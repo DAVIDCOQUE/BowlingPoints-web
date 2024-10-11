@@ -1,0 +1,90 @@
+<mat-toolbar>
+    <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon"
+        (click)="isExpanded = !isExpanded">
+        <mat-icon>menu</mat-icon>
+    </button>
+    <span class="parent" (click)="page = 'Torneos'">Bowling Points</span>
+    <span class="example-spacer"></span>
+    <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
+        <mat-icon>favorite</mat-icon>
+    </button>
+    <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+        <mat-icon>share</mat-icon>
+    </button>
+</mat-toolbar>
+
+<mat-sidenav-container class="example-container" autosize>
+    <mat-sidenav #sidenav class="example-sidenav" mode="side" opened="true" (mouseenter)="mouseenter()"
+        (mouseleave)="mouseleave()">
+        <mat-nav-list>
+            <mat-list-item class="parent" (click)="page = 'Torneos'">
+                <span class="full-width" *ngIf="isExpanded || isShowing">Torneos </span>
+                <img src="../../../assets/img/trofeo.png" height="28" alt="Logo" loading="lazy" />
+            </mat-list-item>
+        </mat-nav-list>
+        <mat-nav-list>
+            <mat-list-item class="parent" (click)="page = 'Cartelera'">
+                <span class="full-width" *ngIf="isExpanded || isShowing">Cartelera
+                </span>
+                <img src="../../../assets/img/megafono.png" height="28" alt="Logo" loading="lazy" />
+            </mat-list-item>
+        </mat-nav-list>
+
+        <mat-nav-list>
+            <mat-list-item class="parent" (click)="page = 'Jugadores'">
+                <span class="full-width" *ngIf="isExpanded || isShowing">Jugadores
+                </span>
+                <img src="../../../assets/img/jugador.png" height="28" alt="Logo" loading="lazy" />
+            </mat-list-item>
+        </mat-nav-list>
+        <mat-nav-list>
+            <mat-list-item class="parent" (click)="page = 'clubes'">
+                <span class="full-width" *ngIf="isExpanded || isShowing">Clubes </span>
+                <img src="../../../assets/img/club.png" height="34" alt="Logo" loading="lazy" />
+            </mat-list-item>
+        </mat-nav-list>
+        <mat-nav-list>
+            <mat-list-item (click)="showSubmenu = !showSubmenu" class="parent" >
+                <span class="full-width" *ngIf="isExpanded || isShowing">Mi Cuenta
+                </span>
+                <img src="../../../assets/img/ajuste.png" height="28" alt="Logo" loading="lazy" />
+            </mat-list-item>
+            <div class="submenu" [ngClass]="{ expanded: showSubmenu }" *ngIf="isShowing || isExpanded">
+                <a mat-list-item (click)="page = 'Cuenta'">Mi perfil</a>
+                <a mat-list-item (click)="login()">Cerrar sesion</a>
+            </div>
+        </mat-nav-list>
+    </mat-sidenav>
+
+    <div class="example-sidenav-content" *ngIf="page == 'Cartelera'">
+        <div class="container">
+            <h1>Cartelera Bowling Points</h1>
+
+            <app-carousel></app-carousel>
+
+            <div class="con">
+                <div class="card mb-4 shadow-sm" *ngFor="let item of items">
+                    <img [src]="item.image" class="card-img-top" alt="..." />
+                    <div class="card-body">
+                        <h2 class="card-title">{{ item.title }}</h2>
+                        <p class="card-text">{{ item.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-sidenav-content" *ngIf="page == 'Torneos'">
+        <app-torneos></app-torneos>
+    </div>
+
+    <div class="example-sidenav-content" *ngIf="page == 'Jugadores'">
+        <app-jugadores></app-jugadores>
+    </div>
+    <div class="example-sidenav-content" *ngIf="page == 'Cuenta'">
+        <app-perfil></app-perfil>
+    </div>
+    <div class="example-sidenav-content" *ngIf="page == 'clubes'">
+        <app-clubes></app-clubes>
+    </div>
+</mat-sidenav-container>

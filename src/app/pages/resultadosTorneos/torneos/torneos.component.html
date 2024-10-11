@@ -1,0 +1,28 @@
+<div class="container">
+
+    <h1>Torneos en Curso</h1>
+
+    <div class="row d-flex justify-content-center align-items-center">
+
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body" (click)="detalleTorneo()">
+                    <p class="card-text">Torneos departametal 2024</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <h1>Historial de Torneos</h1>
+    <div class="row d-flex justify-content-center align-items-center" *ngIf="result_tipoEvento">
+        <div class="col-md-4" *ngFor="let eventType of result_tipoEvento.listTypeEvents">
+            <div class="card text-center">
+                <div class="card-body" (click)="ListaTorneo(eventType)">
+                    <p class="card-text">{{eventType}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

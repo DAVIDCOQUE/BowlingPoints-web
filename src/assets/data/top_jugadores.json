@@ -1,0 +1,94 @@
+{
+  "jugadores_colombia": [
+    {
+      "id": 1,
+      "foto": "../../../assets/jugador_foto/image.png",
+      "nombre": "Andrés Gómez",
+      "edad": 25,
+      "promedio": 205.0,
+      "mejor_juego": 290,
+      "titulos_ganados": 8
+    },
+    {
+      "id": 2,
+      "foto": "../../../assets/img/mujer.png",
+      "nombre": "Catalina García",
+      "edad": 25,
+      "promedio": 198.0,
+      "mejor_juego": 280,
+      "titulos_ganados": 6
+    },
+    {
+      "id": 3,
+      "foto": "../../../assets/img/avatar.png",
+      "nombre": "Juan Pablo Gómez",
+      "edad": 25,
+      "promedio": 200.0,
+      "mejor_juego": 275,
+      "titulos_ganados": 7
+    },
+    {
+      "id": 4,
+      "foto": "../../../assets/img/mujer.png",
+      "nombre": "Laura Rodríguez",
+      "edad": 25,
+      "promedio": 195.0,
+      "mejor_juego": 270,
+      "titulos_ganados": 5
+    },
+    {
+      "id": 5,
+      "foto": "../../../assets/img/avatar.png",
+      "nombre": "Felipe Martínez",
+      "edad": 25,
+      "promedio": 192.0,
+      "mejor_juego": 265,
+      "titulos_ganados": 4
+    },
+    {
+      "id": 6,
+      "foto": "../../../assets/img/mujer.png",
+      "nombre": "Sofía Hernández",
+      "edad": 25,
+      "promedio": 190.0,
+      "mejor_juego": 260,
+      "titulos_ganados": 3
+    },
+    {
+      "id": 7,
+      "foto": "../../../assets/img/avatar.png",
+      "nombre": "Miguel Ángel Ruiz",
+      "edad": 25,
+      "promedio": 188.0,
+      "mejor_juego": 255,
+      "titulos_ganados": 2
+    },
+    {
+      "id": 8,
+      "foto": "../../../assets/img/mujer.png",
+      "nombre": "Paula Torres",
+      "edad": 25,
+      "promedio": 185.0,
+      "mejor_juego": 250,
+      "titulos_ganados": 2
+    },
+    {
+      "id": 9,
+      "foto": "../../../assets/img/avatar.png",
+      "nombre": "Andrés Silva",
+      "edad": 25,
+      "promedio": 183.0,
+      "mejor_juego": 245,
+      "titulos_ganados": 1
+    },
+    {
+      "id": 10,
+      "foto": "../../../assets/img/mujer.png",
+      "nombre": "Isabella Martínez",
+      "edad": 25,
+      "promedio": 180.0,
+      "mejor_juego": 240,
+      "titulos_ganados": 1
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+<div class="container">
+  <h1>Top jugadores Colombia</h1>
+
+  <table class="table align-middle mb-0 bg-white">
+    <thead class="bg-light">
+      <tr>
+        <th>ID:</th>
+        <th>Foto</th>
+        <th>Nombre</th>
+        <th>promedio puntuación</th>
+        <th>mejor juego</th>
+        <th>títulos ganados</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let jugador of top_jugadores.jugadores_colombia">
+        <td>{{ jugador.id }}</td>
+        <td>
+          <div class="d-flex align-items-center">
+            <img
+              [src]="jugador.foto"
+              alt="Foto de perfil"
+              style="width: 45px; height: 45px"
+              class="rounded-circle"
+            />
+            <div class="ms-3"></div>
+          </div>
+        </td>
+        <td [routerLink]="['/jugador', jugador.id]">{{ jugador.nombre }}</td>
+        <td>{{ jugador.promedio }}</td>
+        <td>{{ jugador.mejor_juego }}</td>
+        <td>{{ jugador.titulos_ganados }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

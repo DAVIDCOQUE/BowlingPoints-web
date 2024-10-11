@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "message": "Lista de todo evento entregada con exito",
+  "data": {
+    "todoEventoFemenino": {
+      "jugadores": 27
+    },
+    "todoEventoMasculino": {
+      "jugadores": 21
+    }
+  }
+}

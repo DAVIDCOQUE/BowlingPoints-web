@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Strike Masters",
+    "description": "Strike Masters es un equipo de bolos de alto rendimiento conocido por su precisión y habilidades técnicas.",
+    "image": "https://esports.as.com/2019/10/08/SKT_Logo_2019.png?hash=22e270093357fb43b89c49697d29bfc2e5adcaab",
+    "link": "https://example.com/strike-masters"
+  },
+  {
+    "name": "Pin Crushers",
+    "description": "Pin Crushers es famoso por su estilo agresivo y su capacidad para derribar todos los pines con fuerza.",
+    "image": "https://esports.as.com/2018/03/08/Bbq_Olivers_Logo.png?hash=967e183c48897ff062e2a19552a040d3eeeaeaf4",
+    "link": "https://example.com/pin-crushers"
+  },
+  {
+    "name": "Alley Avengers",
+    "description": "Alley Avengers se especializa en técnicas de precisión y estrategia, asegurando resultados consistentes.",
+    "image": "https://esports.as.com/2020/01/27/G2_Esportslogo_square.png?hash=0fa5532caa9899d8f151aaad2783b2416fb57a42",
+    "link": "https://example.com/alley-avengers"
+  },
+  {
+    "name": "Lane Warriors",
+    "description": "Lane Warriors se destaca por su enfoque en la coordinación y la táctica, lo que les permite dominar los torneos.",
+    "image": "https://esports.as.com/2019/12/17/600px-Dignitaslogo_square.png?hash=a4e370c4d6f1ff7c0fdf6616be21d168848e1717",
+    "link": "https://example.com/lane-warriors"
+  },
+  {
+    "name": "Gutter Guardians",
+    "description": "Gutter Guardians son conocidos por su espíritu de equipo y su capacidad para recuperarse de cualquier situación.",
+    "image": "https://esports.as.com/2020/09/17/Team_Liquidlogo_square.png?hash=44b60df8b30cc44fd4ad018473328943c0576496",
+    "link": "https://example.com/gutter-guardians"
+  }
+]

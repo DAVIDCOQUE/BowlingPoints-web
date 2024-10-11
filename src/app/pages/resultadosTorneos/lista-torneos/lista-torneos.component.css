@@ -1,0 +1,63 @@
+h1 {
+    text-align: center;
+
+}
+
+.container {
+    margin-top: 5%;
+    margin-bottom: 30px;
+    border: 1px solid var(--primary);
+    /* Borde sutil */
+    border-radius: 8px;
+    /* Padding interno para no tener el contenido pegado al borde */
+    background-color: var(--pink-light);
+    /* Color de fondo suave */
+    padding: 2%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card {
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    padding: 3%;
+    border: 1px solid var(--primary);
+    background-color: var(--pink-light);
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out;
+    /* Transición suave para el efecto de hover */
+}
+
+.card:hover {
+    transform: scale(1.04);
+    
+    /* transform: translateY(-5px);*/
+    
+}
+
+img {
+
+    margin-bottom: 16px;
+}
+
+.button-container {
+    display: flex;
+    margin-bottom: 30px;
+    padding-left: 16%;
+    padding-right: 16%;
+    justify-content: center;
+    justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+    .button-container {
+
+        flex-direction: column;
+        /* Mostrar los enlaces uno encima del otro */
+        align-items: center;
+        /* Centrar los enlaces verticalmente */
+        gap: 1em;
+    }
+}

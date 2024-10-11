@@ -1,0 +1,23 @@
+[
+  {
+    "torneo": {
+      "id": "1",
+      "nombre_t": "Nacional Sub 35 2018",
+      "descripcion": "Liga de bolos del valle"
+    }
+  },
+  {
+    "torneo": {
+      "id": "2",
+      "nombre_t": "mundial Sub 18 2023",
+      "descripcion": "liga de bolos de medellin"
+    }
+  },
+  {
+    "torneo": {
+      "id": "3",
+      "nombre_t": "liga valle 2024",
+      "descripcion": "liga nacional"
+    }
+  }
+]

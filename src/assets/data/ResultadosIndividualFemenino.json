@@ -1,0 +1,191 @@
+[
+  {
+    "Puesto": 1,
+    "Nombre": "SANDRA ROCIO",
+    "Apellido": "SILVA ESPITIA",
+    "Club": "FARALLONES",
+    "Juego": [213, 164, 164, 178, 199, 195],
+    "Total": 1113,
+    "Promedio": 185.50
+  },
+  {
+    "Puesto": 2,
+    "Nombre": "JACQUELINE",
+    "Apellido": "VALENCIA CASTELLANOS",
+    "Club": "TOBY",
+    "Juego": [212, 211, 132, 136, 183, 214],
+    "Total": 1088,
+    "Promedio": 181.33
+  },
+  {
+    "Puesto": 3,
+    "Nombre": "MAGNOLIA",
+    "Apellido": "ESPINOSA CARDENAS",
+    "Club": "CORAZON DEL VALLE",
+    "Juego": [195, 176, 175, 146, 215, 152],
+    "Total": 1059,
+    "Promedio": 176.50
+  },
+  {
+    "Puesto": 4,
+    "Nombre": "MARTHA LUCILA",
+    "Apellido": "TRUJILLO LOPEZ",
+    "Club": "CAÑAVERAL",
+    "Juego": [176, 187, 192, 167, 146, 177],
+    "Total": 1045,
+    "Promedio": 174.17
+  },
+  {
+    "Puesto": 5,
+    "Nombre": "GLADYS CRISTINA",
+    "Apellido": "TOBAR MURILLO",
+    "Club": "CORAZON DEL VALLE",
+    "Juego": [132, 193, 168, 148, 197, 155],
+    "Total": 993,
+    "Promedio": 165.50
+  },
+  {
+    "Puesto": 6,
+    "Nombre": "PALMA NORA",
+    "Apellido": "DELGADO PARRA",
+    "Club": "CAÑAVERAL",
+    "Juego": [178, 150, 175, 163, 164, 152],
+    "Total": 982,
+    "Promedio": 163.67
+  },
+  {
+    "Puesto": 7,
+    "Nombre": "ADRIANA",
+    "Apellido": "LOPEZ BENITEZ",
+    "Club": "CORAZON DEL VALLE",
+    "Juego": [209, 138, 180, 143, 171, 136],
+    "Total": 977,
+    "Promedio": 162.83
+  },
+  {
+    "Puesto": 8,
+    "Nombre": "FRANCIA ELENA",
+    "Apellido": "PÁREZ",
+    "Club": "CAÑAVERAL",
+    "Juego": [132, 139, 177, 155, 131, 201],
+    "Total": 935,
+    "Promedio": 155.83
+  },
+  {
+    "Puesto": 9,
+    "Nombre": "MARIA MATILDE",
+    "Apellido": "RODRÍGUEZ BLANCO",
+    "Club": "FARALLONES",
+    "Juego": [161, 221, 125, 143, 116, 155],
+    "Total": 921,
+    "Promedio": 153.50
+  },
+  {
+    "Puesto": 10,
+    "Nombre": "ADRIANA",
+    "Apellido": "HURTADO GÓMEZ",
+    "Club": "AMIGOS",
+    "Juego": [155, 154, 134, 156, 151, 158],
+    "Total": 908,
+    "Promedio": 151.33
+  },
+  {
+    "Puesto": 11,
+    "Nombre": "PATRICIA",
+    "Apellido": "CUELLAR",
+    "Club": "CAÑAVERAL",
+    "Juego": [208, 158, 133, 131, 127, 114],
+    "Total": 871,
+    "Promedio": 145.17
+  },
+  {
+    "Puesto": 12,
+    "Nombre": "MARÍA FERNANDA",
+    "Apellido": "ROMERO",
+    "Club": "FARALLONES",
+    "Juego": [158, 111, 129, 144, 153, 156],
+    "Total": 851,
+    "Promedio": 141.83
+  },
+  {
+    "Puesto": 13,
+    "Nombre": "BLANCA MIREYA",
+    "Apellido": "ROJAS ALZATE",
+    "Club": "CAÑAVERAL",
+    "Juego": [160, 128, 121, 157, 145, 135],
+    "Total": 846,
+    "Promedio": 141.00
+  },
+  {
+    "Puesto": 14,
+    "Nombre": "LINA ESPERANZA",
+    "Apellido": "ARBOLEDA GIRON",
+    "Club": "CAÑAVERAL",
+    "Juego": [151, 133, 125, 132, 136, 156],
+    "Total": 833,
+    "Promedio": 138.83
+  },
+  {
+    "Puesto": 15,
+    "Nombre": "VICTORIA EUGENIA",
+    "Apellido": "CONCHA IBAÑEZ",
+    "Club": "FARALLONES",
+    "Juego": [116, 144, 122, 137, 135, 165],
+    "Total": 819,
+    "Promedio": 136.50
+  },
+  {
+    "Puesto": 16,
+    "Nombre": "MAGNOLIA",
+    "Apellido": "TOLEDO ESTRELLA",
+    "Club": "AMIGOS",
+    "Juego": [114, 115, 149, 137, 115, 174],
+    "Total": 804,
+    "Promedio": 134.00
+  },
+  {
+    "Puesto": 17,
+    "Nombre": "PATRICIA",
+    "Apellido": "TRUJILLO LOPEZ",
+    "Club": "TOBY",
+    "Juego": [136, 125, 144, 122, 135, 125],
+    "Total": 787,
+    "Promedio": 131.17
+  },
+  {
+    "Puesto": 18,
+    "Nombre": "GUIOMAR",
+    "Apellido": "JARAMILLO",
+    "Club": "CAÑAVERAL",
+    "Juego": [142, 141, 126, 137, 133, 100],
+    "Total": 779,
+    "Promedio": 129.83
+  },
+  {
+    "Puesto": 19,
+    "Nombre": "LIBIA",
+    "Apellido": "BAUTISTA",
+    "Club": "CORAZON DEL VALLE",
+    "Juego": [138, 98, 108, 150, 146, 135],
+    "Total": 775,
+    "Promedio": 129.17
+  },
+  {
+    "Puesto": 20,
+    "Nombre": "ELIZABETH",
+    "Apellido": "CÁRDENAS",
+    "Club": "CORAZON DEL VALLE",
+    "Juego": [180, 107, 145, 117, 126, 99],
+    "Total": 774,
+    "Promedio": 129.00
+  },
+  {
+    "Puesto": 21,
+    "Nombre": "MARIA EUGENIA",
+    "Apellido": "PEÑA SANTOFIMIO",
+    "Club": "TOBY",
+    "Juego": [110, 105, 101, 102, 88, 126],
+    "Total": 632,
+    "Promedio": 105.33
+  }
+]

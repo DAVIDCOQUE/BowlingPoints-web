@@ -1,0 +1,14 @@
+<div class="container mt-4">
+    <div class="row">
+      <div class="col-md-4" *ngFor="let club of clubes">
+        <div class="card mb-4">
+          <img src="{{club.image}}" class="card-img-top" alt="{{club.name}}" >
+          <div class="card-body">
+            <h5 class="card-title">{{club.name}}</h5>
+            <p class="card-text">{{club.description}}</p>
+            <a href="{{club.link}}" class="btn btn-primary">Más información</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

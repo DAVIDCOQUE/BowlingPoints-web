@@ -1,0 +1,59 @@
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { RegistroComponent } from './pages/registro/registro.component';
+import { LoginComponent } from './pages/login/login.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { HeaderComponent } from './layouts/header-sidennav/header.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MaterialModule } from '../app/material.module';
+import { JugadoresComponent } from './pages/jugadores/jugadores.component';
+import { FooterComponent } from './layouts/footer/footer.component';
+import { FormsModule } from '@angular/forms';
+import { PerfilComponent } from './pages/perfil/perfil.component';
+import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo/resumen-torneo.component';
+import { DatallesTorneoComponent } from './pages/resultadosTorneos/datalles-torneo/datalles-torneo.component';
+import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jugador/datalles-jugador.component';
+import { ListaTorneosComponent } from './pages/resultadosTorneos/lista-torneos/lista-torneos.component';
+import { TorneosComponent } from './pages/resultadosTorneos/torneos/torneos.component';
+import { HttpClientModule } from '@angular/common/http';
+import { CarouselComponent } from './layouts/carousel/carousel.component';
+import { ClubesComponent } from './pages/clubes/clubes.component';
+
+
+
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    RegistroComponent,
+    LoginComponent,
+    DashboardComponent,
+    HeaderComponent,
+    JugadoresComponent,
+    FooterComponent,
+    PerfilComponent,
+    ResumenTorneoComponent,
+    DatallesTorneoComponent,
+    DatallesJugadorComponent,
+    ListaTorneosComponent,
+    TorneosComponent,
+    CarouselComponent,
+    ClubesComponent,
+   
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    MaterialModule,
+    FormsModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
+    
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }

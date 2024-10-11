@@ -1,0 +1,363 @@
+
+[ 
+{
+    "persona":
+    {
+        "id": "1",
+        "nombres": "John Jairo",
+        "apellidos": "Soto Perlaza",
+        "rama": "Masculino",
+        "equipo" : "Toby",
+        "L1": 200,
+        "L2": 190,
+        "L3": 180,
+        "L4": 195,
+        "L5": 150,
+        "L6": 170,
+        "Total" : 1085,
+        "Promedio" : 180.93 
+    }
+
+    }
+    ,
+{
+    "persona": {
+        "id": "2",
+        "nombres": "Mario Fernando",
+        "apellidos": "Gómez Torres",
+        "rama": "Masculino",
+        "equipo" : "Toby",
+        "L1": 198,
+        "L2": 192,
+        "L3": 184,
+        "L4": 197,
+        "L5": 152,
+        "L6": 168,
+        "Total": 1091,
+        "Promedio": 181.83
+    }
+},
+{
+    "persona": {
+        "id": "3",
+        "nombres": "Pedro José",
+        "apellidos": "García López",
+        "rama": "Masculino",
+        "equipo" : "Amigos",
+        "L1": 203,
+        "L2": 189,
+        "L3": 182,
+        "L4": 200,
+        "L5": 147,
+        "L6": 174,
+        "Total": 1095,
+        "Promedio": 182.5
+    }
+},
+{
+    "persona": {
+        "id": "4",
+        "nombres": "Fransico",
+        "apellidos": "Hernández García",
+        "rama": "Masculino",
+        "equipo" : "Corazon del Valle",
+        "L1": 195,
+        "L2": 191,
+        "L3": 181,
+        "L4": 196,
+        "L5": 149,
+        "L6": 172,
+        "Total": 1084,
+        "Promedio": 180.67
+    }
+},
+{
+    "persona": {
+        "id": "5",
+        "nombres": "Juan Carlos",
+        "apellidos": "Rodríguez Ruiz",
+        "rama": "Masculino",
+        "equipo" : "Farallones",
+        "L1": 199,
+        "L2": 188,
+        "L3": 183,
+        "L4": 195,
+        "L5": 151,
+        "L6": 171,
+        "Total": 1087,
+        "Promedio": 181.17
+    }
+},
+{
+    "persona": {
+        "id": "6",
+        "nombres": "Alfonso",
+        "apellidos": "Martínez Sánchez",
+        "rama": "Masculino",
+        "equipo" : "Toby",
+        "L1": 197,
+        "L2": 190,
+        "L3": 185,
+        "L4": 198,
+        "L5": 153,
+        "L6": 169,
+        "Total": 1092,
+        "Promedio": 182
+    }
+},
+{
+    "persona": {
+        "id": "7",
+        "nombres": "Luis Felipe",
+        "apellidos": "González Pérez",
+        "rama": "Masculino",
+        "equipo" : "Amigos",
+        "L1": 202,
+        "L2": 187,
+        "L3": 180,
+        "L4": 199,
+        "L5": 148,
+        "L6": 173,
+        "Total": 1089,
+        "Promedio": 181.5
+    }
+},
+{
+    "persona": {
+        "id": "8",
+        "nombres": "Antonio",
+        "apellidos": "Díaz Martínez",
+        "rama": "Masculino",
+        "equipo" : "Corazon del Valle",
+        "L1": 196,
+        "L2": 189,
+        "L3": 186,
+        "L4": 194,
+        "L5": 150,
+        "L6": 170,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "9",
+        "nombres": "Diego Alejandro",
+        "apellidos": "Gómez Hernández",
+        "rama": "Masculino",
+        "equipo" : "Toby",
+        "L1": 200,
+        "L2": 188,
+        "L3": 184,
+        "L4": 197,
+        "L5": 150,
+        "L6": 172,
+        "Total": 1091,
+        "Promedio": 181.83
+    }
+},
+{
+    "persona": {
+        "id": "10",
+        "nombres": "Jose",
+        "apellidos": "Fernández García",
+        "rama": "Masculino",
+        "equipo" : "Toby",
+        "L1": 198,
+        "L2": 191,
+        "L3": 183,
+        "L4": 196,
+        "L5": 152,
+        "L6": 171,
+        "Total": 1091,
+        "Promedio": 181.83
+    }
+},
+{
+    "persona": {
+        "id": "11",
+        "nombres": "Andrés Felipe",
+        "apellidos": "López Rodríguez",
+        "rama": "Masculino",
+        "equipo" : "Farallones",
+        "L1": 204,
+        "L2": 189,
+        "L3": 180,
+        "L4": 198,
+        "L5": 147,
+        "L6": 171,
+        "Total": 1089,
+        "Promedio": 181.5
+    }
+},
+{
+    "persona": {
+        "id": "12",
+        "nombres": "Alvaro",
+        "apellidos": "Gutiérrez Martínez",
+        "rama": "Masculino",
+        "equipo" : "Corazon del Valle",
+        "L1": 195,
+        "L2": 192,
+        "L3": 182,
+        "L4": 197,
+        "L5": 148,
+        "L6": 171,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "13",
+        "nombres": "Jorge Luis",
+        "apellidos": "Ramírez Gómez",
+        "rama": "Masculino",
+        "equipo" : "Amigos",
+        "L1": 201,
+        "L2": 191,
+        "L3": 180,
+        "L4": 199,
+        "L5": 151,
+        "L6": 163,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "14",
+        "nombres": "Matias",
+        "apellidos": "Hernández Díaz",
+        "rama": "Masculino",
+        "equipo" : "Amigos",
+        "L1": 196,
+        "L2": 190,
+        "L3": 184,
+        "L4": 195,
+        "L5": 150,
+        "L6": 170,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "15",
+        "nombres": "José Manuel",
+        "apellidos": "Gómez Pérez",
+        "rama": "Masculino",
+        "equipo" : "Amigos",
+        "L1": 200,
+        "L2": 189,
+        "L3": 181,
+        "L4": 198,
+        "L5": 149,
+        "L6": 168,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "16",
+        "nombres": "Rodrigo",
+        "apellidos": "Sánchez Gómez",
+        "rama": "Masculino",
+        "equipo" : "Corazon del Valle",
+        "L1": 196,
+        "L2": 191,
+        "L3": 184,
+        "L4": 194,
+        "L5": 149,
+        "L6": 171,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "17",
+        "nombres": "Miguel Ángel",
+        "apellidos": "Torres Sánchez",
+        "rama": "Masculino",
+        "equipo" : "Amigos",
+        "L1": 199,
+        "L2": 187,
+        "L3": 183,
+        "L4": 197,
+        "L5": 150,
+        "L6": 169,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "18",
+        "nombres": "Jose Alberto",
+        "apellidos": "Martínez Gutiérrez",
+        "rama": "Masculino",
+        "equipo" : "Corazon del Valle",
+        "L1": 197,
+        "L2": 190,
+        "L3": 186,
+        "L4": 196,
+        "L5": 150,
+        "L6": 166,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "19",
+        "nombres": "Fernando",
+        "apellidos": "Gómez Rodríguez",
+        "rama": "Masculino",
+        "equipo" : "Toby",
+        "L1": 201,
+        "L2": 189,
+        "L3": 182,
+        "L4": 198,
+        "L5": 150,
+        "L6": 165,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "20",
+        "nombres": "Javier",
+        "apellidos": "Pérez Martínez",
+        "rama": "Masculino",
+        "equipo" : "Farallones",
+        "L1": 196,
+        "L2": 189,
+        "L3": 185,
+        "L4": 194,
+        "L5": 149,
+        "L6": 172,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+},
+{
+    "persona": {
+        "id": "21",
+        "nombres": "Carlos Alberto",
+        "apellidos": "García Martínez",
+        "rama": "Masculino",
+        "equipo" : "Farallones",
+        "L1": 202,
+        "L2": 188,
+        "L3": 184,
+        "L4": 197,
+        "L5": 150,
+        "L6": 164,
+        "Total": 1085,
+        "Promedio": 180.83
+    }
+}
+]

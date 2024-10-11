@@ -1,0 +1,40 @@
+<div class="container-xl">
+    <h1 class="text-center">Nacional sub 35 2018</h1>
+    <h2 class="card-text"><strong>Organizador: </strong>Liga de bolos del valle</h2>
+
+    <div class="table-responsive">
+        <table class="table align-middle bg-white">
+            <thead class="bg-light">
+                <tr>
+                    <th>Puesto</th>
+                    <th>Nombre</th>
+                    <th>Club</th>
+                    <th>L1</th>
+                    <th>L2</th>
+                    <th>L3</th>
+                    <th>L4</th>
+                    <th>L5</th>
+                    <th>L6</th>
+                    <th>Total</th>
+                    <th>Promedio</th>
+                </tr>
+            </thead>
+            <tbody *ngFor="let item of result">
+                <tr>
+                    <td>{{item.Puesto}}</td>
+                    <td>{{item.Nombre}} {{item.Apellido}}</td>
+                    <td>{{item.Club}}</td>
+                    <td>{{item.Juego[0]}}</td>
+                    <td>{{item.Juego[1]}}</td>
+                    <td>{{item.Juego[2]}}</td>
+                    <td>{{item.Juego[3]}}</td>
+                    <td>{{item.Juego[4]}}</td>
+                    <td>{{item.Juego[5]}}</td>
+                    <td>{{item.Total}}</td>
+                    <td>{{item.Promedio}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <button type="button" class="btn-s mb-3" (click)="atras()">Regresar al menú</button>
+</div>

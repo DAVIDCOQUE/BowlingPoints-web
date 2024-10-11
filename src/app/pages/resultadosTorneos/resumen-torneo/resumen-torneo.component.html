@@ -1,0 +1,73 @@
+<div class="container  p-4">
+    <!--  <h1 class="text-center mb-4">JDS | Bowling Points</h1> -->
+    <div class="mb-3">
+        <button (click)="goBack()" class="btn-s">Devolver al buscador</button>
+    </div>
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <!-- Resumen del Torneo -->
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title">Resumen del Torneo</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p><b>Organizador:</b> {{result_ResumenToreno.data.detalleEvento.organizador}}</p>
+                        <p><b>Nombre:</b> {{result_ResumenToreno.data.detalleEvento.nombreEvento}}</p>
+                        <p><b>Fecha de inicio:</b> {{result_ResumenToreno.data.detalleEvento.fechaInicio}}</p>
+                        <p><b>Fecha de finalización:</b> {{result_ResumenToreno.data.detalleEvento.fechaFin}}</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <!-- Todo evento Masculino -->
+            <div type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="col-md-6"
+                *ngFor="let eventType of result_ResumenToreno.data.eventoRamasDTO">
+                <div class="card card-body">
+                    <h5 class="card-title">{{eventType.nombreRama}}</h5>
+                    <p class="card-text">{{eventType.cantidadJugadores}}</p>
+                    <!-- <button type="button" class="btn-primary" (click)="detalleTorneos()"> Detalles </button> -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Masculino - Modalidades</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- Todo evento Masculino -->
+                            <div type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class=" col-md-6"
+                                (click)="detalleTorneos()">
+                                <div class="card card-body">
+                                    <h5 class="card-title">Dobles</h5>
+                                    <p class="card-text"></p>
+
+                                </div>
+                            </div>
+                            <div type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="col-md-6"
+                                (click)="detalleTorneos()">
+                                <div class="card card-body">
+                                    <h5 class="card-title">Individual</h5>
+                                    <p class="card-text"></p>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-s" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

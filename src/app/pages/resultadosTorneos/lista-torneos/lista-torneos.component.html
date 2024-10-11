@@ -1,0 +1,40 @@
+<div class="container">
+    <h1>Historial de Torneos {{eventType}} </h1>
+
+    <!-- Mostrar mensaje de carga mientras se cargan los datos -->
+    <div *ngIf="isLoading">
+        <p>Cargando torneos...</p>
+    </div>
+
+    <!-- Mostrar mensaje de error si hay un error -->
+    <div *ngIf="hasError">
+        <p>Ocurrió un error al cargar los torneos. Intente nuevamente más tarde.</p>
+    </div>
+
+    <!-- Mostrar lista de torneos si los datos están disponibles -->
+    <div *ngIf="!isLoading && !hasError && result_HistorialTorneo && result_HistorialTorneo.data">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-md-4" *ngFor="let item of result_HistorialTorneo.data">
+                <div class="card text-center" (click)="resumenToreno()">
+                    <h2 class="card-title">{{item.nameEvent}}</h2>
+                    <h4 class="card-title">{{item.descriptionEvent}}</h4>
+                    <div class="card-body">
+                        <img src="../../../../assets/img/trofeo.png" width="70" height="70" alt="Trofeo" />
+                        <p class="card-text"><strong>Organizador: </strong>{{item.eventOrganizer}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-s" (click)="goBack()">Devolver al buscador</button>
+</div>
+
+<div class="button-container">
+    <button *ngFor="let result_eventType of result_tipoEvento?.listTypeEvents" 
+            class="btn-s" 
+            (click)="eventType = result_eventType"
+            (click)="get_HistorialTorneo()">
+        Torneos {{result_eventType}}
+    </button>
+</div>

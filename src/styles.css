@@ -1,0 +1,106 @@
+/* You can add global styles to this file, and also import other style files */
+
+
+html {
+    width: 100%;
+    height: 90%;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.a {
+    color: var(--primary-dark);
+}
+
+.a:hover {
+    color: var(--primary);
+}
+
+.card_h:hover {
+    transform: scale(1.05);
+    /* transform: translateY(-5px);*/
+
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+}
+
+.btn-primay:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-s {
+    background-color: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 12px;
+    cursor: pointer;
+
+}
+
+.btn-s:hover {
+    color: white;
+    background-color: var(--primary)
+}
+
+:root {
+
+    /* Tonalidades */
+    --primary: #e91e63;
+    /* Rosa */
+
+    --primary-dark: #b0003a;
+    /* Rosa oscuro */
+    --primary-light: #facfdc;
+    /* Rosa claro */
+    --pink-light: #fffcfc;
+    /* Rosa claro */
+
+    --secondary: #ff9800;
+    /* Naranja */
+
+    --secondary-dark: #c66900;
+    /* Naranja oscuro */
+    --secondary-light: #ffb74d;
+    /* Naranja claro */
+
+
+    --accent: #4caf50;
+    /* Verde */
+    --accent-light: #81c784;
+    /* Verde claro */
+    --accent-dark: #388e3c;
+    /* Verde oscuro */
+
+    --dark: #333333;
+    /* Gris oscuro */
+    --dark-light: #666666;
+    /* Gris oscuro claro */
+    --dark-dark: #000000;
+    /* Gris oscuro más oscuro */
+
+    --light: #f5f5f5;
+    /* Gris claro */
+    --light-light: #fafafa;
+    /* Gris claro claro */
+    --light-dark: #bdbdbd;
+    /* Gris claro más oscuro */
+
+
+}
+
