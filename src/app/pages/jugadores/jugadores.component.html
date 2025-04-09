@@ -6,7 +6,7 @@
       <tr>
         <th>ID:</th>
         <th>Foto</th>
-        <th>Nombre</th>
+        <th >Nombre</th>
         <th>promedio puntuación</th>
         <th>mejor juego</th>
         <th>títulos ganados</th>
@@ -26,7 +26,7 @@
             <div class="ms-3"></div>
           </div>
         </td>
-        <td [routerLink]="['/jugador', jugador.id]">{{ jugador.nombre }}</td>
+        <td><a class="link-offset-2 link-underline link-underline-opacity-0 link-secondary" [routerLink]="['/jugador', jugador.id]">{{ jugador.nombre }}</a></td>
         <td>{{ jugador.promedio }}</td>
         <td>{{ jugador.mejor_juego }}</td>
         <td>{{ jugador.titulos_ganados }}</td>

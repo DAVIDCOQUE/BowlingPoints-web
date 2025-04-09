@@ -22,6 +22,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { CarouselComponent } from './layouts/carousel/carousel.component';
 import { ClubesComponent } from './pages/clubes/clubes.component';
 
+import { NgxPaginationModule } from 'ngx-pagination';
+
 
 
 
@@ -51,6 +53,7 @@ import { ClubesComponent } from './pages/clubes/clubes.component';
     FormsModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    NgxPaginationModule
     
   ],
   providers: [],
