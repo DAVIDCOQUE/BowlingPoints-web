@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-header',
@@ -40,6 +41,31 @@ export class HeaderComponent {
   }
 
   login() {
-    this.router.navigate(['']);
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción cerrará tu sesión.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, cerrar sesión",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Sesión cerrada",
+          text: "¡Has salido exitosamente!",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['']);
+        }, 1600);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        window.location.reload();
+      }
+    });
   }
 }
