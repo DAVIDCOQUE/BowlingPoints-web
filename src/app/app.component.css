@@ -1,28 +1,6 @@
-
-
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
-
-.content-wrap {
-    min-height: 100%;
-    /* Debe ser igual al negativo de la altura del footer */
-    padding-bottom: 25px;
-    /* Debe ser igual a la altura del footer */
- 
-}
-
-.footer {
-    display: flex;
-    width: 100%;
-    background-color: #333;
-    color: white;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    justify-content: center;
-    align-items: center;
-}
-

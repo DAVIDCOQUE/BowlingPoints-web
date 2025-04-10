@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -9,29 +9,37 @@ import { FormGroup, FormControl } from '@angular/forms';
 })
 export class LoginComponent implements OnInit {
 
-  form: FormGroup = new FormGroup({
-    username: new FormControl(''),
-    password: new FormControl(''),
-  });
-
-  submit() {
-    if (this.form.valid) {
-      this.submitEM.emit(this.form.value);
-    }
-  }
   @Input() error: string | null | undefined;
   @Output() submitEM = new EventEmitter();
 
+  form: FormGroup = new FormGroup({
+    username: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required])
+  });
 
-  constructor(
+  constructor(private router: Router) {}
 
-    private router: Router
-  ) { }
+  ngOnInit(): void {}
 
-  ngOnInit(): void { }
-
-  dashboard() {
-    this.router.navigate(['dashboard']);
+  submit(): void {
+    if (this.form.valid) {
+      this.submitEM.emit(this.form.value);
+    } else {
+      this.form.markAllAsTouched();
+    }
   }
-  
+
+  dashboard(): void {
+    this.router.navigate(['dashboard']);
+    if (this.form.valid) {
+    }
+  }
+
+  get username() {
+    return this.form.get('username');
+  }
+
+  get password() {
+    return this.form.get('password');
+  }
 }
