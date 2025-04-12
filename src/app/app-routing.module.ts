@@ -9,9 +9,11 @@ import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jug
 import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo/resumen-torneo.component';
 import { TorneosComponent } from './pages/resultadosTorneos/torneos/torneos.component';
 import { JugadorComponent } from './pages/jugador/jugador.component';
+import { BodyComponent } from './layouts/body/body.component';
 
 const routes: Routes = [
   { path: '', component: LoginComponent },  // Ruta principal o default
+  { path: 'body', component: BodyComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'registro', component: RegistroComponent },
   { path: 'torneos', component: TorneosComponent },

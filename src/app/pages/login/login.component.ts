@@ -29,8 +29,8 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  dashboard(): void {
-    this.router.navigate(['dashboard']);
+  body(): void {
+    this.router.navigate(['body']);
     if (this.form.valid) {
     }
   }

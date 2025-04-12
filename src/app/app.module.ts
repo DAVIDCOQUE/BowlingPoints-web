@@ -21,6 +21,7 @@ import { TorneosComponent } from './pages/resultadosTorneos/torneos/torneos.comp
 import { HttpClientModule } from '@angular/common/http';
 import { CarouselComponent } from './layouts/carousel/carousel.component';
 import { ClubesComponent } from './pages/clubes/clubes.component';
+import { BodyComponent } from './layouts/body/body.component';
 
 import { NgxPaginationModule } from 'ngx-pagination';
 
@@ -44,7 +45,8 @@ import { NgxPaginationModule } from 'ngx-pagination';
     TorneosComponent,
     CarouselComponent,
     ClubesComponent,
-   
+    BodyComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -54,7 +56,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
     BrowserAnimationsModule,
     HttpClientModule,
     NgxPaginationModule
-    
+
   ],
   providers: [],
   bootstrap: [AppComponent]

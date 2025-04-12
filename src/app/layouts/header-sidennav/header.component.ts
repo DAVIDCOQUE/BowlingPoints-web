@@ -15,10 +15,10 @@ export class HeaderComponent {
   isShowing = false;
   showSubSubMenu: boolean = false;
 
-  page: string = 'Torneos';
+  page: string = 'Dashboard';
 
   navItems = [
-    { page: 'Torneos', icon: 'assets/img/trofeo.png', label: 'Dashboard' },
+    { page: 'Dashboard', icon: 'assets/img/trofeo.png', label: 'Dashboard' },
     { page: 'Torneos', icon: 'assets/img/trofeo.png', label: 'Torneos' },
     { page: 'Cartelera', icon: 'assets/img/megafono.png', label: 'Cartelera' },
     { page: 'Jugadores', icon: 'assets/img/jugador.png', label: 'Jugadores' },
