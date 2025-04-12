@@ -2,3 +2,8 @@ mat-sidenav-container {
   height: 100vh;
   overflow: hidden;
 }
+.mat-list-item.compacto {
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+  min-height: auto !important;
+}
