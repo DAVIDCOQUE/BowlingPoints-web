@@ -4,11 +4,14 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
-import { TorneosComponent } from './pages/resultadosTorneos/torneos/torneos.component';
 import { BodyComponent } from './layouts/body/body.component';
 import { JugadoresComponent } from './pages/jugadores/jugadores.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
 import { ClubesComponent } from './pages/clubes/clubes.component';
+import { MisTorneosComponent } from './pages/mis-torneos/mis-torneos.component';
+import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.component';
+import { ClubComponent } from './pages/club/club.component';
+import { TorneosComponent } from './pages/torneos/torneos.component';
 
 const routes: Routes = [
   //Redirección inicial al dashboard
@@ -24,10 +27,14 @@ const routes: Routes = [
     component: BodyComponent,
     children: [
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'torneos', component: TorneosComponent },
-      { path: 'jugadores', component: JugadoresComponent },
       { path: 'perfil', component: PerfilComponent },
-      { path: 'clubes', component: ClubesComponent }
+      { path: 'mis-torneos', component: MisTorneosComponent },
+      { path: 'mis-resultados', component: MisResultadosComponent },
+      { path: 'club', component: ClubComponent },
+
+      { path: 'clubes', component: ClubesComponent },
+      { path: 'jugadores', component: JugadoresComponent },
+      { path: 'torneos', component: TorneosComponent },
     ]
   },
 

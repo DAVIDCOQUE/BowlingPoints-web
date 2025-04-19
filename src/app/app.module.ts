@@ -16,7 +16,6 @@ import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo
 import { DatallesTorneoComponent } from './pages/resultadosTorneos/datalles-torneo/datalles-torneo.component';
 import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jugador/datalles-jugador.component';
 import { ListaTorneosComponent } from './pages/resultadosTorneos/lista-torneos/lista-torneos.component';
-import { TorneosComponent } from './pages/resultadosTorneos/torneos/torneos.component';
 import { HttpClientModule } from '@angular/common/http';
 import { CarouselComponent } from './layouts/carousel/carousel.component';
 import { ClubesComponent } from './pages/clubes/clubes.component';
@@ -27,6 +26,9 @@ import { SidebarComponent } from './layouts/header-sidenav/sidebar/sidebar.compo
 
 import { MatIconModule } from '@angular/material/icon';
 import { HeaderComponent } from './layouts/header-sidenav/header/header.component';
+import { MisTorneosComponent } from './pages/mis-torneos/mis-torneos.component';
+import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.component';
+import { ClubComponent } from './pages/club/club.component';
 
 
 
@@ -45,12 +47,14 @@ import { HeaderComponent } from './layouts/header-sidenav/header/header.componen
     DatallesTorneoComponent,
     DatallesJugadorComponent,
     ListaTorneosComponent,
-    TorneosComponent,
     CarouselComponent,
     ClubesComponent,
     BodyComponent,
     SidebarComponent,
     HeaderComponent,
+    MisTorneosComponent,
+    MisResultadosComponent,
+    ClubComponent,
 
 
   ],
