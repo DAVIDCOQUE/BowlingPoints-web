@@ -1,1 +1,14 @@
-<app-header></app-header>
+<app-header (menuToggle)="sidebar.isExpanded = !sidebar.isExpanded"></app-header>
+
+<mat-sidenav-container class="vh-100">
+  <mat-sidenav #sidenav mode="side" opened class="bg-light border-end" (mouseenter)="sidebar.mouseenter()"
+    (mouseleave)="sidebar.mouseleave()">
+    <app-sidebar #sidebar></app-sidebar>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <div class="overflow-auto" style="height: calc(100vh - 64px); padding: 0 3rem 6rem 3rem;">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

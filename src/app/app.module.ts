@@ -6,7 +6,6 @@ import { AppComponent } from './app.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { HeaderComponent } from './layouts/header-sidennav/header.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from '../app/material.module';
 import { JugadoresComponent } from './pages/jugadores/jugadores.component';
@@ -24,6 +23,11 @@ import { ClubesComponent } from './pages/clubes/clubes.component';
 import { BodyComponent } from './layouts/body/body.component';
 
 import { NgxPaginationModule } from 'ngx-pagination';
+import { SidebarComponent } from './layouts/header-sidenav/sidebar/sidebar.component';
+
+import { MatIconModule } from '@angular/material/icon';
+import { HeaderComponent } from './layouts/header-sidenav/header/header.component';
+
 
 
 
@@ -34,7 +38,6 @@ import { NgxPaginationModule } from 'ngx-pagination';
     RegistroComponent,
     LoginComponent,
     DashboardComponent,
-    HeaderComponent,
     JugadoresComponent,
     FooterComponent,
     PerfilComponent,
@@ -46,6 +49,9 @@ import { NgxPaginationModule } from 'ngx-pagination';
     CarouselComponent,
     ClubesComponent,
     BodyComponent,
+    SidebarComponent,
+    HeaderComponent,
+
 
   ],
   imports: [
@@ -55,7 +61,8 @@ import { NgxPaginationModule } from 'ngx-pagination';
     FormsModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    NgxPaginationModule
+    NgxPaginationModule,
+    MatIconModule,
 
   ],
   providers: [],

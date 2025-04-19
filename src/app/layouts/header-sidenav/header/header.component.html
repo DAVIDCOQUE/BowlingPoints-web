@@ -1,0 +1,36 @@
+<mat-toolbar class="bg-primary text-white px-3" style="height: 64px; display: flex; align-items: center;">
+
+  <!-- Botón menú -->
+  <button mat-icon-button (click)="toggleSidebar()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Logo / Nombre -->
+  <span class="ms-3 fw-bold">Bowling Points</span>
+
+  <!-- Íconos alineados a la derecha -->
+  <div class="ms-auto d-flex align-items-center gap-2">
+    <button mat-icon-button aria-label="Notificaciones">
+      <mat-icon>notifications</mat-icon>
+    </button>
+
+    <!-- Botón de perfil con menú -->
+    <button mat-icon-button [matMenuTriggerFor]="accountMenu" aria-label="Perfil">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+
+    <mat-menu #accountMenu="matMenu">
+      <button mat-menu-item routerLink="/perfil">
+        <mat-icon>person</mat-icon>
+        <span>Mi Perfil</span>
+      </button>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar Sesión</span>
+      </button>
+    </mat-menu>
+
+
+  </div>
+
+</mat-toolbar>

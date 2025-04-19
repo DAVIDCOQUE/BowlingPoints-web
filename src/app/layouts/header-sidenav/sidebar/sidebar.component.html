@@ -1,0 +1,46 @@
+<mat-nav-list class="d-flex flex-column gap-2">
+
+  <!-- Dashboard -->
+  <mat-list-item routerLink="/dashboard" routerLinkActive="active" class="d-flex align-items-center gap-3">
+    <img src="assets/img/dashboard.png" height="22" class="me-2" />
+    <span *ngIf="isExpanded || isShowing">Dashboard</span>
+  </mat-list-item>
+
+  <!-- Mis Torneos -->
+  <mat-list-item routerLink="/torneos" routerLinkActive="active" class="d-flex align-items-center gap-3">
+    <img src="assets/img/torneo.png" height="22" class="me-2" />
+    <span *ngIf="isExpanded || isShowing">Mis Torneos</span>
+  </mat-list-item>
+
+  <!-- Mis Resultados -->
+  <mat-list-item routerLink="/torneos" routerLinkActive="active" class="d-flex align-items-center gap-3">
+    <img src="assets/img/grafico.png" height="22" class="me-2" />
+    <span *ngIf="isExpanded || isShowing">Mis Resultados</span>
+  </mat-list-item>
+
+  <!-- Clubes -->
+  <mat-list-item routerLink="/clubes" routerLinkActive="active" class="d-flex align-items-center gap-3">
+    <img src="assets/img/clubes.png" height="22" class="me-2" />
+    <span *ngIf="isExpanded || isShowing">Club</span>
+  </mat-list-item>
+
+  <hr>
+
+  <!-- Torneos -->
+  <mat-list-item routerLink="/torneos" routerLinkActive="active" class="d-flex align-items-center gap-3">
+    <img src="assets/img/torneo.png" height="22" class="me-2" />
+    <span *ngIf="isExpanded || isShowing">Torneos</span>
+  </mat-list-item>
+
+  <!-- Jugadores -->
+  <mat-list-item routerLink="/jugadores" routerLinkActive="active" class="d-flex align-items-center gap-3">
+    <img src="assets/img/bola-boliche.png" height="22" class="me-2" />
+    <span *ngIf="isExpanded || isShowing">Jugadores</span>
+  </mat-list-item>
+
+  <!-- Clubes -->
+  <mat-list-item routerLink="/clubes" routerLinkActive="active" class="d-flex align-items-center gap-3">
+    <img src="assets/img/clubes.png" height="22" class="me-2" />
+    <span *ngIf="isExpanded || isShowing">Clubes</span>
+  </mat-list-item>
+</mat-nav-list>
