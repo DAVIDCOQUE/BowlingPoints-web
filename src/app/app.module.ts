@@ -29,6 +29,7 @@ import { HeaderComponent } from './layouts/header-sidenav/header/header.componen
 import { MisTorneosComponent } from './pages/mis-torneos/mis-torneos.component';
 import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.component';
 import { ClubComponent } from './pages/club/club.component';
+import { UsersComponent } from './pages/users/users.component';
 
 
 
@@ -55,6 +56,7 @@ import { ClubComponent } from './pages/club/club.component';
     MisTorneosComponent,
     MisResultadosComponent,
     ClubComponent,
+    UsersComponent,
 
 
   ],

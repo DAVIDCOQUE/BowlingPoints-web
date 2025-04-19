@@ -12,6 +12,8 @@ import { MisTorneosComponent } from './pages/mis-torneos/mis-torneos.component';
 import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.component';
 import { ClubComponent } from './pages/club/club.component';
 import { TorneosComponent } from './pages/torneos/torneos.component';
+import { UsersComponent } from './pages/users/users.component';
+import { JugadorComponent } from './pages/jugador/jugador.component';
 
 const routes: Routes = [
   //Redirección inicial al dashboard
@@ -32,8 +34,11 @@ const routes: Routes = [
       { path: 'mis-resultados', component: MisResultadosComponent },
       { path: 'club', component: ClubComponent },
 
-      { path: 'clubes', component: ClubesComponent },
       { path: 'jugadores', component: JugadoresComponent },
+      { path: 'jugador/:id', component: JugadorComponent },
+
+      { path: 'clubes', component: ClubesComponent },
+      { path: 'Usuarios', component: UsersComponent },
       { path: 'torneos', component: TorneosComponent },
     ]
   },

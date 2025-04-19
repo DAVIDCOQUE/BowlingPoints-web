@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-header',
@@ -16,8 +17,20 @@ export class HeaderComponent {
   }
 
   logout() {
-    // Aquí iría la lógica real de logout
-    console.log('Cerrar sesión...');
-    this.router.navigate(['/login']);
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Deseas cerrar sesión?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        console.log('Sesión cerrada.');
+        this.router.navigate(['/login']);
+      }
+    });
   }
 }
