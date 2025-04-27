@@ -1,28 +1,23 @@
 .card {
   transition: transform 0.2s;
   border-radius: 10px;
-  overflow: hidden; /* Asegura que la imagen se mantenga dentro de la card */
+  overflow: hidden;
   align-items: center;
 }
 
 .card:hover {
   transform: scale(1.05);
 }
-img{
-  height: 120px;
-  width: 120px;
+
+img {
+  height: 80px;
+  width: 80px;
   text-align: center;
 }
 
 .card-img {
-  height: 100px; /* Altura ajustada para una mejor proporción */
-  width: 100%;   /* Ancho completo del contenedor */
-  object-fit: cover; /* Ajusta la imagen para cubrir el área */
-  object-position: center; /* Centra la imagen */
+  height: 100px;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
 }
-
-
-.card-body {
-  text-align: center;
-}
-

@@ -1,1 +1,95 @@
-<p>torneos works!</p>
+<div class="container mt-4">
+  <h1 class="text-center mb-6">Torneos</h1>
+  <form [formGroup]="filtrosForm" class="d-flex flex-wrap gap-3">
+    <div class="d-flex flex-wrap flex-row gap-3">
+      <!-- Buscar -->
+      <div class="mb-3" style="width: 200px;">
+        <label class="form-label">Buscar</label>
+        <input type="text" class="form-control me-2" placeholder="Buscar" [(ngModel)]="filter" />
+      </div>
+
+      <!-- Fecha -->
+      <div class="mb-3" style="width: 175px;">
+        <label class="form-label">Fecha</label>
+        <input type="date" class="form-control" formControlName="fecha">
+      </div>
+
+      <!-- categoria -->
+      <div class="mb-3" style="width: 175px;">
+        <label class="form-label">categoria</label>
+        <select class="form-select" formControlName="categoria">
+          <option value="">Seleccionar categoria</option>
+          <option *ngFor="let categoria of categoria" [value]="categoria.value">{{ categoria.label }}</option>
+        </select>
+      </div>
+
+      <!-- modalidad -->
+      <div class="mb-3" style="width: 175px;">
+        <label class="form-label">modalidad</label>
+        <select class="form-select" formControlName="modalidad">
+          <option value="">Seleccionar modalidad</option>
+          <option *ngFor="let modalidad of modalidad" [value]="modalidad.value">{{ modalidad.label }}</option>
+        </select>
+      </div>
+      <div class="ms-auto d-flex align-items-center mt-2">
+        <button class="btn btn-secondary btn-sm w-150 me-2" style="height: 35px;" (click)="clear()">
+          <i class="fa-duotone fa-solid fa-xmark"></i> Limpiar
+        </button>
+        <button class="btn btn-primary btn-sm w-150" style="height: 35px;" (click)="search()">
+          <i class="fa-duotone fa-solid fa-filter-list"></i> Buscar
+        </button>
+      </div>
+    </div>
+  </form>
+  <hr>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-rounded table-hover border table-bordered border-gray-300 table-vmiddle text-center">
+        <thead class="bg-light-secondary">
+          <tr class="fw-bold">
+            <th>ID:</th>
+            <th>Img</th>
+            <th>Nombre</th>
+            <th>Fecha</th>
+            <th>Lugar</th>
+            <th>Modalidad</th>
+            <th>Categoria</th>
+            <th>Aciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let date of hitorial_torneos">
+            <td>{{ date.id }}</td>
+            <td>
+              <div>
+                <img [src]="date.img" alt="Foto de perfil" style="width: 40px; height: 40px" class="rounded-circle" />
+                <div class="ms-3"></div>
+              </div>
+            </td>
+            <td class="align-items-center"><a
+                class="link-offset-2 link-underline link-underline-opacity-0 link-secondary">{{ date.nombre }}</a></td>
+            <td>{{ date.fecha }}</td>
+            <td>{{ date.lugar }}</td>
+            <td>{{ date.modalidad }}</td>
+            <td>{{ date.categoria }}</td>
+            <td>
+              <div class="d-flex justify-content-center gap-2">
+                <!-- Botón Editar - Azul suave -->
+                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                  style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                  <i class="fas fa-edit"></i>
+                </button>
+
+                <!-- Botón Eliminar - Rojo suave -->
+                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                  style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

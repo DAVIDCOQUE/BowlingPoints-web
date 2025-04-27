@@ -7,4 +7,5 @@ export const API_URLS = {
     resultadoIndividual: 'http://localhost:4200/assets/data/ResultadosIndividualFemenino.json',
     clubes: 'http://localhost:4200/assets/data/club.json',
     topJugadores: 'http://localhost:4200/assets/data/top_jugadores.json',
+    historial_torneo: 'http://localhost:4200/assets/data/hitorial-torneos.json',
 };

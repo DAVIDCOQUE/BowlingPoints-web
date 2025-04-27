@@ -14,6 +14,10 @@ import { ClubComponent } from './pages/club/club.component';
 import { TorneosComponent } from './pages/torneos/torneos.component';
 import { UsersComponent } from './pages/users/users.component';
 import { JugadorComponent } from './pages/jugador/jugador.component';
+import { ListaTorneosComponent } from './pages/resultadosTorneos/lista-torneos/lista-torneos.component';
+import { DatallesTorneoComponent } from './pages/resultadosTorneos/datalles-torneo/datalles-torneo.component';
+import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo/resumen-torneo.component';
+import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jugador/datalles-jugador.component';
 
 const routes: Routes = [
   //Redirección inicial al dashboard
@@ -36,6 +40,11 @@ const routes: Routes = [
 
       { path: 'jugadores', component: JugadoresComponent },
       { path: 'jugador/:id', component: JugadorComponent },
+
+      { path: 'lista-torneos', component: ListaTorneosComponent },
+      { path: 'detalle-torneo/:id', component: DatallesTorneoComponent },
+      { path: 'resumen-torneo/:id', component: ResumenTorneoComponent },
+      { path: 'detalle-jugador/:id', component: DatallesJugadorComponent },
 
       { path: 'clubes', component: ClubesComponent },
       { path: 'Usuarios', component: UsersComponent },

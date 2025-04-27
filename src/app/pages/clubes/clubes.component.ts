@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ResultadosService } from 'src/app/services/resultados.service';
-
-
-
 
 @Component({
   selector: 'app-clubes',
@@ -11,13 +9,13 @@ import { ResultadosService } from 'src/app/services/resultados.service';
   styleUrls: ['./clubes.component.css']
 })
 
-
-
 export class ClubesComponent implements OnInit {
 
+  filtrosForm!: FormGroup;
+  filter: string = '';
   clubes: any;
 
-  constructor(private ResultadosService: ResultadosService, private router: Router) { }
+  constructor(private ResultadosService: ResultadosService, private router: Router, private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
 
@@ -31,6 +29,13 @@ export class ClubesComponent implements OnInit {
       console.log(this.clubes);
     }
     )
+  }
+  clear() {
+
+  }
+
+  search() {
+
   }
 
 }

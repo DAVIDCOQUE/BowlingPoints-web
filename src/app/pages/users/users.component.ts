@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ResultadosService } from 'src/app/services/resultados.service';
-
+import { FormBuilder, FormGroup } from '@angular/forms';
 @Component({
   selector: 'app-users',
   templateUrl: './users.component.html',
@@ -9,16 +9,19 @@ import { ResultadosService } from 'src/app/services/resultados.service';
 })
 export class UsersComponent {
 
+  filtrosForm!: FormGroup;
+  filter: string = '';
   top_jugadores: any;
   usuarios: any;
 
-  constructor(private ResultadosService: ResultadosService, private router: Router) { }
+  constructor(private ResultadosService: ResultadosService, private router: Router, private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
 
     this.get_top_jugadores();
     this.get_usuarios();
   }
+
 
 
   get_top_jugadores() {
@@ -35,5 +38,12 @@ export class UsersComponent {
       console.log(this.usuarios);
     }
     )
+  }
+  clear() {
+
+  }
+
+  search() {
+
   }
 }

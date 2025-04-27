@@ -41,7 +41,7 @@ export class ResultadosService {
   }
 
 
-  
+
 
   // GET Tipo evento en Torneos
   private tipoEvento: string = API_URLS.tipoEvento;
@@ -66,6 +66,8 @@ export class ResultadosService {
 
   private top_jugadores: string = API_URLS.topJugadores;
 
+  private historial_torneo: string = API_URLS.historial_torneo;
+
   get_TipoEvento() {
     return this.http.get(`${this.url + this.tipoEvento}`);
   }
@@ -87,6 +89,10 @@ export class ResultadosService {
 
   get_top_jugadores() {
     return this.http.get(`${this.top_jugadores}`);
+  }
+
+  get_hitorial_torneos() {
+    return this.http.get(`${this.historial_torneo}`);
   }
 
    // Método para manejar errores

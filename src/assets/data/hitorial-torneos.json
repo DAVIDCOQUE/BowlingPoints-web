@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "img": "../../../assets/img/bola-boliche.png",
+    "nombre": "Copa Valle 2025",
+    "fecha": "2025-03-20",
+    "lugar": "Bolera XYZ, Cali",
+    "modalidad": "Individual",
+    "categoria": "Sub-21"
+  },
+  {
+    "id": 2,
+    "img": "../../../assets/img/bola-boliche.png",
+    "nombre": "Torneo Nacional 2025",
+    "fecha": "2025-05-15",
+    "lugar": "Bolera ABC, Bogotá",
+    "modalidad": "Equipos",
+    "categoria": "Mayores"
+  },
+  {
+    "id": 3,
+    "img": "../../../assets/img/bola-boliche.png",
+    "nombre": "Copa Internacional 2025",
+    "fecha": "2025-08-10",
+    "lugar": "Bolera Internacional, Medellín",
+    "modalidad": "Mixto",
+    "categoria": "Todas las categorías"
+  },
+  {
+    "id": 4,
+    "img": "../../../assets/img/bola-boliche.png",
+    "nombre": "Open Regional 2025",
+    "fecha": "2025-06-12",
+    "lugar": "Bolera Norte, Cali",
+    "modalidad": "Individual",
+    "categoria": "Sub-18"
+  },
+  {
+    "id": 5,
+    "img": "../../../assets/img/bola-boliche.png",
+    "nombre": "Torneo Relámpago 2025",
+    "fecha": "2025-11-01",
+    "lugar": "Bolera Centro, Bogotá",
+    "modalidad": "Equipos",
+    "categoria": "Libre"
+  }
+]

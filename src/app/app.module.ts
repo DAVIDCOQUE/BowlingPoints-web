@@ -30,6 +30,8 @@ import { MisTorneosComponent } from './pages/mis-torneos/mis-torneos.component';
 import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.component';
 import { ClubComponent } from './pages/club/club.component';
 import { UsersComponent } from './pages/users/users.component';
+import { TorneosComponent } from './pages/torneos/torneos.component';
+import { RouterModule } from '@angular/router';
 
 
 
@@ -57,6 +59,7 @@ import { UsersComponent } from './pages/users/users.component';
     MisResultadosComponent,
     ClubComponent,
     UsersComponent,
+    TorneosComponent,
 
 
   ],
@@ -69,6 +72,7 @@ import { UsersComponent } from './pages/users/users.component';
     HttpClientModule,
     NgxPaginationModule,
     MatIconModule,
+    RouterModule,
 
   ],
   providers: [],
