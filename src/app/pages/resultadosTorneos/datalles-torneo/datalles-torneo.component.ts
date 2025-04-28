@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ResultadosService } from 'src/app/services/resultados.service';
-
-
 @Component({
   selector: 'app-datalles-torneo',
   templateUrl: './datalles-torneo.component.html',
@@ -10,26 +8,26 @@ import { ResultadosService } from 'src/app/services/resultados.service';
 })
 export class DatallesTorneoComponent implements OnInit {
 
-
   result: any;
- 
+  idTorneo: number = 0;
+
   constructor(private ResultadosService: ResultadosService, private router: Router) {
 
   }
 
-  atras() {
-    this.router.navigate(['resumenToreno']);
-  }
   ngOnInit(): void {
-   this.get_DetalleEvento()
+    this.get_DetalleEvento()
 
   }
-
   get_DetalleEvento() {
     this.ResultadosService.get_ResultadoIndividual().subscribe(results => {
       this.result = results;
       console.log(this.result);
     }
     )
+  }
+
+  resumenToreno(id: number) {
+    this.router.navigate(['/resumen-torneo', id]);
   }
 }
