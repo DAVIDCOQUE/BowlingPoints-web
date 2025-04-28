@@ -76,7 +76,7 @@ export class ResultadosService {
   }
 
   get_ResumenToreno() {
-    return this.http.get(`${this.url + this.ResumenToreno}`);
+    return this.http.get(`${ this.ResumenToreno}`);
   }
 
   get_ResultadoIndividual() {
@@ -94,6 +94,7 @@ export class ResultadosService {
   get_hitorial_torneos() {
     return this.http.get(`${this.historial_torneo}`);
   }
+
 
    // Método para manejar errores
    private handleError(error: HttpErrorResponse) {

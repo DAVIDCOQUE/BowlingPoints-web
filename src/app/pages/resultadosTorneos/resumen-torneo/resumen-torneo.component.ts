@@ -10,7 +10,7 @@ import { ResultadosService } from 'src/app/services/resultados.service';
 export class ResumenTorneoComponent {
 
   result_ResumenToreno: any;
-  
+
 
   constructor(private ResultadosService: ResultadosService, private router: Router) { }
 
@@ -29,11 +29,6 @@ export class ResumenTorneoComponent {
 
   goBack() {
     this.router.navigate(['dashboard']);
-  }
-
-  detalleTorneos() {
-    this.router.navigate(['detalleTorneo']);
-
   }
 
 }

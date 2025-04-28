@@ -22,7 +22,7 @@
             <tbody *ngFor="let item of result">
                 <tr>
                     <td>{{item.Puesto}}</td>
-                    <td>{{item.Nombre}} {{item.Apellido}}</td>
+                    <td [routerLink]="['/detalle-jugador', 1]" >{{item.Nombre}} {{item.Apellido}}</td>
                     <td>{{item.Club}}</td>
                     <td>{{item.Juego[0]}}</td>
                     <td>{{item.Juego[1]}}</td>

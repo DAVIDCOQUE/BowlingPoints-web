@@ -20,15 +20,44 @@
   </form>
   <hr>
   <div class="row">
-    <div class=" col-md-3" *ngFor="let club of clubes">
+    <div class="col-md-3" *ngFor="let club of clubes">
       <div class="card mb-4">
-        <img src="{{club.image}}" class="card-img-top mt-4" alt="{{club.name}}">
+
+        <!-- Imagen -->
+        <img src="{{ club.image }}" class="card-img-top mt-4" alt="{{ club.name }}">
+
+        <!-- Contenido -->
         <div class="card-body text-center">
-          <h4 class="card-title">{{club.name}}</h4>
-          <p class="small">{{club.description}}</p>
-          <a href="{{club.link}}" class="btn btn-primary">Más información</a>
+          <h4 class="card-title">{{ club.name }}</h4>
+          <p class="small">{{ club.description }}</p>
+
+          <!-- 🔥 Botones alineados lado a lado -->
+          <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+
+            <!-- Botón ver -->
+            <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+              style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+
+            <!-- Botón Editar -->
+            <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+              style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+              <i class="fas fa-edit"></i>
+            </button>
+
+            <!-- Botón Eliminar -->
+            <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+              style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+              <i class="fas fa-trash"></i>
+            </button>
+
+          </div>
+
         </div>
+
       </div>
     </div>
   </div>
+
 </div>
