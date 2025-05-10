@@ -5,16 +5,18 @@
     <div class="row g-0 align-items-center">
       <!-- Logo -->
       <div class="col-md-4 text-center p-4">
-        <img [src]="club.logo" alt="{{ club.nombre }}" class="img-fluid rounded-circle border shadow" width="150" height="150">
+        <img [src]="club.logo" alt="{{ club.nombre }}" class="img-fluid rounded-circle border shadow" width="150"
+          height="150">
       </div>
 
       <!-- Datos -->
       <div class="col-md-8 p-4">
-        <h4 class="fw-bold">{{ club.nombre }}</h4>
+        <h1 class="fw-bold">{{ club.nombre }}</h1>
         <p class="text-muted">{{ club.descripcion }}</p>
         <div class="row text-muted">
           <div class="col-sm-6"><b>Fundación:</b> {{ club.fundacion }}</div>
           <div class="col-sm-6"><b>Ubicación:</b> {{ club.ubicacion }}</div>
+
         </div>
       </div>
     </div>
@@ -23,14 +25,14 @@
   <!-- RANKING & PUNTAJE -->
   <div class="row g-3 mb-4">
     <div class="col-md-6">
-      <div class="card text-center shadow-sm border-0 bg-light rounded-4 py-4">
-        <h5 class="fw-bold mb-1">Ranking Nacional</h5>
+      <div class="card text-center shadow-sm border-0 rounded-4 py-4">
+        <h4 class="fw-bold mb-1">Ranking Nacional</h4>
         <h1 class="display-5 text-primary">#{{ club.ranking }}</h1>
       </div>
     </div>
     <div class="col-md-6">
-      <div class="card text-center shadow-sm border-0 bg-light rounded-4 py-4">
-        <h5 class="fw-bold mb-1">Puntaje Global</h5>
+      <div class="card text-center shadow-sm border-0 rounded-4 py-4">
+        <h4 class="fw-bold mb-1">Puntaje Global</h4>
         <h1 class="display-5 text-success">{{ club.puntaje }}</h1>
       </div>
     </div>
@@ -71,21 +73,21 @@
     </div>
   </div>
 
-<!-- MIEMBROS -->
-<div class="mb-4">
-  <h4 class="mb-3 fw-bold text-center">👥 Miembros del Club</h4>
-  <div class="row g-3">
-    <div class="col-6 col-md-3 col-lg-2" *ngFor="let miembro of club.miembros">
-      <div class="card h-100 shadow-sm border-0 text-center rounded-4 py-3">
-        <div class="card-body p-2 d-flex flex-column align-items-center">
-          <img [src]="miembro.foto" class="rounded-circle shadow-sm mb-2" width="60" height="60"
-            alt="{{ miembro.nombre }}">
-          <h6 class="fw-semibold mb-1 text-truncate w-100">{{ miembro.nombre }}</h6>
-          <small class="text-muted text-truncate w-100">{{ miembro.rol }}</small>
+  <!-- MIEMBROS -->
+  <div class="mb-4">
+    <h4 class="mb-3 fw-bold text-center">👥 Miembros del Club</h4>
+    <div class="row g-3">
+      <div class="col-6 col-md-3 col-lg-2" *ngFor="let miembro of club.miembros">
+        <div class="card h-100 shadow-sm border-0 text-center rounded-4 py-3">
+          <div class="card-body p-2 d-flex flex-column align-items-center">
+            <img [src]="miembro.foto" class="rounded-circle shadow-sm mb-2" width="60" height="60"
+              alt="{{ miembro.nombre }}">
+            <h6 class="fw-semibold mb-1 text-truncate w-100">{{ miembro.nombre }}</h6>
+            <small class="text-muted text-truncate w-100">{{ miembro.rol }}</small>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
 </div>

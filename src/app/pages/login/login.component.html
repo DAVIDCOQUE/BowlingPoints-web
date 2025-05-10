@@ -60,14 +60,13 @@
             >
           </div>
 
-          <button
-            type="submit"
-            class="btn btn-primary w-100 text-white fw-semibold"
-            (click)="body()"
-          >
+          <button type="submit" class="btn btn-primary w-100 text-white fw-semibold">
             Ingresar
           </button>
         </form>
+        <div *ngIf="error" class="alert alert-danger mt-3">
+          {{ error }}
+        </div>
       </div>
     </div>
 
