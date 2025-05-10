@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -10,7 +12,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from '../app/material.module';
 import { JugadoresComponent } from './pages/jugadores/jugadores.component';
 import { FooterComponent } from './layouts/footer/footer.component';
-import { FormsModule } from '@angular/forms';
 import { PerfilComponent } from './pages/perfil/perfil.component';
 import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo/resumen-torneo.component';
 import { DatallesTorneoComponent } from './pages/resultadosTorneos/datalles-torneo/datalles-torneo.component';
@@ -64,6 +65,7 @@ import { RouterModule } from '@angular/router';
 
   ],
   imports: [
+    CommonModule,
     BrowserModule,
     AppRoutingModule,
     MaterialModule,
@@ -73,7 +75,7 @@ import { RouterModule } from '@angular/router';
     NgxPaginationModule,
     MatIconModule,
     RouterModule,
-
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

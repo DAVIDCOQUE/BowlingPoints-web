@@ -2,17 +2,26 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ResultadosService } from 'src/app/services/resultados.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
+
+interface Torneo {
+  id: number;
+  img: string;
+  nombre: string;
+  fecha: string; // ISO string: yyyy-MM-dd
+  lugar: string;
+  modalidad: string;
+  categoria: string;
+}
+
 @Component({
   selector: 'app-torneos',
   templateUrl: './torneos.component.html',
-  styleUrls: ['./torneos.component.css']
+  styleUrls: ['./torneos.component.css'],
 })
 export class TorneosComponent {
-
   filtrosForm!: FormGroup;
   filter: string = '';
   hitorial_torneos: any;
-
 
   modalidad = [
     { value: 'activo', label: 'Activo' },
@@ -20,9 +29,11 @@ export class TorneosComponent {
   ];
 
   categoria = [
-    { value: 'mañana', label: 'Mañana' },
-    { value: 'tarde', label: 'Tarde' },
-    { value: 'noche', label: 'Noche' },
+    { value: 'Sub-18',              label: 'Sub-18' },
+    { value: 'Sub-21',              label: 'Sub-21' },
+    { value: 'Mayores',             label: 'Mayores' },
+    { value: 'Libre',               label: 'Libre'   },
+    { value: 'Todas las categorías',label: 'Todas las categorías' },
   ];
 
   fecha = [
@@ -30,14 +41,19 @@ export class TorneosComponent {
     { value: 'maq2', label: 'Máquina 2' },
   ];
 
+   /* -------------  MODAL ------------- */
+   isModalOpen = false;
+   nuevoTorneo: Omit<Torneo, 'id' | 'img'> = this.vaciarTorneo();
 
-  constructor(private ResultadosService: ResultadosService, private router: Router, private formBuilder: FormBuilder,) { }
+  constructor(
+    private ResultadosService: ResultadosService,
+    private router: Router,
+    private formBuilder: FormBuilder
+  ) {}
 
   ngOnInit(): void {
-
     this.initForm();
     this.get_hitorial_torneos();
-
   }
 
   initForm() {
@@ -49,19 +65,69 @@ export class TorneosComponent {
   }
 
   get_hitorial_torneos() {
-    this.ResultadosService.get_hitorial_torneos().subscribe(hitorial_torneos => {
-      this.hitorial_torneos = hitorial_torneos;
-      console.log(this.hitorial_torneos);
-    }
-    )
+    this.ResultadosService.get_hitorial_torneos().subscribe(
+      (hitorial_torneos) => {
+        this.hitorial_torneos = hitorial_torneos;
+        console.log(this.hitorial_torneos);
+      }
+    );
   }
-
 
   clear() {
     this.hitorial_torneos = null;
   }
 
-  search() {
+  search() {}
 
+/** Abre modal */
+openModal(): void {
+  this.nuevoTorneo = this.vaciarTorneo();
+  this.isModalOpen = true;
+}
+
+/** Detener la burbuja */
+onDialogClick(evt: MouseEvent): void {
+  evt.stopPropagation();
+}
+
+/** Cierra solo desde el overlay o Cancelar */
+closeModal(evt?: MouseEvent): void {
+  this.isModalOpen = false;
+}
+
+  /** Guarda el torneo y actualiza la tabla inmediatamente */
+  saveTournament(frm: any): void {
+    if (frm.invalid) return;
+
+    // Generar ID secuencial local (si el backend no lo devuelve)
+    const nextId =
+      this.hitorial_torneos.length > 0
+        ? Math.max(...this.hitorial_torneos.map((t:Torneo) => t.id)) + 1
+        : 1;
+
+    const torneo: Torneo = {
+      id: nextId,
+      img: 'assets/img/bola-boliche.png', // placeholder; cámbialo si subes imagen real
+      ...this.nuevoTorneo,
+    };
+
+    /* ── 1) Actualizar vista inmediatamente ── */
+    this.hitorial_torneos.push(torneo);
+
+    this.isModalOpen = false;
   }
+
+  /* ===== Utils ===== */
+  private vaciarTorneo(): Omit<Torneo, 'id' | 'img'> {
+    return {
+      nombre: '',
+      fecha:  '',
+      lugar:  '',
+      modalidad: '',
+      categoria: '',
+    };
+  }
+
+
+
 }

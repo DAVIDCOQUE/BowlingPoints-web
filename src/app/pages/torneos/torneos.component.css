@@ -1,0 +1,29 @@
+/* Modal overlay */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+  }
+  
+  /* Ventana modal */
+  .modal-dialog {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    width: 100%;
+    max-width: 460px;
+  }
+  
+  .modal-dialog {
+    position: relative !important;
+    z-index: 2000 !important;
+  }
+
+  .modal-dialog * {
+    pointer-events: auto !important;
+  }
+  

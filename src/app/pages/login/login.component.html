@@ -1,10 +1,20 @@
 <div class="container-fluid p-0 m-0">
-  <div class="row g-0" style="height: 100vh;">
+  <div class="row g-0" style="height: 100vh">
     <!-- Lado Izquierdo: Login centrado -->
-    <div class="col-md-6 d-flex justify-content-center align-items-center bg-white p-0">
-      <div class="card shadow-lg p-4 rounded-4" style="width: 100%; max-width: 400px;">
+    <div
+      class="col-md-6 d-flex justify-content-center align-items-center bg-white p-0"
+    >
+      <div
+        class="card shadow-lg p-4 rounded-4"
+        style="width: 100%; max-width: 400px"
+      >
         <div class="text-center mb-3">
-          <img src="assets/logo/bolos.ico" alt="logo" class="img-fluid" style="height: 56px;" />
+          <img
+            src="assets/img/logoJDS.jpeg"
+            alt="logo"
+            class="img-fluid"
+            style="height: 56px"
+          />
         </div>
 
         <h4 class="text-center mb-4 text-dark fw-semibold">Bowling Points</h4>
@@ -12,24 +22,50 @@
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="mb-3">
             <label for="email" class="form-label">Correo electrónico</label>
-            <input type="email" id="email" class="form-control" placeholder="ejemplo@correo.com"
-              formControlName="username" />
-            <div  *ngIf="username?.touched && username?.invalid" class="form-text text-danger">Este campo es obligatorio</div>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              placeholder="ejemplo@correo.com"
+              formControlName="username"
+            />
+            <div
+              *ngIf="username?.touched && username?.invalid"
+              class="form-text text-danger"
+            >
+              Este campo es obligatorio
+            </div>
           </div>
 
           <div class="mb-3">
             <label for="password" class="form-label">Contraseña</label>
-            <input type="password" id="password" class="form-control" placeholder="Contraseña"
-              formControlName="password" />
-              <div  *ngIf="password?.touched && password?.invalid" class="form-text text-danger">Este campo es obligatorio</div>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              placeholder="Contraseña"
+              formControlName="password"
+            />
+            <div
+              *ngIf="password?.touched && password?.invalid"
+              class="form-text text-danger"
+            >
+              Este campo es obligatorio
+            </div>
           </div>
 
           <div class="text-end mb-3">
-            <a href="#" class="text-primary text-decoration-none">Recuperar contraseña</a>
+            <a href="#" class="text-primary text-decoration-none"
+              >Recuperar contraseña</a
+            >
           </div>
 
-          <button type="submit" class="btn btn-primary w-100 text-white fw-semibold" (click)="body()">
-            Continuar
+          <button
+            type="submit"
+            class="btn btn-primary w-100 text-white fw-semibold"
+            (click)="body()"
+          >
+            Ingresar
           </button>
         </form>
       </div>
@@ -37,8 +73,13 @@
 
     <!-- Imagen derecha FULL pantalla -->
     <div class="col-md-6 d-none d-md-block">
-      <div class="w-100 h-100" style="background: url('assets/img/bowlingcrea.png') center center / cover no-repeat;">
-      </div>
+      <div
+        class="w-100 h-100"
+        style="
+          background: url('assets/img/bowlingcrea.png') center center / cover
+            no-repeat;
+        "
+      ></div>
     </div>
   </div>
 </div>
