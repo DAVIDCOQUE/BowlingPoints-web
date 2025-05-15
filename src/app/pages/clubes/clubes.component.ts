@@ -17,7 +17,7 @@ export class ClubesComponent implements OnInit {
   filter: string = '';
   clubes: any;
 
-  idUser: number | null = null;
+  id_Club: number | null = null;
   userForm: FormGroup = new FormGroup({});
 
 
@@ -72,7 +72,7 @@ export class ClubesComponent implements OnInit {
   saveForm() {
   }
 
-  deleteUser(id_torneo: number): void {
+  deleteClub(id_Club: number): void {
     Swal.fire({
       title: '¿Estás seguro?',
       text: 'Esta acción no se puede deshacer',

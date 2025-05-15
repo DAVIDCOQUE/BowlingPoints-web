@@ -104,6 +104,14 @@
               </div>
 
               <div class="col-md-6">
+                <label class="form-label">Correo</label>
+                <input formControlName="email" type="email" class="form-control" placeholder="Correo" [ngClass]="{
+                'is-invalid': userForm.controls['email'].invalid && userForm.controls['email'].touched,
+                'is-valid': userForm.controls['email'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6">
                 <label class="form-label">Nombre</label>
                 <input formControlName="firstName" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
                 'is-invalid': userForm.controls['firstName'].invalid && userForm.controls['firstName'].touched,
@@ -116,14 +124,6 @@
                 <input formControlName="lastName" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
                 'is-invalid': userForm.controls['lastName'].invalid && userForm.controls['lastName'].touched,
                 'is-valid': userForm.controls['lastName'].valid
-              }" />
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Correo</label>
-                <input formControlName="email" type="email" class="form-control" placeholder="Correo" [ngClass]="{
-                'is-invalid': userForm.controls['email'].invalid && userForm.controls['email'].touched,
-                'is-valid': userForm.controls['email'].valid
               }" />
               </div>
 
