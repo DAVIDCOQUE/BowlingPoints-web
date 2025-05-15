@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ResultadosService } from 'src/app/services/resultados.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-clubes',
@@ -71,5 +72,27 @@ export class ClubesComponent implements OnInit {
   saveForm() {
   }
 
+  deleteUser(id_torneo: number): void {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Si estás usando backend:
+        // this.http.delete(`${environment.apiUrl}/usuarios/${id}`).subscribe(...)
+
+        // Si es local:
+
+
+        Swal.fire('Eliminado', 'El usuario ha sido eliminado', 'success');
+      }
+    });
+  }
 
 }

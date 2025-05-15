@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { environment } from '../../../environments/environment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-users',
@@ -104,6 +105,29 @@ export class UsersComponent {
       error: (error) => {
         console.error('❌ Error al registrar usuario:', error);
         this.isLoading$.next(false);
+      }
+    });
+  }
+
+  deleteUser(id_torneo: number): void {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Si estás usando backend:
+        // this.http.delete(`${environment.apiUrl}/usuarios/${id}`).subscribe(...)
+
+        // Si es local:
+
+
+        Swal.fire('Eliminado', 'El usuario ha sido eliminado', 'success');
       }
     });
   }
