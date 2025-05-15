@@ -1,73 +1,42 @@
 <div class="container mt-4">
   <h1 class="text-center mb-6">Torneos</h1>
-  <form [formGroup]="filtrosForm" class="d-flex flex-wrap gap-3">
-    <div class="d-flex flex-wrap flex-row gap-3">
-      <!-- Buscar -->
-      <div class="mb-3" style="width: 200px">
-        <label class="form-label">Buscar</label>
-        <input
-          type="text"
-          class="form-control me-2"
-          placeholder="Buscar"
-          [(ngModel)]="filter"
-        />
+  <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
+    <!-- Filtro -->
+    <div class="d-flex flex-column flex-md-row align-items-start gap-2">
+      <div>
+        <label class="form-label mb-1">Buscar</label>
+        <input type="text" class="form-control form-control-sm" style="height: 36px;" placeholder="Buscar"
+          [(ngModel)]="filter" name="filter" />
       </div>
-
       <!-- Fecha -->
-      <div class="mb-3" style="width: 175px">
-        <label class="form-label">Fecha</label>
+      <div>
+        <label class="form-label mb-1">Fecha</label>
         <input type="date" class="form-control" formControlName="fecha" />
       </div>
-
-      <!-- categoria -->
-      <div class="mb-3" style="width: 175px">
-        <label class="form-label">categoria</label>
-        <select class="form-select" formControlName="categoria">
-          <option value="">Seleccionar categoria</option>
-          <option *ngFor="let categoria of categoria" [value]="categoria.value">
-            {{ categoria.label }}
-          </option>
-        </select>
-      </div>
-
-      <!-- modalidad -->
-      <div class="mb-3" style="width: 175px">
-        <label class="form-label">modalidad</label>
-        <select class="form-select" formControlName="modalidad">
-          <option value="">Seleccionar modalidad</option>
-          <option *ngFor="let modalidad of modalidad" [value]="modalidad.value">
-            {{ modalidad.label }}
-          </option>
-        </select>
-      </div>
-      <div class="ms-auto d-flex align-items-center mt-2">
-        <button
-          class="btn btn-secondary btn-sm w-150 me-2"
-          style="height: 35px"
-          (click)="clear()"
-        >
-          <i class="fa-duotone fa-solid fa-xmark"></i> Limpiar
+      <div class="d-flex gap-2 pt-md-4">
+        <button class="btn btn-secondary btn-sm d-flex align-items-center" style="height: 36px;" (click)="clear()">
+          <i class="fas fa-times me-1"></i> Limpiar
         </button>
-        <button
-          class="btn btn-primary btn-sm w-150"
-          style="height: 35px"
-          (click)="search()"
-        >
-          <i class="fa-duotone fa-solid fa-filter-list"></i> Buscar
-        </button>
-        <button class="btn btn-success btn-sm" (click)="openModal()">
-          <i class="fas fa-plus-circle me-1"></i>
-          Crear torneo
+        <button class="btn btn-danger btn-sm d-flex align-items-center" style="height: 36px;" (click)="search()">
+          <i class="fas fa-search me-1"></i> Buscar
         </button>
       </div>
     </div>
-  </form>
+
+    <!-- Botón Crear -->
+    <div class="pt-md-4">
+      <button class="btn btn-success btn-sm d-flex align-items-center" style="height: 36px;"
+        (click)="openModal(modalToreno)">
+        <i class="fas fa-plus-circle me-1"></i> Crear
+      </button>
+    </div>
+  </div>
+
+
   <hr />
   <div class="card-body">
     <div class="table-responsive">
-      <table
-        class="table table-rounded table-hover border table-bordered border-gray-300 table-vmiddle text-center"
-      >
+      <table class="table table-rounded table-hover border table-bordered border-gray-300 table-vmiddle text-center">
         <thead class="bg-light-secondary">
           <tr class="fw-bold">
             <th>ID:</th>
@@ -85,20 +54,12 @@
             <td>{{ date.id }}</td>
             <td>
               <div>
-                <img
-                  [src]="date.img"
-                  alt="Foto de perfil"
-                  style="width: 40px; height: 40px"
-                  class="rounded-circle"
-                />
+                <img [src]="date.img" alt="Foto de perfil" style="width: 40px; height: 40px" class="rounded-circle" />
                 <div class="ms-3"></div>
               </div>
             </td>
             <td class="align-items-center">
-              <a
-                class="link-offset-2 link-underline link-underline-opacity-0 link-secondary"
-                >{{ date.nombre }}</a
-              >
+              <a class="link-offset-2 link-underline link-underline-opacity-0 link-secondary">{{ date.nombre }}</a>
             </td>
             <td>{{ date.fecha }}</td>
             <td>{{ date.lugar }}</td>
@@ -107,30 +68,24 @@
             <td>
               <div class="d-flex justify-content-center gap-2">
                 <!-- Botón Editar - Azul suave -->
-                <button
-                  class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                  style="
+                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2" style="
                     background-color: rgba(0, 123, 255, 0.1);
                     color: #007bff;
                     border-radius: 0.5rem;
                     min-width: 40px;
                     height: 36px;
-                  "
-                >
+                  " (click)="openModal(modalToreno)">
                   <i class="fas fa-edit"></i>
                 </button>
 
                 <!-- Botón Eliminar - Rojo suave -->
-                <button
-                  class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                  style="
+                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2" style="
                     background-color: rgba(220, 53, 69, 0.1);
                     color: #dc3545;
                     border-radius: 0.5rem;
                     min-width: 40px;
                     height: 36px;
-                  "
-                >
+                  ">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
@@ -143,74 +98,64 @@
 </div>
 
 <!--MODAL-->
-<div class="modal-overlay" *ngIf="isModalOpen">
-  <div class="modal-dialog" (click)="$event.stopPropagation()">
-    <h4 class="mb-3">Nuevo torneo</h4>
+<ng-template #modalToreno>
+  <div class="modal-content">
 
-    <form #frm="ngForm" (ngSubmit)="saveTournament(frm)" novalidate>
-      <div class="mb-2">
-        <label class="form-label">Nombre</label>
-        <input type="text"
-               class="form-control"
-               name="nombre"
-               required
-               [(ngModel)]="nuevoTorneo.nombre" />
-      </div>
+    <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+      <h2 class="modal-title flex-grow-1 m-0">
+        {{ id_torneo ? 'Editar' : 'Crear' }} Torneos
+      </h2>
+      <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+        style="filter: brightness(0) invert(1);"></button>
+    </div>
 
-      <div class="mb-2">
-        <label class="form-label">Fecha</label>
-        <input type="date"
-               class="form-control"
-               name="fecha"
-               required
-               [(ngModel)]="nuevoTorneo.fecha" />
-      </div>
+    <div class="modal-body">
 
-      <div class="mb-2">
-        <label class="form-label">Lugar</label>
-        <input type="text"
-               class="form-control"
-               name="lugar"
-               required
-               [(ngModel)]="nuevoTorneo.lugar" />
-      </div>
+      <form #frm="ngForm" (ngSubmit)="saveTournament(frm)" novalidate>
+        <div class="mb-2">
+          <label class="form-label">Nombre</label>
+          <input type="text" class="form-control" name="nombre" required [(ngModel)]="nuevoTorneo.nombre" />
+        </div>
 
-      <div class="mb-2">
-        <label class="form-label">Modalidad</label>
-        <select class="form-select"
-                name="modalidad"
-                required
-                [(ngModel)]="nuevoTorneo.modalidad">
-          <option value="" disabled selected>Seleccionar</option>
-          <option>Individual</option>
-          <option>Equipos</option>
-          <option>Mixto</option>
-        </select>
-      </div>
+        <div class="mb-2">
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-control" name="fecha" required [(ngModel)]="nuevoTorneo.fecha" />
+        </div>
 
-      <div class="mb-3">
-        <label class="form-label">Categoría</label>
-        <select class="form-select"
-                name="categoria"
-                required
-                [(ngModel)]="nuevoTorneo.categoria">
-          <option value="" disabled selected>Seleccionar</option>
-          <option>Sub-18</option>
-          <option>Sub-21</option>
-          <option>Mayores</option>
-          <option>Libre</option>
-          <option>Todas las categorías</option>
-        </select>
-      </div>
+        <div class="mb-2">
+          <label class="form-label">Lugar</label>
+          <input type="text" class="form-control" name="lugar" required [(ngModel)]="nuevoTorneo.lugar" />
+        </div>
 
-      <div class="d-flex justify-content-end gap-2">
-        <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
-        <button type="submit"
-                class="btn btn-success"
-                [disabled]="frm.invalid">
-          Guardar
-        </button>
-      </div>
-    </form>
+        <div class="mb-2">
+          <label class="form-label">Modalidad</label>
+          <select class="form-select" name="modalidad" required [(ngModel)]="nuevoTorneo.modalidad">
+            <option value="" disabled selected>Seleccionar</option>
+            <option>Individual</option>
+            <option>Equipos</option>
+            <option>Mixto</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Categoría</label>
+          <select class="form-select" name="categoria" required [(ngModel)]="nuevoTorneo.categoria">
+            <option value="" disabled selected>Seleccionar</option>
+            <option>Sub-18</option>
+            <option>Sub-21</option>
+            <option>Mayores</option>
+            <option>Libre</option>
+            <option>Todas las categorías</option>
+          </select>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn-success" [disabled]="frm.invalid">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
+</ng-template>

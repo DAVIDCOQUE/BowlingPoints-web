@@ -33,6 +33,9 @@ import { ClubComponent } from './pages/club/club.component';
 import { UsersComponent } from './pages/users/users.component';
 import { TorneosComponent } from './pages/torneos/torneos.component';
 import { RouterModule } from '@angular/router';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
+
 
 
 
@@ -75,7 +78,8 @@ import { RouterModule } from '@angular/router';
     NgxPaginationModule,
     MatIconModule,
     RouterModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgbModule
   ],
   providers: [],
   bootstrap: [AppComponent]

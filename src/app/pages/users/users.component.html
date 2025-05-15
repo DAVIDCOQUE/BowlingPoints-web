@@ -1,22 +1,33 @@
 <div class="container mt-4">
   <h1 class="text-center">Usuarios</h1>
-  <form [formGroup]="filtrosForm" class="d-flex flex-wrap gap-3">
-    <div class="d-flex flex-wrap flex-row gap-3">
-      <!-- Buscar -->
-      <div class="mb-3" style="width: 200px;">
-        <label class="form-label">Buscar</label>
-        <input type="text" class="form-control me-2" placeholder="Buscar" [(ngModel)]="filter" />
+
+  <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
+    <!-- Filtro -->
+    <div class="d-flex flex-column flex-md-row align-items-start gap-2">
+      <div>
+        <label class="form-label mb-1">Buscar</label>
+        <input type="text" class="form-control form-control-sm" style="height: 36px;" placeholder="Buscar"
+          [(ngModel)]="filter" name="filter" />
       </div>
-      <div class="ms-auto d-flex align-items-center mt-2">
-        <button class="btn btn-secondary btn-sm w-150 me-2" style="height: 36px;" (click)="clear()">
-          <i class="fa-duotone fa-solid fa-xmark"></i> Limpiar
+      <div class="d-flex gap-2 pt-md-4">
+        <button class="btn btn-secondary btn-sm d-flex align-items-center" style="height: 36px;" (click)="clear()">
+          <i class="fas fa-times me-1"></i> Limpiar
         </button>
-        <button class="btn btn-primary btn-sm w-150" style="height: 36px;" (click)="search()">
-          <i class="fa-duotone fa-solid fa-filter-list"></i> Buscar
+        <button class="btn btn-danger btn-sm d-flex align-items-center" style="height: 36px;" (click)="search()">
+          <i class="fas fa-search me-1"></i> Buscar
         </button>
       </div>
     </div>
-  </form>
+
+    <!-- Botón Crear -->
+    <div class="pt-md-4">
+      <button class="btn btn-success btn-sm d-flex align-items-center" style="height: 36px;"
+        (click)="openModal(modalUser)">
+        <i class="fas fa-plus-circle me-1"></i> Crear
+      </button>
+    </div>
+  </div>
+
   <hr>
   <div class="card-body">
     <div class="table-responsive">
@@ -33,37 +44,140 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let jugador of top_jugadores.jugadores_colombia">
-            <td>{{ jugador.id }}</td>
-            <td>
-              <div>
-                <img [src]="jugador.foto" alt="Foto de perfil" style="width: 40px; height: 40px"
-                  class="rounded-circle" />
-                <div class="ms-3"></div>
-              </div>
-            </td>
-            <td class="align-items-center"><a
-                class="link-offset-2 link-underline link-underline-opacity-0 link-secondary"
-                [routerLink]="['/jugador', jugador.id]">{{ jugador.nombre }}</a></td>
-            <td>{{ jugador.promedio }}</td>
-            <td>{{ jugador.mejor_juego }}</td>
-            <td>{{ jugador.titulos_ganados }}</td>
-            <td>
-              <div class="d-flex justify-content-center gap-2">
-                <!-- Botón Editar - Azul suave -->
-                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                  style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
-                  <i class="fas fa-edit"></i>
-                </button>
+          <ng-container *ngIf="top_jugadores?.jugadores_colombia as jugadores">
+            <tr *ngFor="let jugador of jugadores">
+              <td>{{ jugador.id }}</td>
+              <td>
+                <div>
+                  <img [src]="jugador.foto" alt="Foto de perfil" style="width: 40px; height: 40px"
+                    class="rounded-circle" />
+                  <div class="ms-3"></div>
+                </div>
+              </td>
+              <td class="align-items-center"><a
+                  class="link-offset-2 link-underline link-underline-opacity-0 link-secondary"
+                  [routerLink]="['/jugador', jugador.id]">{{ jugador.nombre }}</a></td>
+              <td>{{ jugador.promedio }}</td>
+              <td>{{ jugador.mejor_juego }}</td>
+              <td>{{ jugador.titulos_ganados }}</td>
+              <td>
+                <div class="d-flex justify-content-center gap-2">
+                  <!-- Botón Editar - Azul suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
+                    (click)="openModal(modalUser)">
+                    <i class="fas fa-edit"></i>
+                  </button>
 
-                <!-- Botón Eliminar - Rojo suave -->
-                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                  style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
+                  <!-- Botón Eliminar - Rojo suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
         </tbody>
       </table>
     </div>
+
+    <ng-template #modalUser>
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+          <h2 class="modal-title flex-grow-1 m-0">
+            {{ idUser ? 'Editar' : 'Crear' }} Usuario
+          </h2>
+          <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+            style="filter: brightness(0) invert(1);"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="userForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Username</label>
+                <input formControlName="username" type="text" class="form-control" placeholder="Username" [ngClass]="{
+                'is-invalid': userForm.controls['username'].invalid && userForm.controls['username'].touched,
+                'is-valid': userForm.controls['username'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Nombre</label>
+                <input formControlName="firstName" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
+                'is-invalid': userForm.controls['firstName'].invalid && userForm.controls['firstName'].touched,
+                'is-valid': userForm.controls['firstName'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Apellido</label>
+                <input formControlName="lastName" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
+                'is-invalid': userForm.controls['lastName'].invalid && userForm.controls['lastName'].touched,
+                'is-valid': userForm.controls['lastName'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Correo</label>
+                <input formControlName="email" type="email" class="form-control" placeholder="Correo" [ngClass]="{
+                'is-invalid': userForm.controls['email'].invalid && userForm.controls['email'].touched,
+                'is-valid': userForm.controls['email'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Teléfono</label>
+                <input formControlName="phone" type="number" class="form-control" placeholder="Teléfono" [ngClass]="{
+                'is-invalid': userForm.controls['phone'].invalid && userForm.controls['phone'].touched,
+                'is-valid': userForm.controls['phone'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Género</label>
+                <input formControlName="gender" type="text" class="form-control" placeholder="Género" [ngClass]="{
+                'is-invalid': userForm.controls['gender'].invalid && userForm.controls['gender'].touched,
+                'is-valid': userForm.controls['gender'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6 position-relative">
+                <label class="form-label">Contraseña</label>
+                <input [type]="showPassword ? 'text' : 'password'" formControlName="password" class="form-control pe-5"
+                  placeholder="Contraseña" [ngClass]="{
+                'is-invalid': userForm.controls['password'].invalid && userForm.controls['password'].touched,
+                'is-valid': userForm.controls['password'].valid
+              }" />
+                <i class="fa-solid" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"
+                  (click)="showPassword = !showPassword"
+                  style="position: absolute; top: 72%; right: 15px; transform: translateY(-50%); cursor: pointer;">
+                </i>
+              </div>
+
+              <div class="col-md-6 position-relative">
+                <label class="form-label">Confirmar Contraseña</label>
+                <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirm"
+                  class="form-control pe-5" placeholder="Confirmar Contraseña" [ngClass]="{
+                'is-invalid': userForm.controls['confirm'].invalid && userForm.controls['confirm'].touched,
+                'is-valid': userForm.controls['confirm'].valid
+              }" />
+                <i class="fa-solid" [class.fa-eye]="showConfirmPassword" [class.fa-eye-slash]="!showConfirmPassword"
+                  (click)="showConfirmPassword = !showConfirmPassword"
+                  style="position: absolute; top: 72%; right: 15px; transform: translateY(-50%); cursor: pointer;">
+                </i>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="button" class="btn btn-success" [disabled]="userForm.invalid"
+              (click)="saveForm()">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </ng-template>

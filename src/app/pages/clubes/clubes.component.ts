@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ResultadosService } from 'src/app/services/resultados.service';
 
 @Component({
@@ -15,11 +16,30 @@ export class ClubesComponent implements OnInit {
   filter: string = '';
   clubes: any;
 
-  constructor(private ResultadosService: ResultadosService, private router: Router, private formBuilder: FormBuilder) { }
+  idUser: number | null = null;
+  userForm: FormGroup = new FormGroup({});
+
+
+  constructor(private ResultadosService: ResultadosService, private router: Router, private formBuilder: FormBuilder,
+    private modalService: NgbModal
+  ) { }
 
   ngOnInit(): void {
 
     this.get_clubes()
+  }
+
+  initForm() {
+    this.userForm = this.formBuilder.group({
+      username: ['', Validators.required],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', Validators.required],
+      gender: ['', Validators.required],
+      password: ['', Validators.required],
+      confirm: ['', Validators.required]
+    });
   }
 
 
@@ -37,5 +57,19 @@ export class ClubesComponent implements OnInit {
   search() {
 
   }
+
+  openModal(content: any) {
+    this.modalService.open(content);
+  }
+
+
+  closeModal(): void {
+    this.modalService.dismissAll()
+
+  }
+
+  saveForm() {
+  }
+
 
 }
