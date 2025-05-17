@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,8 +12,7 @@ export class SidebarComponent {
   isShowing = false;
   showSubmenu = false;
 
-
-  constructor(private router: Router) { }
+  constructor(private router: Router, public auth: AuthService) { }
 
   mouseenter() {
     if (!this.isExpanded) {
@@ -31,8 +31,7 @@ export class SidebarComponent {
   }
 
   logout() {
-    // lógica real con auth service
-    console.log('Cerrar sesión...');
+    this.auth.logout();
     this.router.navigate(['/login']);
   }
 }
