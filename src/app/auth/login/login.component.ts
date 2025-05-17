@@ -42,6 +42,12 @@ export class LoginComponent {
     }
   }
 
+  loginAsGuest(): void {
+  localStorage.removeItem('username');
+  localStorage.setItem('roles', JSON.stringify([])); // Sin roles = invitado
+  this.router.navigate(['/dashboard']);
+}
+
   get username() { return this.form.get('username'); }
   get password() { return this.form.get('password'); }
 }

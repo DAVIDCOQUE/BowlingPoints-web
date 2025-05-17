@@ -44,7 +44,7 @@ const routes: Routes = [
       { path: 'mis-resultados', component: MisResultadosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
 
       // ENTRENADORES Y ADMINISTRADORES
-      { path: 'club', component: ClubComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ENTRENADOR', 'ADMIN'] } },
+      { path: 'club', component: ClubComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ENTRENADOR', 'ADMIN','JUGADOR'] } },
 
       // ACCESO GENERAL (requiere login pero sin restricción por rol)
       { path: 'jugadores', component: JugadoresComponent, canActivate: [AuthGuard] },

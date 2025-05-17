@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
@@ -7,11 +7,17 @@ import Swal from 'sweetalert2';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent {
-
+export class HeaderComponent implements OnInit {
   @Output() menuToggle = new EventEmitter<void>();
+  isGuest = false;
 
   constructor(private router: Router) { }
+
+  ngOnInit(): void {
+    const roles = JSON.parse(localStorage.getItem('roles') || '[]');
+    this.isGuest = roles.length === 0;
+  }
+
   toggleSidebar() {
     this.menuToggle.emit();
   }
@@ -29,6 +35,9 @@ export class HeaderComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         console.log('Sesión cerrada.');
+        localStorage.removeItem('username');
+        localStorage.removeItem('roles');
+        localStorage.removeItem('isGuest');
         this.router.navigate(['/login']);
       }
     });
