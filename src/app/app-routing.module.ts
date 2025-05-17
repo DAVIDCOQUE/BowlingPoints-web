@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './pages/login/login.component';
+import { LoginComponent } from './auth/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
@@ -19,42 +19,47 @@ import { DatallesTorneoComponent } from './pages/resultadosTorneos/datalles-torn
 import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo/resumen-torneo.component';
 import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jugador/datalles-jugador.component';
 
-const routes: Routes = [
-  //Redirección inicial al dashboard
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+import { AuthGuard } from './auth/auth.guard';
+import { RoleGuard } from './auth/role.guard';
 
-  // Rutas sin layout (fuera de BodyComponent)
+const routes: Routes = [
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegistroComponent },
 
-  //Rutas con layout principal
   {
     path: '',
     component: BodyComponent,
     children: [
+      // VISITANTES (sin login, sin protección)
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'perfil', component: PerfilComponent },
-      { path: 'mis-torneos', component: MisTorneosComponent },
-      { path: 'mis-resultados', component: MisResultadosComponent },
-      { path: 'club', component: ClubComponent },
-
-      { path: 'jugadores', component: JugadoresComponent },
-      { path: 'jugador/:id', component: JugadorComponent },
-
       { path: 'lista-torneos', component: ListaTorneosComponent },
       { path: 'detalle-torneo/:id', component: DatallesTorneoComponent },
       { path: 'resumen-torneo/:id', component: ResumenTorneoComponent },
       { path: 'detalle-jugador/:id', component: DatallesJugadorComponent },
 
-      { path: 'clubes', component: ClubesComponent },
-      { path: 'Usuarios', component: UsersComponent },
-      { path: 'torneos', component: TorneosComponent },
+      // JUGADORES (rol: JUGADOR, ENTRENADOR, ADMIN)
+      { path: 'perfil', component: PerfilComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
+      { path: 'mis-torneos', component: MisTorneosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
+      { path: 'mis-resultados', component: MisResultadosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
+
+      // ENTRENADORES Y ADMINISTRADORES
+      { path: 'club', component: ClubComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ENTRENADOR', 'ADMIN'] } },
+
+      // ACCESO GENERAL (requiere login pero sin restricción por rol)
+      { path: 'jugadores', component: JugadoresComponent, canActivate: [AuthGuard] },
+      { path: 'jugador/:id', component: JugadorComponent, canActivate: [AuthGuard] },
+
+      // ADMINISTRADORES
+      { path: 'clubes', component: ClubesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'Usuarios', component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'torneos', component: TorneosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } }
     ]
   },
 
-  // Catch-all para rutas no encontradas (404)
   { path: '**', redirectTo: 'dashboard' }
 ];
+
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
