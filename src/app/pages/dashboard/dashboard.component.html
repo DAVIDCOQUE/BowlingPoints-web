@@ -111,7 +111,7 @@
     <!-- Top 10 Puntajes -->
     <div class="col-md-3">
       <h3>🥇 Top Mejores Puntajes</h3>
-      <div class="card shadow-sm h-100" routerLink="/jugadores">
+      <div class="card shadow-sm h-100">
         <div class="card-body">
           <div class="row fw-semibold text-muted border-bottom pb-1 mt-2 mb-2">
             <div class="col-8">Jugador</div>
@@ -134,7 +134,7 @@
           </ul>
           <hr>
           <div class="text-center">
-            <button class="btn btn-outline-primary mt-4" routerLink="/clubes">Ver todos</button>
+            <button class="btn btn-outline-primary mt-4" routerLink="/jugadores">Ver todos</button>
           </div>
         </div>
       </div>
@@ -150,7 +150,7 @@
             <div class="col-4 text-end">Puntaje</div>
           </div>
           <ul class="list-group list-group-flush">
-            <!-- Ejemplo de jugador individual -->
+            <!-- Ejemplo de club individual -->
             <li class="list-group-item d-flex align-items-center justify-content-between px-0 py-2"
               *ngFor="let club of topClubes">
               <!-- Avatar + Nombre -->

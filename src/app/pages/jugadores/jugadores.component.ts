@@ -12,15 +12,13 @@ export class JugadoresComponent {
 
   top_jugadores: any;
   usuarios: any;
+  filter: string = '';
 
   constructor(private ResultadosService: ResultadosService, private router: Router) { }
 
   ngOnInit(): void {
-
-    this.get_top_jugadores(); 
-    this.get_usuarios();
+    this.get_top_jugadores();
   }
-
 
   get_top_jugadores() {
     this.ResultadosService.get_top_jugadores().subscribe(top_jugadores => {
@@ -30,11 +28,7 @@ export class JugadoresComponent {
     )
   }
 
-  get_usuarios() {
-    this.ResultadosService.get_Usuarios().subscribe(usuarios => {
-      this.usuarios = usuarios;
-      console.log(this.usuarios);
-    }
-    )
+  clear() {
+    this.filter = '';
   }
 }

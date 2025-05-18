@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-mis-torneos',
@@ -6,6 +7,8 @@ import { Component } from '@angular/core';
   styleUrls: ['./mis-torneos.component.css']
 })
 export class MisTorneosComponent {
+
+  constructor(private router: Router) { }
 
   torneos: any = [
     {
@@ -20,4 +23,9 @@ export class MisTorneosComponent {
     },
   ];
 
+
+  resumenToreno(id: number) {
+    this.router.navigate(['/resumen-torneo', id]);
+  }
+  // Navega
 }

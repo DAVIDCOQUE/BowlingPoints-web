@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { AuthService } from 'src/app/auth/auth.service';
 import { ResultadosService } from 'src/app/services/resultados.service';
 import Swal from 'sweetalert2';
 
@@ -22,7 +23,7 @@ export class ClubesComponent implements OnInit {
 
 
   constructor(private ResultadosService: ResultadosService, private router: Router, private formBuilder: FormBuilder,
-    private modalService: NgbModal
+    private modalService: NgbModal, public auth: AuthService
   ) { }
 
   ngOnInit(): void {

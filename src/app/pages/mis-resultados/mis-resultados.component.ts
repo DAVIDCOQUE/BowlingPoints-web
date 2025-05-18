@@ -1,4 +1,5 @@
 import { Component, AfterViewChecked, ViewChild, ElementRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 
 @Component({
@@ -14,7 +15,7 @@ export class MisResultadosComponent implements AfterViewChecked {
   private lineChartInstance?: Chart;
   private barChartInstance2?: Chart;
 
-  constructor() {
+  constructor(private router: Router) {
     Chart.register(...registerables);
   }
 
@@ -33,7 +34,7 @@ export class MisResultadosComponent implements AfterViewChecked {
 
   estadisticas = [
     { titulo: 'Torneos Ganados', valor: '6/16', icono: '../../../assets/img/trofeo.png' },
-    { titulo: 'Chuzas Totales', valor: '120', icono: '../../../assets/img/chuzas.png'},
+    { titulo: 'Chuzas Totales', valor: '120', icono: '../../../assets/img/chuzas.png' },
     { titulo: 'Promedio por Partida', valor: '180', icono: '../../../assets/img/promedio.png' },
     { titulo: 'Mejor Juego', valor: '279', icono: '../../../assets/img/mejor-juego.png' }
   ];
@@ -121,6 +122,10 @@ export class MisResultadosComponent implements AfterViewChecked {
         }
       }
     });
+  }
+
+  resumenToreno(id: number) {
+    this.router.navigate(['/resumen-torneo', id]);
   }
 
 }

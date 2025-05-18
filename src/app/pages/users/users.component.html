@@ -6,14 +6,16 @@
     <div class="d-flex flex-column flex-md-row align-items-start gap-2">
       <div>
         <label class="form-label mb-1">Buscar</label>
-        <input type="text" class="form-control form-control-sm" style="height: 36px;" placeholder="Buscar"
+        <input type="text" class="form-control form-control-sm" style="height: 36px; width: 250px;" placeholder="Buscar"
           [(ngModel)]="filter" name="filter" />
       </div>
       <div class="d-flex gap-2 pt-md-4">
-        <button class="btn btn-secondary btn-sm d-flex align-items-center" style="height: 36px;" (click)="clear()">
+        <button class="btn btn-outline-secondary btn-sm  align-items-center" style="height: 36px; width: 100px;"
+          (click)="clear()">
           <i class="fas fa-times me-1"></i> Limpiar
         </button>
-        <button class="btn btn-danger btn-sm d-flex align-items-center" style="height: 36px;" (click)="search()">
+        <button class="btn btn btn-outline-primary btn-sm  align-items-center" style="height: 36px; width: 100px;"
+          (click)="search()">
           <i class="fas fa-search me-1"></i> Buscar
         </button>
       </div>
@@ -21,7 +23,7 @@
 
     <!-- Botón Crear -->
     <div class="pt-md-4">
-      <button class="btn btn-success btn-sm d-flex align-items-center" style="height: 36px;"
+      <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
         (click)="openModal(modalUser)">
         <i class="fas fa-plus-circle me-1"></i> Crear
       </button>
