@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ResultadosService } from 'src/app/services/resultados.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -8,18 +8,30 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { environment } from '../../../environments/environment';
 import Swal from 'sweetalert2';
 
+interface Usuario {
+  id: number;
+  firstName: string;
+  secondName?: string | null;
+  lastName: string;
+  secondLastName?: string | null;
+  email: string;
+  mobile: string;
+  gender: string;
+}
+
 @Component({
   selector: 'app-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.css']
 })
 export class UsersComponent {
-  private dataPath = 'assets/data';
+  @ViewChild('modalUser') modalUserRef: any;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
   filtrosForm!: FormGroup;
   filter: string = '';
   top_jugadores: any;
-  usuarios: any;
+  usuarios: Usuario[] = [];
 
   idUser: number | null = null;
   userForm: FormGroup = new FormGroup({});
@@ -41,32 +53,43 @@ export class UsersComponent {
 
   initForm() {
     this.userForm = this.formBuilder.group({
-      username: ['', Validators.required],
       firstName: ['', Validators.required],
+      secondName: [''],
       lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', Validators.required],
+      secondLastName: [''],
       gender: ['', Validators.required],
-      password: ['', Validators.required],
-      confirm: ['', Validators.required]
+      email: ['', [Validators.required, Validators.email]],
+      mobile: ['', Validators.required],
+      // Solo usar para creación ↓
+      username: [''],
+      password: [''],
+      confirm: ['']
     });
   }
-  getUsers(): void {
-  this.http.get(`${environment.apiUrl}/users/v1/all`).subscribe({
-    next: usuarios => {
-      this.usuarios = usuarios;
-      console.log('Usuarios cargados:', usuarios);
-    },
-    error: err => {
-      console.error('❌ Error al cargar usuarios:', err);
-    }
-  });
-}
 
-  editUser(user: any): void {
+
+  getUsers(): void {
+    this.http.get<{ success: boolean, message: string, data: Usuario[] }>(`${environment.apiUrl}/users/v1/all`)
+      .subscribe({
+        next: res => {
+          this.usuarios = res.data;
+          console.log('Usuarios cargados:', this.usuarios);
+        },
+        error: err => {
+          console.error('Error al cargar usuarios:', err);
+        }
+      });
+  }
+
+  editUser(user: Usuario): void {
     this.idUser = user.id;
     this.userForm.patchValue(user);
-    this.openModal(document.getElementById('editUserModal'));
+
+    this.userForm.get('username')?.disable();
+    this.userForm.get('password')?.disable();
+    this.userForm.get('confirm')?.disable();
+
+    this.openModal(this.modalUserRef);
   }
 
   saveForm() {
@@ -75,24 +98,34 @@ export class UsersComponent {
       return;
     }
 
-    const payload = { ...this.userForm.value };
+    const isEdit = !!this.idUser;
+
+    const payload = { ...this.userForm.getRawValue() };
     delete payload.confirm;
+
+    if (isEdit) {
+      delete payload.username;
+      delete payload.password;
+    }
 
     this.isLoading$.next(true);
 
-    const req = this.idUser
-      ? this.http.put(`${environment.apiUrl}/usuarios/${this.idUser}`, payload)
+    const request = isEdit
+      ? this.http.put(`${environment.apiUrl}/users/v1/persona-update/${this.idUser}`, payload)
       : this.http.post(`${environment.apiUrl}/auth/register`, payload);
 
-    req.subscribe({
-      next: (res) => {
-        console.log('Usuario guardado', res);
+    request.subscribe({
+      next: () => {
+        const msg = isEdit ? 'Usuario actualizado correctamente' : 'Usuario creado exitosamente';
+        Swal.fire(' Éxito', msg, 'success');
         this.getUsers();
-        this.isLoading$.next(false);
         this.closeModal();
+        this.isLoading$.next(false);
       },
       error: (err) => {
-        console.error('Error al guardar:', err);
+        console.error(' Error al guardar:', err);
+        const msg = err.error?.message || 'Ocurrió un error al procesar la solicitud';
+        Swal.fire('❌ Error', msg, 'error');
         this.isLoading$.next(false);
       }
     });
@@ -110,7 +143,7 @@ export class UsersComponent {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`${environment.apiUrl}/usuarios/${id}`).subscribe({
+        this.http.delete(`${environment.apiUrl}/users/v1/persona-delete/${id}`).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'El usuario ha sido eliminado', 'success');
             this.getUsers();
