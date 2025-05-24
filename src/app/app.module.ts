@@ -40,7 +40,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -48,6 +47,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     LoginComponent,
     DashboardComponent,
     JugadoresComponent,
+    ClubesComponent,
     FooterComponent,
     PerfilComponent,
     ResumenTorneoComponent,
@@ -55,7 +55,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     DatallesJugadorComponent,
     ListaTorneosComponent,
     CarouselComponent,
-    ClubesComponent,
     BodyComponent,
     SidebarComponent,
     HeaderComponent,

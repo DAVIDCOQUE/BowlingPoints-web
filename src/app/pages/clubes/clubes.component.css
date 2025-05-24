@@ -21,3 +21,13 @@ img {
   object-fit: cover;
   object-position: center;
 }
+
+/* styles.css o dentro del componente con :host ::ng-deep */
+.modal-body {
+  display: flex;
+  justify-content: center; /* Centra el contenedor principal */
+}
+
+.modal-body form .form-control {
+  text-align: center;      /* Centra el texto dentro de los inputs */
+}

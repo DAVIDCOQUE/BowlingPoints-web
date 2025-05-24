@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef  } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { AuthService } from 'src/app/auth/auth.service';
+import { NgbModal, NgbModalRef  } from '@ng-bootstrap/ng-bootstrap';
 import { ResultadosService } from 'src/app/services/resultados.service';
+import { AuthService } from 'src/app/auth/auth.service';
+import { Club }              from 'src/app/interface/club';     
 import Swal from 'sweetalert2';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
 @Component({
   selector: 'app-clubes',
@@ -14,55 +17,44 @@ import Swal from 'sweetalert2';
 
 export class ClubesComponent implements OnInit {
 
-  filtrosForm!: FormGroup;
+  clubForm!: FormGroup;
+  clubes: Club[] = [];
+  id_Club?: number; 
+  modalRef?: NgbModalRef;
   filter: string = '';
-  clubes: any;
 
-  id_Club: number | null = null;
-  userForm: FormGroup = new FormGroup({});
+   constructor(private ResultadosService: ResultadosService, private router: Router, private formBuilder: FormBuilder, private http: HttpClient,
+       private modalService: NgbModal, private fb: FormBuilder, public  auth: AuthService ) { }
 
-
-  constructor(private ResultadosService: ResultadosService, private router: Router, private formBuilder: FormBuilder,
-    private modalService: NgbModal, public auth: AuthService
-  ) { }
-
-  ngOnInit(): void {
-
-    this.get_clubes()
+ngOnInit(): void {
+    this.buildForm();
+    this.get_clubes();
   }
 
-  initForm() {
-    this.userForm = this.formBuilder.group({
-      username: ['', Validators.required],
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', Validators.required],
-      gender: ['', Validators.required],
-      password: ['', Validators.required],
-      confirm: ['', Validators.required]
+  private buildForm(): void {
+    this.clubForm = this.fb.group({
+      clubName:     ['', Validators.required],
+      creationDate: ['', Validators.required],
+      members:      ['', [Validators.required, Validators.min(1)]]
     });
   }
 
 
-  get_clubes() {
-    this.ResultadosService.get_clubes().subscribe(clubes => {
-      this.clubes = clubes;
-      console.log(this.clubes);
-    }
-    )
+  get_clubes(): void {
+  this.ResultadosService.get_clubes()
+    .subscribe((clubs) => this.clubes = clubs as Club[]);
+}
+ 
+  openModal(content: TemplateRef<any>, club?: Club): void {   // ← firma con 2 args
+  if (club) {
+    this.id_Club = club.id;
+    this.clubForm.patchValue(club);
+  } else {
+    this.id_Club = undefined;
+    this.clubForm.reset();
   }
-  clear() {
-
-  }
-
-  search() {
-
-  }
-
-  openModal(content: any) {
-    this.modalService.open(content);
-  }
+  this.modalRef = this.modalService.open(content, { centered: true });
+}
 
 
   closeModal(): void {
@@ -70,7 +62,28 @@ export class ClubesComponent implements OnInit {
 
   }
 
-  saveForm() {
+ save() {
+    if (this.clubForm.invalid) { return; }
+    const payload = this.clubForm.value;
+
+    if (this.id_Club) {
+      // servicio PUT/UPDATE
+    } else {
+      // servicio POST/CREATE
+    }
+    this.closeModal();
+  }
+
+   search(): void {                           
+    const term = this.filter.toLowerCase().trim();
+    // Si no quieres llamar al backend, filtra localmente:
+    // this.clubesFiltrados = this.clubes.filter(c => c.name.toLowerCase().includes(term));
+    console.log('Buscar:', term);
+  }
+
+  clear(): void {                           
+    this.filter = '';
+    this.search();
   }
 
   deleteClub(id_Club: number): void {
