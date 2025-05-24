@@ -36,8 +36,7 @@ export class UsersComponent {
 
   ngOnInit(): void {
     this.initForm();
-    this.get_top_jugadores();
-    this.get_usuarios();
+    this.getUsers();
   }
 
   initForm() {
@@ -52,37 +51,22 @@ export class UsersComponent {
       confirm: ['', Validators.required]
     });
   }
-  get_usuarios(): void {
-    this.http.get(`${this.dataPath}/club.json`).subscribe(usuarios => {
+  getUsers(): void {
+  this.http.get(`${environment.apiUrl}/users/v1/all`).subscribe({
+    next: usuarios => {
       this.usuarios = usuarios;
-      console.log('📄 Usuarios cargados:', this.usuarios);
-    });
-  }
+      console.log('Usuarios cargados:', usuarios);
+    },
+    error: err => {
+      console.error('❌ Error al cargar usuarios:', err);
+    }
+  });
+}
 
-  get_top_jugadores(): void {
-    this.http.get(`${this.dataPath}/top_jugadores.json`).subscribe(jugadores => {
-      this.top_jugadores = jugadores;
-      console.log('🎳 Top jugadores:', this.top_jugadores);
-    });
-  }
-
-  clear() {
-
-  }
-
-  search() {
-
-  }
-
-  openModal(content: any) {
-    this.modalService.open(content);
-  }
-
-
-  closeModal(): void {
-    this.modalService.dismissAll()
-    this.userForm.reset();
-    this.idUser = null;
+  editUser(user: any): void {
+    this.idUser = user.id;
+    this.userForm.patchValue(user);
+    this.openModal(document.getElementById('editUserModal'));
   }
 
   saveForm() {
@@ -96,20 +80,25 @@ export class UsersComponent {
 
     this.isLoading$.next(true);
 
-    this.http.post(`${environment.apiUrl}/auth/register`, payload).subscribe({
-      next: (response) => {
-        console.log('✅ Usuario registrado', response);
+    const req = this.idUser
+      ? this.http.put(`${environment.apiUrl}/usuarios/${this.idUser}`, payload)
+      : this.http.post(`${environment.apiUrl}/auth/register`, payload);
+
+    req.subscribe({
+      next: (res) => {
+        console.log('Usuario guardado', res);
+        this.getUsers();
         this.isLoading$.next(false);
         this.closeModal();
       },
-      error: (error) => {
-        console.error('❌ Error al registrar usuario:', error);
+      error: (err) => {
+        console.error('Error al guardar:', err);
         this.isLoading$.next(false);
       }
     });
   }
 
-  deleteUser(id_torneo: number): void {
+  deleteUser(id: number): void {
     Swal.fire({
       title: '¿Estás seguro?',
       text: 'Esta acción no se puede deshacer',
@@ -121,14 +110,36 @@ export class UsersComponent {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Si estás usando backend:
-        // this.http.delete(`${environment.apiUrl}/usuarios/${id}`).subscribe(...)
-
-        // Si es local:
-
-
-        Swal.fire('Eliminado', 'El usuario ha sido eliminado', 'success');
+        this.http.delete(`${environment.apiUrl}/usuarios/${id}`).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'El usuario ha sido eliminado', 'success');
+            this.getUsers();
+          },
+          error: () => {
+            Swal.fire('Error', 'No se pudo eliminar el usuario', 'error');
+          }
+        });
       }
     });
+  }
+
+  search() {
+
+  }
+
+
+
+  openModal(content: any) {
+    this.modalService.open(content);
+  }
+
+  closeModal(): void {
+    this.modalService.dismissAll()
+    this.userForm.reset();
+    this.idUser = null;
+  }
+
+  clear() {
+
   }
 }

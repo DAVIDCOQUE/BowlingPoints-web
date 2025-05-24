@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -8,45 +10,47 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
+
   form: FormGroup = new FormGroup({
-    username: new FormControl('', [Validators.required, Validators.email]),
+    username: new FormControl('', [Validators.required]),
     password: new FormControl('', [Validators.required])
   });
 
-  allowedUsers = [
-    { username: 'david03sc@gmail.com', password: 'admin', roles: ['ADMIN'] },
-    { username: 'jhon.soto@gmail.com', password: 'admin', roles: ['ENTRENADOR'] },
-    { username: 'sara.arteaga@gmail.com', password: 'admin', roles: ['JUGADOR'] }
-  ];
-
   error: string | null = null;
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private http: HttpClient) { }
 
   submit(): void {
     if (this.form.valid) {
       const { username, password } = this.form.value;
-      const userFound = this.allowedUsers.find(
-        u => u.username === username && u.password === password
-      );
+      console.log(' Enviando credenciales:', { userName: username, password });
 
-      if (userFound) {
-        localStorage.setItem('username', userFound.username);
-        localStorage.setItem('roles', JSON.stringify(userFound.roles));
-        this.router.navigate(['/dashboard']);
-      } else {
-        this.error = 'Usuario o contraseña incorrectos';
-      }
+      this.http.post<{ token: string }>(
+        `${environment.apiUrl}/auth/login`,
+        { userName: username, password }
+      ).subscribe({
+        next: res => {
+          console.log('Token recibido:', res.token);
+          localStorage.setItem('jwt_token', res.token);
+          this.router.navigate(['/dashboard']);
+        },
+        error: err => {
+          console.error(' Error en login:', err);
+          this.error = 'Usuario o contraseña incorrectos';
+        }
+      });
+
     } else {
+      console.warn('Formulario inválido');
       this.form.markAllAsTouched();
     }
   }
 
   loginAsGuest(): void {
-  localStorage.removeItem('username');
-  localStorage.setItem('roles', JSON.stringify([])); // Sin roles = invitado
-  this.router.navigate(['/dashboard']);
-}
+    localStorage.removeItem('jwt_token');
+    localStorage.setItem('roles', JSON.stringify([]));
+    this.router.navigate(['/dashboard']);
+  }
 
   get username() { return this.form.get('username'); }
   get password() { return this.form.get('password'); }

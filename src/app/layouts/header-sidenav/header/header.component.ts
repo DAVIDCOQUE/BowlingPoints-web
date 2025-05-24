@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/auth.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -9,13 +10,20 @@ import Swal from 'sweetalert2';
 })
 export class HeaderComponent implements OnInit {
   @Output() menuToggle = new EventEmitter<void>();
-  isGuest = false;
 
-  constructor(private router: Router) { }
+  isGuest = false;
+  userEmail: string | null = null;
+  userId: string | null = null;
+  userRole: string = '';
+
+  constructor(private router: Router, private authService: AuthService) { }
 
   ngOnInit(): void {
-    const roles = JSON.parse(localStorage.getItem('roles') || '[]');
-    this.isGuest = roles.length === 0;
+    this.isGuest = this.authService.isGuest();
+    const decoded = this.authService.decodeToken();
+    this.userEmail = decoded?.correo || null;
+    this.userId = decoded?.sub || null;
+    this.userRole = decoded?.roles?.[0] || 'INVITADO';
   }
 
   toggleSidebar() {

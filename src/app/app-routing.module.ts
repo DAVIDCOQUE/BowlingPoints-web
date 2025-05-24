@@ -21,12 +21,13 @@ import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jug
 
 import { AuthGuard } from './auth/auth.guard';
 import { RoleGuard } from './auth/role.guard';
+import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegistroComponent },
-
+  { path: 'unauthorized', component: UnauthorizedComponent },
   {
     path: '',
     component: BodyComponent,

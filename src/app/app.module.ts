@@ -34,12 +34,14 @@ import { UsersComponent } from './pages/users/users.component';
 import { TorneosComponent } from './pages/torneos/torneos.component';
 import { RouterModule } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { JwtInterceptor } from './auth/jwt.interceptor';
+import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
 
 
-
-
-
-
+providers: [
+  { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
+]
 @NgModule({
   declarations: [
     AppComponent,
@@ -63,6 +65,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ClubComponent,
     UsersComponent,
     TorneosComponent,
+    UnauthorizedComponent,
 
 
   ],
@@ -80,7 +83,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ReactiveFormsModule,
     NgbModule
   ],
-  providers: [],
+  providers: [  { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

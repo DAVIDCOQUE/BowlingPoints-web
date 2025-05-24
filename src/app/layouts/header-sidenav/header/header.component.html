@@ -25,14 +25,22 @@
         <mat-icon>account_circle</mat-icon>
       </button>
 
-      <mat-menu #accountMenu="matMenu">
-        <button *ngIf="!isGuest" mat-menu-item routerLink="/perfil">
+      <mat-menu #accountMenu="matMenu" class="px-3 py-2" style="width: 250px;">
+        <div *ngIf="!isGuest" class="mb-2 text-start">
+          <span class="badge bg-primary text-white text-uppercase small mb-2">{{ userRole }}</span>
+          <div class="text-muted small">CC: {{ userId }}</div>
+          <div class="text-muted small">{{ userEmail }}</div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <button mat-menu-item routerLink="/perfil">
           <mat-icon>person</mat-icon>
-          <span>Mi Perfil</span>
+          <span>Editar Perfil</span>
         </button>
-        <hr>
-        <button mat-menu-item (click)="logout()">
-          <mat-icon>logout</mat-icon>
+
+        <button mat-menu-item (click)="logout()" class="text-danger">
+          <mat-icon color="warn">logout</mat-icon>
           <span>Cerrar Sesión</span>
         </button>
       </mat-menu>
