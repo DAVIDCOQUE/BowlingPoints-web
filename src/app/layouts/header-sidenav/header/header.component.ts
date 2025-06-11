@@ -43,9 +43,7 @@ export class HeaderComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         console.log('Sesión cerrada.');
-        localStorage.removeItem('username');
-        localStorage.removeItem('roles');
-        localStorage.removeItem('isGuest');
+        localStorage.clear();
         this.router.navigate(['/login']);
       }
     });
