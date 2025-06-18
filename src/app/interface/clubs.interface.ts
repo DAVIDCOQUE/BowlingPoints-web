@@ -8,4 +8,5 @@ export interface Clubs {
   description: string;
   imageUrl?: string;
   status: boolean;
+  members: IUser[];
 }

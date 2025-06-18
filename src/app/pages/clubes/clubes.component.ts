@@ -54,7 +54,7 @@ export class ClubesComponent implements OnInit {
       description: ['', Validators.required],
       status: [true, Validators.required],
       members: ['', Validators.required],
-      image_url: ['']
+      imageUrl: ['']
 
     });
   }
@@ -113,7 +113,7 @@ export class ClubesComponent implements OnInit {
     // ✅ Transformar members (array de IDs) en objetos con personId + rol
     const members = (raw.members || []).map((id: number) => ({
       personId: id,
-      roleInClub: 'ENTRENADOR' // 👈 Rol fijo por ahora
+      roleInClub: 'ENTRENADOR' // Rol fijo por ahora
     }));
 
     const payload = {
@@ -176,11 +176,21 @@ export class ClubesComponent implements OnInit {
   openModal(content: TemplateRef<any>, club?: Clubs): void {
     if (club) {
       this.id_Club = club.clubId;
-      this.clubForm.patchValue(club);
+
+      // Obtener los IDs de los miembros
+      const memberIds = (club.members || []).map(m => m.personId);
+
+      // Aplicar datos al formulario
+      this.clubForm.patchValue({
+        ...club,
+        members: memberIds,  // ✅ Asignar los IDs directamente al campo "members"
+        imageUrl: club.imageUrl
+      });
     } else {
       this.id_Club = undefined;
       this.clubForm.reset({ status: true });
     }
+
     this.modalService.open(content);
   }
 
@@ -199,11 +209,4 @@ export class ClubesComponent implements OnInit {
     this.getClubes(true); // recargar limpia
   }
 
-  // 🧠 Utilidad: arma cabecera con JWT
-  private createAuthHeader(): HttpHeaders {
-    const token = this.auth.getToken?.(); // ajustá esto según cómo guardes el token
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-  }
 }

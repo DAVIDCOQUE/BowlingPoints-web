@@ -3,6 +3,8 @@ import { IRole } from "./role.interface";
 
 export interface IUser {
   userId: number;
+  personId: number;
+  roleId: number;
   document: string;
   photoUrl?: string | null;
   nickname: string;
@@ -12,7 +14,6 @@ export interface IUser {
   secondlastname?: string | null;
   email: string;
   roleDescription: string;
-  roleId: number;
   phone: string;
   gender: string;
 }
