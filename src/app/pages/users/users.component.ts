@@ -45,6 +45,7 @@ export class UsersComponent {
   initForm(): void {
     this.userForm = this.formBuilder.group({
       nickname: ['', Validators.required],
+      photoUrl: [''],
       document: ['', Validators.required],
       firstname: ['', Validators.required],
       secondname: [''],
@@ -145,6 +146,7 @@ export class UsersComponent {
 
     const payload: any = {
       nickname: formValue.nickname,
+      photoUrl: formValue.photoUrl,
       document: formValue.document,
       email: formValue.email,
       firstname: formValue.firstname,
