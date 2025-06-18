@@ -53,7 +53,7 @@
               <td>{{ user.userId }}</td>
               <td>
                 <div>
-                  <img [src]="user.photoUrl || 'assets/img/perfil.png'" alt="Foto de perfil" style="width: 40px; height: 40px" class="rounded-circle" />
+                  <img [src]="apiUrl + user.photoUrl" alt="Foto de perfil" style="width: 40px; height: 40px" class="rounded-circle" />
                   <div class="ms-3"></div>
                 </div>
               </td>

@@ -22,12 +22,42 @@ img {
   object-position: center;
 }
 
-/* styles.css o dentro del componente con :host ::ng-deep */
-.modal-body {
-  display: flex;
-  justify-content: center; /* Centra el contenedor principal */
+::ng-deep ng-select .ng-dropdown-panel .ng-option {
+  padding: 8px 12px;
+  font-size: 14px;
 }
 
-.modal-body form .form-control {
-  text-align: center;      /* Centra el texto dentro de los inputs */
+::ng-deep ng-select .ng-select-container {
+  min-height: 40px;
+  padding-right: 32px; /* espacio para ícono */
+  position: relative;
+}
+
+::ng-deep ng-select .ng-arrow-wrapper {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background: url("data:image/svg+xml,%3Csvg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat center;
+  pointer-events: none;
+}
+
+::ng-deep ng-select .ng-placeholder {
+  color: #888;
+}
+
+::ng-deep ng-select.ng-select-focused .ng-placeholder,
+::ng-deep ng-select.ng-select-opened .ng-placeholder {
+  display: none;
+}
+
+
+::ng-deep .ng-dropdown-panel {
+  background-color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  z-index: 1055;
+  /* mayor que el modal */
 }

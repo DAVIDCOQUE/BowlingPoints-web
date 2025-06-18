@@ -6,30 +6,16 @@
     <div class="d-flex flex-column flex-md-row align-items-start gap-2">
       <div>
         <label class="form-label mb-1">Buscar</label>
-        <input
-          type="text"
-          class="form-control form-control-sm"
-          style="height: 36px; width: 250px"
-          placeholder="Buscar"
-          [(ngModel)]="filter"
-          name="filter"
-        />
+        <input type="text" class="form-control form-control-sm" style="height: 36px; width: 250px" placeholder="Buscar"
+          [(ngModel)]="filter" name="filter" />
       </div>
 
       <div class="d-flex gap-2 pt-md-4">
-        <button
-          class="btn btn-outline-secondary btn-sm"
-          style="height: 36px; width: 100px"
-          (click)="clear()"
-        >
+        <button class="btn btn-outline-secondary btn-sm" style="height: 36px; width: 100px" (click)="clear()">
           <i class="fas fa-times me-1"></i> Limpiar
         </button>
 
-        <button
-          class="btn btn-outline-primary btn-sm"
-          style="height: 36px; width: 100px"
-          (click)="search()"
-        >
+        <button class="btn btn-outline-primary btn-sm" style="height: 36px; width: 100px" (click)="search()">
           <i class="fas fa-search me-1"></i> Buscar
         </button>
       </div>
@@ -37,11 +23,7 @@
 
     <!-- BOTÓN CREAR ---------------------------------------------------->
     <div class="pt-md-4" *ngIf="auth.hasRole('ADMIN')">
-      <button
-        class="btn btn-success btn-sm"
-        style="height: 36px; width: 100px"
-        (click)="openModal(modalClub)"
-      >
+      <button class="btn btn-success btn-sm" style="height: 36px; width: 100px" (click)="openModal(modalClub)">
         <i class="fas fa-plus-circle me-1"></i> Crear
       </button>
     </div>
@@ -53,58 +35,47 @@
   <div class="row">
     <div class="col-md-3" *ngFor="let club of clubes">
       <div class="card mb-4">
-        <img [src]="club.image" class="card-img-top mt-4" [alt]="club.name" />
+        <img [src]="apiUrl + club.imageUrl" class="card-img-top mt-4" [alt]="club.name" />
+
+
 
         <div class="card-body text-center">
           <h4 class="card-title">{{ club.name }}</h4>
           <p class="small">{{ club.description }}</p>
 
-          <div
-            class="d-flex justify-content-center align-items-center gap-2 mt-3"
-          >
+          <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
             <!-- Ver -->
-            <button
-              class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-              style="
+            <button class="btn btn-sm d-flex align-items-center justify-content-center px-2" style="
                 background-color: rgba(0, 123, 255, 0.1);
                 color: #007bff;
                 border-radius: 0.5rem;
                 min-width: 40px;
                 height: 36px;
-              "
-            >
+              ">
               <i class="fa-solid fa-eye"></i>
             </button>
 
             <!-- Editar -->
-            <button
-              *ngIf="auth.hasRole('ADMIN')"
-              class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-              style="
+            <button *ngIf="auth.hasRole('ADMIN')"
+              class="btn btn-sm d-flex align-items-center justify-content-center px-2" style="
                 background-color: rgba(0, 123, 255, 0.1);
                 color: #007bff;
                 border-radius: 0.5rem;
                 min-width: 40px;
                 height: 36px;
-              "
-              (click)="openModal(modalClub, club)"
-            >
+              " (click)="openModal(modalClub, club)">
               <i class="fas fa-edit"></i>
             </button>
 
             <!-- Eliminar -->
-            <button
-              *ngIf="auth.hasRole('ADMIN')"
-              class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-              style="
+            <button *ngIf="auth.hasRole('ADMIN')"
+              class="btn btn-sm d-flex align-items-center justify-content-center px-2" style="
                 background-color: rgba(220, 53, 69, 0.1);
                 color: #dc3545;
                 border-radius: 0.5rem;
                 min-width: 40px;
                 height: 36px;
-              "
-              (click)="deleteClub(club.id)"
-            >
+              " (click)="deleteClub(club.clubId)">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -118,96 +89,93 @@
 <ng-template #modalClub>
   <div class="modal-content">
     <!-- CABECERA -->
-    <div
-      class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center"
-    >
+    <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
       <h2 class="modal-title flex-grow-1 m-0">
-        {{ id_Club ? "Editar" : "Crear" }} Club
+        {{ id_Club ? 'Editar' : 'Crear' }} Club
       </h2>
-      <button
-        type="button"
-        class="btn-close btn-close-white ms-2"
-        aria-label="Close"
-        (click)="closeModal()"
-        style="filter: brightness(0) invert(1)"
-      ></button>
+      <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+        style="filter: brightness(0) invert(1);"></button>
     </div>
 
     <!-- CUERPO -->
     <div class="modal-body">
-      <form
-        [formGroup]="clubForm"
-        (ngSubmit)="save()"
-        novalidate
-        class="text-center"
-      >
-        <div class="d-flex flex-column align-items-center gap-3">
+      <form [formGroup]="clubForm" novalidate>
+        <div class="row g-3">
           <!-- Nombre -->
-          <div class="w-100" style="max-width: 380px">
-            <label class="form-label fw-semibold">Nombre del club</label>
-            <input
-              type="text"
-              formControlName="clubName"
-              class="form-control text-center"
-              placeholder="Ej. Los Astros"
-              [ngClass]="{
+          <div class="col-md-10">
+            <label class="form-label ">Nombre del Club</label>
+            <input type="text" formControlName="name" class="form-control" placeholder="Ej.Los Astros" [ngClass]="{
                 'is-invalid':
-                  clubForm.controls['clubName'].invalid &&
-                  clubForm.controls['clubName'].touched,
-                'is-valid': clubForm.controls['clubName'].valid
-              }"
-            />
+                  clubForm.controls['name'].invalid &&
+                  clubForm.controls['name'].touched,
+                'is-valid': clubForm.controls['name'].valid
+              }" />
           </div>
 
           <!-- Fecha creación -->
-          <div class="w-100" style="max-width: 380px">
-            <label class="form-label fw-semibold">Fecha creación</label>
-            <input
-              type="date"
-              formControlName="creationDate"
-              class="form-control text-center"
+          <div class="col-md-10">
+            <label class="form-label ">Fecha Creación</label>
+            <input type="date" formControlName="foundationDate" class="form-control" [ngClass]="{
+                'is-invalid':
+                  clubForm.controls['foundationDate'].invalid &&
+                  clubForm.controls['foundationDate'].touched,
+                'is-valid': clubForm.controls['foundationDate'].valid
+              }" />
+          </div>
+
+          <div class="col-md-10">
+            <label class="form-label ">Ubicación</label>
+            <input type="text" formControlName="city" class="form-control" placeholder="Cali (Colombia)" [ngClass]="{
+                'is-invalid':
+                  clubForm.controls['city'].invalid &&
+                  clubForm.controls['city'].touched,
+                'is-valid': clubForm.controls['city'].valid
+              }" />
+          </div>
+
+          <div class="col-md-10">
+            <label class="form-label ">Descripción</label>
+            <input type="text" formControlName="description" class="form-control" placeholder="Descripción ..."
               [ngClass]="{
                 'is-invalid':
-                  clubForm.controls['creationDate'].invalid &&
-                  clubForm.controls['creationDate'].touched,
-                'is-valid': clubForm.controls['creationDate'].valid
-              }"
-            />
+                  clubForm.controls['description'].invalid &&
+                  clubForm.controls['description'].touched,
+                'is-valid': clubForm.controls['description'].valid
+              }" />
+          </div>
+
+          <div class="col-md-10">
+            <label class="form-label">Estado</label>
+            <select class="form-select" formControlName="status" [ngClass]="{
+            'is-invalid': clubForm.controls['status'].invalid && clubForm.controls['status'].touched,
+            'is-valid': clubForm.controls['status'].valid
+          }">
+              <option [ngValue]="null" disabled>Seleccione un estado</option>
+              <option *ngFor="let estado of estados" [ngValue]="estado.valor">
+                {{ estado.etiqueta }}
+              </option>
+            </select>
           </div>
 
           <!-- Integrantes -->
-          <div class="w-100" style="max-width: 380px">
-            <label class="form-label fw-semibold">N.º integrantes</label>
-            <input
-              type="number"
-              formControlName="members"
-              min="1"
-              class="form-control text-center"
-              placeholder="Ej. 25"
-              [ngClass]="{
-                'is-invalid':
-                  clubForm.controls['members'].invalid &&
-                  clubForm.controls['members'].touched,
-                'is-valid': clubForm.controls['members'].valid
-              }"
-            />
+          <div class="col-md-10">
+            <label class="form-label">Entrenadores</label>
+            <ng-select [items]="usuarios" bindLabel="firstname" bindValue="userId" [multiple]="true"
+              placeholder="Seleccione entrenadores" formControlName="members" [ngClass]="{
+      'is-invalid': clubForm.controls['members'].invalid && clubForm.controls['members'].touched,
+      'is-valid': clubForm.controls['members'].valid
+    }">
+            </ng-select>
           </div>
+
         </div>
 
         <!-- FOOTER -->
         <div class="modal-footer mt-4">
-          <button
-            type="button"
-            class="btn btn-outline-secondary"
-            (click)="closeModal()"
-          >
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">
             Cancelar
           </button>
-          <button
-            type="submit"
-            class="btn btn-success"
-            [disabled]="clubForm.invalid"
-          >
+          <button type="submit" class="btn btn-success" [disabled]="clubForm.invalid" (click)="save()">
             Guardar
           </button>
         </div>

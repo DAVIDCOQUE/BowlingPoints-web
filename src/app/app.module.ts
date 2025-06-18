@@ -38,6 +38,9 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtInterceptor } from './auth/jwt.interceptor';
 import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
 
+import { NgSelectModule } from '@ng-select/ng-select';
+
+
 
 providers: [
   { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
@@ -81,9 +84,12 @@ providers: [
     MatIconModule,
     RouterModule,
     ReactiveFormsModule,
-    NgbModule
+    NgbModule,
+    BrowserAnimationsModule,
+    NgSelectModule,
+
   ],
-  providers: [  { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }],
+  providers: [{ provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

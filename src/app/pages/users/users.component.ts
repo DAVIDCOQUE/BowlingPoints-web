@@ -22,6 +22,8 @@ export class UsersComponent {
   usuarios: IUser[] = [];
   roles: IRole[] = [];
   genders: string[] = ['Masculino', 'Femenino', 'No binario', 'Prefiero no decirlo'];
+
+  public apiUrl = environment.apiUrl;
   idUser: number | null = null;
 
   userForm: FormGroup = new FormGroup({});
@@ -58,7 +60,7 @@ export class UsersComponent {
   }
 
   getUsers(): void {
-    this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${environment.apiUrl}/users/all`)
+    this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${environment.apiUrl}/users`)
       .subscribe({
         next: res => {
           this.usuarios = res.data;
@@ -139,31 +141,30 @@ export class UsersComponent {
 
     const isEdit = !!this.idUser;
     const formValue = this.userForm.getRawValue();
-    console.log('Form Value:', formValue);
     const roleDescription = this.getRoleDescriptionById(formValue.roleId);
-    const payload = {
-      ...formValue,
+
+    const payload: any = {
+      nickname: formValue.nickname,
+      document: formValue.document,
+      email: formValue.email,
+      firstname: formValue.firstname,
+      secondname: formValue.secondname,
+      lastname: formValue.lastname,
+      secondlastname: formValue.secondlastname,
+      phone: formValue.phone,
+      gender: formValue.gender,
       roles: [roleDescription]
     };
-    delete payload.confirm;
-    delete payload.roleId;
-    delete payload.roleDescription;
 
-    // LOGS para depurar
-    console.log('Form Value:', formValue);
-    console.log('Rol Seleccionado (roleId):', formValue.roleId);
-    console.log('Rol convertido a Description:', roleDescription);
-    console.log('Payload Final:', payload);
-
-    if (isEdit && !payload.password) {
-      delete payload.password;
+    if (!isEdit || formValue.password) {
+      payload.password = formValue.password;
     }
 
     this.isLoading$.next(true);
 
     const request = isEdit
       ? this.http.put(`${environment.apiUrl}/users/${this.idUser}`, payload)
-      : this.http.post(`${environment.apiUrl}/users/create`, payload);
+      : this.http.post(`${environment.apiUrl}/users`, payload);
 
     request.subscribe({
       next: () => {
@@ -194,7 +195,7 @@ export class UsersComponent {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`${environment.apiUrl}/users/persona-delete/${id}`).subscribe({
+        this.http.delete(`${environment.apiUrl}/users/${id}`).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'El usuario ha sido eliminado', 'success');
             this.getUsers();

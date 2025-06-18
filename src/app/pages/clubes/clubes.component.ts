@@ -1,89 +1,148 @@
-import { Component, OnInit, TemplateRef  } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { NgbModal, NgbModalRef  } from '@ng-bootstrap/ng-bootstrap';
-import { ResultadosService } from 'src/app/services/resultados.service';
-import { AuthService } from 'src/app/auth/auth.service';
-import { Club }              from 'src/app/interface/club';     
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { environment } from 'src/environments/environment';
+import { Clubs } from 'src/app/interface/clubs.interface';
+import { IUser } from 'src/app/model/user.interface';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-clubes',
   templateUrl: './clubes.component.html',
   styleUrls: ['./clubes.component.css']
 })
-
 export class ClubesComponent implements OnInit {
 
   clubForm!: FormGroup;
-  clubes: Club[] = [];
-  id_Club?: number; 
-  modalRef?: NgbModalRef;
+  clubes: Clubs[] = [];
+  usuarios: IUser[] = [];
+  miembros: any[] = [];
+
+  estados = [
+    { valor: true, etiqueta: 'Activo' },
+    { valor: false, etiqueta: 'Inactivo' }
+  ];
+
+  id_Club?: number;
   filter: string = '';
 
-   constructor(private ResultadosService: ResultadosService, private router: Router, private formBuilder: FormBuilder, private http: HttpClient,
-       private modalService: NgbModal, private fb: FormBuilder, public  auth: AuthService ) { }
+  public apiUrl = environment.apiUrl;
+  // Cache para evitar recargas innecesarias
+  private clubesLoaded = false;
+  private usuariosLoaded = false;
 
-ngOnInit(): void {
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private modalService: NgbModal,
+    public auth: AuthService
+  ) { }
+
+  ngOnInit(): void {
     this.buildForm();
-    this.get_clubes();
+    this.getClubes();
+    this.getUsers();
   }
 
   private buildForm(): void {
     this.clubForm = this.fb.group({
-      clubName:     ['', Validators.required],
-      creationDate: ['', Validators.required],
-      members:      ['', [Validators.required, Validators.min(1)]]
+      name: ['', Validators.required],
+      foundationDate: ['', Validators.required],
+      city: ['', Validators.required],
+      description: ['', Validators.required],
+      status: [true, Validators.required],
+      members: ['', Validators.required],
+      image_url: ['']
+
     });
   }
 
-
-  get_clubes(): void {
-  this.ResultadosService.get_clubes()
-    .subscribe((clubs) => this.clubes = clubs as Club[]);
-}
- 
-  openModal(content: TemplateRef<any>, club?: Club): void {   // ← firma con 2 args
-  if (club) {
-    this.id_Club = club.id;
-    this.clubForm.patchValue(club);
-  } else {
-    this.id_Club = undefined;
-    this.clubForm.reset();
-  }
-  this.modalRef = this.modalService.open(content, { centered: true });
-}
-
-
-  closeModal(): void {
-    this.modalService.dismissAll()
-
-  }
-
- save() {
-    if (this.clubForm.invalid) { return; }
-    const payload = this.clubForm.value;
-
-    if (this.id_Club) {
-      // servicio PUT/UPDATE
-    } else {
-      // servicio POST/CREATE
+  // 🔁 Obtener clubes con cacheo y logs
+  getClubes(forceRefresh: boolean = false): void {
+    if (this.clubesLoaded && !forceRefresh) {
+      console.log('✅ Clubes cargados desde caché');
+      return;
     }
-    this.closeModal();
+
+
+
+    this.http.get<Clubs[]>(`${environment.apiUrl}/clubs/with-members`)
+      .subscribe({
+        next: clubs => {
+          console.log('📦 Clubes recibidos:', clubs);
+          this.clubes = clubs;
+          this.clubesLoaded = true;
+        },
+        error: err => {
+          console.error('❌ Error al cargar clubes:', err);
+          Swal.fire('Error', 'No se pudieron cargar los clubes', 'error');
+        }
+      });
   }
 
-   search(): void {                           
-    const term = this.filter.toLowerCase().trim();
-    // Si no quieres llamar al backend, filtra localmente:
-    // this.clubesFiltrados = this.clubes.filter(c => c.name.toLowerCase().includes(term));
-    console.log('Buscar:', term);
+  // 🔁 Obtener usuarios
+  getUsers(forceRefresh: boolean = false): void {
+    if (this.usuariosLoaded && !forceRefresh) {
+      console.log('✅ Usuarios cargados desde caché');
+      return;
+    }
+    this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${environment.apiUrl}/users`,)
+      .subscribe({
+        next: res => {
+          this.usuarios = res.data;
+          this.usuariosLoaded = true;
+          console.log('👤 Usuarios recibidos:', this.usuarios);
+        },
+        error: err => {
+          console.error('❌ Error al cargar usuarios:', err);
+          Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error');
+        }
+      });
   }
 
-  clear(): void {                           
-    this.filter = '';
-    this.search();
+  save(): void {
+    if (this.clubForm.invalid) {
+      console.warn('⚠️ Formulario inválido');
+      return;
+    }
+
+    const raw = this.clubForm.value;
+
+    // ✅ Transformar members (array de IDs) en objetos con personId + rol
+    const members = (raw.members || []).map((id: number) => ({
+      personId: id,
+      roleInClub: 'ENTRENADOR' // 👈 Rol fijo por ahora
+    }));
+
+    const payload = {
+      ...raw,
+      members
+    };
+
+    const url = this.id_Club
+      ? `${environment.apiUrl}/clubs/${this.id_Club}`
+      : `${environment.apiUrl}/clubs/create-with-members`;
+
+    const request$ = this.id_Club
+      ? this.http.put(url, payload)
+      : this.http.post(url, payload);
+
+    console.log('📤 Enviando datos:', payload);
+
+    request$.subscribe({
+      next: () => {
+        const msg = this.id_Club ? 'actualizado' : 'creado';
+        Swal.fire('Éxito', `El club fue ${msg} correctamente`, 'success');
+        this.getClubes(true);
+        this.closeModal();
+      },
+      error: err => {
+        console.error('❌ Error al guardar club:', err);
+        Swal.fire('Error', 'No se pudo guardar el club', 'error');
+      }
+    });
   }
 
   deleteClub(id_Club: number): void {
@@ -98,15 +157,53 @@ ngOnInit(): void {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Si estás usando backend:
-        // this.http.delete(`${environment.apiUrl}/usuarios/${id}`).subscribe(...)
-
-        // Si es local:
 
 
-        Swal.fire('Eliminado', 'El usuario ha sido eliminado', 'success');
+        this.http.delete(`${environment.apiUrl}/clubs/${id_Club}`,).subscribe({
+          next: () => {
+            this.getClubes(true);
+            Swal.fire('Eliminado', 'El club ha sido eliminado', 'success');
+          },
+          error: err => {
+            console.error('❌ Error al eliminar club:', err);
+            Swal.fire('Error', 'No se pudo eliminar el club', 'error');
+          }
+        });
       }
     });
   }
 
+  openModal(content: TemplateRef<any>, club?: Clubs): void {
+    if (club) {
+      this.id_Club = club.clubId;
+      this.clubForm.patchValue(club);
+    } else {
+      this.id_Club = undefined;
+      this.clubForm.reset({ status: true });
+    }
+    this.modalService.open(content);
+  }
+
+  closeModal(): void {
+    this.modalService.dismissAll();
+  }
+
+  search(): void {
+    const term = this.filter.toLowerCase().trim();
+    this.getClubes(); // vuelve a cargar por si borraste antes
+    this.clubes = this.clubes.filter(c => c.name.toLowerCase().includes(term));
+  }
+
+  clear(): void {
+    this.filter = '';
+    this.getClubes(true); // recargar limpia
+  }
+
+  // 🧠 Utilidad: arma cabecera con JWT
+  private createAuthHeader(): HttpHeaders {
+    const token = this.auth.getToken?.(); // ajustá esto según cómo guardes el token
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+  }
 }

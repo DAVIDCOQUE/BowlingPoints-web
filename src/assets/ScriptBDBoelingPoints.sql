@@ -91,7 +91,9 @@ CREATE TABLE club_person (
     joined_at DATE DEFAULT CURRENT_DATE,
     status BOOLEAN DEFAULT TRUE,
     created_by INT,
+    created_at TIMESTAMP
     updated_by INT,
+    updated_at TIMESTAMP
     deleted_at TIMESTAMP,
     FOREIGN KEY (club_id) REFERENCES clubs(club_id),
     FOREIGN KEY (person_id) REFERENCES person(person_id)

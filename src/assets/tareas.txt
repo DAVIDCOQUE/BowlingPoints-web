@@ -1,0 +1,6 @@
+1. Al esditar clubs los entrenadores tambien se deben mandar si no sale error
+2. al crear clubs se esta mandando el ID del usuario y es el de person por eso falla.
+
+3.acomodar la edicion de usuarios y si cambio el rol no lo cambia
+4.acomodar el eliminar persona o usuario
+
