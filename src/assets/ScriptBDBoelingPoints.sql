@@ -102,6 +102,7 @@ CREATE TABLE club_person (
 -- Tabla: category
 CREATE TABLE category (
     category_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
     description TEXT NOT NULL,
     status BOOLEAN DEFAULT TRUE,
     created_by INT,
@@ -115,6 +116,8 @@ CREATE TABLE category (
 CREATE TABLE modality (
     modality_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status BOOLEAN DEFAULT TRUE,
     created_by INT,
     updated_by INT,
     deleted_at TIMESTAMP,

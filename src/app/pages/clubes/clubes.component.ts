@@ -93,7 +93,7 @@ export class ClubesComponent implements OnInit {
         next: res => {
           this.usuarios = res.data;
           this.usuariosLoaded = true;
-          console.log('👤 Usuarios recibidos:', this.usuarios);
+          console.log('👤 Usuarios recibidos:', res);
         },
         error: err => {
           console.error('❌ Error al cargar usuarios:', err);

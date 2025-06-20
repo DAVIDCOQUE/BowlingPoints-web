@@ -1,3 +1,4 @@
 1. hacer crud de torneos mantenedor
 2. hacer crud club id
 2. hacer controller de dashboard
+3. crear tabla modaliad  - categorias - informacion bolera -  ambitos

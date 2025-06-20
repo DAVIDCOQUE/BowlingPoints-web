@@ -22,6 +22,8 @@ import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jug
 import { AuthGuard } from './auth/auth.guard';
 import { RoleGuard } from './auth/role.guard';
 import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
+import { ModalityComponent } from './pages/modality/modality.component';
+import { CategorysComponent } from './pages/categorys/categorys.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -54,7 +56,9 @@ const routes: Routes = [
       // ADMINISTRADORES
       { path: 'clubes', component: ClubesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR','ADMIN'] } },
       { path: 'Usuarios', component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
-      { path: 'torneos', component: TorneosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } }
+      { path: 'torneos', component: TorneosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
+      { path: 'modalitys', component: ModalityComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'categorys', component: CategorysComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
     ]
   },
 

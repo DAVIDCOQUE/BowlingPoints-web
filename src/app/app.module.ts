@@ -20,6 +20,8 @@ import { ListaTorneosComponent } from './pages/resultadosTorneos/lista-torneos/l
 import { HttpClientModule } from '@angular/common/http';
 import { CarouselComponent } from './layouts/carousel/carousel.component';
 import { ClubesComponent } from './pages/clubes/clubes.component';
+import { CategorysComponent } from './pages/categorys/categorys.component';
+import { ModalityComponent } from './pages/modality/modality.component';
 import { BodyComponent } from './layouts/body/body.component';
 
 import { NgxPaginationModule } from 'ngx-pagination';
@@ -69,8 +71,8 @@ providers: [
     UsersComponent,
     TorneosComponent,
     UnauthorizedComponent,
-
-
+    CategorysComponent,
+    ModalityComponent,
   ],
   imports: [
     CommonModule,
