@@ -41,6 +41,7 @@ import { JwtInterceptor } from './auth/jwt.interceptor';
 import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
 
 import { NgSelectModule } from '@ng-select/ng-select';
+import { AmbitComponent } from './pages/ambit/ambit.component';
 
 
 
@@ -73,6 +74,7 @@ providers: [
     UnauthorizedComponent,
     CategorysComponent,
     ModalityComponent,
+    AmbitComponent
   ],
   imports: [
     CommonModule,

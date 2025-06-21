@@ -24,6 +24,7 @@ import { RoleGuard } from './auth/role.guard';
 import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
 import { ModalityComponent } from './pages/modality/modality.component';
 import { CategorysComponent } from './pages/categorys/categorys.component';
+import { AmbitComponent } from './pages/ambit/ambit.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -59,6 +60,7 @@ const routes: Routes = [
       { path: 'torneos', component: TorneosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
       { path: 'modalitys', component: ModalityComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
       { path: 'categorys', component: CategorysComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'ambits', component: AmbitComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
     ]
   },
 

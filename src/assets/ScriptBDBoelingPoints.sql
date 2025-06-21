@@ -1,7 +1,6 @@
 -- ===========================================
 -- CREACIÓN DE BASE DE DATOS PARA BOWLING POINTS (MEJORADO)
 -- ===========================================
-
 -- Tabla: roles
 CREATE TABLE roles (
   role_id SERIAL PRIMARY KEY,
@@ -161,11 +160,26 @@ CREATE TABLE team_person (
   FOREIGN KEY (team_id) REFERENCES team(team_id)
 );
 
+-- Tabla: ambit
+CREATE TABLE ambit (
+  ambit_id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  status BOOLEAN DEFAULT TRUE,
+  created_by INT,
+  updated_by INT,
+  deleted_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tabla: tournament
 CREATE TABLE tournament (
   tournament_id SERIAL PRIMARY KEY,
   tournament_name TEXT NOT NULL,
   modality_id INT,
+  ambit_id INT,
+  -- <---- relación
   start_date DATE,
   end_date DATE,
   location TEXT,
@@ -176,7 +190,8 @@ CREATE TABLE tournament (
   deleted_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (modality_id) REFERENCES modality(modality_id)
+  FOREIGN KEY (modality_id) REFERENCES modality(modality_id),
+  FOREIGN KEY (ambit_id) REFERENCES ambit(ambit_id) -- <---- relación
 );
 
 -- Tabla: round

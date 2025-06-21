@@ -1,5 +1,5 @@
 <div class="container mt-4">
-  <h1 class="text-center">Torneos</h1>
+  <h1 class="text-center">Ambitos</h1>
 
   <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
     <!-- Filtro -->
@@ -24,11 +24,12 @@
     <!-- Botón Crear -->
     <div class="pt-md-4">
       <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
-        (click)="openModal(modalTournament)">
+        (click)="openModal(modalAmbit)">
         <i class="fas fa-plus-circle me-1"></i> Crear
       </button>
     </div>
   </div>
+
   <hr>
   <div class="card-body">
     <div class="table-responsive">
@@ -37,36 +38,30 @@
           <tr class="fw-bold">
             <th>ID:</th>
             <th>Nombre</th>
-            <th>Torneos</th>
-            <th>Fecha Inicio</th>
-            <th>Fecha Fin</th>
-            <th>Lugar</th>
+            <th>descripcion</th>
             <th>Estado</th>
             <th>Aciones</th>
           </tr>
         </thead>
         <tbody>
           <ng-container>
-            <tr *ngFor="let tournament of filteredTournaments">
-              <td>{{ tournament.tournamentId }}</td>
-              <td>{{ tournament.name }}</td>
-              <td>{{ tournament.modalityName || '-' }}</td>
-              <td>{{ tournament.startDate | date: 'dd/MM/yyyy' }}</td>
-              <td>{{ tournament.endDate | date: 'dd/MM/yyyy' }}</td>
-              <td>{{ tournament.location || '-' }}</td>
-              <td>{{ tournament.causeStatus || '-' }} - {{ tournament.status }}</td>
+            <tr *ngFor="let ambit of filteredAmbits">
+              <td>{{ ambit.ambitId }}</td>
+              <td>{{ ambit.name }}</td>
+              <td>{{ ambit.description || '-' }}</td>
+              <td>{{ ambit.status }}</td>
               <td>
                 <div class="d-flex justify-content-center gap-2">
                   <!-- Botón Editar - Azul suave -->
                   <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
                     style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
-                    (click)="editTournament(tournament)">
+                    (click)="editAmbit(ambit)">
                     <i class="fas fa-edit"></i>
                   </button>
 
                   <!-- Botón Eliminar - Rojo suave -->
                   <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                    (click)="deleteTournament(tournament.tournamentId)"
+                    (click)="deleteAmbit(ambit.ambitId)"
                     style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
                     <i class="fas fa-trash"></i>
                   </button>
@@ -78,83 +73,41 @@
       </table>
     </div>
 
-    <ng-template #modalTournament>
+    <ng-template #modalAmbit>
       <div class="modal-content">
         <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
           <h2 class="modal-title flex-grow-1 m-0">
-            {{ idTournament ? 'Editar' : 'Crear' }} Torneos
+            {{ idAmbit ? 'Editar' : 'Crear' }} Ambito
           </h2>
           <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
             style="filter: brightness(0) invert(1);"></button>
         </div>
 
         <div class="modal-body">
-          <form [formGroup]="tournamentForm" novalidate>
+          <form [formGroup]="ambitForm" novalidate>
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label">Nombre Torneos</label>
+                <label class="form-label">Nombre Ambito</label>
                 <input formControlName="name" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
-                'is-invalid': tournamentForm.controls['name'].invalid && tournamentForm.controls['name'].touched,
-                'is-valid': tournamentForm.controls['name'].valid
+                'is-invalid': ambitForm.controls['name'].invalid && ambitForm.controls['name'].touched,
+                'is-valid': ambitForm.controls['name'].valid
               }" />
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">Modalidad</label>
-                <select class="form-select" formControlName="modalityId" [ngClass]="{
-            'is-invalid': tournamentForm.controls['modalityId'].invalid && tournamentForm.controls['modalityId'].touched,
-            'is-valid': tournamentForm.controls['modalityId'].valid
-          }">
-                  <option [ngValue]="null" disabled>Seleccione un modalidad</option>
-                  <option *ngFor="let modality of modalities" [ngValue]="modality.modalityId">
-                    {{ modality.name }}
-                  </option>
-                </select>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Fecha Inicio</label>
-                <input formControlName="startDate" type="date" class="form-control" placeholder="Fecha Inicio"
+                <label class="form-label">Descripcion</label>
+                <input formControlName="description" type="text" class="form-control" placeholder="Descripcion"
                   [ngClass]="{
-                'is-invalid': tournamentForm.controls['startDate'].invalid && tournamentForm.controls['startDate'].touched,
-                'is-valid': tournamentForm.controls['startDate'].valid
+                'is-invalid': ambitForm.controls['description'].invalid && ambitForm.controls['description'].touched,
+                'is-valid': ambitForm.controls['description'].valid
               }" />
               </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Fecha Fin</label>
-                <input formControlName="endDate" type="date" class="form-control" placeholder="Fecha Fin" [ngClass]="{
-                'is-invalid': tournamentForm.controls['endDate'].invalid && tournamentForm.controls['endDate'].touched,
-                'is-valid': tournamentForm.controls['endDate'].valid
-              }" />
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Lugar</label>
-                <input formControlName="location" type="text" class="form-control" placeholder="Lugar" [ngClass]="{
-                'is-invalid': tournamentForm.controls['location'].invalid && tournamentForm.controls['location'].touched,
-                'is-valid': tournamentForm.controls['location'].valid
-              }" />
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Causa</label>
-                <select class="form-select" formControlName="causeStatus" [ngClass]="{
-            'is-invalid': tournamentForm.controls['causeStatus'].invalid && tournamentForm.controls['causeStatus'].touched,
-            'is-valid': tournamentForm.controls['causeStatus'].valid
-          }">
-                  <option [ngValue]="null" disabled>Seleccione una causa</option>
-                  <option *ngFor="let cause of causes" [ngValue]="cause.name">
-                    {{ cause.name }}
-                  </option>
-                </select>
-              </div>
-
-              <div class="col-md-6">
+              <div class="col-md-10">
                 <label class="form-label">Estado</label>
                 <select class="form-select" formControlName="status" [ngClass]="{
-            'is-invalid': tournamentForm.controls['status'].invalid && tournamentForm.controls['status'].touched,
-            'is-valid': tournamentForm.controls['status'].valid
+            'is-invalid': ambitForm.controls['status'].invalid && ambitForm.controls['status'].touched,
+            'is-valid': ambitForm.controls['status'].valid
           }">
                   <option [ngValue]="null" disabled>Seleccione un estado</option>
                   <option *ngFor="let estado of estados" [ngValue]="estado.valor">
@@ -169,7 +122,7 @@
         <div class="modal-footer">
           <div class="d-flex justify-content-end gap-2">
             <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
-            <button type="button" class="btn btn-success" [disabled]="tournamentForm.invalid"
+            <button type="button" class="btn btn-success" [disabled]="ambitForm.invalid"
               (click)="saveForm()">Guardar</button>
           </div>
         </div>
