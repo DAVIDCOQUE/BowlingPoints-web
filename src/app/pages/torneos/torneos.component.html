@@ -40,6 +40,7 @@
             <th>Torneos</th>
             <th>Fecha Inicio</th>
             <th>Fecha Fin</th>
+            <th>Ambito</th>
             <th>Lugar</th>
             <th>Estado</th>
             <th>Aciones</th>
@@ -53,6 +54,7 @@
               <td>{{ tournament.modalityName || '-' }}</td>
               <td>{{ tournament.startDate | date: 'dd/MM/yyyy' }}</td>
               <td>{{ tournament.endDate | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ tournament.ambitName || '-' }}</td>
               <td>{{ tournament.location || '-' }}</td>
               <td>{{ tournament.causeStatus || '-' }} - {{ tournament.status }}</td>
               <td>
@@ -130,6 +132,19 @@
               </div>
 
               <div class="col-md-6">
+                <label class="form-label">Ambito</label>
+                <select class="form-select" formControlName="ambitId" [ngClass]="{
+            'is-invalid': tournamentForm.controls['ambitId'].invalid && tournamentForm.controls['ambitId'].touched,
+            'is-valid': tournamentForm.controls['ambitId'].valid
+          }">
+                  <option [ngValue]="null" disabled>Ambito...</option>
+                  <option *ngFor="let ambit of ambits" [ngValue]="ambit.ambitId">
+                    {{ ambit.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
                 <label class="form-label">Lugar</label>
                 <input formControlName="location" type="text" class="form-control" placeholder="Lugar" [ngClass]="{
                 'is-invalid': tournamentForm.controls['location'].invalid && tournamentForm.controls['location'].touched,
@@ -143,7 +158,7 @@
             'is-invalid': tournamentForm.controls['causeStatus'].invalid && tournamentForm.controls['causeStatus'].touched,
             'is-valid': tournamentForm.controls['causeStatus'].valid
           }">
-                  <option [ngValue]="null" disabled>Seleccione una causa</option>
+                  <option [ngValue]="null" disabled>Causa...</option>
                   <option *ngFor="let cause of causes" [ngValue]="cause.name">
                     {{ cause.name }}
                   </option>

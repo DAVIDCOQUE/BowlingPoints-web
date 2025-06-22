@@ -20,31 +20,46 @@ export class LoginComponent {
 
   constructor(private router: Router, private http: HttpClient) { }
 
-  submit(): void {
-    if (this.form.valid) {
-      const { username, password } = this.form.value;
-      console.log(' Enviando credenciales:', { userName: username, password });
+submit(): void {
+  if (this.form.valid) {
+    const { username, password } = this.form.value;
 
-      this.http.post<{ token: string }>(
-        `${environment.apiUrl}/auth/login`,
-        { userName: username, password }
-      ).subscribe({
-        next: res => {
-          console.log('Token recibido:', res.token);
-          localStorage.setItem('jwt_token', res.token);
-          this.router.navigate(['/dashboard']);
-        },
-        error: err => {
-          console.error(' Error en login:', err);
-          this.error = 'Usuario o contraseña incorrectos';
-        }
-      });
+    this.http.post<{ token: string }>(
+      `${environment.apiUrl}/auth/login`,
+      { userName: username, password }
+    ).subscribe({
+      next: res => {
+        // 1. Guarda el token
+        localStorage.setItem('jwt_token', res.token);
 
-    } else {
-      console.warn('Formulario inválido');
-      this.form.markAllAsTouched();
-    }
+        // 2. Llama a /me y guarda el perfil
+        this.http.get<{ data: any }>(`${environment.apiUrl}/users/me`, {
+          headers: { 'Authorization': `Bearer ${res.token}` }
+        }).subscribe({
+          next: meRes => {
+            // Guarda el usuario en localStorage
+            localStorage.setItem('user', JSON.stringify(meRes.data));
+            // Ejemplo: accedes a los datos con meRes.data.userId, meRes.data.clubId, meRes.data.roles...
+
+            // 3. Ahora sí, navega al dashboard
+            this.router.navigate(['/dashboard']);
+          },
+          error: err => {
+            // Si falla, borra el token y muestra error
+            localStorage.removeItem('jwt_token');
+            this.error = 'No se pudo obtener la información del usuario';
+          }
+        });
+      },
+      error: err => {
+        this.error = 'Usuario o contraseña incorrectos';
+      }
+    });
+
+  } else {
+    this.form.markAllAsTouched();
   }
+}
 
   loginAsGuest(): void {
     localStorage.removeItem('jwt_token');

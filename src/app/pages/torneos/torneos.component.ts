@@ -8,6 +8,7 @@ import { environment } from '../../../environments/environment';
 import Swal from 'sweetalert2';
 import { ITournament } from '../../model/tournament.interface';
 import { IModality } from '../../model/modality.interface';
+import { IAmbit } from 'src/app/model/ambit.interface';
 
 @Component({
   selector: 'app-torneos',
@@ -23,6 +24,7 @@ export class TorneosComponent {
   filter: string = '';
   tournaments: ITournament[] = [];
   modalities: IModality[] = [];
+  ambits: IAmbit[] = [];
   tournamentForm: FormGroup = new FormGroup({});
   idTournament: number | null = null;
 
@@ -56,6 +58,7 @@ export class TorneosComponent {
     this.initForm();
     this.getTournaments();
     this.getModalitys();
+    this.getAmbits();
   }
 
   initForm(): void {
@@ -64,6 +67,7 @@ export class TorneosComponent {
       modalityId: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
+      ambitId: ['', Validators.required],
       location: ['', Validators.required],
       causeStatus: ['', Validators.required],
       status: ['', Validators.required],
@@ -97,6 +101,18 @@ export class TorneosComponent {
         }
       });
   }
+  getAmbits(): void {
+    this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(`${environment.apiUrl}/ambits`)
+      .subscribe({
+        next: res => {
+          this.ambits = res.data;
+          console.log('res:', res);
+        },
+        error: err => {
+          console.error('Error al cargar torneoses:', err);
+        }
+      });
+  }
 
   get filteredTournaments(): ITournament[] {
     const term = this.filter.toLowerCase().trim();
@@ -118,6 +134,7 @@ export class TorneosComponent {
     this.tournamentForm.patchValue({ modalityId: tournament.modalityId });
     this.tournamentForm.patchValue({ startDate: tournament.startDate });
     this.tournamentForm.patchValue({ endDate: tournament.endDate });
+    this.tournamentForm.patchValue({ ambitId: tournament.ambitId });
     this.tournamentForm.patchValue({ location: tournament.location });
     this.tournamentForm.patchValue({ causeStatus: tournament.causeStatus });
     this.tournamentForm.patchValue({ status: tournament.status });

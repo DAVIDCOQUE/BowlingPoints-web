@@ -16,5 +16,11 @@ export interface IUser {
   roleDescription: string;
   phone: string;
   gender: string;
+
+  fullName?: string;
+  roleInClub?: string;
+  joinjoinedAt?: string;
+
+
 }
 

@@ -5,17 +5,17 @@
     <div class="row g-0 align-items-center">
       <!-- Logo -->
       <div class="col-md-4 text-center p-4">
-        <img [src]="club.logo" alt="{{ club.nombre }}" class="img-fluid rounded-circle border shadow" width="150"
-          height="150">
+        <img [src]="apiUrl + miClub?.imageUrl" alt="{{ miClub?.imageUrl }}"
+          class="img-fluid rounded-circle border shadow" width="150" height="150">
       </div>
 
       <!-- Datos -->
       <div class="col-md-8 p-4">
-        <h1 class="fw-bold">{{ club.nombre }}</h1>
-        <p class="text-muted">{{ club.descripcion }}</p>
+        <h1 class="fw-bold">{{ miClub?.name || '-' }}</h1>
+        <p class="text-muted">{{ miClub?.description || '-' }}</p>
         <div class="row text-muted">
-          <div class="col-sm-6"><b>Fundación:</b> {{ club.fundacion }}</div>
-          <div class="col-sm-6"><b>Ubicación:</b> {{ club.ubicacion }}</div>
+          <div class="col-sm-6"><b>Fundación:</b> {{ miClub?.foundationDate }}</div>
+          <div class="col-sm-6"><b>Ubicación:</b> {{ miClub?.city }}</div>
 
         </div>
       </div>
@@ -47,7 +47,7 @@
       </li>
     </ul>
   </div>
-
+  <hr>
   <!-- TORNEOS JUGADOS -->
   <div class="mb-4">
     <h4 class="mb-3 fw-bold">📅 Torneos Jugados</h4>
@@ -72,18 +72,19 @@
       </table>
     </div>
   </div>
+  <hr>
 
   <!-- MIEMBROS -->
   <div class="mb-4">
     <h4 class="mb-3 fw-bold text-center">👥 Miembros del Club</h4>
     <div class="row g-3">
-      <div class="col-6 col-md-3 col-lg-2" *ngFor="let miembro of club.miembros">
+      <div class="col-6 col-md-3 col-lg-2" *ngFor="let member of miClub?.members">
         <div class="card h-100 shadow-sm border-0 text-center rounded-4 py-3">
           <div class="card-body p-2 d-flex flex-column align-items-center">
-            <img [src]="miembro.foto" class="rounded-circle shadow-sm mb-2" width="60" height="60"
-              alt="{{ miembro.nombre }}">
-            <h6 class="fw-semibold mb-1 text-truncate w-100">{{ miembro.nombre }}</h6>
-            <small class="text-muted text-truncate w-100">{{ miembro.rol }}</small>
+            <img [src]="apiUrl + member.photoUrl" class="rounded-circle shadow-sm mb-2" width="50" height="50"
+              alt="avatar">
+            <h5 class="fw-semibold mb-1 text-truncate w-100">{{ member.fullName }}</h5>
+            <small class="text-muted text-truncate w-100">{{ member.roleInClub }}</small>
           </div>
         </div>
       </div>

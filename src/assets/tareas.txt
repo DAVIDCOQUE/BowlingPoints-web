@@ -1,4 +1,4 @@
-1.  hacer seder para torneos y hacer que el torneo reciba los albitos
 2. hacer crud club id
+1. hacer seder para torneos
 3. hacer controller de dashboard
 4. informacion bolera

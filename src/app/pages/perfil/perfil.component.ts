@@ -13,6 +13,7 @@ import { IRole } from '../../model/role.interface';
   styleUrls: ['./perfil.component.css'],
 })
 export class PerfilComponent {
+  public apiUrl = environment.apiUrl;
   usuarios: IUser[] = [];
   roles: IRole[] = [];
   genders: string[] = ['Masculino', 'Femenino', 'No binario', 'Prefiero no decirlo'];
@@ -33,12 +34,14 @@ export class PerfilComponent {
     this.getRoles();
     this.initForm();
     this.loadCurrentUser();
+
   }
 
   initForm(): void {
     this.userForm = this.formBuilder.group({
       nickname: ['', Validators.required],
       document: ['', Validators.required],
+      photoUrl: [''],
       firstname: ['', Validators.required],
       secondname: [''],
       email: ['', [Validators.required, Validators.email]],
@@ -63,6 +66,7 @@ export class PerfilComponent {
 
           this.userForm.patchValue({
             nickname: user.nickname,
+            photoUrl: user.photoUrl,
             document: user.document,
             email: user.email,
             firstname: user.firstname,
@@ -82,6 +86,7 @@ export class PerfilComponent {
             'src',
             img
           );
+
         },
         error: err => {
           console.error('Error al cargar usuario:', err);
@@ -106,6 +111,11 @@ export class PerfilComponent {
     return this.roles.find(r => r.roleId === roleId)?.description || '';
   }
 
+  get photoSrc(): string {
+    const photoUrl = this.userForm.controls['photoUrl'].value;
+    return photoUrl ? (this.apiUrl + photoUrl) : 'assets/img/perfil.png';
+  }
+
   onSubmit(): void {
     if (!this.userForm.valid || this.idUser === null) {
       this.userForm.markAllAsTouched();
@@ -113,7 +123,6 @@ export class PerfilComponent {
     }
 
     const formValue = this.userForm.getRawValue();
-    console.log('Form Value:', formValue);
     const roleDescription = this.getRoleDescriptionById(formValue.roleId);
 
     const payload = {
@@ -123,12 +132,6 @@ export class PerfilComponent {
     delete payload.confirm;
     delete payload.roleId;
     delete payload.roleDescription;
-
-    // LOGS para depurar
-    console.log('Form Value:', formValue);
-    console.log('Rol Seleccionado (roleId):', formValue.roleId);
-    console.log('Rol convertido a Description:', roleDescription);
-    console.log('Payload Final:', payload);
 
     if (!payload.password) {
       delete payload.password;
@@ -167,8 +170,6 @@ export class PerfilComponent {
         }
       });
   }
-
-
 
   previewAvatar(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
