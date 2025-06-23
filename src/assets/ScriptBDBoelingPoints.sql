@@ -1,6 +1,7 @@
 -- ===========================================
 -- CREACIÓN DE BASE DE DATOS PARA BOWLING POINTS (MEJORADO)
 -- ===========================================
+
 -- Tabla: roles
 CREATE TABLE roles (
   role_id SERIAL PRIMARY KEY,
@@ -156,15 +157,18 @@ CREATE TABLE team_person (
   created_by INT,
   updated_by INT,
   deleted_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (person_id) REFERENCES person(person_id),
   FOREIGN KEY (team_id) REFERENCES team(team_id)
 );
 
--- Tabla: ambit
+-- Tabla: ambit (ahora con image_url)
 CREATE TABLE ambit (
   ambit_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
+  image_url TEXT, -- <------ NUEVO
   status BOOLEAN DEFAULT TRUE,
   created_by INT,
   updated_by INT,
@@ -173,13 +177,12 @@ CREATE TABLE ambit (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla: tournament
+-- Tabla: tournament (ahora con image_url, sin modality_id directo)
 CREATE TABLE tournament (
   tournament_id SERIAL PRIMARY KEY,
   tournament_name TEXT NOT NULL,
-  modality_id INT,
   ambit_id INT,
-  -- <---- relación
+  image_url TEXT, -- <------ NUEVO
   start_date DATE,
   end_date DATE,
   location TEXT,
@@ -190,8 +193,29 @@ CREATE TABLE tournament (
   deleted_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (modality_id) REFERENCES modality(modality_id),
-  FOREIGN KEY (ambit_id) REFERENCES ambit(ambit_id) -- <---- relación
+  FOREIGN KEY (ambit_id) REFERENCES ambit(ambit_id)
+);
+
+-- Tabla pivote: tournament_category (torneos por categorías)
+CREATE TABLE tournament_category (
+  tournament_category_id SERIAL PRIMARY KEY,
+  tournament_id INT NOT NULL,
+  category_id INT NOT NULL,
+  created_by INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id),
+  FOREIGN KEY (category_id) REFERENCES category(category_id)
+);
+
+-- Tabla pivote: tournament_modality (torneos por modalidades)
+CREATE TABLE tournament_modality (
+  tournament_modality_id SERIAL PRIMARY KEY,
+  tournament_id INT NOT NULL,
+  modality_id INT NOT NULL,
+  created_by INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id),
+  FOREIGN KEY (modality_id) REFERENCES modality(modality_id)
 );
 
 -- Tabla: round
@@ -225,7 +249,7 @@ CREATE TABLE ranking (
   FOREIGN KEY (person_id) REFERENCES person(person_id)
 );
 
--- TABLA: result
+-- TABLA: result (con modality_id)
 CREATE TABLE result (
   result_id SERIAL PRIMARY KEY,
   person_id INT,
@@ -235,7 +259,7 @@ CREATE TABLE result (
   tournament_id INT NOT NULL,
   round_id INT NOT NULL,
   category_id INT NOT NULL,
-  modality_id INT NOT NULL,
+  modality_id INT NOT NULL,  -- <------ IMPORTANTE
   lane_number INT,
   -- Número de pista/carrete
   line_number INT,

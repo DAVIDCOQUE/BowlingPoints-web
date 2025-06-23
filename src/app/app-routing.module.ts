@@ -25,6 +25,7 @@ import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.compone
 import { ModalityComponent } from './pages/modality/modality.component';
 import { CategorysComponent } from './pages/categorys/categorys.component';
 import { AmbitComponent } from './pages/ambit/ambit.component';
+import { ResultsComponent } from './pages/results/results.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -48,16 +49,17 @@ const routes: Routes = [
       { path: 'mis-resultados', component: MisResultadosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
 
       // ENTRENADORES Y ADMINISTRADORES
-      { path: 'club', component: ClubComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ENTRENADOR', 'ADMIN','JUGADOR'] } },
+      { path: 'club', component: ClubComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ENTRENADOR', 'ADMIN', 'JUGADOR'] } },
 
       // ACCESO GENERAL (requiere login pero sin restricción por rol)
       { path: 'jugadores', component: JugadoresComponent, canActivate: [AuthGuard] },
       { path: 'jugador/:id', component: JugadorComponent, canActivate: [AuthGuard] },
 
       // ADMINISTRADORES
-      { path: 'clubes', component: ClubesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR','ADMIN'] } },
+      { path: 'clubes', component: ClubesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ADMIN'] } },
       { path: 'Usuarios', component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
       { path: 'torneos', component: TorneosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
+      { path: 'reults', component: ResultsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
       { path: 'modalitys', component: ModalityComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
       { path: 'categorys', component: CategorysComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
       { path: 'ambits', component: AmbitComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },

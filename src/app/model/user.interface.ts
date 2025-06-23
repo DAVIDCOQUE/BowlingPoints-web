@@ -20,6 +20,7 @@ export interface IUser {
   fullName?: string;
   roleInClub?: string;
   joinjoinedAt?: string;
+  averageScore?: number;
 
 
 }

@@ -161,10 +161,10 @@
           <div class="col-md-10">
             <label class="form-label">Entrenadores</label>
             <ng-select [items]="usuarios" bindLabel="firstname" bindValue="personId" [multiple]="true"
-              placeholder="Seleccione entrenadores" formControlName="members" [ngClass]="{
-      'is-invalid': clubForm.controls['members'].invalid && clubForm.controls['members'].touched,
-      'is-valid': clubForm.controls['members'].valid
-    }">
+              formControlName="members" [ngClass]="{
+                'is-invalid': clubForm.controls['members'].invalid && clubForm.controls['members'].touched,
+                'is-valid': clubForm.controls['members'].valid
+              }">
             </ng-select>
           </div>
 

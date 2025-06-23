@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import { ITournament } from '../../model/tournament.interface';
 import { IModality } from '../../model/modality.interface';
 import { IAmbit } from 'src/app/model/ambit.interface';
+import { ICategory } from 'src/app/model/category.interface';
 
 @Component({
   selector: 'app-torneos',
@@ -24,6 +25,7 @@ export class TorneosComponent {
   filter: string = '';
   tournaments: ITournament[] = [];
   modalities: IModality[] = [];
+  categoris: ICategory[] = [];
   ambits: IAmbit[] = [];
   tournamentForm: FormGroup = new FormGroup({});
   idTournament: number | null = null;
@@ -58,13 +60,15 @@ export class TorneosComponent {
     this.initForm();
     this.getTournaments();
     this.getModalitys();
+    this.getCategories();
     this.getAmbits();
   }
 
   initForm(): void {
     this.tournamentForm = this.formBuilder.group({
       name: ['', Validators.required],
-      modalityId: ['', Validators.required],
+      modalityIds: ['', Validators.required],
+      categoryIds: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
       ambitId: ['', Validators.required],
@@ -101,6 +105,20 @@ export class TorneosComponent {
         }
       });
   }
+
+   getCategories(): void {
+    this.http.get<{ success: boolean; message: string; data: ICategory[] }>(`${environment.apiUrl}/categories`)
+      .subscribe({
+        next: res => {
+          this.categoris = res.data;
+          console.log('res:', res);
+
+        },
+        error: err => {
+          console.error('Error al cargar torneoses:', err);
+        }
+      });
+  }
   getAmbits(): void {
     this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(`${environment.apiUrl}/ambits`)
       .subscribe({
@@ -128,10 +146,15 @@ export class TorneosComponent {
     this.modalService.open(content);
   }
 
+  openModalResultados(content: any): void {
+    this.modalService.open(content);
+  }
+
   editTournament(tournament: ITournament): void {
     this.idTournament = tournament.tournamentId;
     this.tournamentForm.patchValue({ name: tournament.name });
-    this.tournamentForm.patchValue({ modalityId: tournament.modalityId });
+    this.tournamentForm.patchValue({ categoryIds: tournament.categoryIds });
+    this.tournamentForm.patchValue({ modalityIds: tournament.modalityIds });
     this.tournamentForm.patchValue({ startDate: tournament.startDate });
     this.tournamentForm.patchValue({ endDate: tournament.endDate });
     this.tournamentForm.patchValue({ ambitId: tournament.ambitId });

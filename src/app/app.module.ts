@@ -42,6 +42,7 @@ import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.compone
 
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AmbitComponent } from './pages/ambit/ambit.component';
+import { ResultsComponent } from './pages/results/results.component';
 
 
 
@@ -74,7 +75,8 @@ providers: [
     UnauthorizedComponent,
     CategorysComponent,
     ModalityComponent,
-    AmbitComponent
+    AmbitComponent,
+    ResultsComponent
   ],
   imports: [
     CommonModule,

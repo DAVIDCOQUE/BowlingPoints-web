@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
-import { Clubs } from 'src/app/interface/clubs.interface';
+import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -16,7 +16,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 export class ClubesComponent implements OnInit {
 
   clubForm!: FormGroup;
-  clubes: Clubs[] = [];
+  clubes: IClubs[] = [];
   usuarios: IUser[] = [];
   miembros: any[] = [];
 
@@ -65,10 +65,7 @@ export class ClubesComponent implements OnInit {
       console.log('✅ Clubes cargados desde caché');
       return;
     }
-
-
-
-    this.http.get<Clubs[]>(`${environment.apiUrl}/clubs/with-members`)
+    this.http.get<IClubs[]>(`${environment.apiUrl}/clubs/with-members`)
       .subscribe({
         next: clubs => {
           console.log('📦 Clubes recibidos:', clubs);
@@ -173,7 +170,7 @@ export class ClubesComponent implements OnInit {
     });
   }
 
-  openModal(content: TemplateRef<any>, club?: Clubs): void {
+  openModal(content: TemplateRef<any>, club?: IClubs): void {
     if (club) {
       this.id_Club = club.clubId;
 

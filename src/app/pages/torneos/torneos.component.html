@@ -22,10 +22,14 @@
     </div>
 
     <!-- Botón Crear -->
-    <div class="pt-md-4">
+    <div class="d-flex gap-2 pt-md-4">
       <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
         (click)="openModal(modalTournament)">
         <i class="fas fa-plus-circle me-1"></i> Crear
+      </button>
+      <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
+        routerLink="/reults">
+        <i class="fas fa-file-excel"></i> All Result
       </button>
     </div>
   </div>
@@ -37,7 +41,8 @@
           <tr class="fw-bold">
             <th>ID:</th>
             <th>Nombre</th>
-            <th>Torneos</th>
+            <th>Modalidad</th>
+            <th>Categoria</th>
             <th>Fecha Inicio</th>
             <th>Fecha Fin</th>
             <th>Ambito</th>
@@ -50,8 +55,9 @@
           <ng-container>
             <tr *ngFor="let tournament of filteredTournaments">
               <td>{{ tournament.tournamentId }}</td>
-              <td>{{ tournament.name }}</td>
-              <td>{{ tournament.modalityName || '-' }}</td>
+              <td>{{ tournament.name || '-' }}</td>
+              <td>{{ tournament.categoryNames?.join(', ') || '-' }}</td>
+              <td>{{ tournament.modalityNames?.join(', ') || '-' }}</td>
               <td>{{ tournament.startDate | date: 'dd/MM/yyyy' }}</td>
               <td>{{ tournament.endDate | date: 'dd/MM/yyyy' }}</td>
               <td>{{ tournament.ambitName || '-' }}</td>
@@ -71,6 +77,13 @@
                     (click)="deleteTournament(tournament.tournamentId)"
                     style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
                     <i class="fas fa-trash"></i>
+                  </button>
+
+                  <!-- Botón Cargar resultados - Rojo suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    (click)="openModalResultados(tournament.tournamentId)"
+                    style="background-color: rgba(13, 180, 75, 0.1); color: #28a745; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                    <i class="fas fa-file-excel"></i>
                   </button>
                 </div>
               </td>
@@ -102,16 +115,24 @@
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">Modalidad</label>
-                <select class="form-select" formControlName="modalityId" [ngClass]="{
-            'is-invalid': tournamentForm.controls['modalityId'].invalid && tournamentForm.controls['modalityId'].touched,
-            'is-valid': tournamentForm.controls['modalityId'].valid
-          }">
-                  <option [ngValue]="null" disabled>Seleccione un modalidad</option>
-                  <option *ngFor="let modality of modalities" [ngValue]="modality.modalityId">
-                    {{ modality.name }}
-                  </option>
-                </select>
+                <label class="form-label">Modalidades</label>
+                <ng-select [items]="modalities" bindLabel="name" bindValue="modalityId" [multiple]="true"
+                  formControlName="modalityIds" [ngClass]="{
+                    'is-invalid': tournamentForm.controls['modalityIds'].invalid && tournamentForm.controls['modalityIds'].touched,
+                    'is-valid': tournamentForm.controls['modalityIds'].valid
+                  }">
+                </ng-select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Categorias</label>
+
+                <ng-select [items]="categoris" bindLabel="name" bindValue="categoryId" [multiple]="true"
+                 formControlName="categoryIds" [ngClass]="{
+                    'is-invalid': tournamentForm.controls['categoryIds'].invalid && tournamentForm.controls['categoryIds'].touched,
+                    'is-valid': tournamentForm.controls['categoryIds'].valid
+                  }">
+                </ng-select>
               </div>
 
               <div class="col-md-6">

@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
-import { Clubs } from 'src/app/interface/clubs.interface';
+import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -16,7 +16,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 export class ClubComponent {
 
   clubForm!: FormGroup;
-  miClub: Clubs | null = null;
+  miClub: IClubs | null = null;
   usuarios: IUser[] = [];
   miembros: any[] = [];
 
@@ -89,7 +89,7 @@ export class ClubComponent {
     }
 
     // Ahora consulta los detalles del club
-    this.http.get<Clubs>(`${environment.apiUrl}/clubs/${clubId}/details`)
+    this.http.get<IClubs>(`${environment.apiUrl}/clubs/${clubId}/details`)
       .subscribe({
         next: club => {
           console.log('🏟️ Detalles del club:', club);
@@ -190,7 +190,7 @@ export class ClubComponent {
     });
   }
 
-  openModal(content: TemplateRef<any>, club?: Clubs): void {
+  openModal(content: TemplateRef<any>, club?: IClubs): void {
     if (club) {
       this.id_Club = club.clubId;
 

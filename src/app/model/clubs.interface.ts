@@ -1,6 +1,6 @@
-import { IUser } from "../model/user.interface";
+import { IUser } from "./user.interface";
 
-export interface Clubs {
+export interface IClubs {
   clubId: number;
   name: string;
   foundationDate: string;
