@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -18,52 +19,49 @@ export class LoginComponent {
 
   error: string | null = null;
 
-  constructor(private router: Router, private http: HttpClient) { }
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private auth: AuthService
+  ) { }
 
-submit(): void {
-  if (this.form.valid) {
-    const { username, password } = this.form.value;
+  submit(): void {
+    if (this.form.valid) {
+      const { username, password } = this.form.value;
 
-    this.http.post<{ token: string }>(
-      `${environment.apiUrl}/auth/login`,
-      { userName: username, password }
-    ).subscribe({
-      next: res => {
-        // 1. Guarda el token
-        localStorage.setItem('jwt_token', res.token);
+      this.http.post<{ token: string }>(
+        `${environment.apiUrl}/auth/login`,
+        { userName: username, password }
+      ).subscribe({
+        next: res => {
+          // Llama a /users/me con el token obtenido
+          this.http.get<{ data: any }>(`${environment.apiUrl}/users/me`, {
+            headers: { 'Authorization': `Bearer ${res.token}` }
+          }).subscribe({
+            next: meRes => {
+              // Usa el AuthService para guardar usuario y token
+              this.auth.setAuthData(res.token, meRes.data);
+              this.router.navigate(['/dashboard']);
+            },
+            error: err => {
+              this.auth.logout();
+              this.error = 'No se pudo obtener la información del usuario';
+            }
+          });
+        },
+        error: err => {
+          this.error = 'Usuario o contraseña incorrectos';
+        }
+      });
 
-        // 2. Llama a /me y guarda el perfil
-        this.http.get<{ data: any }>(`${environment.apiUrl}/users/me`, {
-          headers: { 'Authorization': `Bearer ${res.token}` }
-        }).subscribe({
-          next: meRes => {
-            // Guarda el usuario en localStorage
-            localStorage.setItem('user', JSON.stringify(meRes.data));
-            // Ejemplo: accedes a los datos con meRes.data.userId, meRes.data.clubId, meRes.data.roles...
-
-            // 3. Ahora sí, navega al dashboard
-            this.router.navigate(['/dashboard']);
-          },
-          error: err => {
-            // Si falla, borra el token y muestra error
-            localStorage.removeItem('jwt_token');
-            this.error = 'No se pudo obtener la información del usuario';
-          }
-        });
-      },
-      error: err => {
-        this.error = 'Usuario o contraseña incorrectos';
-      }
-    });
-
-  } else {
-    this.form.markAllAsTouched();
+    } else {
+      this.form.markAllAsTouched();
+    }
   }
-}
 
   loginAsGuest(): void {
-    localStorage.removeItem('jwt_token');
-    localStorage.setItem('roles', JSON.stringify([]));
+    this.auth.logout();
+    // Si quieres, puedes poner roles de invitado, depende de tu lógica
     this.router.navigate(['/dashboard']);
   }
 

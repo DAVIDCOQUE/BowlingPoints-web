@@ -47,11 +47,9 @@ export class UsersComponent {
       nickname: ['', Validators.required],
       photoUrl: [''],
       document: ['', Validators.required],
-      firstname: ['', Validators.required],
-      secondname: [''],
+      fullName: ['', Validators.required],
+      fullSurname: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      lastname: ['', Validators.required],
-      secondlastname: [''],
       phone: ['', Validators.required],
       gender: ['', Validators.required],
       roleId: ['', Validators.required],
@@ -92,10 +90,8 @@ export class UsersComponent {
 
     return this.usuarios.filter(user =>
       user.nickname.toLowerCase().includes(term) ||
-      user.firstname.toLowerCase().includes(term) ||
-      (user.secondname && user.secondname.toLowerCase().includes(term)) ||
-      user.lastname.toLowerCase().includes(term) ||
-      (user.secondlastname && user.secondlastname.toLowerCase().includes(term)) ||
+      user.fullName.toLowerCase().includes(term) ||
+      user.fullSurname.toLowerCase().includes(term) ||
       user.email.toLowerCase().includes(term) ||
       user.phone.toLowerCase().includes(term) ||
       user.roleDescription.toLowerCase().includes(term) ||
@@ -119,11 +115,10 @@ export class UsersComponent {
     this.userForm.patchValue({
       nickname: user.nickname,
       document: user.document,
+      photoUrl: user.photoUrl || '',
       email: user.email,
-      firstname: user.firstname,
-      secondname: user.secondname || '',
-      lastname: user.lastname,
-      secondlastname: user.secondlastname || '',
+      fullName: user.fullName,
+      fullSurname: user.fullSurname,
       phone: user.phone,
       gender: user.gender,
       roleId: this.getRoleIdByDescription(user.roleDescription),
@@ -149,10 +144,8 @@ export class UsersComponent {
       photoUrl: formValue.photoUrl,
       document: formValue.document,
       email: formValue.email,
-      firstname: formValue.firstname,
-      secondname: formValue.secondname,
-      lastname: formValue.lastname,
-      secondlastname: formValue.secondlastname,
+      fullName: formValue.fullName,
+      fullSurname: formValue.fullSurname,
       phone: formValue.phone,
       gender: formValue.gender,
       roles: [roleDescription]

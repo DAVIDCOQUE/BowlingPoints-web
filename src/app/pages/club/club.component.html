@@ -1,5 +1,4 @@
-<div class="container py-4">
-
+<div class="container py-4" *ngIf="clubId">
   <!-- INFORMACIÓN GENERAL -->
   <div class="card shadow-sm border-0 rounded-4 mb-4">
     <div class="row g-0 align-items-center">
@@ -27,13 +26,13 @@
     <div class="col-md-6">
       <div class="card text-center shadow-sm border-0 rounded-4 py-4">
         <h4 class="fw-bold mb-1">Ranking Nacional</h4>
-        <h1 class="display-5 text-primary">#{{ club.ranking }}</h1>
+        <h1 class="display-5 text-primary">#{{ miClub?.ranking }}</h1>
       </div>
     </div>
     <div class="col-md-6">
       <div class="card text-center shadow-sm border-0 rounded-4 py-4">
         <h4 class="fw-bold mb-1">Puntaje Global</h4>
-        <h1 class="display-5 text-success">{{ club.puntaje }}</h1>
+        <h1 class="display-5 text-success">{{ miClub?.score }}</h1>
       </div>
     </div>
   </div>
@@ -42,7 +41,7 @@
   <div class="mb-4">
     <h4 class="mb-3 fw-bold">🏆 Logros del Club</h4>
     <ul class="list-group list-group-flush border rounded-3 shadow-sm">
-      <li class="list-group-item" *ngFor="let logro of club.logros">
+      <li class="list-group-item" *ngFor="let logro of miClub?.logros">
         {{ logro }}
       </li>
     </ul>
@@ -62,7 +61,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let torneo of club.torneos">
+          <tr *ngFor="let torneo of miClub?.torneos">
             <td>{{ torneo.nombre }}</td>
             <td>{{ torneo.fecha }}</td>
             <td>{{ torneo.posicion }}</td>
@@ -90,5 +89,8 @@
       </div>
     </div>
   </div>
-
+</div>
+<div class="container text-center py-5" *ngIf="!clubId">
+  <h2 class="fw-bold mb-4">¡Selecciona un club para ver sus detalles!</h2>
+  <p class="text-muted">Haz clic en un club en la lista de clubes para ver su información.</p>
 </div>

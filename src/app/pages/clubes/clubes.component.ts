@@ -107,11 +107,26 @@ export class ClubesComponent implements OnInit {
 
     const raw = this.clubForm.value;
 
-    // ✅ Transformar members (array de IDs) en objetos con personId + rol
+    // Transforma los miembros seleccionados en objetos con personId + rol
     const members = (raw.members || []).map((id: number) => ({
       personId: id,
-      roleInClub: 'ENTRENADOR' // Rol fijo por ahora
+      roleInClub: 'ENTRENADOR' // Puedes cambiarlo si usas roles dinámicos
     }));
+
+    // VALIDACIÓN: Verifica miembros duplicados por personId
+    const seen = new Set<number>();
+    const hasDuplicate = members.some((m: { personId: number; roleInClub: string }) => {
+      if (seen.has(m.personId)) {
+        return true;
+      }
+      seen.add(m.personId);
+      return false;
+    });
+
+    if (hasDuplicate) {
+      Swal.fire('Atención', 'Hay miembros repetidos en el club. Por favor revisa la selección.', 'warning');
+      return;
+    }
 
     const payload = {
       ...raw,
@@ -136,11 +151,16 @@ export class ClubesComponent implements OnInit {
         this.closeModal();
       },
       error: err => {
+        if (err?.error?.message?.includes('asignado a este club')) {
+          Swal.fire('Atención', 'Este miembro ya pertenece al club.', 'warning');
+        } else {
+          Swal.fire('Error', 'No se pudo guardar el club', 'error');
+        }
         console.error('❌ Error al guardar club:', err);
-        Swal.fire('Error', 'No se pudo guardar el club', 'error');
       }
     });
   }
+
 
   deleteClub(id_Club: number): void {
     Swal.fire({

@@ -33,7 +33,7 @@ export class MisResultadosComponent implements AfterViewChecked {
   ];
 
   estadisticas = [
-    { titulo: 'Torneos Ganados', valor: '6/16', icono: '../../../assets/img/trofeo.png' },
+    { titulo: 'Torneos Ganados', valor: '6/16', icono: '../../../assets/img/torneoDefault.png' },
     { titulo: 'Chuzas Totales', valor: '120', icono: '../../../assets/img/chuzas.png' },
     { titulo: 'Promedio por Partida', valor: '180', icono: '../../../assets/img/promedio.png' },
     { titulo: 'Mejor Juego', valor: '279', icono: '../../../assets/img/mejor-juego.png' }

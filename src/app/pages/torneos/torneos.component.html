@@ -41,12 +41,12 @@
           <tr class="fw-bold">
             <th>ID:</th>
             <th>Nombre</th>
-            <th>Modalidad</th>
-            <th>Categoria</th>
-            <th>Fecha Inicio</th>
-            <th>Fecha Fin</th>
             <th>Ambito</th>
             <th>Lugar</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Modalidad</th>
+            <th>Categoria</th>
             <th>Estado</th>
             <th>Aciones</th>
           </tr>
@@ -56,12 +56,12 @@
             <tr *ngFor="let tournament of filteredTournaments">
               <td>{{ tournament.tournamentId }}</td>
               <td>{{ tournament.name || '-' }}</td>
-              <td>{{ tournament.categoryNames?.join(', ') || '-' }}</td>
-              <td>{{ tournament.modalityNames?.join(', ') || '-' }}</td>
-              <td>{{ tournament.startDate | date: 'dd/MM/yyyy' }}</td>
-              <td>{{ tournament.endDate | date: 'dd/MM/yyyy' }}</td>
               <td>{{ tournament.ambitName || '-' }}</td>
               <td>{{ tournament.location || '-' }}</td>
+              <td>{{ tournament.startDate | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ tournament.endDate | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ tournament.modalityNames?.join(', ') || '-' }}</td>
+              <td>{{ tournament.categoryNames?.join(', ') || '-' }}</td>
               <td>{{ tournament.causeStatus || '-' }} - {{ tournament.status }}</td>
               <td>
                 <div class="d-flex justify-content-center gap-2">

@@ -1,11 +1,10 @@
 -- ===========================================
--- CREACIÓN DE BASE DE DATOS PARA BOWLING POINTS (MEJORADO)
+-- MODELO DE DATOS ACTUALIZADO PARA BOWLING POINTS
 -- ===========================================
-
 -- Tabla: roles
 CREATE TABLE roles (
   role_id SERIAL PRIMARY KEY,
-  description TEXT NOT NULL,
+  description TEXT NOT NULL UNIQUE,
   created_by INT,
   updated_by INT,
   deleted_at TIMESTAMP,
@@ -16,13 +15,12 @@ CREATE TABLE roles (
 -- Tabla: person
 CREATE TABLE person (
   person_id SERIAL PRIMARY KEY,
-  document TEXT,
+  document TEXT UNIQUE NOT NULL,
   photo_url TEXT,
-  first_name TEXT NOT NULL,
-  second_name TEXT,
-  lastname TEXT NOT NULL,
-  second_lastname TEXT,
+  full_name TEXT NOT NULL,
+  full_surname TEXT NOT NULL,
   gender TEXT,
+  birth_date DATE,
   email TEXT UNIQUE NOT NULL,
   phone TEXT,
   status BOOLEAN DEFAULT TRUE,
@@ -36,12 +34,12 @@ CREATE TABLE person (
 -- Tabla: users
 CREATE TABLE users (
   user_id SERIAL PRIMARY KEY,
-  person_id INT NOT NULL,
+  person_id INT NOT NULL UNIQUE,
   password TEXT NOT NULL,
   last_login_at TIMESTAMP,
   status BOOLEAN DEFAULT TRUE,
   attempts_login INT DEFAULT 0,
-  nickname TEXT,
+  nickname TEXT UNIQUE,
   created_by INT,
   updated_by INT,
   deleted_at TIMESTAMP,
@@ -62,13 +60,14 @@ CREATE TABLE user_role (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(user_id),
-  FOREIGN KEY (role_id) REFERENCES roles(role_id)
+  FOREIGN KEY (role_id) REFERENCES roles(role_id),
+  CONSTRAINT unique_user_role UNIQUE (user_id, role_id)
 );
 
 -- Tabla: clubs
 CREATE TABLE clubs (
   club_id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL UNIQUE,
   description TEXT,
   image_url TEXT,
   foundation_date DATE,
@@ -95,13 +94,14 @@ CREATE TABLE club_person (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP,
   FOREIGN KEY (club_id) REFERENCES clubs(club_id),
-  FOREIGN KEY (person_id) REFERENCES person(person_id)
+  FOREIGN KEY (person_id) REFERENCES person(person_id),
+  CONSTRAINT unique_club_person UNIQUE (club_id, person_id)
 );
 
 -- Tabla: category
 CREATE TABLE category (
   category_id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL UNIQUE,
   description TEXT NOT NULL,
   status BOOLEAN DEFAULT TRUE,
   created_by INT,
@@ -114,7 +114,7 @@ CREATE TABLE category (
 -- Tabla: modality
 CREATE TABLE modality (
   modality_id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL UNIQUE,
   description TEXT NOT NULL,
   status BOOLEAN DEFAULT TRUE,
   created_by INT,
@@ -133,13 +133,14 @@ CREATE TABLE person_category (
   updated_by INT,
   deleted_at TIMESTAMP,
   FOREIGN KEY (person_id) REFERENCES person(person_id),
-  FOREIGN KEY (category_id) REFERENCES category(category_id)
+  FOREIGN KEY (category_id) REFERENCES category(category_id),
+  CONSTRAINT unique_person_category UNIQUE (person_id, category_id)
 );
 
 -- Tabla: team
 CREATE TABLE team (
   team_id SERIAL PRIMARY KEY,
-  name_team TEXT NOT NULL,
+  name_team TEXT NOT NULL UNIQUE,
   phone TEXT,
   status BOOLEAN DEFAULT TRUE,
   created_by INT,
@@ -160,15 +161,16 @@ CREATE TABLE team_person (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (person_id) REFERENCES person(person_id),
-  FOREIGN KEY (team_id) REFERENCES team(team_id)
+  FOREIGN KEY (team_id) REFERENCES team(team_id),
+  CONSTRAINT unique_team_person UNIQUE (team_id, person_id)
 );
 
--- Tabla: ambit (ahora con image_url)
+-- Tabla: ambit
 CREATE TABLE ambit (
   ambit_id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL UNIQUE,
   description TEXT,
-  image_url TEXT, -- <------ NUEVO
+  image_url TEXT,
   status BOOLEAN DEFAULT TRUE,
   created_by INT,
   updated_by INT,
@@ -177,12 +179,12 @@ CREATE TABLE ambit (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla: tournament (ahora con image_url, sin modality_id directo)
+-- Tabla: tournament
 CREATE TABLE tournament (
   tournament_id SERIAL PRIMARY KEY,
-  tournament_name TEXT NOT NULL,
+  tournament_name TEXT NOT NULL UNIQUE,
   ambit_id INT,
-  image_url TEXT, -- <------ NUEVO
+  image_url TEXT,
   start_date DATE,
   end_date DATE,
   location TEXT,
@@ -196,7 +198,7 @@ CREATE TABLE tournament (
   FOREIGN KEY (ambit_id) REFERENCES ambit(ambit_id)
 );
 
--- Tabla pivote: tournament_category (torneos por categorías)
+-- Tabla pivote: tournament_category
 CREATE TABLE tournament_category (
   tournament_category_id SERIAL PRIMARY KEY,
   tournament_id INT NOT NULL,
@@ -204,10 +206,11 @@ CREATE TABLE tournament_category (
   created_by INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id),
-  FOREIGN KEY (category_id) REFERENCES category(category_id)
+  FOREIGN KEY (category_id) REFERENCES category(category_id),
+  CONSTRAINT unique_tournament_category UNIQUE (tournament_id, category_id)
 );
 
--- Tabla pivote: tournament_modality (torneos por modalidades)
+-- Tabla pivote: tournament_modality
 CREATE TABLE tournament_modality (
   tournament_modality_id SERIAL PRIMARY KEY,
   tournament_id INT NOT NULL,
@@ -215,7 +218,8 @@ CREATE TABLE tournament_modality (
   created_by INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id),
-  FOREIGN KEY (modality_id) REFERENCES modality(modality_id)
+  FOREIGN KEY (modality_id) REFERENCES modality(modality_id),
+  CONSTRAINT unique_tournament_modality UNIQUE (tournament_id, modality_id)
 );
 
 -- Tabla: round
@@ -246,26 +250,22 @@ CREATE TABLE ranking (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id),
   FOREIGN KEY (category_id) REFERENCES category(category_id),
-  FOREIGN KEY (person_id) REFERENCES person(person_id)
+  FOREIGN KEY (person_id) REFERENCES person(person_id),
+  CONSTRAINT unique_ranking UNIQUE (tournament_id, category_id, person_id)
 );
 
--- TABLA: result (con modality_id)
+-- Tabla: result
 CREATE TABLE result (
   result_id SERIAL PRIMARY KEY,
   person_id INT,
-  -- NULL si el resultado es por equipo
   team_id INT,
-  -- NULL si el resultado es individual
   tournament_id INT NOT NULL,
   round_id INT NOT NULL,
   category_id INT NOT NULL,
-  modality_id INT NOT NULL,  -- <------ IMPORTANTE
+  modality_id INT NOT NULL,
   lane_number INT,
-  -- Número de pista/carrete
   line_number INT,
-  -- Número de línea jugada dentro de la ronda
   score INT NOT NULL,
-  -- Puntaje de esa línea
   created_by INT,
   updated_by INT,
   deleted_at TIMESTAMP,
@@ -303,5 +303,22 @@ CREATE TABLE role_permission (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (role_id) REFERENCES roles(role_id),
-  FOREIGN KEY (permission_id) REFERENCES permissions(permission_id)
+  FOREIGN KEY (permission_id) REFERENCES permissions(permission_id),
+  CONSTRAINT unique_role_permission UNIQUE (role_id, permission_id)
+);
+
+-- Tabla: bowling_center
+CREATE TABLE bowling_center (
+  bowling_center_id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  address TEXT NOT NULL UNIQUE,
+  open_days TEXT NOT NULL,
+  open_hours TEXT NOT NULL,
+  social_links TEXT,
+  status BOOLEAN DEFAULT TRUE,
+  created_by INT,
+  updated_by INT,
+  deleted_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

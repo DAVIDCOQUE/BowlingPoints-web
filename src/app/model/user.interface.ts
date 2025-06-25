@@ -8,16 +8,14 @@ export interface IUser {
   document: string;
   photoUrl?: string | null;
   nickname: string;
-  firstname: string;
-  secondname?: string | null;
-  lastname: string;
-  secondlastname?: string | null;
+  fullName: string;
+  fullSurname: string;
   email: string;
   roleDescription: string;
   phone: string;
   gender: string;
 
-  fullName?: string;
+
   roleInClub?: string;
   joinjoinedAt?: string;
   averageScore?: number;

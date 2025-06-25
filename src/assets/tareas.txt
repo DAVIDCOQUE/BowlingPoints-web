@@ -1,7 +1,4 @@
 
-1. crear tablas pivote entre categoria y torneos y modalidad y torneos
-2. crear campo de imagen par ambitos y torneos
 2. hacer controller de dashboard
-3. informacion bolera
 4. horganizar las consultas por fehca de torneos.
 5. horanizar las cosultas por orden alfavatico

@@ -59,8 +59,7 @@
               </td>
               <td class="align-items-center"><a
                   class="link-offset-2 link-underline link-underline-opacity-0 link-secondary"
-                  [routerLink]="['/jugador', user.userId]">{{user.firstname}} {{user.secondname}} {{ user.lastname
-                  }}</a></td>
+                  [routerLink]="['/jugador', user.userId]">{{user.fullName}} {{user.fullSurname}}</a></td>
               <td>{{ user.document }}</td>
               <td>{{ user.email }}</td>
               <td>{{ user.gender }}</td>
@@ -119,36 +118,18 @@
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">Primer Nombre</label>
-                <input formControlName="firstname" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
-                'is-invalid': userForm.controls['firstname'].invalid && userForm.controls['firstname'].touched,
-                'is-valid': userForm.controls['firstname'].valid
+                <label class="form-label">Nombres</label>
+                <input formControlName="fullName" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
+                'is-invalid': userForm.controls['fullName'].invalid && userForm.controls['fullName'].touched,
+                'is-valid': userForm.controls['fullName'].valid
               }" />
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">Segundo Nombre</label>
-                <input formControlName="secondname" type="text" class="form-control" placeholder="Segundo Nombre"
-                  [ngClass]="{
-                'is-invalid': userForm.controls['secondname'].invalid && userForm.controls['secondname'].touched,
-                'is-valid': userForm.controls['secondname'].valid
-              }" />
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Apellido</label>
-                <input formControlName="lastname" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
-                'is-invalid': userForm.controls['lastname'].invalid && userForm.controls['lastname'].touched,
-                'is-valid': userForm.controls['lastname'].valid
-              }" />
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Segundo Apellido</label>
-                <input formControlName="secondlastname" type="text" class="form-control" placeholder="Segundo Apellido"
-                  [ngClass]="{
-                'is-invalid': userForm.controls['secondlastname'].invalid && userForm.controls['secondlastname'].touched,
-                'is-valid': userForm.controls['secondlastname'].valid
+                <label class="form-label">Apellidos</label>
+                <input formControlName="fullSurname" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
+                'is-invalid': userForm.controls['fullSurname'].invalid && userForm.controls['fullSurname'].touched,
+                'is-valid': userForm.controls['fullSurname'].valid
               }" />
               </div>
 

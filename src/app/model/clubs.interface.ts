@@ -9,4 +9,10 @@ export interface IClubs {
   imageUrl?: string;
   status: boolean;
   members: IUser[];
+
+  score?: number;
+  ranking?: number;
+  logros?: string[];
+  torneos?: any[];
+
 }

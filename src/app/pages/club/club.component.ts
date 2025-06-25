@@ -1,67 +1,66 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
 import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
 import { AuthService } from 'src/app/auth/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-club',
   templateUrl: './club.component.html',
   styleUrls: ['./club.component.css']
 })
-export class ClubComponent {
+export class ClubComponent implements OnInit {
 
   clubForm!: FormGroup;
   miClub: IClubs | null = null;
   usuarios: IUser[] = [];
-  miembros: any[] = [];
+  miembros: IUser[] = [];
+  clubId: number | null = null;
+  id_Club?: number;
+  filter: string = '';
 
   estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' }
   ];
 
-  club = {
-
-    ranking: 3,
-    puntaje: 2475,
-    logros: [
-      'Campeón Nacional 2021',
-      'Subcampeón Liga Suramericana 2022',
-      '3er lugar Juegos Interligas 2020',
-    ],
-
-    torneos: [
-      { nombre: 'Torneo Nacional Sub 21', fecha: '2023-05-12', posicion: '1º', puntaje: 750 },
-      { nombre: 'Liga de Verano', fecha: '2022-08-22', posicion: '3º', puntaje: 620 },
-    ],
-  }
-  id_Club?: number;
-  filter: string = '';
-
-  public apiUrl = environment.apiUrl;
-  // Cache para evitar recargas innecesarias
-  private clubesLoaded = false;
+  private userSub?: Subscription;
   private usuariosLoaded = false;
+  public apiUrl = environment.apiUrl;
 
   constructor(
+
     private fb: FormBuilder,
     private http: HttpClient,
     private modalService: NgbModal,
-    public auth: AuthService
-  ) {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const userId = user.userId;
-  }
+    private auth: AuthService
+  ) { this.auth.fetchUser().subscribe(); }
 
   ngOnInit(): void {
+
     this.buildForm();
-    this.getMiClub();
+    // ⚡️ Observa cambios en el usuario logueado (¡reactivo!)
+    this.userSub = this.auth.user$.subscribe(user => {
+      if (user?.clubId) {
+        this.clubId = user.clubId;
+        this.getMiClub();
+      } else {
+        this.miClub = null;
+        this.clubId = null;
+        Swal.fire('Sin Club', 'No tienes un club asociado', 'info');
+      }
+    });
+
     this.getUsers();
+  }
+
+  ngOnDestroy(): void {
+    this.userSub?.unsubscribe();
   }
 
   private buildForm(): void {
@@ -73,49 +72,38 @@ export class ClubComponent {
       status: [true, Validators.required],
       members: ['', Validators.required],
       imageUrl: ['']
-
     });
   }
 
-  // 🔁 Obtener clube con cacheo y logs
+  // 🔁 Obtener detalles del club del usuario logueado
   getMiClub(): void {
-    // Obtener el clubId del usuario logueado desde localStorage
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const clubId = user.clubId;
-
-    if (!clubId) {
-      Swal.fire('Sin Club', 'No tienes un club asociado', 'info');
+    if (!this.clubId) {
+      this.miClub = null;
       return;
     }
 
-    // Ahora consulta los detalles del club
-    this.http.get<IClubs>(`${environment.apiUrl}/clubs/${clubId}/details`)
+    this.http.get<IClubs>(`${this.apiUrl}/clubs/${this.clubId}/details`)
       .subscribe({
         next: club => {
-          console.log('🏟️ Detalles del club:', club);
           this.miClub = club;
         },
         error: err => {
-          console.error('❌ Error al cargar tu club:', err);
+          this.miClub = null;
           Swal.fire('Error', 'No se pudieron cargar los datos de tu club', 'error');
         }
       });
   }
 
   getUsers(forceRefresh: boolean = false): void {
-    if (this.usuariosLoaded && !forceRefresh) {
-      console.log('✅ Usuarios cargados desde caché');
-      return;
-    }
-    this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${environment.apiUrl}/users`,)
+    if (this.usuariosLoaded && !forceRefresh) return;
+
+    this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${this.apiUrl}/users`)
       .subscribe({
         next: res => {
           this.usuarios = res.data;
           this.usuariosLoaded = true;
-          console.log('👤 Usuarios recibidos:', res);
         },
         error: err => {
-          console.error('❌ Error al cargar usuarios:', err);
           Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error');
         }
       });
@@ -123,41 +111,47 @@ export class ClubComponent {
 
   save(): void {
     if (this.clubForm.invalid) {
-      console.warn('⚠️ Formulario inválido');
+      Swal.fire('Atención', 'Formulario inválido', 'warning');
       return;
     }
 
     const raw = this.clubForm.value;
 
-    // ✅ Transformar members (array de IDs) en objetos con personId + rol
+    // Valida duplicados en members antes de enviar
     const members = (raw.members || []).map((id: number) => ({
       personId: id,
-      roleInClub: 'ENTRENADOR' // Rol fijo por ahora
+      roleInClub: 'ENTRENADOR'
     }));
 
-    const payload = {
-      ...raw,
-      members
-    };
+    // Validación anti-duplicados (extra)
+    const seen = new Set<number>();
+    for (const m of members) {
+      if (seen.has(m.personId)) {
+        Swal.fire('Error', 'No puedes agregar el mismo miembro dos veces.', 'error');
+        return;
+      }
+      seen.add(m.personId);
+    }
+
+    const payload = { ...raw, members };
 
     const url = this.id_Club
-      ? `${environment.apiUrl}/clubs/${this.id_Club}`
-      : `${environment.apiUrl}/clubs/create-with-members`;
+      ? `${this.apiUrl}/clubs/${this.id_Club}`
+      : `${this.apiUrl}/clubs/create-with-members`;
 
     const request$ = this.id_Club
       ? this.http.put(url, payload)
       : this.http.post(url, payload);
-
-    console.log('📤 Enviando datos:', payload);
 
     request$.subscribe({
       next: () => {
         const msg = this.id_Club ? 'actualizado' : 'creado';
         Swal.fire('Éxito', `El club fue ${msg} correctamente`, 'success');
         this.closeModal();
+        // 🔄 Refresca club
+        if (this.clubId) this.getMiClub();
       },
       error: err => {
-        console.error('❌ Error al guardar club:', err);
         Swal.fire('Error', 'No se pudo guardar el club', 'error');
       }
     });
@@ -175,14 +169,12 @@ export class ClubComponent {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-
-
-        this.http.delete(`${environment.apiUrl}/clubs/${id_Club}`,).subscribe({
+        this.http.delete(`${this.apiUrl}/clubs/${id_Club}`).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'El club ha sido eliminado', 'success');
+            this.miClub = null;
           },
           error: err => {
-            console.error('❌ Error al eliminar club:', err);
             Swal.fire('Error', 'No se pudo eliminar el club', 'error');
           }
         });
@@ -193,14 +185,10 @@ export class ClubComponent {
   openModal(content: TemplateRef<any>, club?: IClubs): void {
     if (club) {
       this.id_Club = club.clubId;
-
-      // Obtener los IDs de los miembros
       const memberIds = (club.members || []).map(m => m.personId);
-
-      // Aplicar datos al formulario
       this.clubForm.patchValue({
         ...club,
-        members: memberIds,  // ✅ Asignar los IDs directamente al campo "members"
+        members: memberIds,
         imageUrl: club.imageUrl
       });
     } else {
@@ -216,11 +204,12 @@ export class ClubComponent {
   }
 
   search(): void {
-    const term = this.filter.toLowerCase().trim();
+    // Método preparado si implementas filtro por miembros
+    // Ejemplo: this.miembros = this.miembros.filter(...);
   }
 
   clear(): void {
     this.filter = '';
+    // Recarga o limpia filtros, según tu UX
   }
-
 }
