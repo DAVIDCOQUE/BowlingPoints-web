@@ -60,9 +60,9 @@ export class DashboardComponent {
       });
   }
 
- onImgError(event: Event, defaultPath: string) {
-  const target = event.target as HTMLImageElement;
-  target.src = defaultPath;
-}
+  onImgError(event: Event, defaultPath: string) {
+    const target = event.target as HTMLImageElement;
+    target.src = defaultPath;
+  }
 
 }

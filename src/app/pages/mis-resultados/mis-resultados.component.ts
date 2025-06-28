@@ -1,67 +1,93 @@
-import { Component, AfterViewChecked, ViewChild, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-mis-resultados',
   templateUrl: './mis-resultados.component.html',
   styleUrls: ['./mis-resultados.component.css']
 })
-export class MisResultadosComponent implements AfterViewChecked {
 
+export class MisResultadosComponent implements AfterViewInit {
   @ViewChild('lineChartCanvas', { static: false }) lineChartCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('lineChartCanvas2', { static: false }) lineChartCanvas2!: ElementRef<HTMLCanvasElement>;
 
   private lineChartInstance?: Chart;
   private barChartInstance2?: Chart;
 
-  constructor(private router: Router) {
+  imagenesEstadisticas: { [key: string]: string } = {
+    torneo: 'assets/img/torneoDefault.png',
+    chuzas: 'assets/img/chuzas.png',
+    promedio: 'assets/img/promedio.png',
+    mejorJuego: 'assets/img/mejor-juego.png'
+  };
+
+  public apiUrl = environment.apiUrl;
+
+  torneos: any[] = [];
+  topTorneos: any[] = [];
+  estadisticas: any;
+
+  userId: number = 0;
+
+  constructor(private router: Router, private http: HttpClient) {
     Chart.register(...registerables);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.userId = user.userId;
   }
 
-  torneos: any = [
-    {
-      id: 1,
-      nombre: 'Copa de la Bowling',
-      foto: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/T1_logo.svg/800px-T1_logo.svg.png',
-      fecha: '20 marzo 2025',
-      lugar: 'Bolera XYZ, Cali, Valle',
-      modalidad: 'Individual / Equipos',
-      categoria: 'Sub-21, Mayores, Mixto',
-      resultados: '120',
-    },
-  ];
+  ngOnInit(): void {
+    this.cargarEstadisticas();
+    this.cargarTopTorneos();
+  }
 
-  estadisticas = [
-    { titulo: 'Torneos Ganados', valor: '6/16', icono: '../../../assets/img/torneoDefault.png' },
-    { titulo: 'Chuzas Totales', valor: '120', icono: '../../../assets/img/chuzas.png' },
-    { titulo: 'Promedio por Partida', valor: '180', icono: '../../../assets/img/promedio.png' },
-    { titulo: 'Mejor Juego', valor: '279', icono: '../../../assets/img/mejor-juego.png' }
-  ];
+  ngAfterViewInit(): void {
+    this.updateCharts();
+  }
 
+  cargarEstadisticas(): void {
+    this.http.get(`${environment.apiUrl}/api/user-stats/summary?userId=${this.userId}`)
+      .subscribe((res: any) => {
+        this.estadisticas = res.data;
+        console.log('Resumen de estadísticas:', this.estadisticas);
+      });
+  }
 
-  ngAfterViewChecked(): void {
+  cargarTopTorneos(): void {
+    this.http.get<any[]>(`${environment.apiUrl}/api/user-stats/top-tournaments?userId=${this.userId}`)
+      .subscribe((res: any) => {
+        this.topTorneos = res.data;
+        console.log('Top torneos:', this.topTorneos);
+      });
+  }
+
+  updateCharts(): void {
+    // Ejemplo: graficar puntajes de torneos jugados
     if (this.lineChartCanvas && !this.lineChartInstance) {
       this.createLineChart();
     }
     if (this.lineChartCanvas2 && !this.barChartInstance2) {
       this.createBarChart2();
     }
-
   }
 
   private createLineChart(): void {
     if (this.lineChartInstance) {
       this.lineChartInstance.destroy();
     }
+    // Suponiendo que torneos tiene un campo puntaje/resultados
+    const labels = this.torneos.map(t => t.name);
+    const data = this.torneos.map(t => t.resultados);
 
     this.lineChartInstance = new Chart(this.lineChartCanvas.nativeElement, {
       type: 'line',
       data: {
-        labels: ['Enero', 'Febrero', 'Marzo', 'Abril'],
+        labels,
         datasets: [{
-          label: 'Puntaje',
-          data: [65, 59, 80, 81],
+          label: 'Resultados por Torneo',
+          data,
           fill: true,
           backgroundColor: 'rgba(0, 123, 255, 0.1)',
           borderColor: '#007bff',
@@ -89,14 +115,17 @@ export class MisResultadosComponent implements AfterViewChecked {
     if (this.barChartInstance2) {
       this.barChartInstance2.destroy();
     }
+    // Mismo labels/datos para demo
+    const labels = this.torneos.map(t => t.name);
+    const data = this.torneos.map(t => t.resultados);
 
     this.barChartInstance2 = new Chart(this.lineChartCanvas2.nativeElement, {
       type: 'bar',
       data: {
-        labels: ['Enero', 'Febrero', 'Marzo', 'Abril'],
+        labels,
         datasets: [{
-          label: 'Total Acumulado',
-          data: [120, 180, 260, 340],
+          label: 'Resultados por Torneo',
+          data,
           backgroundColor: [
             'rgba(0, 123, 255, 0.5)',
             'rgba(40, 167, 69, 0.5)',
@@ -126,6 +155,11 @@ export class MisResultadosComponent implements AfterViewChecked {
 
   resumenToreno(id: number) {
     this.router.navigate(['/resumen-torneo', id]);
+  }
+
+  onImgError(event: Event, defaultPath: string) {
+    const target = event.target as HTMLImageElement;
+    target.src = defaultPath;
   }
 
 }

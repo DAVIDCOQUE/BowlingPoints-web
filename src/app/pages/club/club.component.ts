@@ -212,4 +212,37 @@ export class ClubComponent implements OnInit {
     this.filter = '';
     // Recarga o limpia filtros, según tu UX
   }
+
+  onImgError(event: Event, defaultPath: string) {
+    const target = event.target as HTMLImageElement;
+    target.src = defaultPath;
+  }
+
+  // --- Helpers para chequear datos en miClub ---
+
+  showRanking(): boolean {
+    // Muestra el ranking solo si existe y es mayor a 0
+    return typeof this.miClub?.ranking === 'number' && this.miClub.ranking > 0;
+  }
+
+  showScore(): boolean {
+    // Muestra el score solo si existe y es un número
+    return typeof this.miClub?.score === 'number' && !isNaN(this.miClub.score);
+  }
+
+  hasLogros(): boolean {
+    const logros = this.miClub?.logros;
+    return Array.isArray(logros) && logros.length > 0;
+  }
+
+  hasTorneos(): boolean {
+    const torneos = this.miClub?.torneos;
+    return Array.isArray(torneos) && torneos.length > 0;
+  }
+
+  hasMembers(): boolean {
+    const members = this.miClub?.members;
+    return Array.isArray(members) && members.length > 0;
+  }
+
 }

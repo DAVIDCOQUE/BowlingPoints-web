@@ -1,4 +1,22 @@
 
-2. hacer controller de dashboard
+1. hacer controller unitario para resultados de torneos
+   que devuela en diferentes endpoints
+
+   - lista de torneos segun ambito: el endpint debe recibir el id o el name del ambito y debe
+    devoler el nombre del torneo la fecha de cuando se inicio y lugar de todos los torneos para ese ambito
+
+   - resumen torno: el endpoint debe resivir el id del torneo y debe devolver:
+     organizador del torneo, Nombre del torneo,  fecha de inicio, fecha de finalizacion, lugar, modalidades, categorias, total de jugadores maxculinos y femeninos
+
+   - resultados de todos los jugadores segun la modalidad selecionada. tambien el promedio de cada jugador. las lineas jugadas (rondas)
+
+   -resultado final para cada jugador en cada modalidad. ejemplo jugador 1 en modalidad individual,
+   250, dobles, 300, ternas, 400 total entre todas las modalidades y el promedio y el total de lineas jugadas
+
+
+
+3. hacer controller crud tabla informacion bolera
+
 4. horganizar las consultas por fehca de torneos.
+
 5. horanizar las cosultas por orden alfavatico

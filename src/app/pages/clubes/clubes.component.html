@@ -35,7 +35,7 @@
   <div class="row">
     <div class="col-md-3" *ngFor="let club of clubes">
       <div class="card mb-4">
-        <img [src]="apiUrl + club.imageUrl" class="card-img-top mt-4" [alt]="club.name" />
+        <img [src]="apiUrl + club.imageUrl" (error)="onImgError($event, 'assets/img/clubDefault.png')"  class="card-img-top mt-4" [alt]="club.name" />
 
 
 

@@ -226,4 +226,9 @@ export class ClubesComponent implements OnInit {
     this.getClubes(true); // recargar limpia
   }
 
+  onImgError(event: Event, defaultPath: string) {
+    const target = event.target as HTMLImageElement;
+    target.src = defaultPath;
+  }
+
 }

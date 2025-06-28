@@ -2,21 +2,64 @@
   <hr>
   <!-- Tarjetas estadísticas -->
   <div class="row g-4 mb-3">
-    <div class="col-md-3" *ngFor="let card of estadisticas">
+    <div class="col-md-3">
       <div class="card border-0 shadow-sm h-100 rounded-4">
-
         <!-- Cabecera optimizada -->
         <div class="d-flex justify-content-center align-items-center bg-primary text-white py-1 rounded-top">
           <span class="badge bg-warning text-dark" style="font-size: 1rem; padding: 6px 12px;">
-            {{ card.titulo }}
+            Torneos Ganados
           </span>
         </div>
-
         <div class="card-body d-flex flex-column justify-content-center align-items-center">
-          <img [src]="card.icono" alt="icono" width="70" class="mb-1 mt-1">
-          <h1 class="fw-bold">{{ card.valor }}</h1>
+          <img [src]="imagenesEstadisticas['torneo']" alt="icono" width="50" class="mb-1 mt-1">
+          <h1 class="fw-bold"> {{ (estadisticas?.tournamentsWon ?? 0) + '/' + (estadisticas?.totalTournaments ?? 0) }}
+          </h1>
         </div>
+      </div>
+    </div>
 
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100 rounded-4">
+        <!-- Cabecera optimizada -->
+        <div class="d-flex justify-content-center align-items-center bg-primary text-white py-1 rounded-top">
+          <span class="badge bg-warning text-dark" style="font-size: 1rem; padding: 6px 12px;">
+            Chuzas Totales
+          </span>
+        </div>
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+          <img [src]="imagenesEstadisticas['chuzas']" alt="icono" width="50" class="mb-1 mt-1">
+          <h1 class="fw-bold">{{ estadisticas?.totalStrikes || 0}}</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100 rounded-4">
+        <!-- Cabecera optimizada -->
+        <div class="d-flex justify-content-center align-items-center bg-primary text-white py-1 rounded-top">
+          <span class="badge bg-warning text-dark" style="font-size: 1rem; padding: 6px 12px;">
+           Promedio
+          </span>
+        </div>
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+          <img [src]="imagenesEstadisticas['promedio']" alt="icono" width="50" class="mb-1 mt-1">
+          <h1 class="fw-bold">{{ estadisticas?.avgScore || 0}}</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100 rounded-4">
+        <!-- Cabecera optimizada -->
+        <div class="d-flex justify-content-center align-items-center bg-primary text-white py-1 rounded-top">
+          <span class="badge bg-warning text-dark" style="font-size: 1rem; padding: 6px 12px;">
+            Mejor Puntaje
+          </span>
+        </div>
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+          <img [src]="imagenesEstadisticas['mejorJuego']" alt="icono" width="50" class="mb-1 mt-1">
+          <h1 class="fw-bold">{{ estadisticas?.bestGame || 0}}</h1>
+        </div>
       </div>
     </div>
   </div>
@@ -46,8 +89,12 @@
   <div class="row g-4 mb-4">
     <div class="col-12">
       <hr>
-      <h3 class="mb-3">🏆 Mejores Torneos Jugados</h3>
+      <h3 class="mb-3">🏆 3 Mejores Torneos Jugados</h3>
       <div class="card-body">
+        <div *ngIf="!topTorneos || topTorneos.length === 0"
+          class="alert alert-warning text-center my-4 py-2 rounded-3 fw-semibold">
+          <i class="bi bi-emoji-frown"></i> No hay torneos para mostrar.
+        </div>
         <div class="table-responsive">
           <table
             class="table table-rounded table-hover border table-bordered border-gray-300 table-vmiddle text-center">
@@ -56,27 +103,24 @@
                 <th>ID</th>
                 <th>Foto</th>
                 <th>Nombre</th>
-                <th>Fecha</th>
+                <th>Fecha Inicio</th>
                 <th>Lugar</th>
-                <th>Modalidad</th>
-                <th>Categoría</th>
-                <th>Resultados</th>
+                <th>Mi Categoría / Modalidad</th>
+                <th>Mi Resultados</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let torneo of torneos">
-                <td>{{ torneo.id }}</td>
-                <td><img [src]="torneo.foto" alt="foto" width="40" height="40" class="rounded-circle"></td>
-                <td><a [routerLink]="['/jugador', torneo.id]" class="link-secondary link-underline-opacity-0">
-                    {{ torneo.nombre }}
-                  </a></td>
-                <td>{{ torneo.fecha }}</td>
+              <tr *ngFor="let torneo of topTorneos">
+                <td>{{ torneo.tournamentId }}</td>
+                <td><img [src]="apiUrl + torneo.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
+                    alt="foto" width="40" height="40" class="rounded-circle"></td>
+                <td>{{ torneo.name }}</td>
+                <td>{{ torneo.startDate }}</td>
                 <td>{{ torneo.lugar }}</td>
-                <td>{{ torneo.modalidad }}</td>
-                <td>{{ torneo.categoria }}</td>
-                <td>{{ torneo.resultados }}</td>
-                <td class="text-center"><button class="btn btn-sm px-2" (click)="resumenToreno(torneo.id)"
+                <td>{{ torneo.modalidad }} {{ torneo.categoria }}</td>
+                <td>{{ torneo.bestScore }}</td>
+                <td class="text-center"><button class="btn btn-sm px-2" (click)="resumenToreno(torneo.tournamentId)"
                     style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
                     <i class="fa-solid fa-eye"></i> </button></td>
               </tr>

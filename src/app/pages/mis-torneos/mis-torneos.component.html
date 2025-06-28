@@ -61,24 +61,22 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let torneo of torneos">
-            <td>{{ torneo.id }}</td>
+          <tr *ngFor="let torneo of torneosJugados">
+            <td>{{ torneo.tournamentId }}</td>
             <td>
               <div>
-                <img [src]="torneo.foto" alt="Foto de perfil" style="width: 40px; height: 40px"
-                  class="rounded-circle" />
+                <img [src]="apiUrl + torneo.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
+                  alt="Foto de perfil" style="width: 40px; height: 40px" class="rounded-circle" />
                 <div class="ms-3"></div>
               </div>
             </td>
-            <td class="align-items-center"><a
-                class="link-offset-2 link-underline link-underline-opacity-0 link-secondary"
-                [routerLink]="['/jugador', torneo.id]">{{ torneo.nombre }}</a></td>
-            <td>{{ torneo.fecha }}</td>
-            <td>{{ torneo.lugar }}</td>
+            <td class="align-items-center">{{ torneo.name }}</td>
+            <td>{{ torneo.date }}</td>
+            <td>{{ torneo.location }}</td>
             <td>{{ torneo.modalidad }}</td>
             <td>{{ torneo.categoria }}</td>
             <td>{{ torneo.resultados }}</td>
-            <td class="text-center"><button class="btn btn-sm px-2" (click)="resumenToreno(torneo.id)"
+            <td class="text-center"><button class="btn btn-sm px-2" (click)="resumenToreno(torneo.tournamentId)"
                 style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
                 <i class="fa-solid fa-eye"></i> </button></td>
           </tr>

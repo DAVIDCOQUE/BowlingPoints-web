@@ -228,4 +228,9 @@ export class UsersComponent {
     const role = this.roles.find(r => r.description === description);
     return role ? role.roleId : null;
   }
+
+  onImgError(event: Event, defaultPath: string) {
+    const target = event.target as HTMLImageElement;
+    target.src = defaultPath;
+  }
 }
