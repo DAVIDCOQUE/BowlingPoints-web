@@ -1,8 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
-import { Router } from '@angular/router'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { environment } from '../../../environments/environment';
 import Swal from 'sweetalert2';
@@ -17,18 +15,17 @@ import { ICategory } from 'src/app/model/category.interface';
   styleUrls: ['./torneos.component.css'],
 })
 export class TorneosComponent {
-
-
   @ViewChild('modalTournament') modalTournamentRef: any;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   filter: string = '';
   tournaments: ITournament[] = [];
+  idTournament: number | null = null;
+
   modalities: IModality[] = [];
   categoris: ICategory[] = [];
   ambits: IAmbit[] = [];
+
   tournamentForm: FormGroup = new FormGroup({});
-  idTournament: number | null = null;
 
   estados = [
     { valor: true, etiqueta: 'Activo' },
@@ -48,7 +45,6 @@ export class TorneosComponent {
     { causeId: 11, name: 'Suspendido por problemas técnicos' },
     { causeId: 12, name: 'Cierre administrativo' }
   ];
-
 
   constructor(
     private formBuilder: FormBuilder,
@@ -83,8 +79,6 @@ export class TorneosComponent {
       .subscribe({
         next: res => {
           this.tournaments = res.data;
-          console.log('res:', res);
-
         },
         error: err => {
           console.error('Error al cargar torneoses:', err);
@@ -97,8 +91,6 @@ export class TorneosComponent {
       .subscribe({
         next: res => {
           this.modalities = res.data;
-          console.log('res:', res);
-
         },
         error: err => {
           console.error('Error al cargar torneoses:', err);
@@ -106,13 +98,11 @@ export class TorneosComponent {
       });
   }
 
-   getCategories(): void {
+  getCategories(): void {
     this.http.get<{ success: boolean; message: string; data: ICategory[] }>(`${environment.apiUrl}/categories`)
       .subscribe({
         next: res => {
           this.categoris = res.data;
-          console.log('res:', res);
-
         },
         error: err => {
           console.error('Error al cargar torneoses:', err);
@@ -124,7 +114,6 @@ export class TorneosComponent {
       .subscribe({
         next: res => {
           this.ambits = res.data;
-          console.log('res:', res);
         },
         error: err => {
           console.error('Error al cargar torneoses:', err);
@@ -139,12 +128,7 @@ export class TorneosComponent {
       : this.tournaments;
   }
 
-  openModal(content: any): void {
-    if (!this.idTournament) {
-      this.tournamentForm.reset();
-    }
-    this.modalService.open(content);
-  }
+
 
   openModalResultados(content: any): void {
     this.modalService.open(content);
@@ -172,7 +156,6 @@ export class TorneosComponent {
 
     const payload = this.tournamentForm.value;
     const isEdit = !!this.idTournament;
-    this.isLoading$.next(true);
 
     const request = isEdit
       ? this.http.put(`${environment.apiUrl}/tournaments/${this.idTournament}`, payload)
@@ -183,12 +166,10 @@ export class TorneosComponent {
         Swal.fire('Éxito', isEdit ? 'Torneos actualizada' : 'Torneos creada', 'success');
         this.getTournaments();
         this.closeModal();
-        this.isLoading$.next(false);
       },
       error: err => {
         console.error('Error al guardar torneos:', err);
         Swal.fire('Error', err.error?.message || 'Algo salió mal', 'error');
-        this.isLoading$.next(false);
       }
     });
   }
@@ -218,14 +199,17 @@ export class TorneosComponent {
     });
   }
 
+  openModal(content: any): void {
+    if (!this.idTournament) {
+      this.tournamentForm.reset();
+    }
+    this.modalService.open(content);
+  }
+
   closeModal(): void {
     this.modalService.dismissAll();
     this.tournamentForm.reset();
     this.idTournament = null;
-  }
-
-  search(): void {
-    console.log('Filtro:', this.filter);
   }
 
   clear(): void {

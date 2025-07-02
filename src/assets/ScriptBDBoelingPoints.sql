@@ -185,6 +185,7 @@ CREATE TABLE tournament (
   tournament_name TEXT NOT NULL UNIQUE,
   ambit_id INT,
   image_url TEXT,
+  organizer TEXT,
   start_date DATE,
   end_date DATE,
   location TEXT,

@@ -92,7 +92,8 @@
         <div class="d-grid gap-3 flex-grow-1">
           <button *ngFor="let ambit of ambits" type="button"
             class="btn btn-outline-primary d-flex justify-content-between align-items-center w-100 flex-grow-1 rounded-3 shadow-sm"
-            style="font-size:1.1rem; min-height: 56px; max-width: 100%;" routerLink="/lista-torneos">
+            style="font-size:1.1rem; min-height: 56px; max-width: 100%;"
+            [routerLink]="['/lista-torneos', ambit.ambitId]">
             <span class="badge bg-warning text-dark fw-semibold px-3 py-2 text-center mx-auto"
               style="min-width:140px; max-width:200px; width:100%;">
               Torneos {{ ambit.name }}
@@ -165,12 +166,13 @@
               *ngFor="let club of clubs">
               <!-- Avatar + Nombre -->
               <div class="d-flex align-items-center gap-3">
-                <img [src]="apiUrl + club.imageUrl" (error)="onImgError($event, 'assets/img/clubDefault.png')" alt="Foto" class="rounded-circle" width="40" height="40">
+                <img [src]="apiUrl + club.imageUrl" (error)="onImgError($event, 'assets/img/clubDefault.png')"
+                  alt="Foto" class="rounded-circle" width="40" height="40">
                 <span>{{ club.name }}</span>
               </div>
               <!-- Puntaje -->
               <span class="badge bg-success bg-opacity-10 text-success fw-semibold px-3 py-1">
-                {{ club.score || 0 | number:'1.2-2'  }}
+                {{ club.score || 0 | number:'1.2-2' }}
               </span>
             </li>
           </ul>

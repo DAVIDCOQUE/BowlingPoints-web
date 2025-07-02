@@ -1,5 +1,4 @@
 import { Component, ViewChild } from '@angular/core';
-import { Router } from '@angular/router'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
@@ -16,14 +15,15 @@ import { IRole } from '../../model/role.interface';
 })
 export class UsersComponent {
   @ViewChild('modalUser') modalUserRef: any;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  public apiUrl = environment.apiUrl;
 
   filter: string = '';
   usuarios: IUser[] = [];
   roles: IRole[] = [];
-  genders: string[] = ['Masculino', 'Femenino', 'No binario', 'Prefiero no decirlo'];
 
-  public apiUrl = environment.apiUrl;
+  genders: string[] = ['Masculino', 'Femenino'];
+
   idUser: number | null = null;
 
   userForm: FormGroup = new FormGroup({});
@@ -63,7 +63,6 @@ export class UsersComponent {
       .subscribe({
         next: res => {
           this.usuarios = res.data;
-          console.log('Usuarios cargados:', this.usuarios);
         },
         error: err => {
           console.error('Error al cargar usuarios:', err);
@@ -76,7 +75,6 @@ export class UsersComponent {
       .subscribe({
         next: res => {
           this.roles = res.data;
-          console.log('Roles cargados:', this.roles);
         },
         error: err => {
           console.error('Error al cargar roles:', err);
@@ -97,16 +95,6 @@ export class UsersComponent {
       user.roleDescription.toLowerCase().includes(term) ||
       user.gender.toLowerCase().includes(term)
     );
-  }
-
-  openModal(content: any): void {
-    if (!this.idUser) {
-      this.userForm.reset({
-        gender: null,
-        roleId: null
-      });
-    }
-    this.modalService.open(content);
   }
 
   editUser(user: IUser): void {
@@ -155,8 +143,6 @@ export class UsersComponent {
       payload.password = formValue.password;
     }
 
-    this.isLoading$.next(true);
-
     const request = isEdit
       ? this.http.put(`${environment.apiUrl}/users/${this.idUser}`, payload)
       : this.http.post(`${environment.apiUrl}/users`, payload);
@@ -167,13 +153,12 @@ export class UsersComponent {
         Swal.fire('Éxito', msg, 'success');
         this.getUsers();
         this.closeModal();
-        this.isLoading$.next(false);
       },
+
       error: err => {
         console.error('Error al guardar:', err);
         const msg = err.error?.message || 'Ocurrió un error al procesar la solicitud';
         Swal.fire('Error', msg, 'error');
-        this.isLoading$.next(false);
       }
     });
   }
@@ -203,16 +188,20 @@ export class UsersComponent {
     });
   }
 
+  openModal(content: any): void {
+    if (!this.idUser) {
+      this.userForm.reset({
+        gender: null,
+        roleId: null
+      });
+    }
+    this.modalService.open(content);
+  }
+
   closeModal(): void {
     this.modalService.dismissAll();
     this.userForm.reset();
     this.idUser = null;
-  }
-
-  search(): void {
-    // No es necesario implementar nada aquí con el getter usuariosFiltrados
-    // pero puedes usarlo para dejar trazabilidad
-    console.log('Búsqueda aplicada:', this.filter);
   }
 
   clear(): void {

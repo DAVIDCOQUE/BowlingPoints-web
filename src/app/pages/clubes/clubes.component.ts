@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
@@ -15,23 +15,21 @@ import { AuthService } from 'src/app/auth/auth.service';
 })
 export class ClubesComponent implements OnInit {
 
-  clubForm!: FormGroup;
+  public apiUrl = environment.apiUrl;
+
+  id_Club?: number;
+  filter: string = '';
+
   clubes: IClubs[] = [];
   usuarios: IUser[] = [];
   miembros: any[] = [];
+
+  clubForm!: FormGroup;
 
   estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' }
   ];
-
-  id_Club?: number;
-  filter: string = '';
-
-  public apiUrl = environment.apiUrl;
-  // Cache para evitar recargas innecesarias
-  private clubesLoaded = false;
-  private usuariosLoaded = false;
 
   constructor(
     private fb: FormBuilder,
@@ -59,18 +57,11 @@ export class ClubesComponent implements OnInit {
     });
   }
 
-  // 🔁 Obtener clubes con cacheo y logs
-  getClubes(forceRefresh: boolean = false): void {
-    if (this.clubesLoaded && !forceRefresh) {
-      console.log('✅ Clubes cargados desde caché');
-      return;
-    }
+  getClubes(): void {
     this.http.get<IClubs[]>(`${environment.apiUrl}/clubs/with-members`)
       .subscribe({
         next: clubs => {
-          console.log('📦 Clubes recibidos:', clubs);
           this.clubes = clubs;
-          this.clubesLoaded = true;
         },
         error: err => {
           console.error('❌ Error al cargar clubes:', err);
@@ -79,18 +70,19 @@ export class ClubesComponent implements OnInit {
       });
   }
 
-  // 🔁 Obtener usuarios
-  getUsers(forceRefresh: boolean = false): void {
-    if (this.usuariosLoaded && !forceRefresh) {
-      console.log('✅ Usuarios cargados desde caché');
-      return;
+    get filteredClubes(): IClubs[] {
+      const term = this.filter.toLowerCase().trim();
+      return term
+        ? this.clubes.filter(cat => cat.name.toLowerCase().includes(term))
+        : this.clubes;
     }
+
+
+  getUsers(): void {
     this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${environment.apiUrl}/users`,)
       .subscribe({
         next: res => {
           this.usuarios = res.data;
-          this.usuariosLoaded = true;
-          console.log('👤 Usuarios recibidos:', res);
         },
         error: err => {
           console.error('❌ Error al cargar usuarios:', err);
@@ -110,7 +102,7 @@ export class ClubesComponent implements OnInit {
     // Transforma los miembros seleccionados en objetos con personId + rol
     const members = (raw.members || []).map((id: number) => ({
       personId: id,
-      roleInClub: 'ENTRENADOR' // Puedes cambiarlo si usas roles dinámicos
+      roleInClub: 'ENTRENADOR'
     }));
 
     // VALIDACIÓN: Verifica miembros duplicados por personId
@@ -141,13 +133,11 @@ export class ClubesComponent implements OnInit {
       ? this.http.put(url, payload)
       : this.http.post(url, payload);
 
-    console.log('📤 Enviando datos:', payload);
-
     request$.subscribe({
       next: () => {
         const msg = this.id_Club ? 'actualizado' : 'creado';
         Swal.fire('Éxito', `El club fue ${msg} correctamente`, 'success');
-        this.getClubes(true);
+        this.getClubes();
         this.closeModal();
       },
       error: err => {
@@ -160,7 +150,6 @@ export class ClubesComponent implements OnInit {
       }
     });
   }
-
 
   deleteClub(id_Club: number): void {
     Swal.fire({
@@ -178,7 +167,7 @@ export class ClubesComponent implements OnInit {
 
         this.http.delete(`${environment.apiUrl}/clubs/${id_Club}`,).subscribe({
           next: () => {
-            this.getClubes(true);
+            this.getClubes();
             Swal.fire('Eliminado', 'El club ha sido eliminado', 'success');
           },
           error: err => {
@@ -194,13 +183,11 @@ export class ClubesComponent implements OnInit {
     if (club) {
       this.id_Club = club.clubId;
 
-      // Obtener los IDs de los miembros
       const memberIds = (club.members || []).map(m => m.personId);
 
-      // Aplicar datos al formulario
       this.clubForm.patchValue({
         ...club,
-        members: memberIds,  // ✅ Asignar los IDs directamente al campo "members"
+        members: memberIds,
         imageUrl: club.imageUrl
       });
     } else {
@@ -215,15 +202,9 @@ export class ClubesComponent implements OnInit {
     this.modalService.dismissAll();
   }
 
-  search(): void {
-    const term = this.filter.toLowerCase().trim();
-    this.getClubes(); // vuelve a cargar por si borraste antes
-    this.clubes = this.clubes.filter(c => c.name.toLowerCase().includes(term));
-  }
-
   clear(): void {
     this.filter = '';
-    this.getClubes(true); // recargar limpia
+    this.getClubes();
   }
 
   onImgError(event: Event, defaultPath: string) {

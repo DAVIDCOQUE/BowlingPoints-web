@@ -14,8 +14,8 @@ export class MisTorneosComponent {
   public apiUrl = environment.apiUrl;
 
   userId: number = 0;
-
   torneosJugados: IUserTournament[] = [];
+
   resultadosTorneo: any;
   estadisticasGenerales: any;
 
@@ -28,14 +28,12 @@ export class MisTorneosComponent {
     this.cargarTorneosJugados();
   }
 
-
   cargarTorneosJugados(): void {
     this.http.get<{ success: boolean; message: string; data: IUserTournament[] }>(
       `${environment.apiUrl}/user-tournaments/${this.userId}/played`
     )
       .subscribe(res => {
         this.torneosJugados = res.data;
-        console.log('Torneos jugados:', this.torneosJugados);
       });
   }
 
@@ -43,28 +41,7 @@ export class MisTorneosComponent {
     this.http.get<any>(`${environment.apiUrl}/user-tournaments/${this.userId}/played`)
       .subscribe((res: any) => {
         this.torneosJugados = res.data;
-        console.log('Torneos jugados:', this.torneosJugados);
       });
-  }
-
-
-
-  torneos: any = [
-    {
-      id: 1,
-      nombre: 'Copa de la Bowling',
-      foto: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/T1_logo.svg/800px-T1_logo.svg.png',
-      fecha: '20 marzo 2025',
-      lugar: 'Bolera XYZ, Cali, Valle',
-      modalidad: 'Individual / Equipos',
-      categoria: 'Sub-21, Mayores, Mixto',
-      resultados: '120',
-    },
-  ];
-
-
-  resumenToreno(id: number) {
-    this.router.navigate(['/resumen-torneo', id]);
   }
 
   onImgError(event: Event, defaultPath: string) {

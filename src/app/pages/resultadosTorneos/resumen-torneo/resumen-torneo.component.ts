@@ -1,7 +1,7 @@
+import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { ResultadosService } from 'src/app/services/resultados.service';
-
+import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-resumen-torneo',
   templateUrl: './resumen-torneo.component.html',
@@ -9,26 +9,27 @@ import { ResultadosService } from 'src/app/services/resultados.service';
 })
 export class ResumenTorneoComponent {
 
-  result_ResumenToreno: any;
+  resumenTorneo: any;
+  tournamentId!: number;
+  ambitId!: number;
 
-
-  constructor(private ResultadosService: ResultadosService, private router: Router) { }
+  constructor(private router: Router, private http: HttpClient, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.get_ResumenToreno()
-
+    this.tournamentId = +this.route.snapshot.paramMap.get('id')!;
+    this.ambitId = +this.route.snapshot.paramMap.get('ambitId')!;
+    this.getResumenTorneo();
   }
 
-  get_ResumenToreno() {
-    this.ResultadosService.get_ResumenToreno().subscribe(results => {
-      this.result_ResumenToreno = results;
-      console.log(this.result_ResumenToreno);
-    }
-    )
+  getResumenTorneo() {
+    this.http.get<any>(`${environment.apiUrl}/results/tournament-summary?tournamentId=${this.tournamentId}`)
+      .subscribe((res: any) => {
+        this.resumenTorneo = res.data;
+      });
   }
 
   goBack() {
-    this.router.navigate(['dashboard']);
+    this.router.navigate(['/lista-torneos', this.ambitId]);
   }
 
 }

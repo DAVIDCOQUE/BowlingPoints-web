@@ -1,5 +1,4 @@
 import { Component, ViewChild } from '@angular/core';
-import { Router } from '@angular/router'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
@@ -15,19 +14,18 @@ import { IAmbit } from 'src/app/model/ambit.interface';
   styleUrls: ['./ambit.component.css']
 })
 export class AmbitComponent {
- @ViewChild('modalAmbit') ambitRef: any;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  @ViewChild('modalAmbit') ambitRef: any;
 
   filter: string = '';
   ambits: IAmbit[] = [];
-  ambitForm: FormGroup = new FormGroup({});
   idAmbit: number | null = null;
+
+  ambitForm: FormGroup = new FormGroup({});
 
   estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' }
   ];
-
 
   constructor(
     private formBuilder: FormBuilder,
@@ -44,7 +42,7 @@ export class AmbitComponent {
     this.ambitForm = this.formBuilder.group({
       name: ['', Validators.required],
       description: [''],
-      status: ['']
+      status: ['', Validators.required]
     });
   }
 
@@ -53,8 +51,6 @@ export class AmbitComponent {
       .subscribe({
         next: res => {
           this.ambits = res.data;
-          console.log('res:', res);
-
         },
         error: err => {
           console.error('Error al cargar ambitos:', err);
@@ -67,13 +63,6 @@ export class AmbitComponent {
     return term
       ? this.ambits.filter(cat => cat.name.toLowerCase().includes(term))
       : this.ambits;
-  }
-
-  openModal(content: any): void {
-    if (!this.idAmbit) {
-      this.ambitForm.reset();
-    }
-    this.modalService.open(content);
   }
 
   editAmbit(ambit: IAmbit): void {
@@ -92,7 +81,6 @@ export class AmbitComponent {
 
     const payload = this.ambitForm.value;
     const isEdit = !!this.idAmbit;
-    this.isLoading$.next(true);
 
     const request = isEdit
       ? this.http.put(`${environment.apiUrl}/ambits/${this.idAmbit}`, payload)
@@ -103,12 +91,10 @@ export class AmbitComponent {
         Swal.fire('Éxito', isEdit ? 'Ambito actualizada' : 'Ambito creada', 'success');
         this.getAmbits();
         this.closeModal();
-        this.isLoading$.next(false);
       },
       error: err => {
         console.error('Error al guardar Ambito:', err);
         Swal.fire('Error', err.error?.message || 'Algo salió mal', 'error');
-        this.isLoading$.next(false);
       }
     });
   }
@@ -138,14 +124,17 @@ export class AmbitComponent {
     });
   }
 
+  openModal(content: any): void {
+    if (!this.idAmbit) {
+      this.ambitForm.reset();
+    }
+    this.modalService.open(content);
+  }
+
   closeModal(): void {
     this.modalService.dismissAll();
     this.ambitForm.reset();
     this.idAmbit = null;
-  }
-
-  search(): void {
-    console.log('Filtro:', this.filter);
   }
 
   clear(): void {

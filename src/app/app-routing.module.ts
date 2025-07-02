@@ -38,9 +38,9 @@ const routes: Routes = [
     children: [
       // VISITANTES (sin login, sin protección)
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'lista-torneos', component: ListaTorneosComponent },
-      { path: 'detalle-torneo/:id', component: DatallesTorneoComponent },
-      { path: 'resumen-torneo/:id', component: ResumenTorneoComponent },
+      { path: 'lista-torneos/:ambitId', component: ListaTorneosComponent },
+      { path: 'resumen-torneo/:ambitId/:id', component: ResumenTorneoComponent },
+      { path: 'detalle-torneo/:ambitId/:tournamentId/:id', component: DatallesTorneoComponent },
       { path: 'detalle-jugador/:id', component: DatallesJugadorComponent },
 
       // JUGADORES (rol: JUGADOR, ENTRENADOR, ADMIN)

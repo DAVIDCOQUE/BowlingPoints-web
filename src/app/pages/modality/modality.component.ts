@@ -1,5 +1,4 @@
 import { Component, ViewChild } from '@angular/core';
-import { Router } from '@angular/router'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
@@ -16,18 +15,17 @@ import { IModality } from '../../model/modality.interface';
 export class ModalityComponent {
 
   @ViewChild('modalModality') modalModalityRef: any;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   filter: string = '';
   modalitys: IModality[] = [];
-  modalityForm: FormGroup = new FormGroup({});
   idModality: number | null = null;
+
+  modalityForm: FormGroup = new FormGroup({});
 
   estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' }
   ];
-
 
   constructor(
     private formBuilder: FormBuilder,
@@ -44,7 +42,7 @@ export class ModalityComponent {
     this.modalityForm = this.formBuilder.group({
       name: ['', Validators.required],
       description: [''],
-      status: ['']
+      status: ['', Validators.required]
     });
   }
 
@@ -53,8 +51,6 @@ export class ModalityComponent {
       .subscribe({
         next: res => {
           this.modalitys = res.data;
-          console.log('res:', res);
-
         },
         error: err => {
           console.error('Error al cargar modalidades:', err);
@@ -67,13 +63,6 @@ export class ModalityComponent {
     return term
       ? this.modalitys.filter(cat => cat.name.toLowerCase().includes(term))
       : this.modalitys;
-  }
-
-  openModal(content: any): void {
-    if (!this.idModality) {
-      this.modalityForm.reset();
-    }
-    this.modalService.open(content);
   }
 
   editModality(modality: IModality): void {
@@ -92,7 +81,6 @@ export class ModalityComponent {
 
     const payload = this.modalityForm.value;
     const isEdit = !!this.idModality;
-    this.isLoading$.next(true);
 
     const request = isEdit
       ? this.http.put(`${environment.apiUrl}/modalities/${this.idModality}`, payload)
@@ -103,12 +91,10 @@ export class ModalityComponent {
         Swal.fire('Éxito', isEdit ? 'Modalidad actualizada' : 'Modalidad creada', 'success');
         this.getModalitys();
         this.closeModal();
-        this.isLoading$.next(false);
       },
       error: err => {
         console.error('Error al guardar modalidad:', err);
         Swal.fire('Error', err.error?.message || 'Algo salió mal', 'error');
-        this.isLoading$.next(false);
       }
     });
   }
@@ -138,14 +124,17 @@ export class ModalityComponent {
     });
   }
 
+  openModal(content: any): void {
+    if (!this.idModality) {
+      this.modalityForm.reset();
+    }
+    this.modalService.open(content);
+  }
+
   closeModal(): void {
     this.modalService.dismissAll();
     this.modalityForm.reset();
     this.idModality = null;
-  }
-
-  search(): void {
-    console.log('Filtro:', this.filter);
   }
 
   clear(): void {

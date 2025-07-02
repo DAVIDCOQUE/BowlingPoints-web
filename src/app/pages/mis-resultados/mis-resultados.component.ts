@@ -14,6 +14,8 @@ export class MisResultadosComponent implements AfterViewInit {
   @ViewChild('lineChartCanvas', { static: false }) lineChartCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('lineChartCanvas2', { static: false }) lineChartCanvas2!: ElementRef<HTMLCanvasElement>;
 
+  public apiUrl = environment.apiUrl;
+
   private lineChartInstance?: Chart;
   private barChartInstance2?: Chart;
 
@@ -24,7 +26,6 @@ export class MisResultadosComponent implements AfterViewInit {
     mejorJuego: 'assets/img/mejor-juego.png'
   };
 
-  public apiUrl = environment.apiUrl;
 
   torneos: any[] = [];
   topTorneos: any[] = [];
@@ -51,7 +52,6 @@ export class MisResultadosComponent implements AfterViewInit {
     this.http.get(`${environment.apiUrl}/api/user-stats/summary?userId=${this.userId}`)
       .subscribe((res: any) => {
         this.estadisticas = res.data;
-        console.log('Resumen de estadísticas:', this.estadisticas);
       });
   }
 
@@ -59,12 +59,10 @@ export class MisResultadosComponent implements AfterViewInit {
     this.http.get<any[]>(`${environment.apiUrl}/api/user-stats/top-tournaments?userId=${this.userId}`)
       .subscribe((res: any) => {
         this.topTorneos = res.data;
-        console.log('Top torneos:', this.topTorneos);
       });
   }
 
   updateCharts(): void {
-    // Ejemplo: graficar puntajes de torneos jugados
     if (this.lineChartCanvas && !this.lineChartInstance) {
       this.createLineChart();
     }
@@ -77,7 +75,7 @@ export class MisResultadosComponent implements AfterViewInit {
     if (this.lineChartInstance) {
       this.lineChartInstance.destroy();
     }
-    // Suponiendo que torneos tiene un campo puntaje/resultados
+
     const labels = this.torneos.map(t => t.name);
     const data = this.torneos.map(t => t.resultados);
 

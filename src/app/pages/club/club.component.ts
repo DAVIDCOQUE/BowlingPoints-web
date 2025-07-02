@@ -15,26 +15,27 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./club.component.css']
 })
 export class ClubComponent implements OnInit {
+  public apiUrl = environment.apiUrl;
 
-  clubForm!: FormGroup;
+  private userSub?: Subscription;
+  private usuariosLoaded = false;
+
+  filter: string = '';
   miClub: IClubs | null = null;
-  usuarios: IUser[] = [];
-  miembros: IUser[] = [];
   clubId: number | null = null;
   id_Club?: number;
-  filter: string = '';
+
+  usuarios: IUser[] = [];
+  miembros: IUser[] = [];
+
+  clubForm!: FormGroup;
 
   estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' }
   ];
 
-  private userSub?: Subscription;
-  private usuariosLoaded = false;
-  public apiUrl = environment.apiUrl;
-
   constructor(
-
     private fb: FormBuilder,
     private http: HttpClient,
     private modalService: NgbModal,
@@ -44,7 +45,7 @@ export class ClubComponent implements OnInit {
   ngOnInit(): void {
 
     this.buildForm();
-    // ⚡️ Observa cambios en el usuario logueado (¡reactivo!)
+
     this.userSub = this.auth.user$.subscribe(user => {
       if (user?.clubId) {
         this.clubId = user.clubId;
@@ -55,7 +56,6 @@ export class ClubComponent implements OnInit {
         Swal.fire('Sin Club', 'No tienes un club asociado', 'info');
       }
     });
-
     this.getUsers();
   }
 
@@ -75,13 +75,11 @@ export class ClubComponent implements OnInit {
     });
   }
 
-  // 🔁 Obtener detalles del club del usuario logueado
   getMiClub(): void {
     if (!this.clubId) {
       this.miClub = null;
       return;
     }
-
     this.http.get<IClubs>(`${this.apiUrl}/clubs/${this.clubId}/details`)
       .subscribe({
         next: club => {
@@ -148,7 +146,6 @@ export class ClubComponent implements OnInit {
         const msg = this.id_Club ? 'actualizado' : 'creado';
         Swal.fire('Éxito', `El club fue ${msg} correctamente`, 'success');
         this.closeModal();
-        // 🔄 Refresca club
         if (this.clubId) this.getMiClub();
       },
       error: err => {
@@ -203,20 +200,16 @@ export class ClubComponent implements OnInit {
     this.modalService.dismissAll();
   }
 
-  search(): void {
-    // Método preparado si implementas filtro por miembros
-    // Ejemplo: this.miembros = this.miembros.filter(...);
-  }
 
   clear(): void {
     this.filter = '';
-    // Recarga o limpia filtros, según tu UX
   }
 
   onImgError(event: Event, defaultPath: string) {
     const target = event.target as HTMLImageElement;
     target.src = defaultPath;
   }
+
 
   // --- Helpers para chequear datos en miClub ---
 

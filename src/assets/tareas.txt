@@ -1,3 +1,16 @@
+0.pasar el ambit id a detalle torneo y en el back tambien
+
+1. revisar estilos css de todas componentes
+
+3. hacer controller crud tabla informacion bolera
+
+4. horganizar las consultas por fehca de torneos.
+
+5. horanizar las cosultas por orden alfavatico
+
+6.mirar como manejar Torneos inscritos
+
+
 
 1. hacer controller unitario para resultados de torneos
    que devuela en diferentes endpoints
@@ -12,11 +25,3 @@
 
    -resultado final para cada jugador en cada modalidad. ejemplo jugador 1 en modalidad individual,
    250, dobles, 300, ternas, 400 total entre todas las modalidades y el promedio y el total de lineas jugadas
-
-
-
-3. hacer controller crud tabla informacion bolera
-
-4. horganizar las consultas por fehca de torneos.
-
-5. horanizar las cosultas por orden alfavatico

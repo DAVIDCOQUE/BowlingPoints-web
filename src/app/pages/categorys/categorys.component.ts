@@ -16,20 +16,18 @@ import { ICategory } from '../../model/category.interface';
 })
 export class CategorysComponent {
 
-
   @ViewChild('modalCategory') modalCategoryRef: any;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   filter: string = '';
   categories: ICategory[] = [];
-  categoryForm: FormGroup = new FormGroup({});
   idCategory: number | null = null;
+
+  categoryForm: FormGroup = new FormGroup({});
 
   estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' }
   ];
-
 
   constructor(
     private formBuilder: FormBuilder,
@@ -46,17 +44,15 @@ export class CategorysComponent {
     this.categoryForm = this.formBuilder.group({
       name: ['', Validators.required],
       description: [''],
-      status: ['']
+      status: ['', Validators.required]
     });
   }
 
   getCategories(): void {
-    this.http.get<{ success: boolean;  message: string;data: ICategory[] }>(`${environment.apiUrl}/categories`)
+    this.http.get<{ success: boolean; message: string; data: ICategory[] }>(`${environment.apiUrl}/categories`)
       .subscribe({
         next: res => {
           this.categories = res.data;
-          console.log('res:', res);
-
         },
         error: err => {
           console.error('Error al cargar categorías:', err);
@@ -71,12 +67,6 @@ export class CategorysComponent {
       : this.categories;
   }
 
-  openModal(content: any): void {
-    if (!this.idCategory) {
-      this.categoryForm.reset();
-    }
-    this.modalService.open(content);
-  }
 
   editCategory(category: ICategory): void {
     this.idCategory = category.categoryId;
@@ -94,7 +84,6 @@ export class CategorysComponent {
 
     const payload = this.categoryForm.value;
     const isEdit = !!this.idCategory;
-    this.isLoading$.next(true);
 
     const request = isEdit
       ? this.http.put(`${environment.apiUrl}/categories/${this.idCategory}`, payload)
@@ -105,12 +94,10 @@ export class CategorysComponent {
         Swal.fire('Éxito', isEdit ? 'Categoría actualizada' : 'Categoría creada', 'success');
         this.getCategories();
         this.closeModal();
-        this.isLoading$.next(false);
       },
       error: err => {
         console.error('Error al guardar categoría:', err);
         Swal.fire('Error', err.error?.message || 'Algo salió mal', 'error');
-        this.isLoading$.next(false);
       }
     });
   }
@@ -140,14 +127,18 @@ export class CategorysComponent {
     });
   }
 
+  openModal(content: any): void {
+    if (!this.idCategory) {
+      this.categoryForm.reset();
+    }
+    this.modalService.open(content);
+  }
+
+
   closeModal(): void {
     this.modalService.dismissAll();
     this.categoryForm.reset();
     this.idCategory = null;
-  }
-
-  search(): void {
-    console.log('Filtro:', this.filter);
   }
 
   clear(): void {
