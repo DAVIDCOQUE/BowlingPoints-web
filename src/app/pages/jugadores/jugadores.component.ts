@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { ResultadosService } from 'src/app/services/resultados.service';
-
-
+import { HttpClient } from '@angular/common/http';
+import Swal from 'sweetalert2';
+import { environment } from 'src/environments/environment';
+import { IUser } from 'src/app/model/user.interface';
+import { AuthService } from 'src/app/auth/auth.service';
 @Component({
   selector: 'app-jugadores',
   templateUrl: './jugadores.component.html',
@@ -10,25 +11,38 @@ import { ResultadosService } from 'src/app/services/resultados.service';
 })
 export class JugadoresComponent {
 
-  top_jugadores: any;
-  usuarios: any;
-  filter: string = '';
+   public apiUrl = environment.apiUrl;
 
-  constructor(private ResultadosService: ResultadosService, private router: Router) { }
+  filter: string = '';
+  players: IUser[] = [];
+
+  constructor(private http: HttpClient, public auth: AuthService) { }
 
   ngOnInit(): void {
-    this.get_top_jugadores();
+    this.getDashboard();
   }
 
-  get_top_jugadores() {
-    this.ResultadosService.get_top_jugadores().subscribe(top_jugadores => {
-      this.top_jugadores = top_jugadores;
-      console.log(this.top_jugadores);
-    }
-    )
+  getDashboard(): void {
+    this.http.get<{ success: boolean; message: string; data: any }>(`${environment.apiUrl}/results/all-player-ranking`)
+      .subscribe({
+        next: res => {
+          this.players = res.data;
+          console.log(this.players);
+        },
+        error: err => {
+          console.error('❌ Error al cargar data:', err);
+          Swal.fire('Error', 'No se pudieron cargar los data', 'error');
+        }
+      });
   }
 
   clear() {
     this.filter = '';
   }
+
+  onImgError(event: Event, defaultPath: string) {
+    const target = event.target as HTMLImageElement;
+    target.src = defaultPath;
+  }
+
 }

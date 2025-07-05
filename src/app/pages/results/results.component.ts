@@ -8,7 +8,6 @@ import { environment } from '../../../environments/environment';
 import Swal from 'sweetalert2';
 import { ITournament } from '../../model/tournament.interface';
 import { IModality } from '../../model/modality.interface';
-import { IAmbit } from 'src/app/model/ambit.interface';
 import { IResults } from 'src/app/model/result.interface';
 import { ICategory } from 'src/app/model/category.interface';
 import { IRound } from 'src/app/model/round.interface';
@@ -21,8 +20,6 @@ import { IUser } from 'src/app/model/user.interface';
   styleUrls: ['./results.component.css']
 })
 export class ResultsComponent {
-
-
 
   @ViewChild('modalResult') modalResultRef: any;
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -57,7 +54,7 @@ export class ResultsComponent {
     { laneNumber: 12 }
   ];
 
-    lineNumbers = [
+  lineNumbers = [
     { lineNumber: 1 },
     { lineNumber: 2 },
     { lineNumber: 3 },
@@ -70,8 +67,6 @@ export class ResultsComponent {
     { lineNumber: 11 },
     { lineNumber: 12 }
   ];
-
-
 
   constructor(
     private formBuilder: FormBuilder,
@@ -101,7 +96,6 @@ export class ResultsComponent {
       laneNumber: ['', Validators.required],
       lineNumber: ['', Validators.required],
       score: ['', Validators.required],
-
     });
   }
 
@@ -124,8 +118,6 @@ export class ResultsComponent {
       .subscribe({
         next: res => {
           this.tournaments = res.data;
-          console.log('res torneos:', res);
-
         },
         error: err => {
           console.error('Error al cargar torneoses:', err);
@@ -138,8 +130,6 @@ export class ResultsComponent {
       .subscribe({
         next: res => {
           this.categories = res.data;
-          console.log('res modalidades:', res);
-
         },
         error: err => {
           console.error('Error al cargar modalidades:', err);
@@ -152,8 +142,6 @@ export class ResultsComponent {
       .subscribe({
         next: res => {
           this.modalities = res.data;
-          console.log('res modalidades:', res);
-
         },
         error: err => {
           console.error('Error al cargar modalidades:', err);
@@ -166,8 +154,6 @@ export class ResultsComponent {
       .subscribe({
         next: res => {
           this.rounds = res.data;
-          console.log('res rondas:', res);
-
         },
         error: err => {
           console.error('Error al cargar rondas:', err);
@@ -180,8 +166,6 @@ export class ResultsComponent {
       .subscribe({
         next: res => {
           this.persons = res.data;
-          console.log('res users:', res);
-
         },
         error: err => {
           console.error('Error al cargar usuarios:', err);
@@ -194,8 +178,6 @@ export class ResultsComponent {
       .subscribe({
         next: res => {
           this.teams = res.data;
-          console.log('res teams:', res);
-
         },
         error: err => {
           console.error('Error al cargar equipos:', err);
@@ -251,7 +233,7 @@ export class ResultsComponent {
     request.subscribe({
       next: () => {
         Swal.fire('Éxito', isEdit ? 'Torneos actualizada' : 'Torneos creada', 'success');
-        this.getTournaments();
+        this.getResults();
         this.closeModal();
         this.isLoading$.next(false);
       },
@@ -278,7 +260,7 @@ export class ResultsComponent {
         this.http.delete(`${environment.apiUrl}/results/${id}`).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'Torneos eliminada correctamente', 'success');
-            this.getTournaments();
+            this.getResults();
           },
           error: () => {
             Swal.fire('Error', 'No se pudo eliminar la torneos', 'error');

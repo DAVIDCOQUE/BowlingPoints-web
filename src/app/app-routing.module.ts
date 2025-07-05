@@ -13,7 +13,6 @@ import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.co
 import { ClubComponent } from './pages/club/club.component';
 import { TorneosComponent } from './pages/torneos/torneos.component';
 import { UsersComponent } from './pages/users/users.component';
-import { JugadorComponent } from './pages/jugador/jugador.component';
 import { ListaTorneosComponent } from './pages/resultadosTorneos/lista-torneos/lista-torneos.component';
 import { DatallesTorneoComponent } from './pages/resultadosTorneos/datalles-torneo/datalles-torneo.component';
 import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo/resumen-torneo.component';
@@ -53,7 +52,6 @@ const routes: Routes = [
 
       // ACCESO GENERAL (requiere login pero sin restricción por rol)
       { path: 'jugadores', component: JugadoresComponent, canActivate: [AuthGuard] },
-      { path: 'jugador/:id', component: JugadorComponent, canActivate: [AuthGuard] },
 
       // ADMINISTRADORES
       { path: 'clubes', component: ClubesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ADMIN'] } },

@@ -1,21 +1,16 @@
 <div class="container mt-4">
-  <h1 class="text-center">Top jugadores Colombia</h1>
+  <h1 class="text-center">Top jugadores</h1>
   <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
     <!-- Filtro -->
     <div class="d-flex flex-column flex-md-row align-items-start gap-2">
       <div>
-        <label class="form-label mb-1">Buscar</label>
         <input type="text" class="form-control form-control-sm" style="height: 36px; width: 250px;" placeholder="Buscar"
           [(ngModel)]="filter" name="filter" />
       </div>
-      <div class="d-flex gap-2 pt-md-4">
+      <div class="d-flex gap-2">
         <button class="btn btn-outline-secondary btn-sm align-items-center" style="height: 36px; width: 100px;"
           (click)="clear()">
           <i class="fas fa-times me-1"></i> Limpiar
-        </button>
-        <button class="btn btn btn-outline-primary btn-sm align-items-center" style="height: 36px; width: 100px;"
-          (click)="get_top_jugadores()">
-          <i class="fas fa-search me-1"></i> Buscar
         </button>
       </div>
     </div>
@@ -26,30 +21,26 @@
       <table class="table table-rounded table-hover border table-bordered border-gray-300 table-vmiddle text-center">
         <thead class="bg-light-secondary">
           <tr class="fw-bold">
-            <th>ID:</th>
             <th>Foto</th>
             <th>Nombre</th>
             <th>promedio puntuación</th>
             <th>Mejor juego</th>
             <th>Títulos ganados</th>
+            <th>Aciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let jugador of top_jugadores.jugadores_colombia">
-            <td>{{ jugador.id }}</td>
-            <td>
-              <div>
-                <img [src]="jugador.foto" alt="Foto de perfil" style="width: 40px; height: 40px"
-                  class="rounded-circle" />
-                <div class="ms-3"></div>
-              </div>
-            </td>
-            <td class="align-items-center"><a
-                class="link-offset-2 link-underline link-underline-opacity-0 link-secondary"
-                [routerLink]="['/jugador', jugador.id]">{{ jugador.nombre }}</a></td>
-            <td>{{ jugador.promedio }}</td>
-            <td>{{ jugador.mejor_juego }}</td>
-            <td>{{ jugador.titulos_ganados }}</td>
+          <tr *ngFor="let player of players">
+            <td><img [src]="apiUrl + player.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')"
+                alt="foto" width="40" height="40" class="rounded-circle"></td>
+
+            <td class="align-items-center">{{ player.fullName }}</td>
+            <td>{{ player.averageScore }}</td>
+            <td>{{ player.bestGame || '-' }}</td>
+            <td>{{ player.joinjoinedAt || '-' }}</td>
+            <td class="text-center"><button class="btn btn-sm px-2" [routerLink]="['/detalle-jugador', player.userId]"
+                style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                <i class="fa-solid fa-eye"></i> </button></td>
           </tr>
         </tbody>
       </table>

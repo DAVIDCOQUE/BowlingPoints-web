@@ -19,6 +19,7 @@ export interface IUser {
   roleInClub?: string;
   joinjoinedAt?: string;
   averageScore?: number;
+  bestGame?: string;
 
 
 }

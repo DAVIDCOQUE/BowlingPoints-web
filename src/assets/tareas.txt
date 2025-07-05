@@ -1,5 +1,7 @@
 0.pasar el ambit id a detalle torneo y en el back tambien
 
+. acomodar  detalle-jugador para recibir data
+
 1. revisar estilos css de todas componentes
 
 3. hacer controller crud tabla informacion bolera
