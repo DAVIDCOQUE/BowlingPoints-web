@@ -1,8 +1,6 @@
-0.pasar el ambit id a detalle torneo y en el back tambien
+0.en detalle-torneo  no solo mandar los rultados si no tambien  la modalidad y la categoria por la que se esta consultando
 
-. acomodar  detalle-jugador para recibir data
-
-1. revisar estilos css de todas componentes
+1. acomodar  detalle-jugador para recibir data acomodar enpoint de mis resultados para que no solo devuelva los resultados del jugador si no tambien el lso datos de este
 
 3. hacer controller crud tabla informacion bolera
 

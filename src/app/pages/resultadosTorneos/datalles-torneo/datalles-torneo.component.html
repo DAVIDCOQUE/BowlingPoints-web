@@ -6,7 +6,7 @@
   </div>
 
   <!-- Título del torneo -->
-  <h1 class="text-center fw-bold mb-2">🏆 Nacional Sub-35 2018</h1>
+  <h1 class="text-center fw-bold mb-2">🏆 {{ resumenTorneo?.tournamentName }}</h1>
   <h5 class="text-center text-muted mb-4">
     <strong>Organizador:</strong> Liga de Bolos del Valle
   </h5>
@@ -14,8 +14,9 @@
   <!-- Tabla de resultados -->
   <div class="card shadow-sm border-0 rounded-4">
     <div class="table-responsive">
-      <table class="table table-bordered table-hover text-center">
-        <thead>
+      <table
+        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
+        <thead class="bg-light-secondary align-middle">
           <tr>
             <th>#</th>
             <th>Nombre</th>
@@ -28,15 +29,18 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let jugador of players; let pos = index">
+          <tr *ngFor="let player of players; let pos = index">
             <td>{{ pos + 1 }}</td>
-            <td>{{ jugador.playerName }}</td>
-            <td>{{ jugador.clubName }}</td>
+            <td class="cursor-pointer player-zoom"> <a [routerLink]="['/detalle-jugador', player.personId]"
+                style="text-decoration: none; color: black;">
+                {{ player.playerName }}
+              </a> </td>
+            <td>{{ player.clubName }}</td>
             <td *ngFor="let idx of [].constructor(maxJuegos); let i = index">
-              {{ jugador.scores && jugador.scores[i] !== undefined ? jugador.scores[i] : '-' }}
+              {{ player.scores && player.scores[i] !== undefined ? player.scores[i] : '-' }}
             </td>
-            <td>{{ jugador.total }}</td>
-            <td>{{ jugador.promedio }}</td>
+            <td>{{ player.total }}</td>
+            <td>{{ player.promedio }}</td>
           </tr>
         </tbody>
       </table>

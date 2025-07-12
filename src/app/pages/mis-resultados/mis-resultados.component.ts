@@ -52,6 +52,7 @@ export class MisResultadosComponent implements AfterViewInit {
     this.http.get(`${environment.apiUrl}/api/user-stats/summary?userId=${this.userId}`)
       .subscribe((res: any) => {
         this.estadisticas = res.data;
+        console.log('Estadísticas:', this.estadisticas);
       });
   }
 

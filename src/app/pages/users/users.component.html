@@ -28,43 +28,44 @@
   <hr>
   <div class="card-body">
     <div class="table-responsive">
-      <table class="table table-rounded table-hover border table-bordered border-gray-300 table-vmiddle text-center">
-        <thead class="bg-light-secondary">
+      <table
+        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
+        <thead class="bg-light-secondary align-middle">
           <tr class="fw-bold">
-            <th>ID:</th>
-            <th>Foto</th>
-            <th>Nombre</th>
-            <th># Documento</th>
-            <th>Correo</th>
-            <th>Genero</th>
-            <th>Telefono</th>
-            <th>Rol</th>
-            <th>Aciones</th>
+            <th class="align-middle">N°</th>
+            <th class="align-middle">Foto</th>
+            <th class="align-middle">Nombre</th>
+            <th class="align-middle d-none d-md-table-cell"># Documento</th>
+            <th class="align-middle d-none d-md-table-cell">Correo</th>
+            <th class="align-middle">Genero</th>
+            <th class="align-middle">Teléfono</th>
+            <th class="align-middle d-none d-sm-table-cell">Rol</th>
+            <th class="align-middle">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <ng-container>
-            <tr *ngFor="let user of usuariosFiltrados">
-              <td>{{ user.userId }}</td>
-              <td>
-                <div>
-                  <img [src]="apiUrl + user.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')"
-                    alt="Foto de perfil" style="width: 40px; height: 40px" class="rounded-circle" />
-                  <div class="ms-3"></div>
-                </div>
-              </td>
-              <td class="align-items-center"><a
-                  class="link-offset-2 link-underline link-underline-opacity-0 link-secondary"
-                  [routerLink]="['/detalle-jugador', user.userId]">{{user.fullName}} {{user.fullSurname}}</a></td>
-              <td>{{ user.document }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.gender }}</td>
-              <td>{{ user.phone }}</td>
-              <td>{{ user.roleDescription }}</td>
-              <td>
-                <div class="d-flex justify-content-center gap-2">
-                  <!-- Botón Editar - Azul suave -->
-                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+          <tr *ngFor="let user of usuariosFiltrados">
+            <td class="align-middle">{{ user.userId }}</td>
+            <td class="align-middle">
+              <div class="avatar-wrapper mx-auto">
+                <img [src]="apiUrl + user.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')"
+                  alt="Foto de perfil" width="40" height="40" class="rounded-circle avatar-img" />
+              </div>
+            </td>
+            <td class="align-middle">
+              <a [routerLink]="['/detalle-jugador', user.userId]" class="player-zoom text-dark"
+                style="text-decoration: none; display: inline-block;">
+                {{ user.fullName }} {{ user.fullSurname }}
+              </a>
+            </td>
+            <td class="align-middle d-none d-md-table-cell">{{ user.document }}</td>
+            <td class="align-middle d-none d-md-table-cell">{{ user.email }}</td>
+            <td class="align-middle">{{ user.gender }}</td>
+            <td class="align-middle">{{ user.phone }}</td>
+            <td class="align-middle d-none d-sm-table-cell">{{ user.roleDescription }}</td>
+            <td class="align-middle">
+              <div class="d-flex justify-content-center gap-2">
+                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
                     style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
                     (click)="editUser(user)">
                     <i class="fas fa-edit"></i>
@@ -76,135 +77,134 @@
                     style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
                     <i class="fas fa-trash"></i>
                   </button>
-                </div>
-              </td>
-            </tr>
-          </ng-container>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
+  </div>
 
-    <ng-template #modalUser>
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
-          <h2 class="modal-title flex-grow-1 m-0">
-            {{ idUser ? 'Editar' : 'Crear' }} Usuario
-          </h2>
-          <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
-            style="filter: brightness(0) invert(1);"></button>
-        </div>
+  <ng-template #modalUser>
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+        <h2 class="modal-title flex-grow-1 m-0">
+          {{ idUser ? 'Editar' : 'Crear' }} Usuario
+        </h2>
+        <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+          style="filter: brightness(0) invert(1);"></button>
+      </div>
 
-        <div class="modal-body">
-          <form [formGroup]="userForm" novalidate>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">nickname</label>
-                <input formControlName="nickname" type="text" class="form-control" placeholder="nickname" [ngClass]="{
+      <div class="modal-body">
+        <form [formGroup]="userForm" novalidate>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">nickname</label>
+              <input formControlName="nickname" type="text" class="form-control" placeholder="nickname" [ngClass]="{
                 'is-invalid': userForm.controls['nickname'].invalid && userForm.controls['nickname'].touched,
                 'is-valid': userForm.controls['nickname'].valid
               }" />
-              </div>
+            </div>
 
-              <div class="col-md-6">
-                <label class="form-label"># Documento</label>
-                <input formControlName="document" type="text" class="form-control" placeholder="1.123.456.789"
-                  [ngClass]="{
+            <div class="col-md-6">
+              <label class="form-label"># Documento</label>
+              <input formControlName="document" type="text" class="form-control" placeholder="1.123.456.789" [ngClass]="{
                 'is-invalid': userForm.controls['document'].invalid && userForm.controls['document'].touched,
                 'is-valid': userForm.controls['document'].valid
               }" />
-              </div>
+            </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Nombres</label>
-                <input formControlName="fullName" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
+            <div class="col-md-6">
+              <label class="form-label">Nombres</label>
+              <input formControlName="fullName" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
                 'is-invalid': userForm.controls['fullName'].invalid && userForm.controls['fullName'].touched,
                 'is-valid': userForm.controls['fullName'].valid
               }" />
-              </div>
+            </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Apellidos</label>
-                <input formControlName="fullSurname" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
+            <div class="col-md-6">
+              <label class="form-label">Apellidos</label>
+              <input formControlName="fullSurname" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
                 'is-invalid': userForm.controls['fullSurname'].invalid && userForm.controls['fullSurname'].touched,
                 'is-valid': userForm.controls['fullSurname'].valid
               }" />
-              </div>
+            </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Correo</label>
-                <input formControlName="email" type="email" class="form-control" placeholder="Correo" [ngClass]="{
+            <div class="col-md-6">
+              <label class="form-label">Correo</label>
+              <input formControlName="email" type="email" class="form-control" placeholder="Correo" [ngClass]="{
                 'is-invalid': userForm.controls['email'].invalid && userForm.controls['email'].touched,
                 'is-valid': userForm.controls['email'].valid
               }" />
-              </div>
+            </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Teléfono</label>
-                <input formControlName="phone" type="number" class="form-control" placeholder="Teléfono" [ngClass]="{
+            <div class="col-md-6">
+              <label class="form-label">Teléfono</label>
+              <input formControlName="phone" type="number" class="form-control" placeholder="Teléfono" [ngClass]="{
                               'is-invalid': userForm.controls['phone'].invalid && userForm.controls['phone'].touched,
                               'is-valid': userForm.controls['phone'].valid
                             }" />
-              </div>
+            </div>
 
-              <!-- Select de Género -->
-              <div class="col-md-6">
-                <label class="form-label">Género</label>
-                <select class="form-select" formControlName="gender" [ngClass]="{
+            <!-- Select de Género -->
+            <div class="col-md-6">
+              <label class="form-label">Género</label>
+              <select class="form-select" formControlName="gender" [ngClass]="{
                     'is-invalid': userForm.controls['gender'].invalid && userForm.controls['gender'].touched,
                     'is-valid': userForm.controls['gender'].valid
                   }">
-                  <option [ngValue]="null" disabled>Seleccione un género</option>
-                  <option *ngFor="let g of genders" [ngValue]="g">{{ g }}</option>
-                </select>
-              </div>
+                <option [ngValue]="null" disabled>Seleccione un género</option>
+                <option *ngFor="let g of genders" [ngValue]="g">{{ g }}</option>
+              </select>
+            </div>
 
-              <!-- Select de Rol -->
-              <div class="col-md-6">
-                <label class="form-label">Rol</label>
-                <select class="form-select" formControlName="roleId" [ngClass]="{
+            <!-- Select de Rol -->
+            <div class="col-md-6">
+              <label class="form-label">Rol</label>
+              <select class="form-select" formControlName="roleId" [ngClass]="{
                     'is-invalid': userForm.controls['roleId'].invalid && userForm.controls['roleId'].touched,
                     'is-valid': userForm.controls['roleId'].valid
                   }">
-                  <option [ngValue]="null" disabled>Seleccione un rol</option>
-                  <option *ngFor="let rol of roles" [ngValue]="rol.roleId">{{ rol.description }}</option>
-                </select>
-              </div>
+                <option [ngValue]="null" disabled>Seleccione un rol</option>
+                <option *ngFor="let rol of roles" [ngValue]="rol.roleId">{{ rol.description }}</option>
+              </select>
+            </div>
 
-              <div class="col-md-6 position-relative">
-                <label class="form-label">Contraseña</label>
-                <input [type]="showPassword ? 'text' : 'password'" formControlName="password" class="form-control pe-5"
-                  placeholder="Contraseña" [ngClass]="{
+            <div class="col-md-6 position-relative">
+              <label class="form-label">Contraseña</label>
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="password" class="form-control pe-5"
+                placeholder="Contraseña" [ngClass]="{
                 'is-invalid': userForm.controls['password'].invalid && userForm.controls['password'].touched,
                 'is-valid': userForm.controls['password'].valid
               }" />
-                <i class="fa-solid" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"
-                  (click)="showPassword = !showPassword"
-                  style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
-                </i>
-              </div>
+              <i class="fa-solid" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"
+                (click)="showPassword = !showPassword"
+                style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
+              </i>
+            </div>
 
-              <div class="col-md-6 position-relative">
-                <label class="form-label">Confirmar Contraseña</label>
-                <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirm"
-                  class="form-control pe-5" placeholder="Confirmar Contraseña" [ngClass]="{
+            <div class="col-md-6 position-relative">
+              <label class="form-label">Confirmar Contraseña</label>
+              <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirm"
+                class="form-control pe-5" placeholder="Confirmar Contraseña" [ngClass]="{
                 'is-invalid': userForm.controls['confirm'].invalid && userForm.controls['confirm'].touched,
                 'is-valid': userForm.controls['confirm'].valid
               }" />
-                <i class="fa-solid" [class.fa-eye]="showConfirmPassword" [class.fa-eye-slash]="!showConfirmPassword"
-                  (click)="showConfirmPassword = !showConfirmPassword"
-                  style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
-                </i>
-              </div>
+              <i class="fa-solid" [class.fa-eye]="showConfirmPassword" [class.fa-eye-slash]="!showConfirmPassword"
+                (click)="showConfirmPassword = !showConfirmPassword"
+                style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
+              </i>
             </div>
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
-            <button type="button" class="btn btn-success" [disabled]="userForm.invalid"
-              (click)="saveForm()">Guardar</button>
           </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+          <button type="button" class="btn btn-success" [disabled]="userForm.invalid"
+            (click)="saveForm()">Guardar</button>
         </div>
       </div>
-    </ng-template>
+    </div>
+  </ng-template>

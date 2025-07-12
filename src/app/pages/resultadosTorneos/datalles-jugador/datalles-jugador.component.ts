@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ResultadosService } from 'src/app/services/resultados.service';
+import { Chart, registerables } from 'chart.js';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 import { Location } from '@angular/common';
+
 
 @Component({
   selector: 'app-datalles-jugador',
@@ -10,29 +13,34 @@ import { Location } from '@angular/common';
 })
 export class DatallesJugadorComponent {
 
-  jugador: any;
+  public apiUrl = environment.apiUrl;
+  statisticsUser: any;
+  personId: number = 0;
 
   constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private resultadosService: ResultadosService,
-    private location: Location
-  ) { }
+    private http: HttpClient, private router: Router, private route: ActivatedRoute, private location: Location
+  ) {
+    this.personId = +this.route.snapshot.paramMap.get('id')!;
+  }
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id') || '1';
-    this.resultadosService
-      .get_top_jugadores()
-      .subscribe((top_jugadores: any) => {
-        console.log('Datos de top_jugadores:', top_jugadores);
-        const jugadoresArray = top_jugadores.jugadores_colombia;
-        this.jugador = jugadoresArray.find(
-          (jugador: any) => jugador.id === Number(id)
-        );
+    this.cargarEstadisticas();
+  }
+
+  cargarEstadisticas(): void {
+    this.http.get(`${environment.apiUrl}/api/user-stats/summary?userId=${this.personId}`)
+      .subscribe((res: any) => {
+        this.statisticsUser = res.data;
+        console.log('Estadísticas:', this.statisticsUser);
       });
   }
 
   goBack(): void {
     this.location.back();
+  }
+
+  onImgError(event: Event, defaultPath: string) {
+    const target = event.target as HTMLImageElement;
+    target.src = defaultPath;
   }
 }

@@ -13,6 +13,7 @@ export class DatallesTorneoComponent implements OnInit {
   ambitId!: number;
   modalityId!: number;
 
+  resumenTorneo: any;
   result: any[] = [];
   players: any[] = [];
   maxJuegos: number = 0;
@@ -26,7 +27,15 @@ export class DatallesTorneoComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.getResumenTorneo();
     this.getDetalleTorneo();
+  }
+
+    getResumenTorneo() {
+    this.http.get<any>(`${environment.apiUrl}/results/tournament-summary?tournamentId=${this.tournamentId}`)
+      .subscribe((res: any) => {
+        this.resumenTorneo = res.data;
+      });
   }
 
   getDetalleTorneo() {
@@ -37,6 +46,7 @@ export class DatallesTorneoComponent implements OnInit {
     ).subscribe((res: any) => {
       this.result = res.data;
       this.players = Array.isArray(this.result) ? this.result : [];
+      console.log(this.players);
       // maxJuegos ahora busca el length de scores (no Juego)
       this.maxJuegos = this.players.reduce((max, p) =>
         Math.max(max, Array.isArray(p.scores) ? p.scores.length : 0), 0
@@ -57,7 +67,6 @@ export class DatallesTorneoComponent implements OnInit {
         console.log('Tabla por género:', this.result);
       });
   }
-
 
   goBack() {
     console.log('Go back', this.tournamentId);
