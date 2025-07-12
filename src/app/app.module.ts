@@ -5,7 +5,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { RegistroComponent } from './pages/registro/registro.component';
 import { LoginComponent } from './auth/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -43,6 +42,7 @@ import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.compone
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AmbitComponent } from './pages/ambit/ambit.component';
 import { ResultsComponent } from './pages/results/results.component';
+import { LoadingComponent } from './components/loading/loading.component';
 
 
 
@@ -52,7 +52,6 @@ providers: [
 @NgModule({
   declarations: [
     AppComponent,
-    RegistroComponent,
     LoginComponent,
     DashboardComponent,
     JugadoresComponent,
@@ -76,7 +75,8 @@ providers: [
     CategorysComponent,
     ModalityComponent,
     AmbitComponent,
-    ResultsComponent
+    ResultsComponent,
+    LoadingComponent
   ],
   imports: [
     CommonModule,
