@@ -1,12 +1,4 @@
-0.en detalle-torneo  no solo mandar los rultados si no tambien  la modalidad y la categoria por la que se esta consultando
 
-1. acomodar  detalle-jugador para recibir data acomodar enpoint de mis resultados para que no solo devuelva los resultados del jugador si no tambien el lso datos de este
-
-3. hacer controller crud tabla informacion bolera
-
-4. horganizar las consultas por fehca de torneos.
-
-5. horanizar las cosultas por orden alfavatico
 
 6.mirar como manejar Torneos inscritos
 

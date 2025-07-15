@@ -36,9 +36,9 @@ const routes: Routes = [
       // VISITANTES (sin login, sin protección)
       { path: 'dashboard', component: DashboardComponent },
       { path: 'lista-torneos/:ambitId', component: ListaTorneosComponent },
-      { path: 'resumen-torneo/:ambitId/:id', component: ResumenTorneoComponent },
-      { path: 'detalle-torneo/:ambitId/:tournamentId/:id', component: DatallesTorneoComponent },
-      { path: 'detalle-jugador/:id', component: DatallesJugadorComponent },
+      { path: 'resumen-torneo/:tournamentId', component: ResumenTorneoComponent },
+      { path: 'detalle-torneo/:tournamentId/:modalityId', component: DatallesTorneoComponent },
+      { path: 'detalle-jugador/:userId', component: DatallesJugadorComponent },
 
       // JUGADORES (rol: JUGADOR, ENTRENADOR, ADMIN)
       { path: 'perfil', component: PerfilComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },

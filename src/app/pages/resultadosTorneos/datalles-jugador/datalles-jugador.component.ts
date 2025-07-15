@@ -20,7 +20,7 @@ export class DatallesJugadorComponent {
   constructor(
     private http: HttpClient, private router: Router, private route: ActivatedRoute, private location: Location
   ) {
-    this.personId = +this.route.snapshot.paramMap.get('id')!;
+    this.personId = +this.route.snapshot.paramMap.get('userId')!;
   }
 
   ngOnInit(): void {

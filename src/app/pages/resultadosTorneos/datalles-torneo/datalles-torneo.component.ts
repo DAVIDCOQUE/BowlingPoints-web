@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import { Location } from '@angular/common';
 @Component({
   selector: 'app-datalles-torneo',
   templateUrl: './datalles-torneo.component.html',
@@ -10,7 +11,6 @@ import { environment } from 'src/environments/environment';
 export class DatallesTorneoComponent implements OnInit {
 
   tournamentId!: number;
-  ambitId!: number;
   modalityId!: number;
 
   resumenTorneo: any;
@@ -19,10 +19,9 @@ export class DatallesTorneoComponent implements OnInit {
   maxJuegos: number = 0;
 
 
-  constructor(private router: Router, private http: HttpClient, private route: ActivatedRoute) {
+  constructor(private router: Router, private http: HttpClient, private route: ActivatedRoute, private location: Location) {
     this.tournamentId = +this.route.snapshot.paramMap.get('tournamentId')!;
-    this.ambitId = +this.route.snapshot.paramMap.get('ambitId')!;
-    this.modalityId = +this.route.snapshot.paramMap.get('id')!;
+    this.modalityId = +this.route.snapshot.paramMap.get('modalityId')!;
 
   }
 
@@ -68,9 +67,8 @@ export class DatallesTorneoComponent implements OnInit {
       });
   }
 
-  goBack() {
-    console.log('Go back', this.tournamentId);
-    this.router.navigate(['/resumen-torneo', this.ambitId, this.tournamentId]);
+ goBack(): void {
+    this.location.back();
   }
 
 }

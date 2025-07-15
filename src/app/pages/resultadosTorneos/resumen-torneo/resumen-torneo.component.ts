@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import { Location } from '@angular/common';
+
 @Component({
   selector: 'app-resumen-torneo',
   templateUrl: './resumen-torneo.component.html',
@@ -11,13 +13,11 @@ export class ResumenTorneoComponent {
 
   resumenTorneo: any;
   tournamentId!: number;
-  ambitId!: number;
 
-  constructor(private router: Router, private http: HttpClient, private route: ActivatedRoute) { }
+  constructor(private router: Router, private http: HttpClient, private route: ActivatedRoute, private location: Location) { }
 
   ngOnInit(): void {
-    this.tournamentId = +this.route.snapshot.paramMap.get('id')!;
-    this.ambitId = +this.route.snapshot.paramMap.get('ambitId')!;
+    this.tournamentId = +this.route.snapshot.paramMap.get('tournamentId')!;
     this.getResumenTorneo();
   }
 
@@ -28,9 +28,10 @@ export class ResumenTorneoComponent {
       });
   }
 
-  goBack() {
-    this.router.navigate(['/lista-torneos', this.ambitId]);
+    goBack(): void {
+    this.location.back();
   }
+
 
 }
 

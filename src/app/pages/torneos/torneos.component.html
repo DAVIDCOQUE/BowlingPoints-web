@@ -35,11 +35,10 @@
         class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
         <thead class="bg-light-secondary align-middle">
           <tr class="fw-bold">
+            <th>Fecha</th>
             <th>Nombre</th>
             <th>Ambito</th>
             <th>Lugar</th>
-            <th>Fecha Inicio</th>
-            <th>Fecha Fin</th>
             <th>Modalidad</th>
             <th>Categoria</th>
             <th>Estado</th>
@@ -49,19 +48,42 @@
         <tbody>
           <ng-container>
             <tr *ngFor="let tournament of filteredTournaments">
+               <td class="align-middle text-start" style="min-width: 150px; max-width: 200px;">
+                <div>
+                  <span class="fw-semibold text-secondary">Inicio:</span>
+                  <span class="text-dark">{{ tournament.startDate | date: 'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="mt-1">
+                  <span class="fw-semibold text-secondary">Fin:</span>
+                  <span class="text-dark">{{ tournament.endDate | date: 'dd/MM/yyyy' }}</span>
+                </div>
+              </td>
               <td>{{ tournament.name || '-' }}</td>
               <td>{{ tournament.ambitName || '-' }}</td>
               <td>{{ tournament.location || '-' }}</td>
-              <td>{{ tournament.startDate | date: 'dd/MM/yyyy' }}</td>
-              <td>{{ tournament.endDate | date: 'dd/MM/yyyy' }}</td>
+
               <td>{{ tournament.modalityNames?.join(', ') || '-' }}</td>
               <td>{{ tournament.categoryNames?.join(', ') || '-' }}</td>
-              <td>{{ tournament.causeStatus || '-' }} - {{ tournament.status }}</td>
+              <td>
+                {{ tournament.causeStatus || '-' }}
+                <span class="ms-2 fw-semibold" [ngClass]="tournament.status ? 'text-success' : 'text-danger'">
+                  ({{ tournament.status ? 'Activo' : 'Inactivo' }})
+                </span>
+              </td>
+
               <td>
                 <div class="d-flex justify-content-center gap-2">
+
+                  <!-- Botón Cargar resultados - Rojo suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    (click)="openModalResultados(tournament.tournamentId)"
+                    style="background-color: rgba(13, 180, 75, 0.1); color: #28a745; border-radius: 0.5rem; min-width: 30px; height: 30px;">
+                    <i class="fas fa-file-excel"></i>
+                  </button>
+
                   <!-- Botón Editar - Azul suave -->
                   <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                    style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
+                    style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 30px; height: 30px;"
                     (click)="editTournament(tournament)">
                     <i class="fas fa-edit"></i>
                   </button>
@@ -69,16 +91,10 @@
                   <!-- Botón Eliminar - Rojo suave -->
                   <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
                     (click)="deleteTournament(tournament.tournamentId)"
-                    style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                    style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 30px; height: 30px;">
                     <i class="fas fa-trash"></i>
                   </button>
 
-                  <!-- Botón Cargar resultados - Rojo suave -->
-                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                    (click)="openModalResultados(tournament.tournamentId)"
-                    style="background-color: rgba(13, 180, 75, 0.1); color: #28a745; border-radius: 0.5rem; min-width: 40px; height: 36px;">
-                    <i class="fas fa-file-excel"></i>
-                  </button>
                 </div>
               </td>
             </tr>
