@@ -33,17 +33,12 @@ export class TorneosComponent {
   ];
 
   causes = [
-    { causeId: 1, name: 'En curso' },
-    { causeId: 2, name: 'Programado' },
-    { causeId: 3, name: 'En juego actualmente' },
-    { causeId: 4, name: 'Finalizado correctamente' },
-    { causeId: 5, name: 'Cancelado por mal clima' },
-    { causeId: 6, name: 'Cancelado por fuerza mayor' },
-    { causeId: 7, name: 'Suspendido por decisión técnica' },
-    { causeId: 8, name: 'Aplazado por programación' },
-    { causeId: 10, name: 'Reprogramado por logística' },
-    { causeId: 11, name: 'Suspendido por problemas técnicos' },
-    { causeId: 12, name: 'Cierre administrativo' }
+    { causeId: 1, name: 'Programado' },
+    { causeId: 2, name: 'En curso' },
+    { causeId: 3, name: 'Aplazado' },
+    { causeId: 4, name: 'Finalizado' },
+    { causeId: 5, name: 'Cancelado' },
+
   ];
 
   constructor(
