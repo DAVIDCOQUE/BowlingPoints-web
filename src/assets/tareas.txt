@@ -1,3 +1,9 @@
 1.mirar como manejar Torneos inscritos: hacer interface para
 torneos inscritos donde aparezcan los jugadores inscritos y el estado del torneo
 
+2. acomodar modales de creacion de datos
+
+3. agregar organizador a la hora de crear tornoes y ver si el endpoints lo recibe correctamente
+
+4. en el endponit de detalle-torneos, no solo traer los resultados si no tambien el torne y  modalidad, ya sea sencillo femenino masculono y asi
+5.

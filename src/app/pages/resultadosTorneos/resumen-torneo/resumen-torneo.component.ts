@@ -25,6 +25,7 @@ export class ResumenTorneoComponent {
     this.http.get<any>(`${environment.apiUrl}/results/tournament-summary?tournamentId=${this.tournamentId}`)
       .subscribe((res: any) => {
         this.resumenTorneo = res.data;
+        console.log(this.resumenTorneo);
       });
   }
 

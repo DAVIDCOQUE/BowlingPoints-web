@@ -24,6 +24,7 @@ import { ModalityComponent } from './pages/modality/modality.component';
 import { CategorysComponent } from './pages/categorys/categorys.component';
 import { AmbitComponent } from './pages/ambit/ambit.component';
 import { ResultsComponent } from './pages/results/results.component';
+import { TorneoInscritosComponent } from './pages/resultadosTorneos/torneo-inscritos/torneo-inscritos.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -36,6 +37,7 @@ const routes: Routes = [
       // VISITANTES (sin login, sin protección)
       { path: 'dashboard', component: DashboardComponent },
       { path: 'lista-torneos/:ambitId', component: ListaTorneosComponent },
+      { path: 'torneo-inscrito/:tournamentId', component: TorneoInscritosComponent },
       { path: 'resumen-torneo/:tournamentId', component: ResumenTorneoComponent },
       { path: 'detalle-torneo/:tournamentId/:modalityId', component: DatallesTorneoComponent },
       { path: 'detalle-jugador/:userId', component: DatallesJugadorComponent },

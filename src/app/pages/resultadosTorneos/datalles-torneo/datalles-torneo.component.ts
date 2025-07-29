@@ -45,12 +45,12 @@ export class DatallesTorneoComponent implements OnInit {
     ).subscribe((res: any) => {
       this.result = res.data;
       this.players = Array.isArray(this.result) ? this.result : [];
-      console.log(this.players);
+      console.log(res);
       // maxJuegos ahora busca el length de scores (no Juego)
       this.maxJuegos = this.players.reduce((max, p) =>
         Math.max(max, Array.isArray(p.scores) ? p.scores.length : 0), 0
       );
-      console.log('Tabla de resultados:', this.result);
+
     });
   }
 
