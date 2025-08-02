@@ -125,6 +125,14 @@
               </div>
 
               <div class="col-md-6">
+                <label class="form-label">Organizador</label>
+                <input formControlName="organizer" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
+                'is-invalid': tournamentForm.controls['organizer'].invalid && tournamentForm.controls['organizer'].touched,
+                'is-valid': tournamentForm.controls['organizer'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6">
                 <label class="form-label">Modalidades</label>
                 <ng-select [items]="modalities" bindLabel="name" bindValue="modalityId" [multiple]="true"
                   formControlName="modalityIds" [ngClass]="{

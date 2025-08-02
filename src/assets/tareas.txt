@@ -1,9 +1,11 @@
-1.mirar como manejar Torneos inscritos: hacer interface para
-torneos inscritos donde aparezcan los jugadores inscritos y el estado del torneo
+1.mirar como manejar Torneos inscritos:
+-- hacer interface para
+-- torneos inscritos donde aparezcan los jugadores inscritos y el estado del torneo
 
-2. acomodar modales de creacion de datos
+2. Acomodar endpoint de resumen-torneos para que devuelva  el total femenino masculino o mixto
 
-3. agregar organizador a la hora de crear tornoes y ver si el endpoints lo recibe correctamente
+ 3. Acomodar el endponit de detalle-torneos, para que filtre por categoria todo evento femenino masculino o mixto y para que filtre por
+ modalidad individual demeninio, individual masculino o mixtos
 
-4. en el endponit de detalle-torneos, no solo traer los resultados si no tambien el torne y  modalidad, ya sea sencillo femenino masculono y asi
-5.
+ 3. ver bien como va hacer el excel de los resultados que va entregar la bolera para haci hacer el importador de torneos
+

@@ -42,6 +42,7 @@ export class DashboardComponent {
           this.clubs = res.data.topClubs ?? [];
           this.players = res.data.topPlayers ?? [];
           this.ambits = res.data.ambits ?? [];
+          console.log(this.tournaments);
         },
         error: err => {
           console.error('❌ Error al cargar data:', err);

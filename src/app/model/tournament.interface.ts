@@ -1,6 +1,7 @@
 export interface ITournament {
   tournamentId: number;
   name: string;
+  organizer: string;
   imageUrl: string;
   modalityIds: [];
   modalityNames?: []; // Opcional si no siempre viene del backend

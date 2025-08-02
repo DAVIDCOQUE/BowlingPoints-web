@@ -6,33 +6,35 @@
       <h3 class="mb-3">🏆 Próximos Torneos</h3>
 
       <!-- Card de Torneo -->
-      <div class="card mb-3 border-0 shadow-sm rounded-4 card_h" *ngFor="let tournament of tournaments">
-        <!-- Header torneo -->
-        <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
-          <strong>{{tournament.name}}</strong><span class="badge bg-warning text-dark fw-semibold">Edición:
-            {{tournament.startDate | date:'yyyy'}}</span>
-        </div>
-        <div class="card-body py-3">
-          <div class="row">
-            <!-- Columna Izquierda (Icono grande) -->
-            <div class="col-2 d-flex align-items-center justify-content-center">
-              <img [src]="apiUrl + tournament.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
-                width="50" alt="Organizador">
-            </div>
-            <!-- Columna Derecha (Información) -->
-            <div class="col-10">
-              <div class="row small gy-1">
-                <div class="col-6">
-                  <span>📅 <strong>Fecha: </strong>{{tournament.startDate | date:'dd MMMM yyyy'}}</span>
-                </div>
-                <div class="col-6">
-                  <span>📍 <strong>Lugar:</strong> {{tournament.location}}</span>
-                </div>
-                <div class="col-6">
-                  <span>🎳 <strong>Modalidad:</strong>{{ tournament.modalityNames?.join(', ') || '-' }}</span>
-                </div>
-                <div class="col-6">
-                  <span>🏷️ <strong>Categoría:</strong> {{ tournament.categoryNames?.join(', ') || '-' }}</span>
+      <div *ngFor="let tournament of tournaments">
+        <div class="card mb-3 border-0 shadow-sm rounded-4 card_h" routerLink="/torneo-inscrito/{{tournament.tournamentId}}">
+          <!-- Header torneo -->
+          <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
+            <strong>{{tournament.name}}</strong><span class="badge bg-warning text-dark fw-semibold">Edición:
+              {{tournament.startDate | date:'yyyy'}}</span>
+          </div>
+          <div class="card-body py-3">
+            <div class="row">
+              <!-- Columna Izquierda (Icono grande) -->
+              <div class="col-2 d-flex align-items-center justify-content-center">
+                <img [src]="apiUrl + tournament.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
+                  width="50" alt="Organizador">
+              </div>
+              <!-- Columna Derecha (Información) -->
+              <div class="col-10">
+                <div class="row small gy-1">
+                  <div class="col-6">
+                    <span>📅 <strong>Fecha: </strong>{{tournament.startDate | date:'dd MMMM yyyy'}}</span>
+                  </div>
+                  <div class="col-6">
+                    <span>📍 <strong>Lugar:</strong> {{tournament.location}}</span>
+                  </div>
+                  <div class="col-6">
+                    <span>🎳 <strong>Modalidad:</strong>{{ tournament.modalityNames?.join(', ') || '-' }}</span>
+                  </div>
+                  <div class="col-6">
+                    <span>🏷️ <strong>Categoría:</strong> {{ tournament.categoryNames?.join(', ') || '-' }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -45,33 +47,35 @@
     <!-- Torneos Derecha -->
     <div class="col-md-6">
       <h3 class="mb-3">🏆 Torneos Activos</h3>
+      <div *ngFor="let tournament of tournaments">
 
-      <div class="card mb-3 border-0 shadow-sm rounded-4 card_h" routerLink="/torneo-inscrito/1">
-        <!-- Header torneo -->
-        <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
-          <strong>Copa valle 2025</strong><span class="badge bg-warning text-dark fw-semibold">Edición 2025</span>
-        </div>
-        <div class="card-body py-3">
-          <div class="row">
-            <!-- Columna Izquierda (Icono grande) -->
-            <div class="col-2 d-flex align-items-center justify-content-center">
-              <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/T1_logo.svg/800px-T1_logo.svg.png"
-                width="50" alt="Organizador">
-            </div>
-            <!-- Columna Derecha (Información) -->
-            <div class="col-10">
-              <div class="row small gy-1">
-                <div class="col-6">
-                  <span>📅 <strong>Fecha: </strong>20 marzo 2025</span>
-                </div>
-                <div class="col-6">
-                  <span>📍 <strong>Lugar:</strong> Bolera XYZ, Cali, Valle</span>
-                </div>
-                <div class="col-6">
-                  <span>🎳 <strong>Modalidad:</strong> Individual / Equipos</span>
-                </div>
-                <div class="col-6">
-                  <span>🏷️ <strong>Categoría:</strong> Sub-21, Mayores, Mixto</span>
+        <div class="card mb-3 border-0 shadow-sm rounded-4 card_h" routerLink="/resumen-torneo/{{tournament.tournamentId}}">
+          <!-- Header torneo -->
+          <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
+            <strong>Copa valle 2025</strong><span class="badge bg-warning text-dark fw-semibold">Edición 2025</span>
+          </div>
+          <div class="card-body py-3">
+            <div class="row">
+              <!-- Columna Izquierda (Icono grande) -->
+              <div class="col-2 d-flex align-items-center justify-content-center">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/T1_logo.svg/800px-T1_logo.svg.png" width="50"
+                  alt="Organizador">
+              </div>
+              <!-- Columna Derecha (Información) -->
+              <div class="col-10">
+                <div class="row small gy-1">
+                  <div class="col-6">
+                    <span>📅 <strong>Fecha: </strong>20 marzo 2025</span>
+                  </div>
+                  <div class="col-6">
+                    <span>📍 <strong>Lugar:</strong> Bolera XYZ, Cali, Valle</span>
+                  </div>
+                  <div class="col-6">
+                    <span>🎳 <strong>Modalidad:</strong> Individual / Equipos</span>
+                  </div>
+                  <div class="col-6">
+                    <span>🏷️ <strong>Categoría:</strong> Sub-21, Mayores, Mixto</span>
+                  </div>
                 </div>
               </div>
             </div>

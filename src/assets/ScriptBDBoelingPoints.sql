@@ -261,6 +261,7 @@ CREATE TABLE result (
   person_id INT,
   team_id INT,
   tournament_id INT NOT NULL,
+  rama TEXT NOT NULL,
   round_id INT NOT NULL,
   category_id INT NOT NULL,
   modality_id INT NOT NULL,

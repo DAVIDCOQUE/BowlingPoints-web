@@ -58,6 +58,7 @@ export class TorneosComponent {
   initForm(): void {
     this.tournamentForm = this.formBuilder.group({
       name: ['', Validators.required],
+      organizer:['', Validators.required],
       modalityIds: ['', Validators.required],
       categoryIds: ['', Validators.required],
       startDate: ['', Validators.required],
@@ -74,6 +75,7 @@ export class TorneosComponent {
       .subscribe({
         next: res => {
           this.tournaments = res.data;
+          console.log(this.tournaments);
         },
         error: err => {
           console.error('Error al cargar torneoses:', err);
@@ -132,6 +134,7 @@ export class TorneosComponent {
   editTournament(tournament: ITournament): void {
     this.idTournament = tournament.tournamentId;
     this.tournamentForm.patchValue({ name: tournament.name });
+    this.tournamentForm.patchValue({ organizer: tournament.organizer });
     this.tournamentForm.patchValue({ categoryIds: tournament.categoryIds });
     this.tournamentForm.patchValue({ modalityIds: tournament.modalityIds });
     this.tournamentForm.patchValue({ startDate: tournament.startDate });
