@@ -7,6 +7,7 @@ teamId: number;
 tournamentId: number;
 categoryId: number;
 modalityId: number;
+rama: string;
 laneNumber: number;
 lineNumber: number;
 score: number;

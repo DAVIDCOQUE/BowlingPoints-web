@@ -16,6 +16,7 @@ import { ICategory } from 'src/app/model/category.interface';
 })
 export class TorneosComponent {
   @ViewChild('modalTournament') modalTournamentRef: any;
+  @ViewChild('modalSetResultTournament') modalSetResultTournamentRef: any;
 
   filter: string = '';
   tournaments: ITournament[] = [];
@@ -26,6 +27,8 @@ export class TorneosComponent {
   ambits: IAmbit[] = [];
 
   tournamentForm: FormGroup = new FormGroup({});
+
+  selectedTournament: any = null;
 
   estados = [
     { valor: true, etiqueta: 'Activo' },
@@ -58,7 +61,7 @@ export class TorneosComponent {
   initForm(): void {
     this.tournamentForm = this.formBuilder.group({
       name: ['', Validators.required],
-      organizer:['', Validators.required],
+      organizer: ['', Validators.required],
       modalityIds: ['', Validators.required],
       categoryIds: ['', Validators.required],
       startDate: ['', Validators.required],
@@ -106,6 +109,7 @@ export class TorneosComponent {
         }
       });
   }
+
   getAmbits(): void {
     this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(`${environment.apiUrl}/ambits`)
       .subscribe({
@@ -123,12 +127,6 @@ export class TorneosComponent {
     return term
       ? this.tournaments.filter(cat => cat.name.toLowerCase().includes(term))
       : this.tournaments;
-  }
-
-
-
-  openModalResultados(content: any): void {
-    this.modalService.open(content);
   }
 
   editTournament(tournament: ITournament): void {
@@ -195,6 +193,13 @@ export class TorneosComponent {
         });
       }
     });
+  }
+
+
+  openModalSetResultTournament(tournament: any) {
+    this.selectedTournament = tournament;
+    // Aquí abres el modal y pasas el tamaño 'xl'
+    this.modalService.open(this.modalSetResultTournamentRef, { size: 'xl' });
   }
 
   openModal(content: any): void {

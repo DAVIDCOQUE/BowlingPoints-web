@@ -48,7 +48,7 @@
         <tbody>
           <ng-container>
             <tr *ngFor="let tournament of filteredTournaments">
-               <td class="align-middle text-start" style="min-width: 150px; max-width: 200px;">
+              <td class="align-middle text-start" style="min-width: 150px; max-width: 200px;">
                 <div>
                   <span class="fw-semibold text-secondary">Inicio:</span>
                   <span class="text-dark">{{ tournament.startDate | date: 'dd/MM/yyyy' }}</span>
@@ -76,7 +76,7 @@
 
                   <!-- Botón Cargar resultados - Rojo suave -->
                   <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                    (click)="openModalResultados(tournament.tournamentId)"
+                    (click)="openModalSetResultTournament(tournament)"
                     style="background-color: rgba(13, 180, 75, 0.1); color: #28a745; border-radius: 0.5rem; min-width: 30px; height: 30px;">
                     <i class="fas fa-file-excel"></i>
                   </button>
@@ -228,4 +228,54 @@
           </div>
         </div>
       </div>
+    </ng-template>
+
+
+    <ng-template #modalSetResultTournament>
+
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+            <h2 class="modal-title flex-grow-1 m-0">
+              Cargar Resultados
+            </h2>
+            <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+              style="filter: brightness(0) invert(1);"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label"><strong>Torneo: </strong>{{ selectedTournament?.name }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"><strong>Organizador: </strong>{{ selectedTournament?.organizer }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"><strong>Modalidades: </strong>{{ selectedTournament?.modalityNames?.join(', ') }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"><strong>Categorías: </strong>{{ selectedTournament?.categoryNames?.join(', ') }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"><strong>Fecha Inicio: </strong>{{ selectedTournament?.startDate | date: 'dd/MM/yyyy' }}</label>
+
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"><strong>Fecha Fin: </strong>{{ selectedTournament?.endDate | date: 'dd/MM/yyyy' }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"><strong>Ámbito: </strong>{{ selectedTournament?.ambitName }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"><strong>Lugar: </strong>{{ selectedTournament?.location }}</label>
+              </div>
+              <!-- Agrega los demás campos igual -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Guardar</button>
+              <!-- Aquí puedes poner el botón de cargar resultados, si lo necesitas -->
+            </div>
+          </div>
+        </div>
     </ng-template>

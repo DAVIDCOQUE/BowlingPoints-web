@@ -83,6 +83,13 @@
                 style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
                 <i class="fa-solid fa-eye"></i> </button></td>
           </tr>
+          <tr *ngIf="!torneosJugados || torneosJugados.length === 0">
+            <td colspan="9">
+              <div class="alert alert-warning text-center my-3 py-2 rounded-3 fw-semibold m-0">
+                <i class="bi bi-emoji-frown"></i> No hay torneos para mostrar.
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

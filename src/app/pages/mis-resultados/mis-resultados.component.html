@@ -91,10 +91,6 @@
       <hr>
       <h3 class="mb-3">🏆 3 Mejores Torneos Jugados</h3>
       <div class="card-body">
-        <div *ngIf="!topTorneos || topTorneos.length === 0"
-          class="alert alert-warning text-center my-4 py-2 rounded-3 fw-semibold">
-          <i class="bi bi-emoji-frown"></i> No hay torneos para mostrar.
-        </div>
         <div class="table-responsive">
           <table
             class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
@@ -123,6 +119,14 @@
                 <td class="text-center"><button class="btn btn-sm px-2" (click)="resumenToreno(torneo.tournamentId)"
                     style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
                     <i class="fa-solid fa-eye"></i> </button></td>
+              </tr>
+              <!-- Mensaje vacío en la tabla -->
+              <tr *ngIf="!topTorneos || topTorneos.length === 0">
+                <td colspan="8">
+                  <div class="alert alert-warning text-center my-3 py-2 rounded-3 fw-semibold m-0">
+                    <i class="bi bi-emoji-frown"></i> No hay torneos para mostrar.
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
