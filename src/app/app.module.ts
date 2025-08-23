@@ -43,6 +43,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { AmbitComponent } from './pages/ambit/ambit.component';
 import { ResultsComponent } from './pages/results/results.component';
 import { LoadingComponent } from './components/loading/loading.component';
+import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
 
 
 
@@ -76,7 +77,8 @@ providers: [
     ModalityComponent,
     AmbitComponent,
     ResultsComponent,
-    LoadingComponent
+    LoadingComponent,
+    TournamentResultComponent
   ],
   imports: [
     CommonModule,

@@ -7,5 +7,7 @@
  3. Acomodar el endponit de detalle-torneos, para que filtre por categoria todo evento femenino masculino o mixto y para que filtre por
  modalidad individual demeninio, individual masculino o mixtos
 
- 3. ver bien como va hacer el excel de los resultados que va entregar la bolera para haci hacer el importador de torneos
+ 3. ver bien como va hacer el excel de los resultados que va entregar la bolera para hacer el importador de torneos
+
+ 4 hacer inportador de jugadores (usuarios ) desde excel
 
