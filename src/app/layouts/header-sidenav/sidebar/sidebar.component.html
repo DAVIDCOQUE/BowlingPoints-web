@@ -29,6 +29,15 @@
 
   <hr>
 
+  <!-- Mis Resultados -->
+  <mat-list-item *ngIf="auth.hasRole('JUGADOR')  || auth.hasRole('ADMIN')" routerLink="/mis-resultados"
+    routerLinkActive="active" class="d-flex align-items-center gap-3">
+    <img src="assets/img/grafico.png" height="22" class="me-2" />
+    <span *ngIf="isExpanded || isShowing">Resultados y estadísticas</span>
+  </mat-list-item>
+
+  <hr>
+
   <!-- Torneos -->
   <mat-list-item *ngIf="auth.hasRole('ADMIN')" routerLink="/torneos" routerLinkActive="active"
     class="d-flex align-items-center gap-3">
