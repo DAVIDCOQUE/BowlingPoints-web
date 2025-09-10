@@ -13,11 +13,12 @@ import { AuthService } from 'src/app/auth/auth.service';
 export class LoginComponent {
 
   form: FormGroup = new FormGroup({
-    username: new FormControl('', [Validators.required]),
+    username: new FormControl('', [Validators.required, Validators.pattern('^[0-9]+$')]),
     password: new FormControl('', [Validators.required])
   });
 
   error: string | null = null;
+  showPassword = false;
 
   constructor(
     private router: Router,
@@ -57,6 +58,10 @@ export class LoginComponent {
     } else {
       this.form.markAllAsTouched();
     }
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
   }
 
   loginAsGuest(): void {

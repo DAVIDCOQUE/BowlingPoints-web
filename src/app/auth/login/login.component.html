@@ -11,18 +11,26 @@
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="mb-3">
-            <label for="text" class="form-label">UserName</label>
-            <input type="text" id="text" class="form-control" placeholder="ejemplo@correo.com"
-              formControlName="username" />
+            <label for="username" class="form-label">Número de documento</label>
+            <input type="text" id="username" class="form-control" placeholder="123456789" formControlName="username"
+              inputmode="numeric" />
             <div *ngIf="username?.touched && username?.invalid" class="form-text text-danger">
-              Este campo es obligatorio
+              <span *ngIf="username?.errors?.['required']">Este campo es obligatorio</span>
+              <span *ngIf="username?.errors?.['pattern']">Solo se permiten números</span>
             </div>
           </div>
 
-          <div class="mb-3">
+          <div class="mb-3 position-relative">
             <label for="password" class="form-label">Contraseña</label>
-            <input type="password" id="password" class="form-control" placeholder="Contraseña"
-              formControlName="password" />
+
+            <div class="input-group">
+              <input [type]="showPassword ? 'text' : 'password'" id="password" class="form-control"
+                placeholder="Contraseña" formControlName="password" />
+              <button type="button" class="btn btn-outline-secondary" (click)="togglePassword()">
+                <i [ngClass]="showPassword ? 'fa fa-eye': 'fa fa-eye-slash'"></i>
+              </button>
+            </div>
+
             <div *ngIf="password?.touched && password?.invalid" class="form-text text-danger">
               Este campo es obligatorio
             </div>
@@ -32,11 +40,13 @@
             <a href="#" class="text-primary text-decoration-none">Recuperar contraseña</a>
           </div>
 
-          <button type="submit" class="btn btn btn-outline-primary w-100 ">
+          <button type="submit" class="btn btn btn-outline-primary w-100" [disabled]="form.invalid">
             Ingresar
           </button>
           <div class="text-center mb-3 mt-3">
-            <a (click)="loginAsGuest()" class="text-decoration-none" style="color: black;">Ingresar como invitado</a>
+            <button type="button" class="btn btn-link" (click)="loginAsGuest()">
+              Ingresar como invitado
+            </button>
           </div>
 
         </form>
