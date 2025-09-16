@@ -9,16 +9,6 @@ import { IModality } from '../../model/modality.interface';
 import { IAmbit } from 'src/app/model/ambit.interface';
 import { ICategory } from 'src/app/model/category.interface';
 import { dateRangeValidator } from 'src/app/shared/validators/date-range.validator';
-import { Observable, of } from 'rxjs';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  switchMap,
-  tap,
-  catchError,
-} from 'rxjs/operators';
-import { CitiesService, CityDto } from 'src/app/services/cities.service';
-import { NgbTypeaheadSelectItemEvent } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-torneos',
@@ -34,6 +24,7 @@ export class TorneosComponent {
   idTournament: number | null = null;
 
   modalities: IModality[] = [];
+  departments: any[] = [];
   categoris: ICategory[] = [];
   ambits: IAmbit[] = [];
 
@@ -54,18 +45,29 @@ export class TorneosComponent {
     { causeId: 5, name: 'Cancelado' },
   ];
 
+
+  location = [
+    { locationId: 1, name: 'Programado' },
+    { locationId: 1, name: 'Programado' },
+    { locationId: 1, name: 'Programado' },
+    { locationId: 1, name: 'Programado' },
+    { locationId: 1, name: 'Programado' },
+    { locationId: 1, name: 'Programado' },
+  ];
+
+
   constructor(
     private formBuilder: FormBuilder,
     private http: HttpClient,
     private modalService: NgbModal,
-    private cities: CitiesService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForm();
     this.getTournaments();
     this.getModalitys();
     this.getCategories();
+    this.getDepartments();
     this.getAmbits();
   }
 
@@ -79,10 +81,7 @@ export class TorneosComponent {
         startDate: ['', Validators.required],
         endDate: ['', Validators.required],
         ambitId: ['', Validators.required],
-        // ⬇️ nuevo control “canónico”
-        cityId: [null, Validators.required],
-        // ⬇️ se sigue mostrando en la tabla, lo rellenaremos al seleccionar
-        location: ['', [Validators.required, Validators.maxLength(60)]],
+        location: [''],
         causeStatus: ['', Validators.required],
         status: ['', Validators.required],
       },
@@ -107,6 +106,22 @@ export class TorneosComponent {
         },
         error: (err) => {
           console.error('Error al cargar torneoses:', err);
+        },
+      });
+  }
+
+
+
+  getDepartments(): void {
+    this.http
+      .get<any[]>(`https://api-colombia.com/api/v1/Department`)
+      .subscribe({
+        next: (res) => {
+          this.departments = res; // res ya es un array de países
+          console.log(this.departments)
+        },
+        error: (err) => {
+          console.error('Error al cargar países:', err);
         },
       });
   }
@@ -165,21 +180,29 @@ export class TorneosComponent {
 
   editTournament(tournament: ITournament): void {
     this.idTournament = tournament.tournamentId;
-    this.tournamentForm.patchValue({ name: tournament.name });
-    this.tournamentForm.patchValue({ organizer: tournament.organizer });
-    this.tournamentForm.patchValue({ categoryIds: tournament.categoryIds });
-    this.tournamentForm.patchValue({ modalityIds: tournament.modalityIds });
-    this.tournamentForm.patchValue({ startDate: tournament.startDate });
-    this.tournamentForm.patchValue({ endDate: tournament.endDate });
-    this.tournamentForm.patchValue({ ambitId: tournament.ambitId });
-    this.tournamentForm.patchValue({
-      cityId: (tournament as any).cityId ?? null,
-    });
-    this.tournamentForm.patchValue({ location: tournament.location });
-    this.tournamentForm.patchValue({ causeStatus: tournament.causeStatus });
-    this.tournamentForm.patchValue({ status: tournament.status });
 
-    // ⬇️ Recalcula el validador cruzado después de patchValue
+    this.tournamentForm.patchValue({
+      name: tournament.name,
+      organizer: tournament.organizer,
+      categoryIds: tournament.categoryIds,
+      modalityIds: tournament.modalityIds,
+      startDate: tournament.startDate,
+      endDate: tournament.endDate,
+      ambitId: tournament.ambitId,
+      cityId: (tournament as any).cityId ?? null,
+      causeStatus: tournament.causeStatus,
+      status: tournament.status
+    });
+
+    // Manejo especial para location
+    if (typeof tournament.location === 'number') {
+      this.tournamentForm.patchValue({ location: tournament.location });
+    } else if (typeof tournament.location === 'string') {
+      const dep = this.departments.find(d => d.name === tournament.location);
+      this.tournamentForm.patchValue({ location: dep ? dep.id : null });
+    }
+
+    // Recalcula el validador cruzado
     this.tournamentForm.updateValueAndValidity({
       onlySelf: false,
       emitEvent: false,
@@ -199,9 +222,9 @@ export class TorneosComponent {
 
     const request = isEdit
       ? this.http.put(
-          `${environment.apiUrl}/tournaments/${this.idTournament}`,
-          payload
-        )
+        `${environment.apiUrl}/tournaments/${this.idTournament}`,
+        payload
+      )
       : this.http.post(`${environment.apiUrl}/tournaments`, payload);
 
     request.subscribe({
@@ -286,24 +309,6 @@ export class TorneosComponent {
   }
 
   cityLoading = false;
-  searchCities = (text$: Observable<string>): Observable<CityDto[]> => {
-    return text$.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      tap(() => (this.cityLoading = true)),
-      switchMap((term) => this.cities.search(term, 10 /*limit*/)), // puedes pasar 'CO' como 3er arg si quieres limitar por país
-      tap(() => (this.cityLoading = false)),
-      catchError(() => {
-        this.cityLoading = false;
-        return of([]);
-      })
-    );
-  };
-
-  formatResult = (c: CityDto) =>
-    `${c.name}, ${c.countryName}${c.admin1 ? ' — ' + c.admin1 : ''}`;
-  formatInput = (c: CityDto | string) =>
-    typeof c === 'string' ? c : `${c.name}, ${c.countryName}`;
 
   // Si el usuario escribe y no selecciona una opción, invalida:
   onLocationBlur() {
@@ -315,12 +320,4 @@ export class TorneosComponent {
     }
   }
 
-  // Cuando selecciona una ciudad:
-  onCitySelected(e: NgbTypeaheadSelectItemEvent<CityDto>) {
-    const city = e.item;
-    this.tournamentForm.patchValue({
-      cityId: city.id,
-      location: `${city.name}, ${city.countryName}`,
-    });
-  }
 }

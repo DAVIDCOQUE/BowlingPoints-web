@@ -12,7 +12,7 @@
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="mb-3">
             <label for="username" class="form-label">Número de documento</label>
-            <input type="text" id="username" class="form-control" placeholder="123456789" formControlName="username"
+            <input type="number" id="username" class="form-control" placeholder="123456789" formControlName="username"
               inputmode="numeric" />
             <div *ngIf="username?.touched && username?.invalid" class="form-text text-danger">
               <span *ngIf="username?.errors?.['required']">Este campo es obligatorio</span>
