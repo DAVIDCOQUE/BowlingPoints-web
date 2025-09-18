@@ -189,18 +189,11 @@ export class TorneosComponent {
       startDate: tournament.startDate,
       endDate: tournament.endDate,
       ambitId: tournament.ambitId,
-      cityId: (tournament as any).cityId ?? null,
+      location: tournament.location,
       causeStatus: tournament.causeStatus,
       status: tournament.status
     });
 
-    // Manejo especial para location
-    if (typeof tournament.location === 'number') {
-      this.tournamentForm.patchValue({ location: tournament.location });
-    } else if (typeof tournament.location === 'string') {
-      const dep = this.departments.find(d => d.name === tournament.location);
-      this.tournamentForm.patchValue({ location: dep ? dep.id : null });
-    }
 
     // Recalcula el validador cruzado
     this.tournamentForm.updateValueAndValidity({
@@ -306,18 +299,6 @@ export class TorneosComponent {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
-  }
-
-  cityLoading = false;
-
-  // Si el usuario escribe y no selecciona una opción, invalida:
-  onLocationBlur() {
-    const cityId = this.tournamentForm.get('cityId')!.value;
-    const location = this.tournamentForm.get('location')!.value;
-    if (!cityId || !location) {
-      this.tournamentForm.get('cityId')!.setValue(null);
-      this.tournamentForm.get('location')!.setErrors({ required: true });
-    }
   }
 
 }

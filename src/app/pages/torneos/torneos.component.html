@@ -241,7 +241,7 @@
             'is-valid': tournamentForm.controls['location'].valid
           }">
                   <option [ngValue]="null" disabled>Departamento...</option>
-                  <option *ngFor="let department of departments" [ngValue]="department.id">
+                  <option *ngFor="let department of departments" [ngValue]="department.name">
                     {{ department.name }}
                   </option>
                 </select>
