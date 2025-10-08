@@ -1,0 +1,218 @@
+<div class="container mt-4">
+  <h1 class="text-center">Usuarios</h1>
+
+  <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
+    <!-- Filtro -->
+    <div class="d-flex flex-column flex-md-row align-items-start gap-2">
+      <div>
+        <input type="text" class="form-control form-control-sm" style="height: 36px; width: 250px;" placeholder="Buscar"
+          [(ngModel)]="filter" name="filter" />
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm  align-items-center" style="height: 36px; width: 100px;"
+          (click)="clear()">
+          <i class="fas fa-times me-1"></i> Limpiar
+        </button>
+      </div>
+    </div>
+
+    <!-- Botón Crear -->
+    <div>
+      <button class="btn btn-success btn-sm  align-items-center me-2" style="height: 36px; width: 150px;">
+        <i class="fas fa-file-excel"></i> Cargar Usuarios
+      </button>
+      <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
+        (click)="openModal(modalUser)">
+        <i class="fas fa-plus-circle me-1"></i> Crear
+      </button>
+    </div>
+  </div>
+
+  <hr>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table
+        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
+        <thead class="bg-light-secondary align-middle">
+          <tr class="fw-bold">
+            <th class="align-middle">N°</th>
+            <th class="align-middle">Foto</th>
+            <th class="align-middle">Nombre</th>
+            <th class="align-middle d-none d-md-table-cell"># Documento</th>
+            <th class="align-middle d-none d-md-table-cell">Correo</th>
+            <th class="align-middle">Genero</th>
+            <th class="align-middle">Teléfono</th>
+            <th class="align-middle d-none d-sm-table-cell">Rol</th>
+            <th class="align-middle">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of usuariosFiltrados">
+            <td class="align-middle">{{ user.userId }}</td>
+            <td class="align-middle">
+              <div class="avatar-wrapper mx-auto">
+                <img [src]="apiUrl + user.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')"
+                  alt="Foto de perfil" width="40" height="40" class="rounded-circle avatar-img" />
+              </div>
+            </td>
+            <td class="align-middle">
+              <a [routerLink]="['/detalle-jugador', user.userId]" class="player-zoom text-dark"
+                style="text-decoration: none; display: inline-block;">
+                {{ user.fullName }} {{ user.fullSurname }}
+              </a>
+            </td>
+            <td class="align-middle d-none d-md-table-cell">{{ user.document }}</td>
+            <td class="align-middle d-none d-md-table-cell">{{ user.email }}</td>
+            <td class="align-middle">{{ user.gender }}</td>
+            <td class="align-middle">{{ user.phone }}</td>
+            <td class="align-middle d-none d-sm-table-cell">{{ user.roleDescription }}</td>
+            <td class="align-middle">
+              <div class="d-flex justify-content-center gap-2">
+                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                  style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
+                  (click)="editUser(user)">
+                  <i class="fas fa-edit"></i>
+                </button>
+
+                <!-- Botón Eliminar - Rojo suave -->
+                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                  (click)="deleteUser(user.userId)"
+                  style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <ng-template #modalUser>
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+        <h2 class="modal-title flex-grow-1 m-0">
+          {{ idUser ? 'Editar' : 'Crear' }} Usuario
+        </h2>
+        <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+          style="filter: brightness(0) invert(1);"></button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="userForm" novalidate>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">nickname</label>
+              <input formControlName="nickname" type="text" class="form-control" placeholder="nickname" [ngClass]="{
+                'is-invalid': userForm.controls['nickname'].invalid && userForm.controls['nickname'].touched,
+                'is-valid': userForm.controls['nickname'].valid
+              }" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label"># Documento</label>
+              <input formControlName="document" type="text" class="form-control" placeholder="1.123.456.789" [ngClass]="{
+                'is-invalid': userForm.controls['document'].invalid && userForm.controls['document'].touched,
+                'is-valid': userForm.controls['document'].valid
+              }" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Nombres</label>
+              <input formControlName="fullName" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
+                'is-invalid': userForm.controls['fullName'].invalid && userForm.controls['fullName'].touched,
+                'is-valid': userForm.controls['fullName'].valid
+              }" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Apellidos</label>
+              <input formControlName="fullSurname" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
+                'is-invalid': userForm.controls['fullSurname'].invalid && userForm.controls['fullSurname'].touched,
+                'is-valid': userForm.controls['fullSurname'].valid
+              }" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Correo</label>
+              <input formControlName="email" type="email" class="form-control" placeholder="Correo" [ngClass]="{
+                'is-invalid': userForm.controls['email'].invalid && userForm.controls['email'].touched,
+                'is-valid': userForm.controls['email'].valid
+              }" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Teléfono</label>
+              <input formControlName="phone" type="number" class="form-control" placeholder="Teléfono" [ngClass]="{
+                              'is-invalid': userForm.controls['phone'].invalid && userForm.controls['phone'].touched,
+                              'is-valid': userForm.controls['phone'].valid
+                            }" />
+            </div>
+
+            <!-- Select de Género -->
+            <div class="col-md-6">
+              <label class="form-label">Género</label>
+              <select class="form-select" formControlName="gender" [ngClass]="{
+                    'is-invalid': userForm.controls['gender'].invalid && userForm.controls['gender'].touched,
+                    'is-valid': userForm.controls['gender'].valid
+                  }">
+                <option [ngValue]="null" disabled>Seleccione un género</option>
+                <option *ngFor="let g of genders" [ngValue]="g">{{ g }}</option>
+              </select>
+            </div>
+
+            <!-- Select de Rol -->
+            <div class="col-md-6">
+              <label class="form-label">Rol</label>
+              <select class="form-select" formControlName="roleId" [ngClass]="{
+                    'is-invalid': userForm.controls['roleId'].invalid && userForm.controls['roleId'].touched,
+                    'is-valid': userForm.controls['roleId'].valid
+                  }">
+                <option [ngValue]="null" disabled>Seleccione un rol</option>
+                <option *ngFor="let rol of roles" [ngValue]="rol.roleId">{{ rol.description }}</option>
+              </select>
+            </div>
+
+            <div class="col-md-6 position-relative">
+              <label class="form-label">Contraseña</label>
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="password" class="form-control pe-5"
+                placeholder="Contraseña" [ngClass]="{
+                'is-invalid': userForm.controls['password'].invalid && userForm.controls['password'].touched,
+                'is-valid': userForm.controls['password'].valid
+              }" />
+              <i class="fa-solid" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"
+                (click)="showPassword = !showPassword" (keydown.enter)="showPassword = !showPassword" tabindex="0"
+                role="button" aria-label="Mostrar u ocultar contraseña"
+                style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
+              </i>
+            </div>
+
+            <div class="col-md-6 position-relative">
+              <label class="form-label">Confirmar Contraseña</label>
+              <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirm"
+                class="form-control pe-5" placeholder="Confirmar Contraseña" [ngClass]="{
+                'is-invalid': userForm.controls['confirm'].invalid && userForm.controls['confirm'].touched,
+                'is-valid': userForm.controls['confirm'].valid
+              }" />
+              <i class="fa-solid" [class.fa-eye]="showConfirmPassword" [class.fa-eye-slash]="!showConfirmPassword"
+                (click)="showConfirmPassword = !showConfirmPassword"
+                (keydown.enter)="showConfirmPassword = !showConfirmPassword" tabindex="0" role="button"
+                aria-label="Mostrar u ocultar confirmación de contraseña"
+                style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
+              </i>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+          <button type="button" class="btn btn-success" [disabled]="userForm.invalid || loading" (click)="saveForm()">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            {{ idUser ? 'Actualizar' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-template>

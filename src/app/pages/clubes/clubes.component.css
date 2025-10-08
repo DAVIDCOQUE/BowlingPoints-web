@@ -1,0 +1,23 @@
+.card {
+  transition: transform 0.2s;
+  border-radius: 10px;
+  overflow: hidden;
+  align-items: center;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+img {
+  height: 80px;
+  width: 80px;
+  text-align: center;
+}
+
+.card-img {
+  height: 100px;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+}

@@ -1,0 +1,90 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarqube:
+    name: SonarCloud Scan
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Importante para SonarCloud (detecta historial correctamente)
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install system dependencies for Chrome Headless
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2 \
+            libxss1 \
+            libgconf-2-4 \
+            libnss3 \
+            libx11-xcb1 \
+            libxcomposite1 \
+            libxcursor1 \
+            libxdamage1 \
+            libxi6 \
+            libxtst6 \
+            libxrandr2 \
+            libgbm1 \
+            libgtk-3-0
+
+      - name: Install project dependencies
+        run: npm ci
+
+      #  Este paso ejecuta los tests con cobertura
+      - name: Run tests with coverage (Karma custom config)
+        run: |
+          npm run test:coverage || true
+
+      #  Verifica que los archivos de cobertura se hayan generado
+      - name: List generated coverage files (debug)
+        run: ls -la coverage/bowling-points || echo "No coverage directory"
+
+      #  Asegúrate de que el archivo lcov.info exista
+      - name: Show lcov path (debug)
+        run: find . -name "lcov.info"
+
+      #  Verifica que lcov.info tenga datos
+      - name: Check if lcov contains data
+        run: |
+          echo " Lines covered:"
+          grep -c "^DA:" coverage/bowling-points/lcov.info || echo "No lines covered"
+
+      #  Ajuste de rutas para SonarCloud
+      - name: Fix and validate lcov path
+        if: hashFiles('coverage/bowling-points/lcov.info') != ''
+        run: |
+          echo " lcov.info exists"
+          sed -i 's|SF:.*/src|SF:src|' coverage/bowling-points/lcov.info
+          head -n 10 coverage/bowling-points/lcov.info
+
+      #  Vista previa del contenido del archivo lcov
+      - name: Print lcov contents (debug)
+        if: success() && hashFiles('coverage/bowling-points/lcov.info') != ''
+        run: head -n 20 coverage/bowling-points/lcov.info
+
+      #  Compila el proyecto si es necesario
+      - name: Build Angular app
+        run: npm run build --if-present
+
+      #  Ejecuta el escaneo de SonarCloud
+      - name: Run SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

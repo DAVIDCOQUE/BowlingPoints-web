@@ -1,0 +1,126 @@
+<div class="container mt-4">
+  <h1 class="text-center">Modalidades</h1>
+
+  <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
+    <!-- Filtro -->
+    <div class="d-flex flex-column flex-md-row align-items-start gap-2">
+      <div>
+        <input type="text" class="form-control form-control-sm" style="height: 36px; width: 250px;" placeholder="Buscar"
+          [(ngModel)]="filter" name="filter" />
+      </div>
+      <div class="d-flex gap-2 ">
+        <button class="btn btn-outline-secondary btn-sm  align-items-center" style="height: 36px; width: 100px;"
+          (click)="clear()">
+          <i class="fas fa-times me-1"></i> Limpiar
+        </button>
+      </div>
+    </div>
+
+    <!-- Botón Crear -->
+    <div>
+      <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
+        (click)="openModal(modalModality)">
+        <i class="fas fa-plus-circle me-1"></i> Crear
+      </button>
+    </div>
+  </div>
+
+  <hr>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table
+        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
+        <thead class="bg-light-secondary align-middle">
+          <tr class="fw-bold">
+            <th>ID:</th>
+            <th>Nombre</th>
+            <th>Descripcion</th>
+            <th>Estado</th>
+            <th>Aciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container>
+            <tr *ngFor="let modality of filteredModalitys">
+              <td>{{ modality.modalityId }}</td>
+              <td>{{ modality.name }}</td>
+              <td>{{ modality.description || '-' }}</td>
+              <td>{{ modality.status ? 'Activo' : 'Inactivo' }}</td>
+              <td>
+                <div class="d-flex justify-content-center gap-2">
+                  <!-- Botón Editar - Azul suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
+                    (click)="editModality(modality)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+
+                  <!-- Botón Eliminar - Rojo suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    (click)="deleteModality(modality.modalityId)"
+                    style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #modalModality>
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+          <h2 class="modal-title flex-grow-1 m-0">
+            {{ idModality ? 'Editar' : 'Crear' }} Modalidad
+          </h2>
+          <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+            style="filter: brightness(0) invert(1);"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="modalityForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre Modalidad</label>
+                <input formControlName="name" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
+                'is-invalid': modalityForm.controls['name'].invalid && modalityForm.controls['name'].touched,
+                'is-valid': modalityForm.controls['name'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Descripcion</label>
+                <input formControlName="description" type="text" class="form-control" placeholder="Descripcion"
+                  [ngClass]="{
+                'is-invalid': modalityForm.controls['description'].invalid && modalityForm.controls['description'].touched,
+                'is-valid': modalityForm.controls['description'].valid
+              }" />
+              </div>
+
+              <div class="col-md-10">
+                <label class="form-label">Estado</label>
+                <select class="form-select" formControlName="status" [ngClass]="{
+            'is-invalid': modalityForm.controls['status'].invalid && modalityForm.controls['status'].touched,
+            'is-valid': modalityForm.controls['status'].valid
+          }">
+                  <option [ngValue]="null" disabled>Seleccione un estado</option>
+                  <option *ngFor="let estado of estados" [ngValue]="estado.valor">
+                    {{ estado.etiqueta }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="button" class="btn btn-success" [disabled]="modalityForm.invalid"
+              (click)="saveForm()">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </ng-template>

@@ -1,0 +1,147 @@
+<div class="container">
+
+  <form *ngIf="userForm" [formGroup]="userForm" (ngSubmit)="onSubmit()">
+    <h1 class="text-center mb-4">Perfil de Jugador</h1>
+
+    <div class="d-flex justify-content-center mb-4 position-relative">
+      <div class="position-relative">
+        <img id="avatarPreview" [src]="photoSrc" alt="Avatar" class="rounded-circle border border-primary shadow"
+          style="width: 100px; height: 100px; object-fit: cover;">
+
+        <!-- Icono botón flotante sobre la imagen -->
+        <label for="avatarInput"
+          class="position-absolute bottom-0 end-0 translate-middle bg-white border rounded-circle shadow p-1"
+          style="cursor: pointer; transform: translate(25%, 25%);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#0d6efd" class="bi bi-camera"
+            viewBox="0 0 16 16">
+            <path d="M10.5 3a.5.5 0 0 1 .416.223l.647.97H13a1 1 0 0 1 1 1v6a1
+                 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5.193a1 1 0 0 1 1-1h1.437l.647-.97A.5.5
+                 0 0 1 5.5 3h5zM8 5.5a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7zm0 1a2.5
+                 2.5 0 1 1 0 5a2.5 2.5 0 0 1 0-5z" />
+          </svg>
+        </label>
+        <input type="file" id="avatarInput" accept="image/*" hidden (change)="previewAvatar($event)">
+      </div>
+    </div>
+    <div class="row mb-4">
+      <div class="col">
+        <div class="form-group">
+          <label for="firstName">username</label>
+          <input formControlName="nickname" type="text" class="form-control" placeholder="nickname" [ngClass]="{
+                'is-invalid': userForm.controls['nickname'].invalid && userForm.controls['nickname'].touched,
+                'is-valid': userForm.controls['nickname'].valid
+              }" />
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          <label for="document"># Documento</label>
+          <input formControlName="document" type="document" class="form-control" placeholder="document" [ngClass]="{
+                'is-invalid': userForm.controls['document'].invalid && userForm.controls['document'].touched,
+                'is-valid': userForm.controls['document'].valid
+              }" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col">
+        <div class="form-group">
+          <label for="fullName">Nombres</label>
+          <input formControlName="fullName" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
+                'is-invalid': userForm.controls['fullName'].invalid && userForm.controls['fullName'].touched,
+                'is-valid': userForm.controls['fullName'].valid
+              }" />
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="form-group">
+          <label for="fullSurname">Apellidos</label>
+          <input formControlName="fullSurname" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
+                'is-invalid': userForm.controls['fullSurname'].invalid && userForm.controls['fullSurname'].touched,
+                'is-valid': userForm.controls['fullSurname'].valid
+              }" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col">
+        <div class="form-group">
+          <label for="email">email</label>
+          <input formControlName="email" type="email" class="form-control" placeholder="Correo" [ngClass]="{
+                'is-invalid': userForm.controls['email'].invalid && userForm.controls['email'].touched,
+                'is-valid': userForm.controls['email'].valid
+              }" />
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          <label for="phone">Telefono</label>
+          <input formControlName="phone" type="number" class="form-control" placeholder="Teléfono" [ngClass]="{
+                              'is-invalid': userForm.controls['phone'].invalid && userForm.controls['phone'].touched,
+                              'is-valid': userForm.controls['phone'].valid
+                            }" />
+        </div>
+      </div>
+    </div>
+    <div class="row mb-4">
+
+      <div class="col">
+        <div class="form-group">
+          <label for="gender">Genero</label>
+          <select class="form-select" formControlName="gender" [ngClass]="{
+                    'is-invalid': userForm.controls['gender'].invalid && userForm.controls['gender'].touched,
+                    'is-valid': userForm.controls['gender'].valid
+                  }">
+            <option [ngValue]="null" disabled>Seleccione un género</option>
+            <option *ngFor="let g of genders" [ngValue]="g">{{ g }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="form-group">
+          <label for="firstName">Rol</label>
+          <input class="form-control" [value]="getRoleDescription(userForm.value.roleId)" readonly />
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col">
+        <div class="form-group position-relative">
+          <label for="password">Contraseña</label>
+          <input [type]="showPassword ? 'text' : 'password'" formControlName="password" class="form-control pe-5"
+            placeholder="Contraseña" [ngClass]="{
+           'is-invalid': userForm.controls['password'].invalid && userForm.controls['password'].touched,
+           'is-valid': userForm.controls['password'].valid
+         }" />
+
+          <i class="fa-solid" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"
+            (click)="showPassword = !showPassword"
+            style="position: absolute; right: 30px; top: 70%; transform: translateY(-50%); cursor: pointer;">
+          </i>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="form-group position-relative">
+          <label for="confirm">Confirmar conraseña</label>
+          <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirm" class="form-control pe-5"
+            placeholder="Confirmar Contraseña" [ngClass]="{
+                'is-invalid': userForm.controls['confirm'].invalid && userForm.controls['confirm'].touched,
+                'is-valid': userForm.controls['confirm'].valid
+              }" />
+          <i class="fa-solid" [class.fa-eye]="showConfirmPassword" [class.fa-eye-slash]="!showConfirmPassword"
+            (click)="showConfirmPassword = !showConfirmPassword"
+            style="position: absolute; right: 30px; top: 70%; transform: translateY(-50%); cursor: pointer;">
+          </i>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn btn-outline-primary btn-sm  align-items-center">Actualizar Datos</button>
+  </form>
+</div>

@@ -1,0 +1,49 @@
+<mat-toolbar class="bg-primary text-white px-3" style="height: 64px; display: flex; align-items: center;">
+  <!-- Botón menú -->
+  <button mat-icon-button (click)="toggleSidebar()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Logo / Nombre -->
+  <span class="ms-3 fw-bold">Bowling Points</span>
+
+  <!-- Íconos alineados a la derecha -->
+  <div class="ms-auto d-flex align-items-center gap-2">
+
+    <!-- Mensaje: Modo invitado -->
+    <span class="ms-4 text-warning fw-normal text-center" *ngIf="isGuest">
+      <strong>invitado</strong>
+    </span>
+
+    <button mat-icon-button aria-label="Notificaciones">
+      <mat-icon>notifications</mat-icon>
+    </button>
+
+    <!-- Solo mostrar perfil si NO es invitado -->
+    <ng-container>
+      <button mat-icon-button [matMenuTriggerFor]="accountMenu" aria-label="Perfil">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+
+      <mat-menu #accountMenu="matMenu" class="px-3 py-2" style="width: 250px;">
+        <div *ngIf="!isGuest" class="mb-2 text-start">
+          <span class="badge bg-primary text-white text-uppercase small mb-2">{{ userRole }}</span>
+          <div class="text-muted small">CC: {{ userDocument }}</div>
+          <div class="text-muted small">{{ userEmail }}</div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <button mat-menu-item routerLink="/perfil">
+          <mat-icon>person</mat-icon>
+          <span>Editar Perfil</span>
+        </button>
+
+        <button mat-menu-item (click)="logout()" class="text-danger">
+          <mat-icon color="warn">logout</mat-icon>
+          <span>Cerrar Sesión</span>
+        </button>
+      </mat-menu>
+    </ng-container>
+  </div>
+</mat-toolbar>

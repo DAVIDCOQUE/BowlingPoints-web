@@ -1,0 +1,71 @@
+/* You can add global styles to this file, and also import other style files */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+
+}
+
+.a {
+  color: var(--primary-dark);
+}
+
+.a:hover {
+  color: var(--primary);
+}
+
+.card_h:hover {
+  transform: scale(1.03);
+  /* Zoom suave */
+  background-color: #f8f9fa;
+  /* Un fondo gris clarito (Bootstrap color) */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  /* Sombra más profunda */
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+}
+
+.btn-primay:hover {
+  background-color: var(--primary-dark);
+}
+
+.btn-s {
+  background-color: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 12px;
+  cursor: pointer;
+
+}
+
+.btn-s:hover {
+  color: white;
+  background-color: var(--primary)
+}
+
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}

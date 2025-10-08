@@ -1,0 +1,118 @@
+<div class="container py-4" *ngIf="clubId">
+  <!-- INFORMACIÓN GENERAL -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="row g-0 align-items-center">
+      <!-- Logo -->
+      <div class="col-md-4 text-center p-4">
+        <img [src]="apiUrl + miClub?.imageUrl" (error)="onImgError($event, 'assets/img/clubDefault.png')"
+          alt="{{ miClub?.imageUrl }}" class="img-fluid rounded-circle border shadow" width="150" height="150">
+      </div>
+
+      <!-- Datos -->
+      <div class="col-md-8 p-4">
+        <h1 class="fw-bold">{{ miClub?.name || '-' }}</h1>
+        <p class="text-muted">{{ miClub?.description || '-' }}</p>
+        <div class="row text-muted">
+          <div class="col-sm-6"><b>Fundación:</b> {{ miClub?.foundationDate }}</div>
+          <div class="col-sm-6"><b>Ubicación:</b> {{ miClub?.city }}</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RANKING & PUNTAJE -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card text-center shadow-sm border-0 rounded-4 py-4">
+        <h4 class="fw-bold mb-1">Ranking Nacional</h4>
+
+        <!-- Si no hay ranking o club, muestra el mensaje -->
+        <div *ngIf="!miClub || !miClub.ranking || miClub.ranking === 0"
+          class="alert alert-warning text-center my-4 py-2 rounded-3 fw-semibold">
+          <i class="bi bi-emoji-frown"></i> No hay Datos.
+        </div>
+
+        <!-- Solo muestra el número si hay ranking y es > 0 -->
+        <h1 *ngIf="showRanking()" class="display-5 text-primary">
+          #{{ miClub?.ranking }}
+        </h1>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card text-center shadow-sm border-0 rounded-4 py-4">
+        <h4 class="fw-bold mb-1">Puntaje Global</h4>
+        <div *ngIf="showScore(); else noScore">
+          <h1 class="display-5 text-success">{{ miClub?.score }}</h1>
+        </div>
+        <ng-template #noScore>
+          <div class="alert alert-warning">No hay puntaje disponible.</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGROS -->
+  <div class="mb-4">
+    <h4 class="mb-3 fw-bold">🏆 Logros del Club</h4>
+    <ul class="list-group list-group-flush border rounded-3 shadow-sm" *ngIf="hasLogros(); else noLogros">
+      <li class="list-group-item" *ngFor="let logro of miClub?.logros">{{ logro }}</li>
+    </ul>
+    <ng-template #noLogros>
+      <div class="alert alert-warning">No hay logros registrados.</div>
+    </ng-template>
+  </div>
+  <hr>
+  <!-- TORNEOS JUGADOS -->
+  <div class="mb-4">
+    <h4 class="mb-3 fw-bold">📅 Torneos Jugados</h4>
+    <div *ngIf="hasTorneos(); else noTorneos" class="table-responsive">
+      <table class="table table-striped text-center align-middle shadow-sm border rounded-3">
+        <thead class="table-light">
+          <tr>
+            <th>Nombre</th>
+            <th>Fecha</th>
+            <th>Posición</th>
+            <th>Puntaje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let torneo of miClub?.torneos">
+            <td>{{ torneo.nombre }}</td>
+            <td>{{ torneo.fecha }}</td>
+            <td>{{ torneo.posicion }}</td>
+            <td>{{ torneo.puntaje }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #noTorneos>
+      <div class="alert alert-warning">No hay torneos registrados.</div>
+    </ng-template>
+  </div>
+  <hr>
+
+  <!-- MIEMBROS -->
+  <div class="mb-4">
+    <h4 class="mb-3 fw-bold text-center">👥 Miembros del Club</h4>
+    <div *ngIf="hasMembers(); else noMembers" class="row g-3">
+      <div class="col-6 col-md-3 col-lg-2" *ngFor="let member of miClub?.members">
+        <div class="card h-100 shadow-sm border-0 text-center rounded-4 py-3">
+          <div class="card-body p-2 d-flex flex-column align-items-center">
+            <img [src]="apiUrl + member.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')"
+              class="rounded-circle shadow-sm mb-2" width="50" height="50" alt="avatar">
+            <h5 class="fw-semibold mb-1 text-truncate w-100">{{ member.fullName }}</h5>
+            <small class="text-muted text-truncate w-100">{{ member.roleInClub }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noMembers>
+      <div class="alert alert-warning">No hay miembros en este club.</div>
+    </ng-template>
+  </div>
+</div>
+<div class="container text-center py-5" *ngIf="!clubId">
+  <h2 class="fw-bold mb-4">¡Selecciona un club para ver sus detalles!</h2>
+  <p class="text-muted">Haz clic en un club en la lista de clubes para ver su información.</p>
+</div>

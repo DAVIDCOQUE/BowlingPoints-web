@@ -1,0 +1,96 @@
+<div class="container mt-4">
+  <hr>
+  <div class="row g-4">
+    <!-- Torneos Inscriptos -->
+    <div class="col-md-6">
+      <h3 class="mb-3">🏆 Torneos Inscriptos</h3>
+
+
+      <div class="card mb-3 border-0 shadow-sm rounded-4">
+
+        <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
+          <strong>Copa valle 2025</strong><span class="badge bg-warning text-dark fw-semibold">Edición 2025</span>
+        </div>
+        <div class="card-body py-3">
+          <div class="row">
+            <!-- Columna Izquierda (Icono grande) -->
+            <div class="col-2 d-flex align-items-center justify-content-center">
+              <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/T1_logo.svg/800px-T1_logo.svg.png"
+                width="50" alt="Organizador">
+            </div>
+            <!-- Columna Derecha (Información) -->
+            <div class="col-10">
+              <div class="row small gy-1">
+                <div class="col-6">
+                  <span>📅 <strong>Fecha: </strong>20 marzo 2025</span>
+                </div>
+                <div class="col-6">
+                  <span>📍 <strong>Lugar:</strong> Bolera XYZ, Cali, Valle</span>
+                </div>
+                <div class="col-6">
+                  <span>🎳 <strong>Modalidad:</strong> Individual / Equipos</span>
+                </div>
+                <div class="col-6">
+                  <span>🏷️ <strong>Categoría:</strong> Sub-21, Mayores, Mixto</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+
+  <!-- Torneos Jugados -->
+  <h1 class="text-center">Torneos Jugados</h1>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table
+        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
+        <thead class="bg-light-secondary align-middle">
+          <tr class="fw-bold">
+            <th>ID:</th>
+            <th>Foto</th>
+            <th>Nombre</th>
+            <th>Fecha</th>
+            <th>Lugar</th>
+            <th>Modalidad</th>
+            <th>Categoría</th>
+            <th>Resultados</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let torneo of torneosJugados">
+            <td>{{ torneo.tournamentId }}</td>
+            <td>
+              <div>
+                <img [src]="apiUrl + torneo.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
+                  alt="Foto de perfil" style="width: 40px; height: 40px" class="rounded-circle" />
+                <div class="ms-3"></div>
+              </div>
+            </td>
+            <td class="align-items-center">{{ torneo.name }}</td>
+            <td>{{ torneo.date }}</td>
+            <td>{{ torneo.location }}</td>
+            <td>{{ torneo.modalidad }}</td>
+            <td>{{ torneo.categoria }}</td>
+            <td>{{ torneo.resultados }}</td>
+            <td class="text-center"><button class="btn btn-sm px-2"
+                [routerLink]="['/resumen-torneo', torneo.tournamentId]"
+                style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                <i class="fa-solid fa-eye"></i> </button></td>
+          </tr>
+          <tr *ngIf="!torneosJugados || torneosJugados.length === 0">
+            <td colspan="9">
+              <div class="alert alert-warning text-center my-3 py-2 rounded-3 fw-semibold m-0">
+                <i class="bi bi-emoji-frown"></i> No hay torneos para mostrar.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>

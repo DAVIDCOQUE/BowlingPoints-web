@@ -1,0 +1,299 @@
+<div class="container mt-4">
+  <h1 class="text-center">Torneos</h1>
+
+  <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
+    <!-- Filtro -->
+    <div class="d-flex flex-column flex-md-row align-items-start gap-2">
+      <div>
+        <input type="text" class="form-control form-control-sm" style="height: 36px; width: 250px" placeholder="Buscar"
+          [(ngModel)]="filter" name="filter" />
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm align-items-center" style="height: 36px; width: 100px"
+          (click)="clear()">
+          <i class="fas fa-times me-1"></i> Limpiar
+        </button>
+      </div>
+    </div>
+
+    <!-- Botón Crear -->
+    <div class="d-flex gap-2">
+      <button class="btn btn-success btn-sm align-items-center" style="height: 36px; width: 100px"
+        (click)="openModal(modalTournament)">
+        <i class="fas fa-plus-circle me-1"></i> Crear
+      </button>
+      <button class="btn btn-success btn-sm align-items-center" style="height: 36px; width: 100px" routerLink="/reults">
+        <i class="fas fa-file-excel"></i> All Result
+      </button>
+    </div>
+  </div>
+  <hr />
+  <div class="card-body">
+    <div class="table-responsive">
+      <table
+        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
+        <thead class="bg-light-secondary align-middle">
+          <tr class="fw-bold">
+            <th>Fecha</th>
+            <th>Nombre</th>
+            <th>Ambito</th>
+            <th>Lugar</th>
+            <th>Modalidad</th>
+            <th>Categoria</th>
+            <th>Estado</th>
+            <th>Aciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container>
+            <tr *ngFor="let tournament of filteredTournaments">
+              <td class="align-middle text-start" style="min-width: 150px; max-width: 200px">
+                <div>
+                  <span class="fw-semibold text-secondary">Inicio:</span>
+                  <span class="text-dark">{{
+                    tournament.startDate | date : "dd/MM/yyyy"
+                    }}</span>
+                </div>
+                <div class="mt-1">
+                  <span class="fw-semibold text-secondary">Fin:</span>
+                  <span class="text-dark">{{
+                    tournament.endDate | date : "dd/MM/yyyy"
+                    }}</span>
+                </div>
+              </td>
+              <td>{{ tournament.name || "-" }}</td>
+              <td>{{ tournament.ambitName || "-" }}</td>
+              <td>{{ tournament.location || "-" }}</td>
+
+              <td>{{ getModalitiesString(tournament) }}</td>
+              <td>{{ getCategoriesString(tournament) }}</td>
+              <td>
+                {{ tournament.stage || "-" }}
+                <span class="ms-2 fw-semibold" [ngClass]="tournament.status ? 'text-success' : 'text-danger'">
+                  ({{ tournament.status ? "Activo" : "Inactivo" }})
+                </span>
+              </td>
+
+              <td>
+                <div class="d-flex justify-content-center gap-2">
+                  <!-- Botón Cargar resultados - Rojo suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    routerLink="/torneos-result" style="
+                      background-color: rgba(13, 180, 75, 0.1);
+                      color: #28a745;
+                      border-radius: 0.5rem;
+                      min-width: 30px;
+                      height: 30px;
+                    ">
+                    <i class="fas fa-file-excel"></i>
+                  </button>
+
+                  <!-- Botón Editar - Azul suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2" style="
+                      background-color: rgba(0, 123, 255, 0.1);
+                      color: #007bff;
+                      border-radius: 0.5rem;
+                      min-width: 30px;
+                      height: 30px;
+                    " (click)="editTournament(tournament)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+
+                  <!-- Botón Eliminar - Rojo suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    (click)="deleteTournament(tournament.tournamentId)" style="
+                      background-color: rgba(220, 53, 69, 0.1);
+                      color: #dc3545;
+                      border-radius: 0.5rem;
+                      min-width: 30px;
+                      height: 30px;
+                    ">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #modalTournament>
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+          <h2 class="modal-title flex-grow-1 m-0">
+            {{ idTournament ? "Editar" : "Crear" }} Torneos
+          </h2>
+          <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+            style="filter: brightness(0) invert(1)"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="tournamentForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre Torneos</label>
+                <input formControlName="name" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['name'].invalid &&
+                      tournamentForm.controls['name'].touched,
+                    'is-valid': tournamentForm.controls['name'].valid
+                  }" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Organizador</label>
+                <input formControlName="organizer" type="text" class="form-control" placeholder="Organizador" [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['organizer'].invalid &&
+                      tournamentForm.controls['organizer'].touched,
+                    'is-valid': tournamentForm.controls['organizer'].valid
+                  }" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Modalidades</label>
+                <ng-select [items]="modalities" bindLabel="name" bindValue="modalityId" [multiple]="true"
+                  formControlName="modalityIds" [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['modalityIds'].invalid &&
+                      tournamentForm.controls['modalityIds'].touched,
+                    'is-valid': tournamentForm.controls['modalityIds'].valid
+                  }">
+                </ng-select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Categorias</label>
+
+                <ng-select [items]="categories" bindLabel="name" bindValue="categoryId" [multiple]="true"
+                  formControlName="categoryIds" [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['categoryIds'].invalid &&
+                      tournamentForm.controls['categoryIds'].touched,
+                    'is-valid': tournamentForm.controls['categoryIds'].valid
+                  }">
+                </ng-select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Fecha Inicio</label>
+                <input formControlName="startDate" type="date" class="form-control" placeholder="Fecha Inicio"
+                  [attr.max]="toYMDStrict(tournamentForm.get('endDate')?.value)" [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['startDate'].invalid &&
+                      tournamentForm.controls['startDate'].touched,
+                    'is-valid': tournamentForm.controls['startDate'].valid
+                  }" />
+                <!-- Mensajes -->
+                <div class="invalid-feedback"
+                  *ngIf="tournamentForm.controls['startDate'].touched && tournamentForm.controls['startDate'].errors?.['required']">
+                  La fecha de inicio es obligatoria.
+                </div>
+                <div class="invalid-feedback"
+                  *ngIf="tournamentForm.controls['startDate'].touched && tournamentForm.controls['startDate'].errors?.['startAfterEnd']">
+                  La fecha de inicio no puede ser posterior a la fecha fin.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Fecha Fin</label>
+                <input formControlName="endDate" type="date" class="form-control" placeholder="Fecha Fin" [attr.min]="
+                    toYMDStrict(tournamentForm.get('startDate')?.value)
+                  " [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['endDate'].invalid &&
+                      tournamentForm.controls['endDate'].touched,
+                    'is-valid': tournamentForm.controls['endDate'].valid
+                  }" />
+                <!-- Mensajes -->
+                <div class="invalid-feedback"
+                  *ngIf="tournamentForm.controls['endDate'].touched && tournamentForm.controls['endDate'].errors?.['required']">
+                  La fecha de fin es obligatoria.
+                </div>
+                <div class="invalid-feedback"
+                  *ngIf="tournamentForm.controls['endDate'].touched && tournamentForm.controls['endDate'].errors?.['endBeforeStart']">
+                  La fecha de fin no puede ser anterior a la fecha de inicio.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Ambito</label>
+                <select class="form-select" formControlName="ambitId" [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['ambitId'].invalid &&
+                      tournamentForm.controls['ambitId'].touched,
+                    'is-valid': tournamentForm.controls['ambitId'].valid
+                  }">
+                  <option [ngValue]="null" disabled>Ambito...</option>
+                  <option *ngFor="let ambit of ambits" [ngValue]="ambit.ambitId">
+                    {{ ambit.name }}
+                  </option>
+                </select>
+              </div>
+
+
+              <div class="col-md-6">
+                <label class="form-label">Lugar</label>
+                <select class="form-select" formControlName="location" [ngClass]="{
+            'is-invalid': tournamentForm.controls['location'].invalid &&
+                          tournamentForm.controls['location'].touched,
+            'is-valid': tournamentForm.controls['location'].valid
+          }">
+                  <option [ngValue]="null" disabled>Departamento...</option>
+                  <option *ngFor="let department of departments" [ngValue]="department.name">
+                    {{ department.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Causa</label>
+                <select class="form-select" formControlName="stage" [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['stage'].invalid &&
+                      tournamentForm.controls['stage'].touched,
+                    'is-valid': tournamentForm.controls['stage'].valid
+                  }">
+                  <option [ngValue]="null" disabled>Causa...</option>
+                  <option *ngFor="let cause of causes" [ngValue]="cause.name">
+                    {{ cause.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Estado</label>
+                <select class="form-select" formControlName="status" [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['status'].invalid &&
+                      tournamentForm.controls['status'].touched,
+                    'is-valid': tournamentForm.controls['status'].valid
+                  }">
+                  <option [ngValue]="null" disabled>
+                    Seleccione un estado
+                  </option>
+                  <option *ngFor="let estado of estados" [ngValue]="estado.valor">
+                    {{ estado.etiqueta }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-success" (click)="saveForm()"
+              [disabled]="tournamentForm.invalid || tournamentForm.pending">
+              Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</div>
