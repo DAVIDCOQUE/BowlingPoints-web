@@ -1,9 +1,8 @@
 import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { environment } from '../../../environments/environment';
 import { IAmbit } from 'src/app/model/ambit.interface';
+import { AmbitApiService } from 'src/app/services/ambit-api.service';
 
 @Component({
   selector: 'app-ambit',
@@ -14,9 +13,9 @@ export class AmbitComponent implements OnInit {
 
   @ViewChild('modalAmbit', { static: true }) modalAmbit!: TemplateRef<unknown>;
 
-  private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
   private readonly modalService = inject(NgbModal);
+  private readonly ambitApi = inject(AmbitApiService); // ✅ inyectar nuevo servicio
 
   public filter = '';
   public ambits: IAmbit[] = [];
@@ -29,17 +28,11 @@ export class AmbitComponent implements OnInit {
     { valor: false, etiqueta: 'Inactivo' }
   ];
 
-  /**
-   * Lifecycle hook
-   */
   ngOnInit(): void {
     this.initForm();
     this.getAmbits();
   }
 
-  /**
-   * Inicializa el formulario reactivo para ámbito
-   */
   private initForm(): void {
     this.ambitForm = this.fb.group({
       name: ['', Validators.required],
@@ -48,20 +41,12 @@ export class AmbitComponent implements OnInit {
     });
   }
 
-  /**
-   * Obtiene los ámbitos desde la API
-   */
   public getAmbits(): void {
-    this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(
-      `${environment.apiUrl}/ambits`
-    ).subscribe({
-      next: res => this.ambits = res.data
+    this.ambitApi.getAmbits().subscribe({
+      next: ambits => this.ambits = ambits
     });
   }
 
-  /**
-   * Retorna los ámbitos filtrados por el texto del filtro
-   */
   get filteredAmbits(): IAmbit[] {
     const term = this.filter.toLowerCase().trim();
     return term
@@ -69,10 +54,6 @@ export class AmbitComponent implements OnInit {
       : this.ambits;
   }
 
-  /**
-   * Carga los datos del ámbito seleccionado para editar
-   * @param ambit Ámbito seleccionado
-   */
   public editAmbit(ambit: IAmbit): void {
     this.idAmbit = ambit.ambitId;
     this.ambitForm.patchValue({
@@ -83,9 +64,6 @@ export class AmbitComponent implements OnInit {
     this.openModal(this.modalAmbit);
   }
 
-  /**
-   * Envía el formulario para crear o actualizar un ámbito
-   */
   public saveForm(): void {
     if (this.ambitForm.invalid) {
       this.ambitForm.markAllAsTouched();
@@ -96,8 +74,8 @@ export class AmbitComponent implements OnInit {
     const isEdit = !!this.idAmbit;
 
     const request = isEdit
-      ? this.http.put(`${environment.apiUrl}/ambits/${this.idAmbit}`, payload)
-      : this.http.post(`${environment.apiUrl}/ambits`, payload);
+      ? this.ambitApi.updateAmbit(this.idAmbit!, payload)
+      : this.ambitApi.createAmbit(payload);
 
     request.subscribe({
       next: () => {
@@ -107,20 +85,12 @@ export class AmbitComponent implements OnInit {
     });
   }
 
-  /**
-   * Elimina un ámbito por su ID
-   * @param id Identificador del ámbito
-   */
   public deleteAmbit(id: number): void {
-    this.http.delete(`${environment.apiUrl}/ambits/${id}`).subscribe({
+    this.ambitApi.deleteAmbit(id).subscribe({
       next: () => this.getAmbits()
     });
   }
 
-  /**
-   * Abre un modal de creación/edición
-   * @param content TemplateRef del modal
-   */
   public openModal(content: TemplateRef<unknown>): void {
     if (!this.idAmbit) {
       this.ambitForm.reset();
@@ -128,18 +98,12 @@ export class AmbitComponent implements OnInit {
     this.modalService.open(content);
   }
 
-  /**
-   * Cierra todos los modales abiertos y resetea el formulario
-   */
   public closeModal(): void {
     this.modalService.dismissAll();
     this.ambitForm.reset();
     this.idAmbit = null;
   }
 
-  /**
-   * Limpia el filtro de búsqueda
-   */
   public clear(): void {
     this.filter = '';
   }

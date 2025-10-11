@@ -1,11 +1,10 @@
 import { Component, ViewChild, TemplateRef, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 
-import { environment } from '../../../environments/environment';
 import { IModality } from '../../model/modality.interface';
+import { ModalityApiService } from 'src/app/services/modality-api.service';
 
 @Component({
   selector: 'app-modality',
@@ -16,9 +15,6 @@ export class ModalityComponent implements OnInit {
 
   /** Referencia al modal */
   @ViewChild('modalModality') modalModalityRef!: TemplateRef<unknown>;
-
-  /** URL base de la API */
-  readonly apiUrl = environment.apiUrl;
 
   /** Lista de modalidades */
   modalitys: IModality[] = [];
@@ -40,8 +36,8 @@ export class ModalityComponent implements OnInit {
 
   /** Inyecciones con inject() */
   private readonly fb = inject(FormBuilder);
-  private readonly http = inject(HttpClient);
   private readonly modalService = inject(NgbModal);
+  private readonly api = inject(ModalityApiService); // ✅ usamos el servicio refactorizado
 
   /**
    * Hook de inicialización
@@ -66,11 +62,10 @@ export class ModalityComponent implements OnInit {
    * Consulta las modalidades desde la API
    */
   getModalitys(): void {
-    this.http.get<{ success: boolean; message: string; data: IModality[] }>(`${this.apiUrl}/modalities`)
-      .subscribe({
-        next: res => this.modalitys = res.data,
-        error: err => console.error('Error al cargar modalidades:', err)
-      });
+    this.api.getModalities().subscribe({
+      next: res => this.modalitys = res,
+      error: err => console.error('Error al cargar modalidades:', err)
+    });
   }
 
   /**
@@ -109,8 +104,8 @@ export class ModalityComponent implements OnInit {
     const isEdit = !!this.idModality;
 
     const request = isEdit
-      ? this.http.put(`${this.apiUrl}/modalities/${this.idModality}`, payload)
-      : this.http.post(`${this.apiUrl}/modalities`, payload);
+      ? this.api.updateModality(this.idModality!, payload)
+      : this.api.createModality(payload);
 
     request.subscribe({
       next: () => {
@@ -140,7 +135,7 @@ export class ModalityComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (result.isConfirmed) {
-        this.http.delete(`${this.apiUrl}/modalities/${id}`).subscribe({
+        this.api.deleteModality(id).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'Modalidad eliminada correctamente', 'success');
             this.getModalitys();

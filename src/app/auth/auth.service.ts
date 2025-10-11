@@ -17,6 +17,10 @@ export class AuthService {
     return str ? JSON.parse(str) as IUser : null;
   }
 
+  get baseUrl(): string {
+    return environment.apiUrl;
+  }
+
   /** Retorna el usuario actual (observable) */
   get user$(): Observable<IUser | null> {
     return this.userSubject.asObservable();
@@ -82,8 +86,11 @@ export class AuthService {
   }
 
   hasRole(role: string): boolean {
-    if (!this.user || !this.user.roles) return false;
-    return this.user.roles.includes(role);
+    console.log('Checking role:', role);
+    console.log('user role:', this.user);
+    if (!this.user || !this.user.roleDescription) return false;
+
+    return this.user.roleDescription.includes(role);
   }
 
   isGuest(): boolean {
@@ -104,6 +111,18 @@ export class AuthService {
     }).pipe(
       tap(res => {
         localStorage.setItem('user', JSON.stringify(res.data));
+        this.userSubject.next(res.data);
+      }),
+      map(res => res.data)
+    );
+  }
+
+  updateUserProfile(id: number, payload: Partial<IUser>): Observable<IUser> {
+    return this.http.put<{ data: IUser }>(`${environment.apiUrl}/users/${id}`, payload).pipe(
+      tap(res => {
+        //  Actualiza el usuario guardado en localStorage
+        localStorage.setItem('user', JSON.stringify(res.data));
+        // Actualiza el observable del usuario autenticado
         this.userSubject.next(res.data);
       }),
       map(res => res.data)

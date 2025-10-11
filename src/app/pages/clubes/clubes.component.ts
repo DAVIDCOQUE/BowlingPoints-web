@@ -1,12 +1,12 @@
 import { Component, TemplateRef, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
-import { environment } from 'src/environments/environment';
 import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
 import { AuthService } from 'src/app/auth/auth.service';
+import { ClubApiService } from 'src/app/services/club-api.service';
+import { UserApiService } from 'src/app/services/user-api.service';
 
 @Component({
   selector: 'app-clubes',
@@ -15,14 +15,17 @@ import { AuthService } from 'src/app/auth/auth.service';
 })
 export class ClubesComponent implements OnInit {
 
-  private readonly http = inject(HttpClient);
+  /** Inyecciones */
   private readonly fb = inject(FormBuilder);
   private readonly modalService = inject(NgbModal);
   readonly auth = inject(AuthService);
+  private readonly clubApi = inject(ClubApiService);
+  private readonly userApi = inject(UserApiService);
 
-  public apiUrl = environment.apiUrl;
+  /** URL base (para imágenes, etc.) */
+  public apiUrl = this.clubApi.apiUrl;
 
-  // UI State
+  /** UI State */
   filter = '';
   id_Club?: number;
 
@@ -57,16 +60,13 @@ export class ClubesComponent implements OnInit {
 
   /** Obtiene todos los clubes con sus miembros */
   getClubes(): void {
-    this.http.get<IClubs[]>(`${this.apiUrl}/clubs/with-members`)
-      .subscribe({
-        next: clubs => {
-          this.clubes = clubs;
-        },
-        error: err => {
-          console.error('❌ Error al cargar clubes:', err);
-          Swal.fire('Error', 'No se pudieron cargar los clubes', 'error');
-        }
-      });
+    this.clubApi.getClubs().subscribe({
+      next: clubs => this.clubes = clubs,
+      error: err => {
+        console.error('❌ Error al cargar clubes:', err);
+        Swal.fire('Error', 'No se pudieron cargar los clubes', 'error');
+      }
+    });
   }
 
   /** Filtro de búsqueda */
@@ -79,16 +79,13 @@ export class ClubesComponent implements OnInit {
 
   /** Obtiene los usuarios del sistema */
   getUsers(): void {
-    this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${this.apiUrl}/users`)
-      .subscribe({
-        next: res => {
-          this.usuarios = res.data;
-        },
-        error: err => {
-          console.error('❌ Error al cargar usuarios:', err);
-          Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error');
-        }
-      });
+    this.userApi.getUsers().subscribe({
+      next: res => this.usuarios = res,
+      error: err => {
+        console.error('❌ Error al cargar usuarios:', err);
+        Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error');
+      }
+    });
   }
 
   /** Crea o actualiza un club */
@@ -121,13 +118,9 @@ export class ClubesComponent implements OnInit {
 
     const payload = { ...raw, members };
 
-    const url = this.id_Club
-      ? `${this.apiUrl}/clubs/${this.id_Club}`
-      : `${this.apiUrl}/clubs/create-with-members`;
-
     const request$ = this.id_Club
-      ? this.http.put(url, payload)
-      : this.http.post(url, payload);
+      ? this.clubApi.updateClub(this.id_Club, payload)
+      : this.clubApi.createClub(payload);
 
     request$.subscribe({
       next: () => {
@@ -160,7 +153,7 @@ export class ClubesComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`${this.apiUrl}/clubs/${id_Club}`).subscribe({
+        this.clubApi.deleteClub(id_Club).subscribe({
           next: () => {
             this.getClubes();
             Swal.fire('Eliminado', 'El club ha sido eliminado', 'success');
@@ -208,5 +201,4 @@ export class ClubesComponent implements OnInit {
     const target = event.target as HTMLImageElement;
     target.src = defaultPath;
   }
-
 }

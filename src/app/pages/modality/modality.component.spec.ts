@@ -1,54 +1,50 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalityComponent } from './modality.component';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { IModality } from 'src/app/model/modality.interface';
 import { TemplateRef } from '@angular/core';
 import Swal from 'sweetalert2';
 import { of } from 'rxjs';
+import { ModalityApiService } from 'src/app/services/modality-api.service';
 
 describe('ModalityComponent', () => {
   let component: ModalityComponent;
   let fixture: ComponentFixture<ModalityComponent>;
-  let httpMock: HttpTestingController;
+  let modalityService: jasmine.SpyObj<ModalityApiService>;
   let modalServiceMock: jasmine.SpyObj<NgbModal>;
 
   beforeEach(async () => {
     modalServiceMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
+    const modalityServiceSpy = jasmine.createSpyObj('ModalityApiService', ['getModalities', 'createModality', 'updateModality', 'deleteModality']);
 
     await TestBed.configureTestingModule({
       declarations: [ModalityComponent],
       imports: [HttpClientTestingModule, ReactiveFormsModule, FormsModule],
       providers: [
-        { provide: NgbModal, useValue: modalServiceMock }
+        { provide: NgbModal, useValue: modalServiceMock },
+        { provide: ModalityApiService, useValue: modalityServiceSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ModalityComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
-  });
+    modalityService = TestBed.inject(ModalityApiService) as jasmine.SpyObj<ModalityApiService>;
 
-  afterEach(() => {
-    // Verifica que no haya peticiones abiertas
-    httpMock.verify();
+    // Configurar respuesta por defecto
+    modalityService.getModalities.and.returnValue(of([]));
   });
 
   it('debe crear el componente', () => {
     fixture.detectChanges();
 
-    const req = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    req.flush({ success: true, message: '', data: [] });
-
     expect(component).toBeTruthy();
+    expect(modalityService.getModalities).toHaveBeenCalled();
   });
 
   it('debe inicializar el formulario con valores vacíos', () => {
     fixture.detectChanges();
-
-    const req = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    req.flush({ success: true, message: '', data: [] });
 
     expect(component.modalityForm).toBeTruthy();
     expect(component.modalityForm.get('name')?.value).toBe('');
@@ -56,16 +52,14 @@ describe('ModalityComponent', () => {
   });
 
   it('debe cargar las modalidades desde la API', () => {
-    fixture.detectChanges();
-
     const mockModalities: IModality[] = [
       { modalityId: 1, name: 'Individual', description: '', status: true }
     ];
 
-    const req = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    expect(req.request.method).toBe('GET');
-    req.flush({ success: true, message: '', data: mockModalities });
+    modalityService.getModalities.and.returnValue(of(mockModalities));
+    component.getModalitys();
 
+    expect(modalityService.getModalities).toHaveBeenCalled();
     expect(component.modalitys.length).toBe(1);
     expect(component.modalitys[0].name).toBe('Individual');
   });
@@ -86,9 +80,6 @@ describe('ModalityComponent', () => {
   it('debe llenar el formulario para editar y abrir el modal', () => {
     fixture.detectChanges();
 
-    const req = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    req.flush({ success: true, message: '', data: [] });
-
     const modality: IModality = {
       modalityId: 1,
       name: 'Parejas',
@@ -106,21 +97,16 @@ describe('ModalityComponent', () => {
   it('debe no guardar si el formulario es inválido', () => {
     fixture.detectChanges();
 
-    const req = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    req.flush({ success: true, message: '', data: [] });
-
     component.modalityForm.patchValue({ name: '', status: '' });
     component.saveForm();
 
     expect(component.modalityForm.invalid).toBeTrue();
+    expect(modalityService.createModality).not.toHaveBeenCalled();
+    expect(modalityService.updateModality).not.toHaveBeenCalled();
   });
 
   it('debe crear una nueva modalidad', () => {
     fixture.detectChanges();
-
-    // 1️⃣ GET en ngOnInit
-    const getReq1 = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    getReq1.flush({ success: true, message: '', data: [] });
 
     component.modalityForm.setValue({
       name: 'Nuevo',
@@ -129,25 +115,15 @@ describe('ModalityComponent', () => {
     });
 
     component.idModality = null;
+    modalityService.createModality.and.returnValue(of({}));
     component.saveForm();
 
-    // 2️⃣ POST para crear modalidad
-    const postReq = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    expect(postReq.request.method).toBe('POST');
-    postReq.flush({});
-
-    // 3️⃣ GET posterior al POST (en el subscribe de saveForm)
-    const getReq2 = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    getReq2.flush({ success: true, message: '', data: [] });
-
+    expect(modalityService.createModality).toHaveBeenCalled();
     expect(component.idModality).toBeNull();
   });
 
   it('debe actualizar una modalidad existente', () => {
     fixture.detectChanges();
-
-    const getReq1 = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    getReq1.flush({ success: true, message: '', data: [] });
 
     component.modalityForm.setValue({
       name: 'Actualizado',
@@ -156,15 +132,10 @@ describe('ModalityComponent', () => {
     });
 
     component.idModality = 5;
+    modalityService.updateModality.and.returnValue(of({}));
     component.saveForm();
 
-    const putReq = httpMock.expectOne(`${component.apiUrl}/modalities/5`);
-    expect(putReq.request.method).toBe('PUT');
-    putReq.flush({});
-
-    const getReq2 = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    getReq2.flush({ success: true, message: '', data: [] });
-
+    expect(modalityService.updateModality).toHaveBeenCalledWith(5, jasmine.any(Object));
     expect(component.idModality).toBeNull();
   });
 
@@ -172,28 +143,18 @@ describe('ModalityComponent', () => {
   it('debe eliminar una modalidad tras confirmación', async () => {
     fixture.detectChanges();
 
-    const getReq1 = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    getReq1.flush({ success: true, message: '', data: [] });
-
     spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
+    modalityService.deleteModality.and.returnValue(of({}));
 
     component.deleteModality(1);
 
     await Promise.resolve(); // Esperar al .then()
 
-    const deleteReq = httpMock.expectOne(`${component.apiUrl}/modalities/1`);
-    expect(deleteReq.request.method).toBe('DELETE');
-    deleteReq.flush({});
-
-    const getReq2 = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    getReq2.flush({ success: true, message: '', data: [] });
+    expect(modalityService.deleteModality).toHaveBeenCalledWith(1);
   });
 
   it('debe abrir el modal y resetear el formulario si es nuevo', () => {
     fixture.detectChanges();
-
-    const req = httpMock.expectOne(`${component.apiUrl}/modalities`);
-    req.flush({ success: true, message: '', data: [] });
 
     component.idModality = null;
     component.modalityForm.patchValue({ name: 'ABC', status: true });

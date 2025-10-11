@@ -1,20 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
 import { IUserTournament } from 'src/app/model/UserTournament.interface';
-
-// Interfaz para representar el usuario logueado desde localStorage
+import { UserTournamentApiService } from 'src/app/services/user-tournament-api.service';
+import { AuthService } from 'src/app/auth/auth.service';
 interface IUser {
   userId: number;
   [key: string]: unknown;
-}
-
-// Respuesta genérica de la API
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
 }
 
 @Component({
@@ -24,16 +15,19 @@ interface ApiResponse<T> {
 })
 export class MisTorneosComponent implements OnInit {
 
-  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-
-  public readonly apiUrl = environment.apiUrl;
+  private readonly userTournamentApi = inject(UserTournamentApiService);
+  private readonly authService = inject(AuthService);
 
   public userId: number = 0;
   public torneosJugados: IUserTournament[] = [];
 
   public resultadosTorneo: Record<string, unknown> | null = null;
   public estadisticasGenerales: Record<string, unknown> | null = null;
+
+  get apiUrl(): string {
+    return this.authService.baseUrl;
+  }
 
   constructor() {
     const user = this.getUserFromStorage();
@@ -50,37 +44,28 @@ export class MisTorneosComponent implements OnInit {
    * Carga los torneos jugados por el usuario actual.
    */
   cargarTorneosJugados(): void {
-    this.http.get<ApiResponse<IUserTournament[]>>(
-      `${this.apiUrl}/user-tournaments/${this.userId}/played`
-    ).subscribe({
-      next: (res) => {
-        if (res.success && Array.isArray(res.data)) {
-          this.torneosJugados = res.data;
+    this.userTournamentApi.getTorneosJugados(this.userId)
+      .subscribe({
+        next: torneos => this.torneosJugados = torneos,
+        error: () => {
+          // Aquí podrías mostrar un mensaje al usuario
+          console.error('❌ No se pudieron cargar los torneos jugados');
         }
-      },
-      error: () => {
-        // En producción: se recomienda mostrar una notificación al usuario
-      }
-    });
+      });
   }
 
   /**
    * Carga los torneos en los que el usuario está inscrito.
-   * Actualmente usa el mismo endpoint, revisar si es correcto.
+   * Verifica si necesitas este método o si es redundante.
    */
   cargarTorneosInscriptos(): void {
-    this.http.get<ApiResponse<IUserTournament[]>>(
-      `${this.apiUrl}/user-tournaments/${this.userId}/played`
-    ).subscribe({
-      next: (res) => {
-        if (res.success && Array.isArray(res.data)) {
-          this.torneosJugados = res.data;
+    this.userTournamentApi.getTorneosInscriptos(this.userId)
+      .subscribe({
+        next: torneos => this.torneosJugados = torneos,
+        error: () => {
+          console.error('❌ No se pudieron cargar los torneos inscritos');
         }
-      },
-      error: () => {
-        // Manejo de error apropiado
-      }
-    });
+      });
   }
 
   /**
@@ -96,8 +81,7 @@ export class MisTorneosComponent implements OnInit {
   }
 
   /**
-   * Obtiene el usuario almacenado en localStorage y lo parsea con validación.
-   * @returns Objeto de tipo IUser o null si falla
+   * Obtiene el usuario almacenado en localStorage
    */
   private getUserFromStorage(): IUser | null {
     try {

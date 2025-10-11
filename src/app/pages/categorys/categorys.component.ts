@@ -1,10 +1,9 @@
 import { Component, ViewChild, TemplateRef, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { environment } from '../../../environments/environment';
 import Swal from 'sweetalert2';
-import { ICategory } from '../../model/category.interface';
+import { ICategory } from 'src/app/model/category.interface';
+import { CategoryApiService } from 'src/app/services/category-api.service';
 
 @Component({
   selector: 'app-categorys',
@@ -22,23 +21,20 @@ export class CategorysComponent {
   // Form
   categoryForm: FormGroup = new FormGroup({});
 
-  // Estado del registro
   estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' }
   ];
 
-  // Inyecciones modernas
   private readonly fb = inject(FormBuilder);
-  private readonly http = inject(HttpClient);
   private readonly modalService = inject(NgbModal);
+  private readonly api = inject(CategoryApiService);
 
   ngOnInit(): void {
     this.initForm();
     this.getCategories();
   }
 
-  /** Inicializa el formulario reactivo */
   initForm(): void {
     this.categoryForm = this.fb.group({
       name: ['', Validators.required],
@@ -47,16 +43,16 @@ export class CategorysComponent {
     });
   }
 
-  /** Consulta todas las categorías */
   getCategories(): void {
-    this.http.get<{ success: boolean; message: string; data: ICategory[] }>(`${environment.apiUrl}/categories`)
-      .subscribe({
-        next: res => this.categories = res.data,
-        error: err => console.error('Error al cargar categorías:', err)
-      });
+    this.api.getCategories().subscribe({
+      next: res => this.categories = res,
+      error: err => {
+        console.error('Error al cargar categorías:', err);
+        Swal.fire('Error', 'No se pudieron cargar las categorías', 'error');
+      }
+    });
   }
 
-  /** Devuelve las categorías filtradas */
   get filteredCategories(): ICategory[] {
     const term = this.filter.toLowerCase().trim();
     return term
@@ -64,7 +60,6 @@ export class CategorysComponent {
       : this.categories;
   }
 
-  /** Edita una categoría existente */
   editCategory(category: ICategory): void {
     this.idCategory = category.categoryId;
 
@@ -77,7 +72,6 @@ export class CategorysComponent {
     this.openModal(this.modalCategoryRef);
   }
 
-  /** Guarda (crea o actualiza) una categoría */
   saveForm(): void {
     if (this.categoryForm.invalid) {
       this.categoryForm.markAllAsTouched();
@@ -88,8 +82,8 @@ export class CategorysComponent {
     const isEdit = !!this.idCategory;
 
     const request = isEdit
-      ? this.http.put(`${environment.apiUrl}/categories/${this.idCategory}`, payload)
-      : this.http.post(`${environment.apiUrl}/categories`, payload);
+      ? this.api.updateCategory(this.idCategory!, payload)
+      : this.api.createCategory(payload);
 
     request.subscribe({
       next: () => {
@@ -104,7 +98,6 @@ export class CategorysComponent {
     });
   }
 
-  /** Elimina una categoría con confirmación */
   deleteCategory(id: number): void {
     Swal.fire({
       title: '¿Eliminar categoría?',
@@ -117,7 +110,7 @@ export class CategorysComponent {
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (result.isConfirmed) {
-        this.http.delete(`${environment.apiUrl}/categories/${id}`).subscribe({
+        this.api.deleteCategory(id).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'Categoría eliminada correctamente', 'success');
             this.getCategories();
@@ -130,7 +123,6 @@ export class CategorysComponent {
     });
   }
 
-  /** Abre el modal de formulario */
   openModal(content: TemplateRef<unknown>): void {
     if (!this.idCategory) {
       this.categoryForm.reset();
@@ -138,14 +130,12 @@ export class CategorysComponent {
     this.modalService.open(content);
   }
 
-  /** Cierra el modal y limpia el formulario */
   closeModal(): void {
     this.modalService.dismissAll();
     this.categoryForm.reset();
     this.idCategory = null;
   }
 
-  /** Limpia el filtro de búsqueda */
   clear(): void {
     this.filter = '';
   }

@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ClubesComponent } from './clubes.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthService } from 'src/app/auth/auth.service';
+import { ClubApiService } from 'src/app/services/club-api.service';
+import { UserApiService } from 'src/app/services/user-api.service';
 import { of } from 'rxjs';
 import { IClubs } from 'src/app/model/clubs.interface';
 import { mockUser } from 'src/app/tests/mocks/mock-user';
@@ -13,17 +15,13 @@ import { TemplateRef } from '@angular/core';
 describe('ClubesComponent', () => {
   let component: ClubesComponent;
   let fixture: ComponentFixture<ClubesComponent>;
-  let httpMock: HttpTestingController;
+  let authService: jasmine.SpyObj<AuthService>;
+  let clubService: jasmine.SpyObj<ClubApiService>;
+  let userService: jasmine.SpyObj<UserApiService>;
 
   const modalServiceMock = {
     open: jasmine.createSpy('open'),
     dismissAll: jasmine.createSpy('dismissAll'),
-  };
-
-  const authMock = {
-    user$: of({ userId: 1 }),
-    fetchUser: () => of({}),
-    hasRole: jasmine.createSpy('hasRole').and.returnValue(true),
   };
 
   const mockClub: IClubs = {
@@ -42,33 +40,34 @@ describe('ClubesComponent', () => {
   };
 
   beforeEach(async () => {
+    // Crear spies para los servicios
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['fetchUser', 'hasRole'], { user$: of({ userId: 1 }) });
+    const clubServiceSpy = jasmine.createSpyObj('ClubApiService', ['getClubs', 'createClub', 'updateClub', 'deleteClub'], { baseUrl: 'http://test-api' });
+    const userServiceSpy = jasmine.createSpyObj('UserApiService', ['getUsers']);
+
     await TestBed.configureTestingModule({
       declarations: [ClubesComponent],
       imports: [ReactiveFormsModule, FormsModule, HttpClientTestingModule],
       providers: [
         { provide: NgbModal, useValue: modalServiceMock },
-        { provide: AuthService, useValue: authMock },
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: ClubApiService, useValue: clubServiceSpy },
+        { provide: UserApiService, useValue: userServiceSpy },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ClubesComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
+    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    clubService = TestBed.inject(ClubApiService) as jasmine.SpyObj<ClubApiService>;
+    userService = TestBed.inject(UserApiService) as jasmine.SpyObj<UserApiService>;
 
-    // 🔥 Interceptar llamadas de ngOnInit (getClubes + getUsers)
-    fixture.detectChanges();
-
-    const reqClubs = httpMock.expectOne(`${component.apiUrl}/clubs/with-members`);
-    reqClubs.flush([]); // ✅ array vacío (el componente espera array directo)
-
-    const reqUsers = httpMock.expectOne(`${component.apiUrl}/users`);
-    reqUsers.flush({ success: true, message: 'ok', data: [] }); // ✅ objeto con data (como el backend real)
+    // Configurar respuestas por defecto para los spies
+    authService.hasRole.and.returnValue(true);
+    clubService.getClubs.and.returnValue(of([]));
+    userService.getUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    httpMock.verify();
   });
 
   it('should create the component', () => {
@@ -80,18 +79,16 @@ describe('ClubesComponent', () => {
   });
 
   it('should load clubes from API', () => {
+    clubService.getClubs.and.returnValue(of([mockClub]));
     component.getClubes();
-    const req = httpMock.expectOne(`${component.apiUrl}/clubs/with-members`);
-    expect(req.request.method).toBe('GET');
-    req.flush([mockClub]); // ✅ array directo
+    expect(clubService.getClubs).toHaveBeenCalled();
     expect(component.clubes.length).toBe(1);
   });
 
   it('should load users from API', () => {
+    userService.getUsers.and.returnValue(of([mockUser]));
     component.getUsers();
-    const req = httpMock.expectOne(`${component.apiUrl}/users`);
-    expect(req.request.method).toBe('GET');
-    req.flush({ success: true, message: 'ok', data: [mockUser] }); // ✅ formato correcto
+    expect(userService.getUsers).toHaveBeenCalled();
     expect(component.usuarios.length).toBe(1);
   });
 
@@ -140,6 +137,7 @@ describe('ClubesComponent', () => {
 
   it('should submit and create club', () => {
     spyOn(Swal, 'fire');
+    clubService.createClub.and.returnValue(of({ success: true }));
 
     component.clubForm.patchValue({
       name: 'Nuevo Club',
@@ -152,15 +150,7 @@ describe('ClubesComponent', () => {
 
     component.save();
 
-    // ✅ Mock del POST
-    const req = httpMock.expectOne(`${component.apiUrl}/clubs/create-with-members`);
-    expect(req.request.method).toBe('POST');
-    req.flush({ success: true });
-
-    // ✅ 🔥 Mock del GET que se dispara dentro del .subscribe()
-    const getClubs = httpMock.expectOne(`${component.apiUrl}/clubs/with-members`);
-    getClubs.flush([]); // o [mockClub] si quieres simular data real
-
+    expect(clubService.createClub).toHaveBeenCalled();
     expect(Swal.fire).toHaveBeenCalledWith(
       'Éxito',
       'El club fue creado correctamente',
@@ -171,11 +161,10 @@ describe('ClubesComponent', () => {
   it('should delete club after confirmation', fakeAsync(() => {
     spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
     spyOn(component, 'getClubes');
+    clubService.deleteClub.and.returnValue(of({}));
     component.deleteClub(1);
     tick();
-    const req = httpMock.expectOne(`${component.apiUrl}/clubs/1`);
-    expect(req.request.method).toBe('DELETE');
-    req.flush({});
+    expect(clubService.deleteClub).toHaveBeenCalledWith(1);
     expect(component.getClubes).toHaveBeenCalled();
   }));
 });

@@ -130,22 +130,22 @@ describe('AuthService', () => {
 
   it('debería devolver true si el usuario tiene el rol requerido', () => {
     service.setAuthData('mock-token', mockUser);
-    expect(service.hasRole('ADMIN')).toBeTrue();
+    expect(service.hasRole('Administrador')).toBeTrue();
   });
 
   it('debería devolver false si el usuario no tiene el rol requerido', () => {
-    const userWithoutAdmin: IUser = { ...mockUser, roles: ['USER'] };
+    const userWithoutAdmin: IUser = { ...mockUser, roleDescription: 'Usuario' };
     service.setAuthData('mock-token', userWithoutAdmin);
-    expect(service.hasRole('ADMIN')).toBeFalse();
+    expect(service.hasRole('Administrador')).toBeFalse();
   });
 
-  it('debería devolver false si roles es undefined', () => {
-    const userWithoutRoles: IUser = { ...mockUser, roles: undefined };
+  it('debería devolver false si roleDescription está vacío', () => {
+    const userWithoutRoles: IUser = { ...mockUser, roleDescription: '' };
     service.setAuthData('mock-token', userWithoutRoles);
-    expect(service.hasRole('ADMIN')).toBeFalse();
+    expect(service.hasRole('Administrador')).toBeFalse();
   });
 
   it('debería devolver false si no hay usuario cargado', () => {
-    expect(service.hasRole('ADMIN')).toBeFalse();
+    expect(service.hasRole('Administrador')).toBeFalse();
   });
 });

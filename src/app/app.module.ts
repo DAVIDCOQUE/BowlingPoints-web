@@ -28,7 +28,7 @@ import { SidebarComponent } from './layouts/header-sidenav/sidebar/sidebar.compo
 import { MatIconModule } from '@angular/material/icon';
 import { HeaderComponent } from './layouts/header-sidenav/header/header.component';
 import { MisTorneosComponent } from './pages/mis-torneos/mis-torneos.component';
-import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.component';
+import { UserStatsComponent } from './pages/mis-resultados/user-stats.component';
 import { ClubComponent } from './pages/club/club.component';
 import { UsersComponent } from './pages/users/users.component';
 import { TorneosComponent } from './pages/torneos/torneos.component';
@@ -61,7 +61,7 @@ import { TournamentResultComponent } from './pages/tournament-result/tournament-
     SidebarComponent,
     HeaderComponent,
     MisTorneosComponent,
-    MisResultadosComponent,
+    UserStatsComponent,
     ClubComponent,
     UsersComponent,
     TorneosComponent,

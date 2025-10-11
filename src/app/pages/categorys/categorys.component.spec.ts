@@ -1,17 +1,18 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { CategorysComponent } from './categorys.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { ICategory } from '../../model/category.interface';
-import { environment } from 'src/environments/environment';
+import { CategoryApiService } from 'src/app/services/category-api.service';
+import { of } from 'rxjs';
 import { TemplateRef } from '@angular/core';
 
 describe('CategorysComponent', () => {
   let component: CategorysComponent;
   let fixture: ComponentFixture<CategorysComponent>;
-  let httpMock: HttpTestingController;
+  let categoryService: jasmine.SpyObj<CategoryApiService>;
 
   const modalMock = {
     open: jasmine.createSpy('open'),
@@ -19,26 +20,26 @@ describe('CategorysComponent', () => {
   };
 
   beforeEach(async () => {
+    // Crear spy para el servicio
+    const categoryServiceSpy = jasmine.createSpyObj('CategoryApiService', ['getCategories', 'createCategory', 'updateCategory', 'deleteCategory']);
+
     await TestBed.configureTestingModule({
       declarations: [CategorysComponent],
       imports: [ReactiveFormsModule, HttpClientTestingModule, FormsModule],
-      providers: [{ provide: NgbModal, useValue: modalMock }]
+      providers: [
+        { provide: NgbModal, useValue: modalMock },
+        { provide: CategoryApiService, useValue: categoryServiceSpy }
+      ]
     }).compileComponents();
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CategorysComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
+    categoryService = TestBed.inject(CategoryApiService) as jasmine.SpyObj<CategoryApiService>;
+
+    // Configurar respuesta por defecto
+    categoryService.getCategories.and.returnValue(of([]));
+
     fixture.detectChanges();
-
-    // 🔹 Al inicializar, se hace un GET automático a categories
-    const req = httpMock.expectOne(`${environment.apiUrl}/categories`);
-    req.flush({ success: true, message: '', data: [] });
-  });
-
-  afterEach(() => {
-    httpMock.verify();
   });
 
   it('should create the component', () => {
@@ -61,12 +62,10 @@ describe('CategorysComponent', () => {
       { categoryId: 1, name: 'Test', description: 'desc', status: true }
     ];
 
+    categoryService.getCategories.and.returnValue(of(mockCategories));
     component.getCategories();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/categories`);
-    expect(req.request.method).toBe('GET');
-    req.flush({ success: true, message: '', data: mockCategories });
-
+    expect(categoryService.getCategories).toHaveBeenCalled();
     expect(component.categories.length).toBe(1);
     expect(component.categories[0].name).toBe('Test');
   });
@@ -112,6 +111,8 @@ describe('CategorysComponent', () => {
   it('should not submit invalid form', () => {
     component.saveForm();
     expect(component.categoryForm.invalid).toBeTrue();
+    expect(categoryService.createCategory).not.toHaveBeenCalled();
+    expect(categoryService.updateCategory).not.toHaveBeenCalled();
   });
 
   it('should send POST when creating new category', () => {
@@ -122,16 +123,10 @@ describe('CategorysComponent', () => {
       status: true
     });
 
+    categoryService.createCategory.and.returnValue(of({}));
     component.saveForm();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/categories`);
-    expect(req.request.method).toBe('POST');
-    req.flush({});
-
-    // 🔹 Simula el getCategories() que ocurre después del POST
-    const reqReload = httpMock.expectOne(`${environment.apiUrl}/categories`);
-    reqReload.flush({ success: true, message: '', data: [] });
-
+    expect(categoryService.createCategory).toHaveBeenCalled();
     expect(modalMock.dismissAll).toHaveBeenCalled();
   });
 
@@ -143,16 +138,10 @@ describe('CategorysComponent', () => {
       status: true
     });
 
+    categoryService.updateCategory.and.returnValue(of({}));
     component.saveForm();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/categories/5`);
-    expect(req.request.method).toBe('PUT');
-    req.flush({});
-
-    // 🔹 Simula el getCategories() que ocurre después del PUT
-    const reqReload = httpMock.expectOne(`${environment.apiUrl}/categories`);
-    reqReload.flush({ success: true, message: '', data: [] });
-
+    expect(categoryService.updateCategory).toHaveBeenCalledWith(5, jasmine.any(Object));
     expect(modalMock.dismissAll).toHaveBeenCalled();
   });
 
@@ -178,15 +167,12 @@ describe('CategorysComponent', () => {
   it('should delete category after confirmation', fakeAsync(() => {
     spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
     spyOn(component, 'getCategories');
+    categoryService.deleteCategory.and.returnValue(of({}));
 
     component.deleteCategory(3);
-
     tick(); // simula la respuesta async
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/categories/3`);
-    expect(req.request.method).toBe('DELETE');
-    req.flush({});
-
+    expect(categoryService.deleteCategory).toHaveBeenCalledWith(3);
     expect(component.getCategories).toHaveBeenCalled();
   }));
 });

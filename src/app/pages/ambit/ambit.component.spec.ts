@@ -1,16 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AmbitComponent } from './ambit.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { IAmbit } from 'src/app/model/ambit.interface';
 import { TemplateRef } from '@angular/core';
-import { environment } from 'src/environments/environment';
+import { AmbitApiService } from 'src/app/services/ambit-api.service';
+import { of } from 'rxjs';
 
 describe('AmbitComponent', () => {
   let component: AmbitComponent;
   let fixture: ComponentFixture<AmbitComponent>;
-  let httpMock: HttpTestingController;
+  let ambitService: jasmine.SpyObj<AmbitApiService>;
 
   const modalServiceMock = {
     open: jasmine.createSpy('open'),
@@ -18,25 +19,26 @@ describe('AmbitComponent', () => {
   };
 
   beforeEach(async () => {
+    // Crear spy para el servicio
+    const ambitServiceSpy = jasmine.createSpyObj('AmbitApiService', ['getAmbits', 'create', 'update', 'delete']);
+
     await TestBed.configureTestingModule({
       declarations: [AmbitComponent],
       imports: [ReactiveFormsModule, HttpClientTestingModule, FormsModule],
       providers: [
-        { provide: NgbModal, useValue: modalServiceMock }
+        { provide: NgbModal, useValue: modalServiceMock },
+        { provide: AmbitApiService, useValue: ambitServiceSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AmbitComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
+    ambitService = TestBed.inject(AmbitApiService) as jasmine.SpyObj<AmbitApiService>;
+
+    // Configurar respuesta por defecto
+    ambitService.getAmbits.and.returnValue(of([]));
+
     fixture.detectChanges();
-
-    const req = httpMock.expectOne(`${environment.apiUrl}/ambits`);
-    req.flush({ success: true, message: '', data: [] });
-  });
-
-  afterEach(() => {
-    httpMock.verify();
   });
 
   it('should create the component', () => {
@@ -52,11 +54,10 @@ describe('AmbitComponent', () => {
       { ambitId: 1, name: 'Nacional', description: 'Ámbito nacional', status: true }
     ];
 
+    ambitService.getAmbits.and.returnValue(of(mockAmbits));
     component.getAmbits();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/ambits`);
-    req.flush({ success: true, message: '', data: mockAmbits });
-
+    expect(ambitService.getAmbits).toHaveBeenCalled();
     expect(component.ambits.length).toBe(1);
   });
 

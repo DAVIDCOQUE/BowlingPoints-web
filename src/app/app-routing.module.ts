@@ -8,7 +8,7 @@ import { JugadoresComponent } from './pages/jugadores/jugadores.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
 import { ClubesComponent } from './pages/clubes/clubes.component';
 import { MisTorneosComponent } from './pages/mis-torneos/mis-torneos.component';
-import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.component';
+import { UserStatsComponent } from './pages/mis-resultados/user-stats.component';
 import { ClubComponent } from './pages/club/club.component';
 import { TorneosComponent } from './pages/torneos/torneos.component';
 import { UsersComponent } from './pages/users/users.component';
@@ -46,7 +46,7 @@ const routes: Routes = [
       // JUGADORES (rol: JUGADOR, ENTRENADOR, ADMIN)
       { path: 'perfil', component: PerfilComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
       { path: 'mis-torneos', component: MisTorneosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
-      { path: 'mis-resultados', component: MisResultadosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
+      { path: 'mis-resultados', component: UserStatsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
 
       // ENTRENADORES Y ADMINISTRADORES
       { path: 'club', component: ClubComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ENTRENADOR', 'ADMIN', 'JUGADOR'] } },

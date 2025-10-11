@@ -1,12 +1,12 @@
 import { Component, OnInit, ViewChild, TemplateRef, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 
-import { environment } from '../../../environments/environment';
 import { IUser } from '../../model/user.interface';
 import { IRole } from '../../model/role.interface';
+import { UserApiService } from 'src/app/services/user-api.service';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-users',
@@ -15,9 +15,6 @@ import { IRole } from '../../model/role.interface';
 })
 export class UsersComponent implements OnInit {
   @ViewChild('modalUser') modalUserRef!: TemplateRef<unknown>;
-
-  /** URL base de la API */
-  public readonly apiUrl = environment.apiUrl;
 
   /** Filtro de búsqueda */
   filter = '';
@@ -46,13 +43,21 @@ export class UsersComponent implements OnInit {
 
   /** Inyecciones mediante inject() */
   private readonly formBuilder = inject(FormBuilder);
-  private readonly http = inject(HttpClient);
   private readonly modalService = inject(NgbModal);
+  private readonly userApi = inject(UserApiService);
+  private readonly authService = inject(AuthService);
 
+  /**
+   * Hook de inicialización
+   */
   ngOnInit(): void {
     this.initForm();
     this.getUsers();
     this.getRoles();
+  }
+
+  get apiUrl(): string {
+    return this.authService.baseUrl;
   }
 
   /**
@@ -78,22 +83,20 @@ export class UsersComponent implements OnInit {
    * Obtiene todos los usuarios desde la API
    */
   getUsers(): void {
-    this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${this.apiUrl}/users`)
-      .subscribe({
-        next: res => this.usuarios = res.data,
-        error: err => console.error('Error al cargar usuarios:', err)
-      });
+    this.userApi.getUsers().subscribe({
+      next: res => this.usuarios = res,
+      error: err => console.error('Error al cargar usuarios:', err)
+    });
   }
 
   /**
    * Obtiene todos los roles desde la API
    */
   getRoles(): void {
-    this.http.get<{ success: boolean; message: string; data: IRole[] }>(`${this.apiUrl}/roles`)
-      .subscribe({
-        next: res => this.roles = res.data,
-        error: err => console.error('Error al cargar roles:', err)
-      });
+    this.userApi.getRoles().subscribe({
+      next: res => this.roles = res,
+      error: err => console.error('Error al cargar roles:', err)
+    });
   }
 
   /**
@@ -169,8 +172,8 @@ export class UsersComponent implements OnInit {
     }
 
     const request = isEdit
-      ? this.http.put(`${this.apiUrl}/users/${this.idUser}`, payload)
-      : this.http.post(`${this.apiUrl}/users`, payload);
+      ? this.userApi.updateUser(this.idUser!, payload)
+      : this.userApi.createUser(payload);
 
     request.subscribe({
       next: () => {
@@ -203,7 +206,7 @@ export class UsersComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`${this.apiUrl}/users/${id}`).subscribe({
+        this.userApi.deleteUser(id).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'El usuario ha sido eliminado', 'success');
             this.getUsers();

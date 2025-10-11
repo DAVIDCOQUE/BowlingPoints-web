@@ -1,11 +1,13 @@
 import { Component, ViewChild, ElementRef, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { environment } from 'src/environments/environment';
 import Swal from 'sweetalert2';
+
 import { IUser } from '../../model/user.interface';
 import { IRole } from '../../model/role.interface';
+
+import { AuthService } from 'src/app/auth/auth.service';
+import { RoleApiService } from '../../services/role-api.service';
 
 @Component({
   selector: 'app-perfil',
@@ -13,9 +15,6 @@ import { IRole } from '../../model/role.interface';
   styleUrls: ['./perfil.component.css']
 })
 export class PerfilComponent implements OnInit {
-
-  /** URL base de la API */
-  public readonly apiUrl = environment.apiUrl;
 
   /** Listado de usuarios (no se usa mucho en perfil, pero se mantiene) */
   usuarios: IUser[] = [];
@@ -38,7 +37,8 @@ export class PerfilComponent implements OnInit {
 
   /** Inyecciones con inject() */
   private readonly fb = inject(FormBuilder);
-  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
+  private readonly roleService = inject(RoleApiService);
   private readonly modalService = inject(NgbModal);
 
   @ViewChild('avatarPreview') avatarPreviewRef!: ElementRef<HTMLImageElement>;
@@ -72,50 +72,49 @@ export class PerfilComponent implements OnInit {
   }
 
   /**
-   * Carga el usuario autenticado desde la API
+   * Carga el usuario autenticado desde el AuthService
    */
   loadCurrentUser(): void {
-    this.http.get<{ success: boolean; data: IUser }>(`${this.apiUrl}/users/me`)
-      .subscribe({
-        next: res => {
-          const user = res.data;
-          this.idUser = user.userId;
+    this.authService.fetchUser().subscribe({
+      next: user => {
+        if (!user) return;
 
-          this.userForm.patchValue({
-            nickname: user.nickname,
-            photoUrl: user.photoUrl,
-            document: user.document,
-            email: user.email,
-            fullName: user.fullName,
-            fullSurname: user.fullSurname,
-            phone: user.phone,
-            gender: user.gender,
-            roleId: this.getRoleIdByDescription(user.roleDescription),
-            password: '',
-            confirm: ''
-          });
+        this.idUser = user.userId;
 
-          // Previsualización del avatar
-          const img = user.photoUrl || 'assets/img/perfil.png';
-          if (this.avatarPreviewRef?.nativeElement) {
-            this.avatarPreviewRef.nativeElement.src = img;
-          }
-        },
-        error: err => {
-          console.error('Error al cargar usuario:', err);
+        this.userForm.patchValue({
+          nickname: user.nickname,
+          photoUrl: user.photoUrl,
+          document: user.document,
+          email: user.email,
+          fullName: user.fullName,
+          fullSurname: user.fullSurname,
+          phone: user.phone,
+          gender: user.gender,
+          roleId: this.getRoleIdByDescription(user.roleDescription),
+          password: '',
+          confirm: ''
+        });
+
+        // Previsualización del avatar
+        const img = user.photoUrl || 'assets/img/perfil.png';
+        if (this.avatarPreviewRef?.nativeElement) {
+          this.avatarPreviewRef.nativeElement.src = img;
         }
-      });
+      },
+      error: err => {
+        console.error('Error al cargar usuario:', err);
+      }
+    });
   }
 
   /**
-   * Obtiene los roles disponibles desde la API
+   * Obtiene los roles disponibles desde RoleApiService
    */
   getRoles(): void {
-    this.http.get<{ success: boolean; message: string; data: IRole[] }>(`${this.apiUrl}/roles`)
-      .subscribe({
-        next: res => this.roles = res.data,
-        error: err => console.error('Error al cargar roles:', err)
-      });
+    this.roleService.getAll().subscribe({
+      next: res => this.roles = res,
+      error: err => console.error('Error al cargar roles:', err)
+    });
   }
 
   /**
@@ -138,7 +137,7 @@ export class PerfilComponent implements OnInit {
    */
   get photoSrc(): string {
     const photoUrl = this.userForm.controls['photoUrl'].value;
-    return photoUrl ? (this.apiUrl + photoUrl) : 'assets/img/perfil.png';
+    return photoUrl ? photoUrl : 'assets/img/perfil.png';
   }
 
   /**
@@ -167,34 +166,33 @@ export class PerfilComponent implements OnInit {
       delete payload.password;
     }
 
-    this.http.put(`${this.apiUrl}/users/${this.idUser}`, payload)
-      .subscribe({
-        next: () => {
-          Swal.fire({
-            title: 'Éxito',
-            text: 'Tu perfil ha sido actualizado correctamente.',
-            icon: 'success',
-            confirmButtonText: 'Aceptar',
-            customClass: { confirmButton: 'btn btn-outline-primary btn-sm align-items-center' },
-            buttonsStyling: false
-          }).then(result => {
-            if (result.isConfirmed) {
-              window.location.reload();
-            }
-          });
-        },
-        error: err => {
-          console.error('Error al actualizar usuario:', err);
-          Swal.fire({
-            title: 'Error',
-            text: 'Ocurrió un error al actualizar el perfil.',
-            icon: 'error',
-            confirmButtonText: 'Cerrar',
-            customClass: { confirmButton: 'btn btn-outline-danger' },
-            buttonsStyling: false
-          });
-        }
-      });
+    this.authService.updateUserProfile(this.idUser, payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: 'Éxito',
+          text: 'Tu perfil ha sido actualizado correctamente.',
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+          customClass: { confirmButton: 'btn btn-outline-primary btn-sm align-items-center' },
+          buttonsStyling: false
+        }).then(result => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      },
+      error: err => {
+        console.error('Error al actualizar usuario:', err);
+        Swal.fire({
+          title: 'Error',
+          text: 'Ocurrió un error al actualizar el perfil.',
+          icon: 'error',
+          confirmButtonText: 'Cerrar',
+          customClass: { confirmButton: 'btn btn-outline-danger' },
+          buttonsStyling: false
+        });
+      }
+    });
   }
 
   /**

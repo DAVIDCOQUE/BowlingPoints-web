@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MisResultadosComponent } from './mis-resultados.component';
+import { UserStatsComponent } from './user-stats.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { Router } from '@angular/router';
 
-describe('MisResultadosComponent', () => {
-  let component: MisResultadosComponent;
-  let fixture: ComponentFixture<MisResultadosComponent>;
+describe('UserStatsComponent', () => {
+  let component: UserStatsComponent;
+  let fixture: ComponentFixture<UserStatsComponent>;
   let httpMock: HttpTestingController;
   let routerSpy: jasmine.SpyObj<Router>;
 
@@ -21,13 +21,13 @@ describe('MisResultadosComponent', () => {
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      declarations: [MisResultadosComponent],
+      declarations: [UserStatsComponent],
       imports: [HttpClientTestingModule],
       providers: [{ provide: Router, useValue: routerSpy }],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MisResultadosComponent);
+    fixture = TestBed.createComponent(UserStatsComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
   });
