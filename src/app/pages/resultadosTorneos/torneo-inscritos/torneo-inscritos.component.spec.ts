@@ -1,126 +1,161 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TorneoInscritosComponent } from './torneo-inscritos.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
-import { AuthService } from 'src/app/auth/auth.service';
-import { of } from 'rxjs';
+import Swal from 'sweetalert2';
+import { TorneoInscritosComponent } from './torneo-inscritos.component';
+import { environment } from 'src/environments/environment';
+import { ITournament } from 'src/app/model/tournament.interface';
 import { IUser } from 'src/app/model/user.interface';
 
 describe('TorneoInscritosComponent', () => {
   let component: TorneoInscritosComponent;
   let fixture: ComponentFixture<TorneoInscritosComponent>;
   let httpMock: HttpTestingController;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
+  const apiUrl = environment.apiUrl;
+
+  const mockTournament: ITournament = {
+    tournamentId: 1,
+    name: 'Torneo de Prueba',
+    organizer: 'Organizador',
+    imageUrl: 'test.jpg',
+    modalities: [],
+    categories: [],
+    modalityIds: [],
+    categoryIds: [],
+    lugar: 'Ciudad Prueba',
+    startDate: '2020-01-01',
+    endDate: '2020-01-02',
+    ambitId: 1,
+    ambitName: 'Nacional',
+    location: 'Estadio Central',
+    stage: 'Final',
+    status: true
+  };
+
+  const mockPlayers: IUser[] = [
+    {
+      userId: 1,
+      personId: 1,
+      roleId: 1,
+      clubId: 1,
+      document: '123',
+      nickname: 'player1',
+      fullName: 'Jugador Uno',
+      fullSurname: 'Apellido',
+      email: 'jugador@uno.com',
+      roleDescription: 'Jugador',
+      phone: '999999',
+      gender: 'M',
+      category: '',
+      modality: '',
+      rama: '',
+      team: ''
+    }
+  ];
 
   beforeEach(async () => {
-    // Crear mock del AuthService
-    mockAuthService = jasmine.createSpyObj<AuthService>('AuthService', ['fetchUser']);
-    mockAuthService.fetchUser.and.returnValue(of({ clubId: 1 } as IUser));
-
-    // Asignar user$ como getter manual
-    Object.defineProperty(mockAuthService, 'user$', {
-      get: () => of({ clubId: 1 } as IUser)
-    });
-
     await TestBed.configureTestingModule({
-      declarations: [TorneoInscritosComponent],
-      imports: [
-        HttpClientTestingModule,
-        ReactiveFormsModule,
-        NgbModalModule
-      ],
-      providers: [
-        { provide: AuthService, useValue: mockAuthService }
-      ]
+      imports: [HttpClientTestingModule],
+      declarations: [TorneoInscritosComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TorneoInscritosComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
-
-    fixture.detectChanges();
-
-    // Flushear llamadas del ngOnInit()
-    httpMock.expectOne(`${component.apiUrl}/clubs/1/details`).flush({
-      clubId: 1,
-      name: 'Mi Club',
-      members: []
-    });
-
-    httpMock.expectOne(`${component.apiUrl}/users`).flush({
-      success: true,
-      message: '',
-      data: []
-    });
   });
 
   afterEach(() => {
     httpMock.verify();
   });
 
-  it('debería crear el componente', () => {
+  it('should create the component', () => {
+    fixture.detectChanges();
+
+    const req1 = httpMock.expectOne(`${apiUrl}/tournaments/1`);
+    req1.flush({ success: true, data: mockTournament });
+    const req2 = httpMock.expectOne(`${apiUrl}/tournaments/1/players`);
+    req2.flush({ success: true, data: mockPlayers });
+
     expect(component).toBeTruthy();
   });
 
-  it('debería inicializar el formulario correctamente', () => {
-    expect(component.clubForm).toBeDefined();
-    expect(component.clubForm.get('name')).toBeTruthy();
-    expect(component.clubForm.get('status')?.value).toBe(true);
-  });
-
-  it('debería devolver false si NO hay miembros duplicados', () => {
-    const result = (component as any).hasDuplicateMembers([
-      { personId: 1 },
-      { personId: 2 }
-    ]);
-    expect(result).toBeFalse();
-  });
-
-  it('debería devolver true si hay miembros duplicados', () => {
-    const result = (component as any).hasDuplicateMembers([
-      { personId: 1 },
-      { personId: 1 }
-    ]);
-    expect(result).toBeTrue();
-  });
-
-  it('debería obtener el clubId desde AuthService.user$', () => {
-    expect(component.clubId).toBe(1);
-  });
-
-
-  it('debería manejar error al cargar datos del club', () => {
-    // Reinstanciar componente para forzar error
-    fixture = TestBed.createComponent(TorneoInscritosComponent);
-    component = fixture.componentInstance;
+  it('should load tournament successfully', () => {
     fixture.detectChanges();
 
-    const reqClub = httpMock.expectOne(`${component.apiUrl}/clubs/1/details`);
-    reqClub.flush({}, { status: 500, statusText: 'Error' });
+    const req1 = httpMock.expectOne(`${apiUrl}/tournaments/1`);
+    req1.flush({ success: true, data: mockTournament });
+    const req2 = httpMock.expectOne(`${apiUrl}/tournaments/1/players`);
+    req2.flush({ success: true, data: mockPlayers });
 
-    const reqUsers = httpMock.expectOne(`${component.apiUrl}/users`);
-    reqUsers.flush({ success: true, message: '', data: [] });
-
-    expect(component.miClub).toBeNull();
+    expect(component.selectedTournament).toEqual(mockTournament);
+    expect(component.cards.length).toBe(3);
   });
 
-  it('debería manejar error al cargar usuarios', () => {
-    fixture = TestBed.createComponent(TorneoInscritosComponent);
-    component = fixture.componentInstance;
+  it('should show error alert when loadTournament fails', () => {
+    const swalSpy = spyOn(Swal, 'fire');
     fixture.detectChanges();
 
-    httpMock.expectOne(`${component.apiUrl}/clubs/1/details`).flush({
-      clubId: 1,
-      name: 'Mi Club',
-      members: []
-    });
+    const req1 = httpMock.expectOne(`${apiUrl}/tournaments/1`);
+    req1.flush('Error', { status: 500, statusText: 'Server Error' });
 
-    const reqUsers = httpMock.expectOne(`${component.apiUrl}/users`);
-    reqUsers.flush({}, { status: 500, statusText: 'Error' });
+    // 💡 Cierra la request que se dispara después del fallo
+    const pending = httpMock.match(`${apiUrl}/tournaments/1/players`);
+    pending.forEach(req => req.flush({}));
 
-    // No podemos acceder directamente a usuariosLoaded (es private)
-    // Pero podemos confirmar que no llenó usuarios:
-    expect(component.usuarios.length).toBe(0);
+    expect(swalSpy).toHaveBeenCalledWith(
+      'Error',
+      'No se pudo cargar la información del torneo',
+      'error'
+    );
+  });
+
+  it('should load players successfully', () => {
+    fixture.detectChanges();
+
+    const req1 = httpMock.expectOne(`${apiUrl}/tournaments/1`);
+    req1.flush({ success: true, data: mockTournament });
+    const req2 = httpMock.expectOne(`${apiUrl}/tournaments/1/players`);
+    req2.flush({ success: true, data: mockPlayers });
+
+    expect(component.players.length).toBe(1);
+    expect(component.players[0].nickname).toBe('player1');
+  });
+
+  it('should show alert when loadPlayers fails', () => {
+    const swalSpy = spyOn(Swal, 'fire');
+    fixture.detectChanges();
+
+    const req1 = httpMock.expectOne(`${apiUrl}/tournaments/1`);
+    req1.flush({ success: true, data: mockTournament });
+    const req2 = httpMock.expectOne(`${apiUrl}/tournaments/1/players`);
+    req2.flush('Error', { status: 500, statusText: 'Server Error' });
+
+    expect(swalSpy).toHaveBeenCalledWith(
+      'Error',
+      'No se pudieron cargar los jugadores inscritos',
+      'error'
+    );
+  });
+
+  it('should build cards correctly in updateCards', () => {
+    component.modalities = [
+      { modalityId: 1, name: 'Individual', description: '', status: true }
+    ];
+    component.categories = [
+      { categoryId: 1, name: 'A', description: '', status: true }
+    ];
+
+    component.updateCards();
+
+    expect(component.cards.length).toBe(3);
+    expect(component.cards[0].title).toBe('Modalidades');
+    expect(component.cards[1].title).toBe('Categorías');
+    expect(component.cards[2].title).toBe('Ramas');
+  });
+
+  it('should replace image src on error', () => {
+    const img = new Image();
+    const event = { target: img } as unknown as Event;
+    component.onImgError(event, 'fallback.jpg');
+    expect(img.src).toContain('fallback.jpg');
   });
 });

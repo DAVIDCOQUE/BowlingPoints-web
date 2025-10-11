@@ -16,6 +16,7 @@ import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo
 import { DatallesTorneoComponent } from './pages/resultadosTorneos/datalles-torneo/datalles-torneo.component';
 import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jugador/datalles-jugador.component';
 import { ListaTorneosComponent } from './pages/resultadosTorneos/lista-torneos/lista-torneos.component';
+import { TorneoInscritosComponent } from './pages/resultadosTorneos/torneo-inscritos/torneo-inscritos.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ClubesComponent } from './pages/clubes/clubes.component';
 import { CategorysComponent } from './pages/categorys/categorys.component';
@@ -44,6 +45,7 @@ import { ResultsComponent } from './pages/results/results.component';
 import { LoadingComponent } from './components/loading/loading.component';
 import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
 
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -71,7 +73,8 @@ import { TournamentResultComponent } from './pages/tournament-result/tournament-
     AmbitComponent,
     ResultsComponent,
     LoadingComponent,
-    TournamentResultComponent
+    TournamentResultComponent,
+    TorneoInscritosComponent
   ],
   imports: [
     CommonModule,

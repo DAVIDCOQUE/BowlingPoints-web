@@ -12,6 +12,10 @@ export interface IUser {
   roleDescription: string;
   phone: string;
   gender: string;
+  category?:string;
+  modality?:string;
+  rama?:string;
+  team?:string;
   roles?: string[];
 
 

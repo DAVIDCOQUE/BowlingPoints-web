@@ -1,65 +1,96 @@
 <div class="container py-4">
-  <!-- INFORMACIÓN GENERAL -->
+  <!-- INFORMACIÓN GENERAL DEL TORNEO -->
   <div class="card shadow-sm border-0 rounded-4 mb-4">
     <div class="row g-0 align-items-center">
       <!-- Logo -->
-      <div class="col-md-4 text-center p-4">
-        <img [src]="apiUrl + miClub?.imageUrl" (error)="onImgError($event, 'assets/img/clubDefault.png')"
-          alt="{{ miClub?.imageUrl }}" class="img-fluid rounded-circle border shadow" width="100" height="100">
+      <div class="col-md-3 text-center p-4">
+        <img
+          [src]="selectedTournament?.imageUrl || 'assets/img/clubDefault.png'"
+          (error)="onImgError($event, 'assets/img/clubDefault.png')"
+          alt="Logo torneo"
+          class="img-fluid rounded-circle border shadow-sm"
+          width="120"
+          height="120"
+        />
       </div>
 
-      <!-- Datos -->
-      <div class="col-md-8 p-4">
-        <h1 class="fw-bold">Nombre del Torneo</h1>
-        <p class="text-muted">Información del torneo</p>
-        <div class="row text-muted">
-          <div class="col-sm-6"><b>Fundación:</b> {{ miClub?.foundationDate }}</div>
-          <div class="col-sm-6"><b>Ubicación:</b> {{ miClub?.city }}</div>
+      <!-- Información del torneo -->
+      <div class="col-md-9 p-4">
+        <h2 class="fw-bold mb-1">{{ selectedTournament?.name || 'Nombre del Torneo' }}</h2>
+        <p class="text-muted mb-2">Información general del torneo</p>
 
+        <div class="row text-muted">
+          <div class="col-md-6"><b>Fundación:</b> {{ selectedTournament?.foundationDate | date }}</div>
+          <div class="col-md-6"><b>Ubicación:</b> {{ selectedTournament?.location || 'No especificada' }}</div>
+          <div class="col-md-6"><b>Estado:</b> {{ selectedTournament?.status || 'En curso' }}</div>
+          <div class="col-md-6"><b>Organizador:</b> {{ selectedTournament?.organizer || 'N/D' }}</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- RANKING & PUNTAJE -->
+  <!-- SECCIONES DE MODALIDADES / CATEGORÍAS / RAMAS -->
   <div class="row g-3 mb-4">
-    <div class="col-md-6">
+    <div class="col-md-4" *ngFor="let card of cards">
       <div class="card text-center shadow-sm border-0 rounded-4 py-4">
-        <h4 class="fw-bold mb-1">Modalidades</h4>
+        <h4 class="fw-bold mb-2">{{ card.title }}</h4>
 
-        <!-- Si no hay ranking o club, muestra el mensaje -->
-        <div *ngIf="!miClub || !miClub.ranking || miClub.ranking === 0"
-          class="alert alert-warning text-center my-4 py-2 rounded-3 fw-semibold">
-          <i class="bi bi-emoji-frown"></i> No hay Datos.
-        </div>
+        <ng-container *ngIf="card.items && card.items.length; else noData">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item" *ngFor="let item of card.items">
+              {{ item.name || item }}
+            </li>
+          </ul>
+        </ng-container>
 
-        <!-- Solo muestra el número si hay ranking y es > 0 -->
-        <h1 *ngIf="showRanking()" class="display-5 text-primary">
-          #{{ miClub?.ranking }}
-        </h1>
-      </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card text-center shadow-sm border-0 rounded-4 py-4">
-        <h4 class="fw-bold mb-1">Categorias</h4>
-        <div *ngIf="showScore(); else noScore">
-          <h1 class="display-5 text-success">{{ miClub?.score }}</h1>
-        </div>
-        <ng-template #noScore>
-          <div class="alert alert-warning">No hay puntaje disponible.</div>
+        <ng-template #noData>
+          <div class="alert alert-warning my-2 py-2 rounded-3 fw-semibold">
+            <i class="bi bi-exclamation-triangle"></i> No hay datos.
+          </div>
         </ng-template>
       </div>
     </div>
   </div>
 
-  <!-- JUGADORES INSCRITOS -->
-  <div class="mb-4">
-    <h4 class="mb-3 fw-bold">🏆 Jugadores Inscritos</h4>
-    <ul class="list-group list-group-flush border rounded-3 shadow-sm" *ngIf="hasLogros(); else noLogros">
-      <li class="list-group-item" *ngFor="let logro of miClub?.logros">{{ logro }}</li>
-    </ul>
-    <ng-template #noLogros>
-      <div class="alert alert-warning">No hay logros registrados.</div>
-    </ng-template>
+  <!-- TABLA DE JUGADORES INSCRITOS -->
+  <div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-primary text-white rounded-top-4">
+      <h5 class="mb-0">
+        <i class="bi bi-trophy me-2"></i> Jugadores Inscritos
+      </h5>
+    </div>
+
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Modalidad</th>
+            <th>Rama</th>
+            <th>Equipo</th>
+          </tr>
+        </thead>
+        <tbody *ngIf="players && players.length; else noPlayers">
+          <tr *ngFor="let player of players; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ player.fullName }}</td>
+            <td>{{ player.category }}</td>
+            <td>{{ player.modality }}</td>
+            <td>{{ player.rama }}</td>
+            <td>{{ player.team }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-  <hr>
+
+  <ng-template #noPlayers>
+    <tr>
+      <td colspan="6" class="text-center text-muted py-4">
+        <i class="bi bi-people"></i> No hay jugadores inscritos.
+      </td>
+    </tr>
+  </ng-template>
+</div>

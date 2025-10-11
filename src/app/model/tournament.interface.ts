@@ -4,6 +4,7 @@ import { IModality } from "./modality.interface";
 export interface ITournament {
   tournamentId: number;
   name: string;
+  foundationDate?: Date;
   organizer: string;
   imageUrl: string;
 

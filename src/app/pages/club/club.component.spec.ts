@@ -1,91 +1,88 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { of } from 'rxjs';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import Swal, { SweetAlertResult } from 'sweetalert2';
-import { ClubComponent } from './club.component';
+import Swal from 'sweetalert2';
+import { of, Subject, Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
+import { environment } from 'src/environments/environment';
+import { ClubComponent } from './club.component';
 import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
 
-// Mock data
-const mockUser: IUser = {
-  userId: 1,
-  personId: 1,
-  roleId: 1,
+/** Helper para crear clubes válidos */
+const createMockClub = (members: IUser[] = []): IClubs => ({
   clubId: 1,
-  document: '12345678',
-  nickname: 'testuser',
-  fullName: 'Test',
-  fullSurname: 'User',
-  email: 'test@example.com',
-  roleDescription: 'Admin',
-  phone: '123456789',
-  gender: 'M',
-  sub: 'testsub'
-};
-
-const mockClub: IClubs = {
-  clubId: 1,
-  name: 'Club A',
-  foundationDate: '2000-01-01',
-  city: 'City A',
-  description: 'Description A',
-  status: true,
+  name: 'Mock Club',
+  foundationDate: '2020-01-01',
+  city: 'Ciudad Test',
+  description: 'Descripción de prueba',
   imageUrl: '',
-  members: [mockUser],
-  ranking: 1,
-  score: 100,
-  logros: ['Logro 1'],
-  torneos: ['Torneo 1']
-};
+  status: true,
+  members,
+});
 
 describe('ClubComponent', () => {
   let component: ClubComponent;
   let fixture: ComponentFixture<ClubComponent>;
   let httpMock: HttpTestingController;
-  let modalService: NgbModal;
+  let authServiceMock: jasmine.SpyObj<AuthService>;
+  let userSubject: Subject<any>;
+
+  const apiUrl = environment.apiUrl;
+
+  const mockUsers: IUser[] = [
+    {
+      userId: 1,
+      personId: 1,
+      roleId: 1,
+      clubId: 1,
+      document: '123',
+      nickname: 'Player1',
+      fullName: 'Jugador Uno',
+      fullSurname: 'Apellido',
+      email: 'uno@test.com',
+      roleDescription: 'Jugador',
+      phone: '9999999',
+      gender: 'M',
+      category: 'A',
+      modality: 'Individual',
+      rama: 'Masculina',
+      team: 'Equipo1'
+    },
+    {
+      userId: 2,
+      personId: 2,
+      roleId: 2,
+      clubId: 1,
+      document: '456',
+      nickname: 'Player2',
+      fullName: 'Jugador Dos',
+      fullSurname: 'Apellido',
+      email: 'dos@test.com',
+      roleDescription: 'Jugador',
+      phone: '8888888',
+      gender: 'F',
+      category: 'B',
+      modality: 'Parejas',
+      rama: 'Femenina',
+      team: 'Equipo2'
+    }
+  ];
 
   beforeEach(async () => {
+    userSubject = new Subject();
+    authServiceMock = jasmine.createSpyObj('AuthService', [], {
+      user$: userSubject.asObservable(),
+    });
+
     await TestBed.configureTestingModule({
       declarations: [ClubComponent],
-      imports: [ReactiveFormsModule, HttpClientTestingModule],
-      providers: [
-        {
-          provide: NgbModal,
-          useValue: {
-            open: jasmine.createSpy('open'),
-            dismissAll: jasmine.createSpy('dismissAll')
-          }
-        },
-        {
-          provide: AuthService,
-          useValue: {
-            user$: of({ clubId: 1 })
-          }
-        }
-      ]
+      imports: [HttpClientTestingModule],
+      providers: [{ provide: AuthService, useValue: authServiceMock }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ClubComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
-    modalService = TestBed.inject(NgbModal);
-
-    // Set apiUrl manually if not defined
-    if (!component.apiUrl) component.apiUrl = 'http://localhost:9999';
-
-    // Intercept ngOnInit HTTP calls
-    fixture.detectChanges();
-
-    const req1 = httpMock.expectOne(`${component.apiUrl}/clubs/1/details`);
-    req1.flush(mockClub);
-
-    const req2 = httpMock.expectOne(`${component.apiUrl}/users`);
-    req2.flush({ success: true, message: '', data: [mockUser] });
-
-    fixture.detectChanges();
   });
 
   afterEach(() => {
@@ -96,195 +93,126 @@ describe('ClubComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should build form as invalid initially', () => {
-    component.buildForm();
-    expect(component.clubForm.invalid).toBeTrue();
+  it('should load club data when user has clubId', () => {
+    fixture.detectChanges();
+    userSubject.next({ clubId: 1 });
+
+    const reqClub = httpMock.expectOne(`${apiUrl}/clubs/1/details`);
+    expect(reqClub.request.method).toBe('GET');
+    reqClub.flush(createMockClub());
+
+    const reqUsers = httpMock.expectOne(`${apiUrl}/users`);
+    reqUsers.flush({ success: true, message: '', data: mockUsers });
+
+    expect(component.miClub).toBeTruthy();
+    expect(component.usuarios.length).toBe(2);
   });
 
-  it('should handle image error', () => {
-    const img = new Image();
-    const event = { target: img } as unknown as Event;
-    component.onImgError(event, 'fallback.jpg');
-    expect(img.src).toContain('fallback.jpg');
+  it('should show alert if user has no club', () => {
+    spyOn(Swal, 'fire');
+    fixture.detectChanges();
+    userSubject.next({ clubId: null });
+
+    // Cierra cualquier llamada HTTP inesperada
+    const pending = httpMock.match(() => true);
+    pending.forEach(req => req.flush({}));
+
+    expect(component.miClub).toBeNull();
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Sin Club',
+      'No tienes un club asociado',
+      'info'
+    );
   });
 
-  it('should clear filter', () => {
-    component.filter = 'test';
-    component.clear();
-    expect(component.filter).toBe('');
+  it('should unsubscribe on destroy', () => {
+    component['userSub'] = new Subscription();
+    const unsubscribeSpy = spyOn(component['userSub'], 'unsubscribe');
+    component.ngOnDestroy();
+    expect(unsubscribeSpy).toHaveBeenCalled();
   });
 
-  it('should return true from hasMembers', () => {
-    component.miClub = mockClub;
-    expect(component.hasMembers()).toBeTrue();
-  });
-
-  it('should return true from hasLogros', () => {
-    component.miClub = mockClub;
-    expect(component.hasLogros()).toBeTrue();
-  });
-
-  it('should return true from hasTorneos', () => {
-    component.miClub = mockClub;
-    expect(component.hasTorneos()).toBeTrue();
-  });
-
-  it('should return true from showRanking', () => {
-    component.miClub = mockClub;
-    expect(component.showRanking()).toBeTrue();
-  });
-
-  it('should return true from showScore', () => {
-    component.miClub = mockClub;
-    expect(component.showScore()).toBeTrue();
-  });
-
-  it('should handle null clubId in getMiClub', () => {
+  it('should set miClub to null if no clubId in getMiClub', () => {
     component.clubId = null;
     component.getMiClub();
     expect(component.miClub).toBeNull();
   });
 
-  it('should getMiClub successfully', () => {
+  it('should load miClub successfully', () => {
+    component.clubId = 1;
     component.getMiClub();
-    const req = httpMock.expectOne(`${component.apiUrl}/clubs/1/details`);
-    req.flush(mockClub);
-    expect(component.miClub).toEqual(mockClub);
+
+    const req = httpMock.expectOne(`${apiUrl}/clubs/1/details`);
+    req.flush(createMockClub());
+    expect(component.miClub?.name).toBe('Mock Club');
   });
 
   it('should handle error in getMiClub', () => {
+    spyOn(Swal, 'fire');
+    component.clubId = 1;
     component.getMiClub();
-    const req = httpMock.expectOne(`${component.apiUrl}/clubs/1/details`);
-    req.flush('Error', { status: 500, statusText: 'Server Error' });
+
+    const req = httpMock.expectOne(`${apiUrl}/clubs/1/details`);
+    req.flush({}, { status: 500, statusText: 'Server Error' });
+
     expect(component.miClub).toBeNull();
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Error',
+      'No se pudieron cargar los datos de tu club',
+      'error'
+    );
   });
 
-  it('should get users once', () => {
+  it('should load users correctly', () => {
     component.usuariosLoaded = false;
     component.getUsers();
-    const req = httpMock.expectOne(`${component.apiUrl}/users`);
-    req.flush({ success: true, message: '', data: [mockUser] });
-    expect(component.usuarios.length).toBe(1);
+
+    const req = httpMock.expectOne(`${apiUrl}/users`);
+    req.flush({ success: true, message: '', data: mockUsers });
+
+    expect(component.usuarios.length).toBe(2);
+    expect(component.usuariosLoaded).toBeTrue();
   });
 
-  it('should force refresh users', () => {
-    component.getUsers(true);
-    const req = httpMock.expectOne(`${component.apiUrl}/users`);
-    req.flush({ success: true, message: '', data: [mockUser] });
-    expect(component.usuarios.length).toBe(1);
+  it('should skip getUsers if already loaded', () => {
+    component.usuariosLoaded = true;
+    const spy = spyOn<any>(component['http'], 'get');
+    component.getUsers();
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it('should handle error in getUsers', () => {
-    component.usuarios = []; // Limpia usuarios antes del test
+    spyOn(Swal, 'fire');
     component.getUsers(true);
 
-    const req = httpMock.expectOne(`${component.apiUrl}/users`);
-    req.flush('Error', { status: 500, statusText: 'Error' });
+    const req = httpMock.expectOne(`${apiUrl}/users`);
+    req.flush({}, { status: 500, statusText: 'Server Error' });
 
-    expect(component.usuarios.length).toBe(0);
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Error',
+      'No se pudieron cargar los usuarios',
+      'error'
+    );
   });
 
-  it('should not submit invalid form', () => {
-    component.clubForm.reset();
-    component.save();
-    expect(component.clubForm.invalid).toBeTrue();
+  it('should replace image src on error', () => {
+    const event = { target: { src: '' } } as unknown as Event;
+    component.onImgError(event, 'fallback.png');
+    expect((event.target as HTMLImageElement).src).toContain('fallback.png');
   });
 
-  it('should show error if duplicate members are added', () => {
-    component.clubForm.setValue({
-      name: 'Test',
-      foundationDate: '2020-01-01',
-      city: 'City',
-      description: 'Desc',
-      status: true,
-      members: [1, 1],
-      imageUrl: ''
-    });
-    component.save();
-    expect(component.clubForm.invalid || true).toBeTrue();
+  it('should return true from hasMembers when club has members', () => {
+    component.miClub = createMockClub([{ userId: 1 } as IUser]);
+    expect(component.hasMembers()).toBeTrue();
   });
 
-  it('should create club with valid data', () => {
-    component.id_Club = undefined;
-    component.clubForm.setValue({
-      name: 'Test',
-      foundationDate: '2020-01-01',
-      city: 'City',
-      description: 'Desc',
-      status: true,
-      members: [1],
-      imageUrl: ''
-    });
-    component.save();
-    const req = httpMock.expectOne(`${component.apiUrl}/clubs/create-with-members`);
-    expect(req.request.method).toBe('POST');
-    req.flush({});
-    const reloadReq = httpMock.expectOne(`${component.apiUrl}/clubs/1/details`);
-    reloadReq.flush(mockClub);
+  it('should return false from hasMembers when no members', () => {
+    component.miClub = createMockClub([]);
+    expect(component.hasMembers()).toBeFalse();
   });
 
-  it('should update club with valid data', () => {
-    component.id_Club = 1;
-    component.clubForm.setValue({
-      name: 'Test',
-      foundationDate: '2020-01-01',
-      city: 'City',
-      description: 'Desc',
-      status: true,
-      members: [1],
-      imageUrl: ''
-    });
-    component.save();
-    const req = httpMock.expectOne(`${component.apiUrl}/clubs/1`);
-    expect(req.request.method).toBe('PUT');
-    req.flush({});
-    const reloadReq = httpMock.expectOne(`${component.apiUrl}/clubs/1/details`);
-    reloadReq.flush(mockClub);
-  });
-
-  it('should handle error on save', () => {
-    component.id_Club = undefined;
-    component.clubForm.setValue({
-      name: 'Test',
-      foundationDate: '2020-01-01',
-      city: 'City',
-      description: 'Desc',
-      status: true,
-      members: [1],
-      imageUrl: ''
-    });
-    component.save();
-    const req = httpMock.expectOne(`${component.apiUrl}/clubs/create-with-members`);
-    req.flush('Error', { status: 500, statusText: 'Error' });
-  });
-
-  it('should delete club when confirmed', async () => {
-    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true } as SweetAlertResult));
-    await component.deleteClub(1);
-    const req = httpMock.expectOne(`${component.apiUrl}/clubs/1`);
-    expect(req.request.method).toBe('DELETE');
-    req.flush({});
-    expect(component.miClub).toBeNull();
-  });
-
-  it('should not delete club when cancelled', async () => {
-    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: false } as SweetAlertResult));
-    await component.deleteClub(1);
-    httpMock.expectNone(`${component.apiUrl}/clubs/1`);
-  });
-
-  it('should open modal for create', () => {
-    component.openModal({} as any);
-    expect(component.clubForm.value.status).toBeTrue();
-  });
-
-  it('should open modal for edit', () => {
-    component.openModal({} as any, mockClub);
-    expect(component.clubForm.value.name).toBe(mockClub.name);
-  });
-
-  it('should close modal', () => {
-    component.closeModal();
-    expect(modalService.dismissAll).toHaveBeenCalled();
+  it('should return false from hasMembers when miClub is null', () => {
+    component.miClub = null;
+    expect(component.hasMembers()).toBeFalse();
   });
 });

@@ -1,141 +1,121 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TournamentResultComponent } from './tournament-result.component';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { of } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 describe('TournamentResultComponent', () => {
   let component: TournamentResultComponent;
   let fixture: ComponentFixture<TournamentResultComponent>;
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
+  let httpMock: HttpTestingController;
+
+  const apiUrl = environment.apiUrl;
 
   beforeEach(async () => {
     modalServiceSpy = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
 
     await TestBed.configureTestingModule({
       declarations: [TournamentResultComponent],
-      imports: [HttpClientTestingModule, ReactiveFormsModule, FormsModule],
-      providers: [
-        { provide: NgbModal, useValue: modalServiceSpy }
-      ]
+      imports: [HttpClientTestingModule, FormsModule],
+      providers: [{ provide: NgbModal, useValue: modalServiceSpy }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TournamentResultComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  /** Helper para responder a las llamadas iniciales del ngOnInit() */
+  const flushInitRequests = () => {
+    const reqTournaments = httpMock.expectOne(`${apiUrl}/tournaments`);
+    reqTournaments.flush({ success: true, data: [{ tournamentId: 1, name: 'Torneo A' }] });
+
+    const reqCategories = httpMock.expectOne(`${apiUrl}/categories`);
+    reqCategories.flush({ success: true, data: [{ categoryId: 1, name: 'Cat A' }] });
+
+    const reqModalities = httpMock.expectOne(`${apiUrl}/modalities`);
+    reqModalities.flush({ success: true, data: [{ modalityId: 1, name: 'Indiv' }] });
+
+    const reqResults = httpMock.expectOne(`${apiUrl}/results`);
+    reqResults.flush({ success: true, data: [{ resultId: 1, score: 100 }] });
+  };
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should create', () => {
+    fixture.detectChanges();
+    flushInitRequests();
     expect(component).toBeTruthy();
   });
 
-  it('should initialize the form on init', () => {
-    expect(component.resultForm).toBeTruthy();
-    expect(component.resultForm.controls['tournamentId']).toBeDefined();
+  it('should load tournaments on init', () => {
+    fixture.detectChanges();
+    flushInitRequests();
+    expect(component.tournaments.length).toBe(1);
+    expect(component.selectedTournament?.name).toBe('Torneo A');
   });
 
-  it('should not submit form if invalid', () => {
-    spyOn(Swal, 'fire');
-    component.resultForm.patchValue({ tournamentId: '' }); // invalid
-    component.saveForm();
-    expect(Swal.fire).not.toHaveBeenCalled();
+  it('should filter results by category, modality and rama', () => {
+    component.results = [
+      { resultId: 1, categoryId: 1, modalityId: 1, rama: 'Masculina' } as any,
+      { resultId: 2, categoryId: 2, modalityId: 2, rama: 'Femenina' } as any,
+    ];
+    component.selectedCategory = '1';
+    component.selectedModality = '1';
+    component.selectedRama = 'Masculina';
+    component.onFilterChange();
+    expect(component.filteredResults.length).toBe(1);
+    expect(component.filteredResults[0].resultId).toBe(1);
   });
 
-  it('should patch form and open modal when editing result', () => {
-    const mockResult = {
-      resultId: 1,
-      personId: 1,
-      teamId: 1,
-      tournamentId: 1,
-      categoryId: 1,
-      modalityId: 1,
-      roundId: 1,
-      laneNumber: 1,
-      lineNumber: 1,
-      score: 150,
-      tournamentName: '',
-      personName: '',
-      teamName: '',
-      categoryName: '',
-      modalityName: '',
-      roundNumber: '',
-      rama: ''
-    };
+  it('should open file input when calling openFileInput()', () => {
+    const clickSpy = spyOn(document, 'createElement').and.callThrough();
+    component.openFileInput();
+    expect(clickSpy).toHaveBeenCalledWith('input');
+  });
 
-    component.editResult(mockResult);
-    expect(component.resultForm.value.tournamentId).toBe(1);
+  it('should handle file selection and show Swal alert', () => {
+    const file = new File(['dummy'], 'test.xlsx', { type: 'application/vnd.ms-excel' });
+    const event = { target: { files: [file] } };
+    const swalSpy = spyOn(Swal, 'fire');
+    component.onFileSelected(event);
+    expect(component.selectedFile).toBe(file);
+    expect(swalSpy).toHaveBeenCalled();
+  });
+
+  it('should open modal', () => {
+    fixture.detectChanges();
+    flushInitRequests();
+    component.openModal('mock-template');
     expect(modalServiceSpy.open).toHaveBeenCalled();
   });
 
-  it('should open modal and reset form if creating new result', () => {
-    component.idResult = null;
-    component.resultForm.patchValue({ tournamentId: 5 });
-    component.openModal('mock-content');
-    expect(component.resultForm.value.tournamentId).toBeNull();
-    expect(modalServiceSpy.open).toHaveBeenCalled();
-  });
-
-  it('should call closeModal correctly', () => {
-    component.resultForm.patchValue({ tournamentId: 1 });
+  it('should close modal', () => {
+    fixture.detectChanges();
+    flushInitRequests();
     component.closeModal();
-    expect(component.resultForm.value.tournamentId).toBeNull();
-    expect(component.idResult).toBeNull();
     expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
   });
 
-  it('should clear filter when calling clear()', () => {
-    component.filter = 'test';
-    component.clear();
-    expect(component.filter).toBe('');
-  });
+  it('should call deleteResult and refresh results on success', async () => {
+    fixture.detectChanges();
+    flushInitRequests();
 
-  it('should filter results by tournament name', () => {
-    component.results = [
-      {
-        resultId: 1,
-        personId: 1,
-        teamId: 1,
-        tournamentId: 1,
-        categoryId: 1,
-        modalityId: 1,
-        roundId: 1,
-        laneNumber: 1,
-        lineNumber: 1,
-        score: 200,
-        tournamentName: 'Copa Nacional',
-        personName: '',
-        teamName: '',
-        categoryName: '',
-        modalityName: '',
-        roundNumber: '',
-        rama: ''
-      },
-      {
-        resultId: 2,
-        personId: 2,
-        teamId: 2,
-        tournamentId: 2,
-        categoryId: 2,
-        modalityId: 2,
-        roundId: 2,
-        laneNumber: 2,
-        lineNumber: 2,
-        score: 180,
-        tournamentName: 'Copa Local',
-        personName: '',
-        teamName: '',
-        categoryName: '',
-        modalityName: '',
-        roundNumber: '',
-        rama: ''
-      }
-    ];
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
+    spyOn(component, 'loadResults');
 
-    component.filter = 'nacional';
-    const filtered = component.filteredResult;
-    expect(filtered.length).toBe(1);
-    expect(filtered[0].tournamentName).toBe('Copa Nacional');
+    await component.deleteResult(1); // <-- IMPORTANTE: esperar a que se resuelva el Swal
+
+    const req = httpMock.expectOne(`${apiUrl}/results/1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush({ success: true });
+
+    expect(component.loadResults).toHaveBeenCalled();
   });
 });
