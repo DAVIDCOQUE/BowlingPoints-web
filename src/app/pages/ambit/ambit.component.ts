@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { IAmbit } from 'src/app/model/ambit.interface';
 import { AmbitApiService } from 'src/app/services/ambit-api.service';
-
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-ambit',
   templateUrl: './ambit.component.html',
@@ -79,15 +79,39 @@ export class AmbitComponent implements OnInit {
 
     request.subscribe({
       next: () => {
+        Swal.fire('Éxito', isEdit ? 'Ambito actualizado' : 'Ambito creado', 'success');
         this.getAmbits();
         this.closeModal();
+      },
+      error: err => {
+        console.error('Error al guardar Ambito:', err);
+        Swal.fire('Error', err.error?.message || 'Algo salió mal', 'error');
       }
     });
   }
 
   public deleteAmbit(id: number): void {
-    this.ambitApi.deleteAmbit(id).subscribe({
-      next: () => this.getAmbits()
+    Swal.fire({
+      title: '¿Eliminar Ambito?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.ambitApi.deleteAmbit(id).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'Ambito eliminada correctamente', 'success');
+            this.getAmbits()
+          },
+          error: () => {
+            Swal.fire('Error', 'No se pudo eliminar la Ambito', 'error');
+          }
+        });
+      }
     });
   }
 

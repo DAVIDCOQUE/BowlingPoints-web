@@ -24,7 +24,7 @@ export class SidebarComponent {
     this.isJugador = this.auth.hasRole('JUGADOR');
     this.isEntrenador = this.auth.hasRole('ENTRENADOR');
 
-    console.log(  this.isAdmin, this.isJugador, this.isEntrenador )
+    console.log(this.isAdmin, this.isJugador, this.isEntrenador)
   }
 
   mouseenter() {
