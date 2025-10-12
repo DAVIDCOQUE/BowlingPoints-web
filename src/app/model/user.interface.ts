@@ -17,6 +17,7 @@ export interface IUser {
   gender: string;
   birthDate?: Date;
   photoUrl?: string;
+  clubId?: number
   club?: IClubs;
   roleInClub?: string;
   status?: boolean;

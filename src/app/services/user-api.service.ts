@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { IUser } from '../model/user.interface';
 import { IRole } from '../model/role.interface';
 
@@ -20,7 +20,7 @@ export class UserApiService {
    */
   getUsers(): Observable<IUser[]> {
     return this.http.get<{ success: boolean; message: string; data: IUser[] }>(this.usersUrl)
-      .pipe(map(res => res.data));
+      .pipe(tap(res => console.log('Respuesta completa del backend:', res)), map(res => res.data));
   }
 
   /**

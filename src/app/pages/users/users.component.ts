@@ -278,6 +278,8 @@ export class UsersComponent implements OnInit {
   }
 
   getRoleDescriptions(user: IUser): string {
-  return user.roles.map(r => r.description).join(', ');
-}
+    return Array.isArray(user.roles)
+      ? user.roles.map(r => r.description).join(', ')
+      : '';
+  }
 }

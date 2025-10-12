@@ -196,6 +196,10 @@ export class ClubsComponent implements OnInit {
     this.getClubes();
   }
 
+  /** Ir al club */
+
+
+
   /** Maneja error al cargar imagen */
   onImgError(event: Event, defaultPath: string): void {
     const target = event.target as HTMLImageElement;

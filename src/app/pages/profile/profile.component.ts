@@ -1,11 +1,9 @@
 import { Component, ViewChild, ElementRef, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 
 import { IUser } from '../../model/user.interface';
 import { IRole } from '../../model/role.interface';
-
 import { AuthService } from 'src/app/auth/auth.service';
 import { RoleApiService } from '../../services/role-api.service';
 
@@ -16,45 +14,39 @@ import { RoleApiService } from '../../services/role-api.service';
 })
 export class ProfileComponent implements OnInit {
 
-  /** Listado de usuarios (no se usa mucho en profile, pero se mantiene) */
-  usuarios: IUser[] = [];
-
-  /** Listado de roles disponibles */
-  roles: IRole[] = [];
-
-  /** Lista de géneros disponibles */
-  genders: string[] = ['Masculino', 'Femenino', 'No binario', 'Prefiero no decirlo'];
-
   /** ID del usuario autenticado */
   idUser: number | null = null;
 
-  /** Formulario reactivo del profile */
+  /** Formulario del perfil */
   userForm: FormGroup = new FormGroup({});
 
-  /** Estados para mostrar u ocultar contraseñas */
+  /** Lista de roles y géneros */
+  roles: IRole[] = [];
+  genders: string[] = ['Masculino', 'Femenino', 'No binario', 'Prefiero no decirlo'];
+
+  /** Control de visibilidad de contraseñas */
   showPassword = false;
   showConfirmPassword = false;
 
-  /** Inyecciones con inject() */
+  /** Inyecciones */
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly roleService = inject(RoleApiService);
-  private readonly modalService = inject(NgbModal);
 
   @ViewChild('avatarPreview') avatarPreviewRef!: ElementRef<HTMLImageElement>;
 
-  /**
-   * Hook de inicialización
-   */
+  /** Devuelve la URL base del backend */
+  get apiUrl(): string {
+    return this.authService.baseUrl;
+  }
+
   ngOnInit(): void {
-    this.getRoles();
     this.initForm();
+    this.getRoles();
     this.loadCurrentUser();
   }
 
-  /**
-   * Inicializa el formulario reactivo
-   */
+  /** Inicializa el formulario reactivo */
   initForm(): void {
     this.userForm = this.fb.group({
       nickname: ['', Validators.required],
@@ -71,13 +63,12 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  /**
-   * Carga el usuario autenticado desde el AuthService
-   */
+  /** Carga los datos del usuario autenticado */
   loadCurrentUser(): void {
     this.authService.fetchUser().subscribe({
-      next: user => {
-        if (!user) return;
+      next: (res: any) => {
+        const user = res.data || res;
+        if (!user) return console.warn('No se recibió usuario desde fetchUser');
 
         this.idUser = user.userId;
 
@@ -90,26 +81,41 @@ export class ProfileComponent implements OnInit {
           fullSurname: user.fullSurname,
           phone: user.phone,
           gender: user.gender,
-          roleId: this.getRoleIdByDescription(user.roles[0]?.description),
+          roleId: this.getRoleIdByDescription(user.roleDescription || ''),
           password: '',
           confirm: ''
         });
 
-        // Previsualización del avatar
-        const img = user.photoUrl || 'assets/img/profile.png';
+        console.log('Usuario cargado en perfil:', user);
+
+        // Previsualiza avatar (foto del backend o imagen por defecto)
+        const imgSrc = this.getAvatarUrl(user);
         if (this.avatarPreviewRef?.nativeElement) {
-          this.avatarPreviewRef.nativeElement.src = img;
+          this.avatarPreviewRef.nativeElement.src = imgSrc;
         }
       },
-      error: err => {
-        console.error('Error al cargar usuario:', err);
-      }
+      error: err => console.error('Error al cargar usuario:', err)
     });
   }
 
-  /**
-   * Obtiene los roles disponibles desde RoleApiService
-   */
+  /** Retorna la URL del avatar (completa o por defecto) */
+  getAvatarUrl(user: IUser): string {
+    if (user?.photoUrl) {
+      return user.photoUrl.startsWith('http')
+        ? user.photoUrl
+        : this.apiUrl + user.photoUrl;
+    }
+    return 'assets/img/profile.png';
+  }
+
+  /** Retorna la imagen actual o la default */
+  get photoSrc(): string {
+    const photoUrl = this.userForm.controls['photoUrl'].value;
+    if (!photoUrl) return 'assets/img/profile.png';
+    return photoUrl.startsWith('http') ? photoUrl : this.apiUrl + photoUrl;
+  }
+
+  /** Carga los roles desde el servicio */
   getRoles(): void {
     this.roleService.getAll().subscribe({
       next: res => this.roles = res,
@@ -117,32 +123,39 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  /**
-   * Retorna la descripción del rol según su ID
-   */
-  getRoleDescription(roleId: number): string {
-    return this.roles.find(r => r.roleId === roleId)?.description || '';
-  }
-
-  /**
-   * Retorna el rolId dado su descripción
-   */
+  /** Retorna el ID de rol según su descripción */
   getRoleIdByDescription(description: string): number | null {
     const role = this.roles.find(r => r.description === description);
     return role ? role.roleId : null;
   }
 
-  /**
-   * Retorna la ruta de la imagen del usuario (o la default)
-   */
-  get photoSrc(): string {
-    const photoUrl = this.userForm.controls['photoUrl'].value;
-    return photoUrl ? photoUrl : 'assets/img/profile.png';
+  /** Retorna la descripción del rol según su ID */
+  getRoleDescription(roleId: number): string {
+    return this.roles.find(r => r.roleId === roleId)?.description || '';
   }
 
-  /**
-   * Envía el formulario para actualizar el profile
-   */
+  /** Manejador para error de carga de imagen */
+  onImgError(event: Event, fallbackUrl: string): void {
+    const img = event.target as HTMLImageElement;
+    img.src = fallbackUrl;
+  }
+
+  /** Previsualiza la imagen seleccionada (sin guardar aún) */
+  previewAvatar(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (this.avatarPreviewRef?.nativeElement) {
+        this.avatarPreviewRef.nativeElement.src = reader.result as string;
+      }
+      this.userForm.patchValue({ photoUrl: reader.result });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /** Envía los cambios del perfil */
   onSubmit(): void {
     if (!this.userForm.valid || this.idUser === null) {
       this.userForm.markAllAsTouched();
@@ -150,42 +163,33 @@ export class ProfileComponent implements OnInit {
     }
 
     const formValue = this.userForm.getRawValue();
-    const roleDescription = this.getRoleDescriptionById(formValue.roleId);
+    const roleDescription = this.getRoleDescription(formValue.roleId);
 
     const payload: Partial<IUser> & { password?: string } = {
       ...formValue,
       roles: [roleDescription]
     };
 
-    // Eliminamos campos innecesarios
     delete (payload as any).confirm;
     delete (payload as any).roleId;
-    delete (payload as any).roleDescription;
-
-    if (!payload.password) {
-      delete payload.password;
-    }
+    if (!payload.password) delete payload.password;
 
     this.authService.updateUserProfile(this.idUser, payload).subscribe({
       next: () => {
         Swal.fire({
           title: 'Éxito',
-          text: 'Tu profile ha sido actualizado correctamente.',
+          text: 'Tu perfil ha sido actualizado correctamente.',
           icon: 'success',
           confirmButtonText: 'Aceptar',
-          customClass: { confirmButton: 'btn btn-outline-primary btn-sm align-items-center' },
+          customClass: { confirmButton: 'btn btn-outline-primary btn-sm' },
           buttonsStyling: false
-        }).then(result => {
-          if (result.isConfirmed) {
-            window.location.reload();
-          }
-        });
+        }).then(r => { if (r.isConfirmed) window.location.reload(); });
       },
       error: err => {
         console.error('Error al actualizar usuario:', err);
         Swal.fire({
           title: 'Error',
-          text: 'Ocurrió un error al actualizar el profile.',
+          text: 'Ocurrió un error al actualizar el perfil.',
           icon: 'error',
           confirmButtonText: 'Cerrar',
           customClass: { confirmButton: 'btn btn-outline-danger' },
@@ -193,29 +197,5 @@ export class ProfileComponent implements OnInit {
         });
       }
     });
-  }
-
-  /**
-   * Previsualiza el avatar seleccionado
-   */
-  previewAvatar(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (this.avatarPreviewRef?.nativeElement) {
-          this.avatarPreviewRef.nativeElement.src = reader.result as string;
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  /**
-   * Retorna la descripción del rol dado su ID
-   */
-  getRoleDescriptionById(roleId: number): string {
-    const role = this.roles.find(r => r.roleId === roleId);
-    return role ? role.description : '';
   }
 }

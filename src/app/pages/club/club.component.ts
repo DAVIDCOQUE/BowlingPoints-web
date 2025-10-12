@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
 import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
 import { AuthService } from 'src/app/auth/auth.service';
 import { Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-club',
@@ -17,6 +17,7 @@ export class ClubComponent implements OnInit, OnDestroy {
 
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
 
   public apiUrl = environment.apiUrl;
 
@@ -26,7 +27,6 @@ export class ClubComponent implements OnInit, OnDestroy {
   // UI State
 
   miClub: IClubs | null = null;
-  id_Club?: number;
   clubId: number | null = null;
 
   // Data
@@ -35,18 +35,27 @@ export class ClubComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.userSub = this.auth.user$.subscribe(user => {
-      if (user?.club?.clubId) {
-        this.clubId = user?.club?.clubId;
-        this.getMiClub();
-      } else {
-        this.miClub = null;
-        this.clubId = null;
-        Swal.fire('Sin Club', 'No tienes un club asociado', 'info');
-      }
-    });
+    const idFromRoute = this.route.snapshot.paramMap.get('id');
 
-    this.getUsers();
+    if (idFromRoute) {
+      // Caso B: Ver club desde otro usuario o tabla
+      this.clubId = Number(idFromRoute);
+      this.getMiClub();
+    } else {
+      // Caso A: Ver mi club (desde el usuario autenticado)
+      this.userSub = this.auth.user$.subscribe(user => {
+        console.log('Usuario autenticado recibido:', user);
+        if (user?.clubId) {
+          this.clubId = user.clubId;
+          console.log('ID del club del usuario:', this.clubId);
+          this.getMiClub();
+        } else {
+          this.miClub = null;
+          this.clubId = null;
+          Swal.fire('Sin Club', 'No tienes un club asociado', 'info');
+        }
+      });
+    }
   }
 
   ngOnDestroy(): void {
@@ -68,22 +77,6 @@ export class ClubComponent implements OnInit, OnDestroy {
         error: () => {
           this.miClub = null;
           Swal.fire('Error', 'No se pudieron cargar los datos de tu club', 'error');
-        }
-      });
-  }
-
-  /** Obtiene la lista de usuarios (una sola vez) */
-  getUsers(forceRefresh: boolean = false): void {
-    if (this.usuariosLoaded && !forceRefresh) return;
-
-    this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${this.apiUrl}/users`)
-      .subscribe({
-        next: res => {
-          this.usuarios = res.data;
-          this.usuariosLoaded = true;
-        },
-        error: () => {
-          Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error');
         }
       });
   }

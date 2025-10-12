@@ -5,21 +5,24 @@
 
     <div class="d-flex justify-content-center mb-4 position-relative">
       <div class="position-relative">
-        <img id="avatarPreview" [src]="photoSrc" alt="Avatar" class="rounded-circle border border-primary shadow"
-          style="width: 100px; height: 100px; object-fit: cover;">
+        <img #avatarPreview [src]="apiUrl + (userForm.controls['photoUrl'].value || '/uploads/users/default.png')"
+          (error)="onImgError($event, 'assets/img/profile.png')" alt="Avatar"
+          class="rounded-circle border border-primary shadow" style="width: 100px; height: 100px; object-fit: cover;" />
 
-        <!-- Icono botón flotante sobre la imagen -->
+        <!-- Botón flotante para cambiar avatar -->
         <label for="avatarInput"
           class="position-absolute bottom-0 end-0 translate-middle bg-white border rounded-circle shadow p-1"
           style="cursor: pointer; transform: translate(25%, 25%);">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#0d6efd" class="bi bi-camera"
             viewBox="0 0 16 16">
-            <path d="M10.5 3a.5.5 0 0 1 .416.223l.647.97H13a1 1 0 0 1 1 1v6a1
-                 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5.193a1 1 0 0 1 1-1h1.437l.647-.97A.5.5
+            <path d="M10.5 3a.5.5 0 0 1 .416.223l.647.97H13a1
+                 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1
+                 1 0 0 1-1-1V5.193a1 1 0 0 1 1-1h1.437l.647-.97A.5.5
                  0 0 1 5.5 3h5zM8 5.5a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7zm0 1a2.5
                  2.5 0 1 1 0 5a2.5 2.5 0 0 1 0-5z" />
           </svg>
         </label>
+
         <input type="file" id="avatarInput" accept="image/*" hidden (change)="previewAvatar($event)">
       </div>
     </div>
