@@ -1,28 +1,23 @@
-import { ICategory } from "./category.interface";
-import { IModality } from "./modality.interface";
-
+import { IAmbit } from './ambit.interface';
+import { ICategory } from './category.interface';
+import { IModality } from './modality.interface';
+import { ITeam } from './team.interface';
 export interface ITournament {
   tournamentId: number;
-  name: string;
-  foundationDate?: Date;
-  organizer: string;
-  imageUrl: string;
+  tournamentName: string;
+  ambit?: IAmbit;
+  startDate?: Date;
+  endDate?: Date;
+  status?: boolean;
+  location?: string;
+  imageUrl?: string;
+  organizer?: string;
+  stage?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date;
 
-  modalities: IModality[];
-  categories: ICategory[];
-
-  modalityIds: number[];
-  modalityNames?: string[];
-
-  categoryIds?: number[];
-  categoryNames?: string[];
-
-  lugar: string;
-  startDate: string;
-  endDate: string;
-  ambitId: number;
-  ambitName: string;
-  location: string;
-  stage: string;
-  status: boolean;
+  categories?: ICategory[];
+  modalities?: IModality[];
+  teams?: ITeam[];
 }

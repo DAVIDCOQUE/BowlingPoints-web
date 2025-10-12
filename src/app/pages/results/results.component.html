@@ -54,13 +54,13 @@
           <ng-container>
             <tr *ngFor="let result of filteredResult">
               <td>{{ result.resultId }}</td>
-              <td>{{ result.tournamentName || '-' }}</td>
-              <td>{{ result.categoryName }}</td>
-              <td>{{ result.modalityName || '-' }}</td>
+              <td>{{ result.tournament?.tournamentName || '-' }}</td>
+              <td>{{ result.category }}</td>
+              <td>{{ result.modality || '-' }}</td>
               <td>{{ result.rama || '-' }}</td>
               <td>{{ result.roundNumber || '-' }}</td>
-              <td>{{ result.personName ||'-' }}</td>
-              <td>{{ result.teamName ||'-' }}</td>
+              <td>{{ result.person?.fullName ||'-' }}</td>
+              <td>{{ result.team?.nameTeam ||'-' }}</td>
               <td>{{ result.laneNumber || '-' }}</td>
               <td>{{ result.lineNumber || '-' }}</td>
               <td>{{ result.score || '-' }}</td>
@@ -109,7 +109,7 @@
           }">
                   <option [ngValue]="null" disabled>Torneo...</option>
                   <option *ngFor="let tournament of tournaments" [ngValue]="tournament.tournamentId">
-                    {{ tournament.name }}
+                    {{ tournament.tournamentName }}
                   </option>
                 </select>
               </div>

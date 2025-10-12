@@ -156,8 +156,11 @@ export class ResultsComponent implements OnInit {
    */
   get filteredResult(): IResults[] {
     const term = this.filter.toLowerCase().trim();
+
     return term
-      ? this.results.filter(result => result.tournamentName.toLowerCase().includes(term))
+      ? this.results.filter(result =>
+        result.tournament?.tournamentName?.toLowerCase().includes(term)
+      )
       : this.results;
   }
 

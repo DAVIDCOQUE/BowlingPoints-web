@@ -1,21 +1,23 @@
+import { ICategory } from './category.interface';
+import { ITeam } from './team.interface';
+import { ITournament } from './tournament.interface';
+import { IModality } from './modality.interface';
+import { IUser } from './user.interface';
 export interface IResults {
 
-resultId: number;
-personId: number;
-roundId: number;
-teamId: number | null;
-tournamentId: number;
-categoryId: number;
-modalityId: number;
-rama: string;
-laneNumber: number;
-lineNumber: number;
-score: number;
+  resultId: number;
+  score: number;
+  laneNumber?: number;
+  lineNumber?: number;
+  rama: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date;
+  category?: ICategory;
+  person?: IUser;
+  team?: ITeam;
+  roundNumber: number;
+  tournament?: ITournament;
+  modality?: IModality;
 
-personName: string;
-teamName: string;
-tournamentName: string;
-categoryName: string;
-modalityName: string;
-roundNumber: string;
 }

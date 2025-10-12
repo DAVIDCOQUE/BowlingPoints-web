@@ -41,7 +41,7 @@ export class LoginComponent {
           }).subscribe({
             next: meRes => {
               // Usa el AuthService para guardar usuario y token
-              this.auth.setAuthData(res.token, meRes.data);
+              this.auth.setAuthData(res.token);
               this.router.navigate(['/dashboard']);
             },
             error: err => {

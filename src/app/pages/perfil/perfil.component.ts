@@ -90,7 +90,7 @@ export class PerfilComponent implements OnInit {
           fullSurname: user.fullSurname,
           phone: user.phone,
           gender: user.gender,
-          roleId: this.getRoleIdByDescription(user.roleDescription),
+          roleId: this.getRoleIdByDescription(user.roles[0]?.description),
           password: '',
           confirm: ''
         });

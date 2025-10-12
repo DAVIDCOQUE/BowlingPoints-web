@@ -65,7 +65,7 @@
             <td class="align-middle d-none d-md-table-cell">{{ user.email }}</td>
             <td class="align-middle">{{ user.gender }}</td>
             <td class="align-middle">{{ user.phone }}</td>
-            <td class="align-middle d-none d-sm-table-cell">{{ user.roleDescription }}</td>
+            <td class="align-middle d-none d-sm-table-cell"> {{ getRoleDescriptions(user) }}</td>
             <td class="align-middle">
               <div class="d-flex justify-content-center gap-2">
                 <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"

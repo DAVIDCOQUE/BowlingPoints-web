@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
 import { IUser } from 'src/app/model/user.interface';
 import { AuthService } from 'src/app/auth/auth.service';
+import { IUserResult } from 'src/app/model/userResult.inteface';
 
 @Component({
   selector: 'app-jugadores',
@@ -15,7 +16,7 @@ export class JugadoresComponent {
   public apiUrl = environment.apiUrl;
 
   filter: string = '';
-  players: IUser[] = [];
+  players: IUserResult[] = [];
 
   private readonly http = inject(HttpClient);
   public readonly auth = inject(AuthService);
@@ -31,7 +32,7 @@ export class JugadoresComponent {
    * Obtiene el ranking de jugadores desde el backend.
    */
   getPlayersRanking(): void {
-    this.http.get<{ success: boolean; message: string; data: IUser[] }>(
+    this.http.get<{ success: boolean; message: string; data: IUserResult[] }>(
       `${this.apiUrl}/results/all-player-ranking`
     ).subscribe({
       next: res => {

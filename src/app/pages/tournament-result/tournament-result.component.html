@@ -3,14 +3,14 @@
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <h3 class="text-center text-primary fw-bold mb-3">
-        Torneo: {{ selectedTournament?.name || '---' }}
+        Torneo: {{ selectedTournament?.tournamentName || '---' }}
       </h3>
 
       <div class="row g-3">
         <div class="col-md-6">
           <p><strong>Organizador:</strong> {{ selectedTournament?.organizer || '-' }}</p>
           <p><strong>Ubicación:</strong> {{ selectedTournament?.location || '-' }}</p>
-          <p><strong>Ámbito:</strong> {{ selectedTournament?.ambitName || '-' }}</p>
+          <p><strong>Ámbito:</strong> {{ selectedTournament?.ambit || '-' }}</p>
         </div>
         <div class="col-md-6">
           <p><strong>Fecha Inicio:</strong> {{ selectedTournament?.startDate | date:'dd/MM/yyyy' }}</p>
@@ -92,13 +92,13 @@
           <tbody>
             <tr *ngFor="let result of filteredResults">
               <td>{{ result.resultId }}</td>
-              <td>{{ result.tournamentName || '-' }}</td>
-              <td>{{ result.categoryName || '-' }}</td>
-              <td>{{ result.modalityName || '-' }}</td>
+              <td>{{ result.tournament || '-' }}</td>
+              <td>{{ result.category || '-' }}</td>
+              <td>{{ result.modality?.name || '-' }}</td>
               <td>{{ result.rama || '-' }}</td>
               <td>{{ result.roundNumber || '-' }}</td>
-              <td>{{ result.personName || '-' }}</td>
-              <td>{{ result.teamName || '-' }}</td>
+              <td>{{ result.person || '-' }}</td>
+              <td>{{ result.team || '-' }}</td>
               <td>{{ result.laneNumber || '-' }}</td>
               <td>{{ result.lineNumber || '-' }}</td>
               <td>{{ result.score || '-' }}</td>

@@ -112,8 +112,7 @@ export class UsersComponent implements OnInit {
       user.fullSurname.toLowerCase().includes(term) ||
       user.email.toLowerCase().includes(term) ||
       user.phone.toLowerCase().includes(term) ||
-      user.roleDescription.toLowerCase().includes(term) ||
-      user.gender.toLowerCase().includes(term)
+      user.roles.some(r => r.description.toLowerCase().includes(term))
     );
   }
 
@@ -132,7 +131,7 @@ export class UsersComponent implements OnInit {
       fullSurname: user.fullSurname,
       phone: user.phone,
       gender: user.gender,
-      roleId: this.getRoleIdByDescription(user.roleDescription),
+      roleId: this.getRoleIdByDescription(user.roles[0]?.description),
       password: '',
       confirm: ''
     });
@@ -155,6 +154,12 @@ export class UsersComponent implements OnInit {
     const formValue = this.userForm.getRawValue();
     const roleDescription = this.getRoleDescriptionById(formValue.roleId);
 
+    const role: IRole = {
+      roleId: formValue.roleId,
+      description: roleDescription,
+    };
+
+
     const payload: Partial<IUser> & { password?: string } = {
       nickname: formValue.nickname,
       photoUrl: formValue.photoUrl,
@@ -164,7 +169,7 @@ export class UsersComponent implements OnInit {
       fullSurname: formValue.fullSurname,
       phone: formValue.phone,
       gender: formValue.gender,
-      roles: [roleDescription]
+      roles: [role]
     };
 
     if (!isEdit || formValue.password) {
@@ -271,4 +276,8 @@ export class UsersComponent implements OnInit {
     const target = event.target as HTMLImageElement;
     target.src = defaultPath;
   }
+
+  getRoleDescriptions(user: IUser): string {
+  return user.roles.map(r => r.description).join(', ');
+}
 }

@@ -17,24 +17,20 @@ import { ICategory } from '../../model/category.interface';
 })
 export class TournamentResultComponent {
 
-  // 📦 Referencias y estado
   @ViewChild('modalResult') modalResultRef: any;
   isLoading$ = new BehaviorSubject<boolean>(false);
 
-  // 🎯 Datos base
   selectedTournament: ITournament | null = null;
   tournaments: ITournament[] = [];
   results: IResults[] = [];
   filteredResults: IResults[] = [];
 
-  // 🔽 Filtros
   categories: ICategory[] = [];
   modalities: IModality[] = [];
   selectedCategory: string = '';
   selectedModality: string = '';
   selectedRama: string = '';
 
-  // 📂 Archivo Excel
   selectedFile: File | null = null;
 
   constructor(
@@ -99,8 +95,8 @@ export class TournamentResultComponent {
   // ==========================================================
   onFilterChange(): void {
     this.filteredResults = this.results.filter(r =>
-      (!this.selectedCategory || r.categoryId === +this.selectedCategory) &&
-      (!this.selectedModality || r.modalityId === +this.selectedModality) &&
+      (!this.selectedCategory || r.category?.categoryId === +this.selectedCategory) &&
+      (!this.selectedModality || r.modality?.modalityId === +this.selectedModality) &&
       (!this.selectedRama || r.rama?.toLowerCase() === this.selectedRama.toLowerCase())
     );
   }

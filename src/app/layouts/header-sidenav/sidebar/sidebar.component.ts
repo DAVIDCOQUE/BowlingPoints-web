@@ -12,7 +12,20 @@ export class SidebarComponent {
   isShowing = false;
   showSubmenu = false;
 
+  isAdmin = false;
+  isJugador = false;
+  isEntrenador = false;
+
   constructor(private router: Router, public auth: AuthService) { }
+
+
+  ngOnInit(): void {
+    this.isAdmin = this.auth.hasRole('ADMIN');
+    this.isJugador = this.auth.hasRole('JUGADOR');
+    this.isEntrenador = this.auth.hasRole('ENTRENADOR');
+
+    console.log(  this.isAdmin, this.isJugador, this.isEntrenador )
+  }
 
   mouseenter() {
     if (!this.isExpanded) {

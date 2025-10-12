@@ -16,11 +16,11 @@
 
       <!-- Información del torneo -->
       <div class="col-md-9 p-4">
-        <h2 class="fw-bold mb-1">{{ selectedTournament?.name || 'Nombre del Torneo' }}</h2>
+        <h2 class="fw-bold mb-1">{{ selectedTournament?.tournamentName || 'Nombre del Torneo' }}</h2>
         <p class="text-muted mb-2">Información general del torneo</p>
 
         <div class="row text-muted">
-          <div class="col-md-6"><b>Fundación:</b> {{ selectedTournament?.foundationDate | date }}</div>
+          <div class="col-md-6"><b>Fundación:</b> {{ selectedTournament?.startDate | date }}</div>
           <div class="col-md-6"><b>Ubicación:</b> {{ selectedTournament?.location || 'No especificada' }}</div>
           <div class="col-md-6"><b>Estado:</b> {{ selectedTournament?.status || 'En curso' }}</div>
           <div class="col-md-6"><b>Organizador:</b> {{ selectedTournament?.organizer || 'N/D' }}</div>
@@ -76,10 +76,9 @@
           <tr *ngFor="let player of players; let i = index">
             <td>{{ i + 1 }}</td>
             <td>{{ player.fullName }}</td>
-            <td>{{ player.category }}</td>
-            <td>{{ player.modality }}</td>
+            <td>{{ player.categories }}</td>
             <td>{{ player.rama }}</td>
-            <td>{{ player.team }}</td>
+            <td>{{ player.teams }}</td>
           </tr>
         </tbody>
       </table>

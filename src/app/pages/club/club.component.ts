@@ -36,8 +36,8 @@ export class ClubComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
 
     this.userSub = this.auth.user$.subscribe(user => {
-      if (user?.clubId) {
-        this.clubId = user.clubId;
+      if (user?.club?.clubId) {
+        this.clubId = user?.club?.clubId;
         this.getMiClub();
       } else {
         this.miClub = null;

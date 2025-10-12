@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 import { ITournament } from 'src/app/model/tournament.interface';
 import { ICategory } from 'src/app/model/category.interface';
 import { IModality } from 'src/app/model/modality.interface';
-import { IUser } from 'src/app/model/user.interface';
+import { IUserResult } from 'src/app/model/userResult.inteface';
 
 @Component({
   selector: 'app-torneo-inscritos',
@@ -21,7 +21,7 @@ export class TorneoInscritosComponent implements OnInit {
   categories: ICategory[] = [];
   modalities: IModality[] = [];
   ramas: string[] = ['Masculina', 'Femenina', 'Mixta'];
-  players: IUser[] = [];
+  players: IUserResult[] = [];
 
   cards: { title: string; items: any[] }[] = [];
 
@@ -52,7 +52,7 @@ export class TorneoInscritosComponent implements OnInit {
 
   loadPlayers(): void {
     // Endpoint de ejemplo — adáptalo al real de tu API
-    this.http.get<{ success: boolean; data: IUser[] }>(`${this.apiUrl}/tournaments/1/players`).subscribe({
+    this.http.get<{ success: boolean; data: IUserResult[] }>(`${this.apiUrl}/tournaments/1/players`).subscribe({
       next: res => {
         this.players = res.data;
       },

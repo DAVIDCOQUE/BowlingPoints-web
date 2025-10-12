@@ -137,7 +137,7 @@ export class TorneosComponent implements OnInit {
   get filteredTournaments(): ITournament[] {
     const term = this.filter.toLowerCase().trim();
     return term
-      ? this.tournaments.filter(t => t.name.toLowerCase().includes(term))
+      ? this.tournaments.filter(t => t.tournamentName.toLowerCase().includes(term))
       : this.tournaments;
   }
 
@@ -149,13 +149,13 @@ export class TorneosComponent implements OnInit {
     const modalityIds = tournament.modalities?.map(m => m.modalityId) ?? [];
 
     this.tournamentForm.patchValue({
-      name: tournament.name,
+      name: tournament.tournamentName,
       organizer: tournament.organizer,
       categoryIds,
       modalityIds,
       startDate: tournament.startDate,
       endDate: tournament.endDate,
-      ambitId: tournament.ambitId,
+      ambitId: tournament.ambit,
       location: tournament.location,
       stage: tournament.stage,
       status: tournament.status

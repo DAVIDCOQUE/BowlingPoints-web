@@ -1,6 +1,7 @@
 import { Component, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { IRole } from 'src/app/model/role.interface';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -14,7 +15,7 @@ export class HeaderComponent implements OnInit {
   isGuest = false;
   userEmail: string | null = null;
   userDocument: string | null = null;
-  userRole: string = '';
+  userRole!: IRole | string;
 
   constructor(private router: Router, private authService: AuthService) { }
 

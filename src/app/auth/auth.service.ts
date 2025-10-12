@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { map, tap } from 'rxjs/operators';
 import { IUser } from '../model/user.interface';
+import { IAuthToken } from '../model/auth-token.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -14,9 +15,10 @@ export class AuthService {
   /** Cargar usuario de localStorage */
   private loadUserFromStorage(): IUser | null {
     const str = localStorage.getItem('user');
-    return str ? JSON.parse(str) as IUser : null;
+    return str ? (JSON.parse(str) as IUser) : null;
   }
 
+  /** Base URL de la API */
   get baseUrl(): string {
     return environment.apiUrl;
   }
@@ -31,68 +33,85 @@ export class AuthService {
     return this.userSubject.value;
   }
 
-  /** Guarda usuario y token */
-  setAuthData(token: string, user: IUser): void {
+  /** Guarda el token y sincroniza usuario desde la API */
+  setAuthData(token: string): void {
     localStorage.setItem('jwt_token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    this.userSubject.next(user);
+
+    // ✅ Se obtiene el usuario real desde el backend
+    this.fetchUser().subscribe({
+      next: (user) => {
+        if (user) {
+          localStorage.setItem('user', JSON.stringify(user));
+          this.userSubject.next(user);
+        }
+      },
+      error: (err) => {
+        console.error('Error al obtener usuario tras login:', err);
+      },
+    });
   }
 
-  /** Borra todo */
+  /** Cierra sesión */
   logout(): void {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user');
     this.userSubject.next(null);
+    // Opcional: redirigir
+    // window.location.href = '/login';
   }
 
-  /** Obtiene el token JWT */
+  /** Obtiene el token JWT almacenado */
   getToken(): string | null {
     return localStorage.getItem('jwt_token');
   }
 
-  /** ¿Está logueado? */
+  /** ¿Está logueado el usuario? */
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
-  /** Decodifica el token */
-  decodeToken(): Partial<IUser> | null {
+  /** Decodifica el token JWT */
+  decodeToken(): IAuthToken | null {
     const token = this.getToken();
     if (!token) return null;
+
     try {
       const payload = token.split('.')[1];
-      return JSON.parse(atob(payload)) as Partial<IUser>;
+      const decoded = atob(payload);
+      return JSON.parse(decoded) as IAuthToken;
     } catch {
       return null;
     }
   }
 
-  /** Obtiene el correo */
+  /** Obtiene el correo desde el token */
   getEmail(): string | null {
     const decoded = this.decodeToken();
     return decoded?.email || null;
   }
 
-  /** Obtiene el nombre de usuario */
+  /** Obtiene el identificador del usuario (sub del token) */
   getUsername(): string | null {
     const decoded = this.decodeToken();
-    return decoded?.fullName || null;
+    return decoded?.sub || null;
   }
 
-  /** Devuelve roles */
+  /** Obtiene los roles desde el token */
   getRoles(): string[] {
     const decoded = this.decodeToken();
-    return decoded?.roles || ['INVITADO'];
+    return decoded?.roles ?? ['INVITADO'];
   }
 
+  /** Verifica si el usuario tiene un rol específico */
   hasRole(role: string): boolean {
-    console.log('Checking role:', role);
-    console.log('user role:', this.user);
-    if (!this.user || !this.user.roleDescription) return false;
-
-    return this.user.roleDescription.includes(role);
+    const decoded = this.decodeToken();
+    const roles = decoded?.roles ?? [];
+    const result = roles.includes(role);
+    console.log(`Checking role: ${role}`, '→', result ? '✅ permitido' : '❌ no permitido');
+    return result;
   }
 
+  /** Verifica si es un invitado */
   isGuest(): boolean {
     const roles = this.getRoles();
     return !roles || roles.length === 0 || (roles.length === 1 && roles[0] === 'INVITADO');
@@ -106,26 +125,29 @@ export class AuthService {
       return of(null);
     }
 
-    return this.http.get<{ data: IUser }>(`${environment.apiUrl}/users/me`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    }).pipe(
-      tap(res => {
-        localStorage.setItem('user', JSON.stringify(res.data));
-        this.userSubject.next(res.data);
-      }),
-      map(res => res.data)
-    );
+    return this.http
+      .get<{ data: IUser }>(`${environment.apiUrl}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .pipe(
+        tap((res) => {
+          localStorage.setItem('user', JSON.stringify(res.data));
+          this.userSubject.next(res.data);
+        }),
+        map((res) => res.data)
+      );
   }
 
+  /** Actualiza el perfil del usuario */
   updateUserProfile(id: number, payload: Partial<IUser>): Observable<IUser> {
-    return this.http.put<{ data: IUser }>(`${environment.apiUrl}/users/${id}`, payload).pipe(
-      tap(res => {
-        //  Actualiza el usuario guardado en localStorage
-        localStorage.setItem('user', JSON.stringify(res.data));
-        // Actualiza el observable del usuario autenticado
-        this.userSubject.next(res.data);
-      }),
-      map(res => res.data)
-    );
+    return this.http
+      .put<{ data: IUser }>(`${environment.apiUrl}/users/${id}`, payload)
+      .pipe(
+        tap((res) => {
+          localStorage.setItem('user', JSON.stringify(res.data));
+          this.userSubject.next(res.data);
+        }),
+        map((res) => res.data)
+      );
   }
 }

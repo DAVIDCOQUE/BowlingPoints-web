@@ -8,6 +8,7 @@ import { IUser } from 'src/app/model/user.interface';
 import { ITournament } from 'src/app/model/tournament.interface';
 import { IAmbit } from 'src/app/model/ambit.interface';
 import { AuthService } from 'src/app/auth/auth.service';
+import { IUserResult } from 'src/app/model/userResult.inteface';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,7 +30,7 @@ export class DashboardComponent {
   clubs: IClubs[] = [];
 
   /** Listado de jugadores destacados */
-  players: IUser[] = [];
+  players: IUserResult[] = [];
 
   /** Listado de ámbitos disponibles */
   ambits: IAmbit[] = [];
