@@ -17,14 +17,13 @@ describe('ProfileComponent', () => {
 
   const mockRoles: IRole[] = [
     { roleId: 1, description: 'Administrador' },
-    { roleId: 2, description: 'Usuario' }
+    { roleId: 2, description: 'Usuario' },
   ];
 
   const mockUser: IUser = {
     userId: 10,
-    personId: 101,            // ✔️ requerido
-    roleId: 1,                // ✔️ requerido
-    clubId: 5,                // ✔️ requerido
+    personId: 101,
+    clubId: 5,
     nickname: 'testuser',
     document: '12345678',
     photoUrl: '/img/test.jpg',
@@ -33,21 +32,21 @@ describe('ProfileComponent', () => {
     email: 'test@example.com',
     phone: '5551234567',
     gender: 'Masculino',
-    roleDescription: 'Administrador',
-    roles: ['Administrador'],
-    createdAt: '',
-    updatedAt: '',
+    roles: [{ roleId: 1, description: 'Administrador' }],
+    createdAt: new Date('2023-10-01T00:00:00Z'),
+    updatedAt: new Date('2023-10-02T00:00:00Z'),
     status: true,
+    password: 'dummy-password',
     sub: 'sub-id-xyz',
     roleInClub: 'Jugador',
-    joinjoinedAt: '2023-10-01T00:00:00Z',
-    averageScore: 210,
-    bestGame: '278'
   };
 
   beforeEach(async () => {
     // Crear spies para los servicios
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['fetchUser', 'updateUserProfile']);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', [
+      'fetchUser',
+      'updateUserProfile',
+    ]);
     const roleServiceSpy = jasmine.createSpyObj('RoleApiService', ['getAll']);
 
     await TestBed.configureTestingModule({
@@ -56,14 +55,16 @@ describe('ProfileComponent', () => {
       providers: [
         { provide: NgbModal, useValue: {} },
         { provide: AuthService, useValue: authServiceSpy },
-        { provide: RoleApiService, useValue: roleServiceSpy }
-      ]
+        { provide: RoleApiService, useValue: roleServiceSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    roleService = TestBed.inject(RoleApiService) as jasmine.SpyObj<RoleApiService>;
+    roleService = TestBed.inject(
+      RoleApiService
+    ) as jasmine.SpyObj<RoleApiService>;
 
     // Configurar respuestas por defecto para los spies
     authService.fetchUser.and.returnValue(of(mockUser));
@@ -101,7 +102,7 @@ describe('ProfileComponent', () => {
 
   it('debe retornar la imagen por defecto si no hay photoUrl', () => {
     component.userForm = component['fb'].group({
-      photoUrl: ['']
+      photoUrl: [''],
     });
 
     const result = component.photoSrc;
@@ -114,10 +115,9 @@ describe('ProfileComponent', () => {
     expect(roleId).toBe(2);
   });
 
-
   it('debe retornar la ruta completa si hay photoUrl', () => {
     component.userForm = component['fb'].group({
-      photoUrl: ['/avatar.jpg']
+      photoUrl: ['/avatar.jpg'],
     });
 
     const result = component.photoSrc;
@@ -151,7 +151,7 @@ describe('ProfileComponent', () => {
       gender: 'Masculino',
       roleId: 1,
       password: '',
-      confirm: ''
+      confirm: '',
     });
 
     component.onSubmit();
@@ -167,7 +167,7 @@ describe('ProfileComponent', () => {
         email: 'test@example.com',
         phone: '555',
         gender: 'Masculino',
-        roles: ['Administrador']
+        roles: ['Administrador'],
       })
     );
   });

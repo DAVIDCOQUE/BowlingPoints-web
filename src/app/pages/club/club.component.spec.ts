@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import Swal from 'sweetalert2';
 import { of, Subject, Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -7,12 +10,14 @@ import { environment } from 'src/environments/environment';
 import { ClubComponent } from './club.component';
 import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
+import { IRole } from 'src/app/model/role.interface';
+import { ActivatedRoute } from '@angular/router';
 
 /** Helper para crear clubes válidos */
 const createMockClub = (members: IUser[] = []): IClubs => ({
   clubId: 1,
   name: 'Mock Club',
-  foundationDate: '2020-01-01',
+  foundationDate: new Date('2020-01-01'),
   city: 'Ciudad Test',
   description: 'Descripción de prueba',
   imageUrl: '',
@@ -33,40 +38,42 @@ describe('ClubComponent', () => {
     {
       userId: 1,
       personId: 1,
-      roleId: 1,
-      clubId: 1,
-      document: '123',
       nickname: 'Player1',
+      password: 'dummy',
+      roles: [] as IRole[],
+      document: '123',
       fullName: 'Jugador Uno',
       fullSurname: 'Apellido',
       email: 'uno@test.com',
-      roleDescription: 'Jugador',
       phone: '9999999',
       gender: 'M',
-      category: 'A',
-      modality: 'Individual',
-      rama: 'Masculina',
-      team: 'Equipo1'
+      clubId: 1,
+      sub: '1',
     },
     {
       userId: 2,
       personId: 2,
-      roleId: 2,
-      clubId: 1,
-      document: '456',
       nickname: 'Player2',
+      password: 'dummy',
+      roles: [] as IRole[],
+      document: '456',
       fullName: 'Jugador Dos',
       fullSurname: 'Apellido',
       email: 'dos@test.com',
-      roleDescription: 'Jugador',
       phone: '8888888',
       gender: 'F',
-      category: 'B',
-      modality: 'Parejas',
-      rama: 'Femenina',
-      team: 'Equipo2'
-    }
+      clubId: 1,
+      sub: '2',
+    },
   ];
+
+  const mockActivatedRoute: any = {
+    snapshot: {
+      paramMap: {
+        get: (key: string) => null,
+      },
+    },
+  };
 
   beforeEach(async () => {
     userSubject = new Subject();
@@ -77,7 +84,10 @@ describe('ClubComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ClubComponent],
       imports: [HttpClientTestingModule],
-      providers: [{ provide: AuthService, useValue: authServiceMock }],
+      providers: [
+        { provide: AuthService, useValue: authServiceMock },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ClubComponent);
@@ -99,13 +109,11 @@ describe('ClubComponent', () => {
 
     const reqClub = httpMock.expectOne(`${apiUrl}/clubs/1/details`);
     expect(reqClub.request.method).toBe('GET');
-    reqClub.flush(createMockClub());
-
-    const reqUsers = httpMock.expectOne(`${apiUrl}/users`);
-    reqUsers.flush({ success: true, message: '', data: mockUsers });
+    reqClub.flush(createMockClub(mockUsers));
 
     expect(component.miClub).toBeTruthy();
-    expect(component.usuarios.length).toBe(2);
+    expect(component.miClub?.name).toBe('Mock Club');
+    expect(component.miClub?.members?.length).toBe(2);
   });
 
   it('should show alert if user has no club', () => {
@@ -115,7 +123,7 @@ describe('ClubComponent', () => {
 
     // Cierra cualquier llamada HTTP inesperada
     const pending = httpMock.match(() => true);
-    pending.forEach(req => req.flush({}));
+    pending.forEach((req) => req.flush({}));
 
     expect(component.miClub).toBeNull();
     expect(Swal.fire).toHaveBeenCalledWith(
@@ -159,38 +167,6 @@ describe('ClubComponent', () => {
     expect(Swal.fire).toHaveBeenCalledWith(
       'Error',
       'No se pudieron cargar los datos de tu club',
-      'error'
-    );
-  });
-
-  it('should load users correctly', () => {
-    component.usuariosLoaded = false;
-    component.getUsers();
-
-    const req = httpMock.expectOne(`${apiUrl}/users`);
-    req.flush({ success: true, message: '', data: mockUsers });
-
-    expect(component.usuarios.length).toBe(2);
-    expect(component.usuariosLoaded).toBeTrue();
-  });
-
-  it('should skip getUsers if already loaded', () => {
-    component.usuariosLoaded = true;
-    const spy = spyOn<any>(component['http'], 'get');
-    component.getUsers();
-    expect(spy).not.toHaveBeenCalled();
-  });
-
-  it('should handle error in getUsers', () => {
-    spyOn(Swal, 'fire');
-    component.getUsers(true);
-
-    const req = httpMock.expectOne(`${apiUrl}/users`);
-    req.flush({}, { status: 500, statusText: 'Server Error' });
-
-    expect(Swal.fire).toHaveBeenCalledWith(
-      'Error',
-      'No se pudieron cargar los usuarios',
       'error'
     );
   });

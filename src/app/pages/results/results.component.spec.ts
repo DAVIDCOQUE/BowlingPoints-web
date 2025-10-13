@@ -1,6 +1,14 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { ResultsComponent } from './results.component';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { of } from 'rxjs';
@@ -18,7 +26,7 @@ describe('ResultsComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ResultsComponent],
       imports: [ReactiveFormsModule, FormsModule, HttpClientTestingModule],
-      providers: [{ provide: NgbModal, useValue: modalServiceSpy }]
+      providers: [{ provide: NgbModal, useValue: modalServiceSpy }],
     }).compileComponents();
   });
 
@@ -78,7 +86,7 @@ describe('ResultsComponent', () => {
       roundId: 5,
       laneNumber: 6,
       lineNumber: 7,
-      score: 180
+      score: 180,
     };
     component.editResult(mockResult as any);
     expect(component.resultForm.value.score).toBe(180);
@@ -88,14 +96,27 @@ describe('ResultsComponent', () => {
 
   it('should return filtered results by tournament name', () => {
     component.results = [
-      { tournamentName: 'Torneo A' },
-      { tournamentName: 'Otro' }
+      {
+        resultId: 1,
+        score: 100,
+        rama: 'M',
+        roundNumber: 1,
+        tournament: { tournamentId: 1, tournamentName: 'Torneo A' } as any,
+      },
+      {
+        resultId: 2,
+        score: 120,
+        rama: 'F',
+        roundNumber: 1,
+        tournament: { tournamentId: 2, tournamentName: 'Otro' } as any,
+      },
     ] as any;
 
     component.filter = 'torneo';
-    const result = component.filteredResult;
-    expect(result.length).toBe(1);
-    expect(result[0].tournamentName).toBe('Torneo A');
+    const filtered = component.filteredResult;
+
+    expect(filtered.length).toBe(1);
+    expect(filtered[0].tournament!.tournamentName).toBe('Torneo A');
   });
 
   it('should clear filter', () => {

@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { of } from 'rxjs';
 import Swal from 'sweetalert2';
+import { IRole } from 'src/app/model/role.interface';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
@@ -17,9 +18,7 @@ describe('UsersComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [UsersComponent],
       imports: [HttpClientTestingModule, ReactiveFormsModule, FormsModule],
-      providers: [
-        { provide: NgbModal, useValue: modalServiceSpy }
-      ]
+      providers: [{ provide: NgbModal, useValue: modalServiceSpy }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(UsersComponent);
@@ -64,19 +63,18 @@ describe('UsersComponent', () => {
       {
         userId: 1,
         nickname: 'testUser',
+        password: 'dummy',
+        roles: [] as IRole[],
         fullName: 'Juan',
         fullSurname: 'Pérez',
         document: '123',
         email: 'juan@test.com',
         phone: '123456',
         gender: 'Masculino',
-        roleDescription: 'Administrador',
         personId: 1,
-        roleId: 1,
         clubId: 1,
-        roles: [],
-        sub: ''
-      }
+        sub: '',
+      },
     ];
 
     component.filter = 'juan';
@@ -87,19 +85,18 @@ describe('UsersComponent', () => {
   it('should patch form and open modal when editing user', () => {
     const mockUser = {
       userId: 1,
+      personId: 1,
       nickname: 'testUser',
+      password: 'dummy',
+      roles: [] as IRole[],
       fullName: 'Juan',
       fullSurname: 'Pérez',
       document: '123',
       email: 'juan@test.com',
       phone: '123456',
       gender: 'Masculino',
-      roleDescription: 'Administrador',
-      personId: 1,
-      roleId: 1,
       clubId: 1,
-      roles: [],
-      sub: ''
+      sub: '1',
     };
 
     component.roles = [{ roleId: 1, description: 'Administrador' }];

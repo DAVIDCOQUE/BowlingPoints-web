@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TournamentlistComponent } from './tournament-list.component';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { IGenerico } from 'src/app/model/generico.interface';
@@ -16,9 +19,9 @@ describe('TournamentlistComponent', () => {
   const mockActivatedRoute = {
     snapshot: {
       paramMap: {
-        get: (key: string) => (key === 'ambitId' ? '1' : null)
-      }
-    }
+        get: (key: string) => (key === 'ambitId' ? '1' : null),
+      },
+    },
   };
 
   beforeEach(async () => {
@@ -27,8 +30,8 @@ describe('TournamentlistComponent', () => {
       imports: [HttpClientTestingModule],
       providers: [
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: Router, useValue: routerSpy }
-      ]
+        { provide: Router, useValue: routerSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TournamentlistComponent);
@@ -46,10 +49,12 @@ describe('TournamentlistComponent', () => {
     req1.flush({
       success: true,
       message: '',
-      data: { ambitId: 1, name: 'Nacional' }
+      data: { ambitId: 1, name: 'Nacional' },
     });
 
-    const req2 = httpMock.expectOne(`${environment.apiUrl}/results/by-ambit?ambitId=1`);
+    const req2 = httpMock.expectOne(
+      `${environment.apiUrl}/results/by-ambit?ambitId=1`
+    );
     req2.flush({ success: true, message: '', data: [] });
 
     expect(component).toBeTruthy();
@@ -61,7 +66,7 @@ describe('TournamentlistComponent', () => {
     httpMock.expectOne(`${environment.apiUrl}/ambits/1`).flush({
       success: true,
       message: '',
-      data: { ambitId: 1, name: 'Nacional' }
+      data: { ambitId: 1, name: 'Nacional' },
     });
 
     // 2️⃣ Mock torneos
@@ -71,30 +76,28 @@ describe('TournamentlistComponent', () => {
       data: [
         {
           tournamentId: 1,
-          name: 'Torneo Nacional',
+          tournamentName: 'Torneo Nacional',
           organizer: 'Liga',
           imageUrl: 'default.jpg',
           modalities: [],
           categories: [],
-          modalityIds: [],
-          categoryIds: [],
-          startDate: '2025-01-01',
-          endDate: '2025-01-03',
-          ambitId: 1,
-          ambitName: 'Nacional',
+          startDate: new Date('2025-01-01'),
+          endDate: new Date('2025-01-03'),
+          ambit: { ambitId: 1, name: 'Nacional' },
           location: 'Cali',
           stage: 'Fase 1',
           status: true,
-          lugar: 'Liga Municipal'
-        }
-      ]
+        },
+      ],
     };
 
-    const req2 = httpMock.expectOne(`${environment.apiUrl}/results/by-ambit?ambitId=1`);
+    const req2 = httpMock.expectOne(
+      `${environment.apiUrl}/results/by-ambit?ambitId=1`
+    );
     req2.flush(mockTorneos);
 
     expect(component.listaTorneos.length).toBe(1);
-    expect(component.listaTorneos[0].name).toBe('Torneo Nacional');
+    expect(component.listaTorneos[0].tournamentName).toBe('Torneo Nacional');
   });
 
   it('debería navegar al dashboard al llamar goBack()', () => {
@@ -102,14 +105,16 @@ describe('TournamentlistComponent', () => {
     httpMock.expectOne(`${environment.apiUrl}/ambits/1`).flush({
       success: true,
       message: '',
-      data: { ambitId: 1, name: 'Nacional' }
+      data: { ambitId: 1, name: 'Nacional' },
     });
 
-    httpMock.expectOne(`${environment.apiUrl}/results/by-ambit?ambitId=1`).flush({
-      success: true,
-      message: '',
-      data: []
-    });
+    httpMock
+      .expectOne(`${environment.apiUrl}/results/by-ambit?ambitId=1`)
+      .flush({
+        success: true,
+        message: '',
+        data: [],
+      });
 
     component.goBack();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['dashboard']);
@@ -117,10 +122,15 @@ describe('TournamentlistComponent', () => {
 
   it('debería manejar error al cargar ámbito', () => {
     const req1 = httpMock.expectOne(`${environment.apiUrl}/ambits/1`);
-    req1.flush('Error al obtener ámbito', { status: 500, statusText: 'Internal Server Error' });
+    req1.flush('Error al obtener ámbito', {
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
 
     // Cierra también la segunda request
-    const req2 = httpMock.expectOne(`${environment.apiUrl}/results/by-ambit?ambitId=1`);
+    const req2 = httpMock.expectOne(
+      `${environment.apiUrl}/results/by-ambit?ambitId=1`
+    );
     req2.flush({ success: true, message: '', data: [] });
 
     expect(component.ambitName).toBe('');
@@ -130,11 +140,16 @@ describe('TournamentlistComponent', () => {
     httpMock.expectOne(`${environment.apiUrl}/ambits/1`).flush({
       success: true,
       message: '',
-      data: { ambitId: 1, name: 'Nacional' }
+      data: { ambitId: 1, name: 'Nacional' },
     });
 
-    const req2 = httpMock.expectOne(`${environment.apiUrl}/results/by-ambit?ambitId=1`);
-    req2.flush('Error al obtener torneos', { status: 500, statusText: 'Server Error' });
+    const req2 = httpMock.expectOne(
+      `${environment.apiUrl}/results/by-ambit?ambitId=1`
+    );
+    req2.flush('Error al obtener torneos', {
+      status: 500,
+      statusText: 'Server Error',
+    });
 
     expect(component.listaTorneos).toEqual([]);
   });
@@ -148,11 +163,11 @@ describe('TournamentlistComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            snapshot: { paramMap: { get: () => null } }
-          }
+            snapshot: { paramMap: { get: () => null } },
+          },
         },
-        { provide: Router, useValue: routerSpy }
-      ]
+        { provide: Router, useValue: routerSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TournamentlistComponent);

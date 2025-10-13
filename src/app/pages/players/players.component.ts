@@ -8,10 +8,9 @@ import { IUserResult } from 'src/app/model/userResult.inteface';
 @Component({
   selector: 'app-players',
   templateUrl: './players.component.html',
-  styleUrls: ['./players.component.css']
+  styleUrls: ['./players.component.css'],
 })
 export class PlayersComponent {
-
   public apiUrl = environment.apiUrl;
 
   filter: string = '';
@@ -31,17 +30,23 @@ export class PlayersComponent {
    * Obtiene el ranking de players desde el backend.
    */
   getPlayersRanking(): void {
-    this.http.get<{ success: boolean; message: string; data: IUserResult[] }>(
-      `${this.apiUrl}/results/all-player-ranking`
-    ).subscribe({
-      next: res => {
-        this.players = res.data;
-      },
-      error: err => {
-        console.error('Error al cargar players:', err);
-        Swal.fire('Error', 'No se pudo cargar el ranking de players', 'error');
-      }
-    });
+    this.http
+      .get<{ success: boolean; message: string; data: IUserResult[] }>(
+        `${this.apiUrl}/results/all-player-ranking`
+      )
+      .subscribe({
+        next: (res) => {
+          this.players = res.data;
+        },
+        error: (err) => {
+          console.error('Error al cargar players:', err);
+          Swal.fire(
+            'Error',
+            'No se pudo cargar el ranking de jugadores',
+            'error'
+          ); 
+        },
+      });
   }
 
   /**

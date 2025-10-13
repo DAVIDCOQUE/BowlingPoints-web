@@ -20,7 +20,6 @@ import { dateRangeValidator } from 'src/app/shared/validators/date-range.validat
   styleUrls: ['./tournaments.component.css'],
 })
 export class TournamentsComponent implements OnInit {
-
   /** Refs a modales */
   @ViewChild('modalTournament') modalTournamentRef!: unknown;
   @ViewChild('modalSetResultTournament') modalSetResultTournamentRef!: unknown;
@@ -72,96 +71,139 @@ export class TournamentsComponent implements OnInit {
 
   /** Inicializa el formulario reactivo con validaciones */
   initForm(): void {
-    this.tournamentForm = this.fb.group({
-      name: ['', Validators.required],
-      organizer: ['', Validators.required],
-      modalityIds: ['', Validators.required],
-      categoryIds: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
-      ambitId: ['', Validators.required],
-      location: [''],
-      stage: ['', Validators.required],
-      status: ['', Validators.required],
-    }, {
-      validators: dateRangeValidator('startDate', 'endDate', { allowEqual: true })
-    });
+    this.tournamentForm = this.fb.group(
+      {
+        name: ['', Validators.required],
+        organizer: ['', Validators.required],
+        modalityIds: ['', Validators.required],
+        categoryIds: ['', Validators.required],
+        startDate: ['', Validators.required],
+        endDate: ['', Validators.required],
+        ambitId: ['', Validators.required],
+        location: [''],
+        stage: ['', Validators.required],
+        status: ['', Validators.required],
+      },
+      {
+        validators: dateRangeValidator('startDate', 'endDate', {
+          allowEqual: true,
+        }),
+      }
+    );
   }
 
   /** Carga tournaments desde la API */
   getTournaments(): void {
-    this.http.get<{ success: boolean; message: string; data: ITournament[] }>(`${this.apiUrl}/tournaments`)
+    this.http
+      .get<{ success: boolean; message: string; data: ITournament[] }>(
+        `${this.apiUrl}/tournaments`
+      )
       .subscribe({
-        next: res => this.tournaments = res.data,
-        error: err => console.error('Error al cargar tournaments:', err)
+        next: (res) => (this.tournaments = res.data),
+        error: (err) => console.error('Error al cargar tournaments:', err),
       });
   }
 
   /** Carga departamentos desde API externa */
   getDepartments(): void {
-    this.http.get<{ id: number; name: string }[]>(`https://api-colombia.com/api/v1/Department`)
+    this.http
+      .get<{ id: number; name: string }[]>(
+        `https://api-colombia.com/api/v1/Department`
+      )
       .subscribe({
-        next: res => this.departments = res,
-        error: err => console.error('Error al cargar departamentos:', err)
+        next: (res) => (this.departments = res),
+        error: (err) => console.error('Error al cargar departamentos:', err),
       });
   }
 
   /** Carga modalidades disponibles */
   getModalitys(): void {
-    this.http.get<{ success: boolean; message: string; data: IModality[] }>(`${this.apiUrl}/modalities`)
+    this.http
+      .get<{ success: boolean; message: string; data: IModality[] }>(
+        `${this.apiUrl}/modalities`
+      )
       .subscribe({
-        next: res => this.modalities = res.data,
-        error: err => console.error('Error al cargar modalidades:', err)
+        next: (res) => (this.modalities = res.data),
+        error: (err) => console.error('Error al cargar modalidades:', err),
       });
   }
 
   /** Carga categorías disponibles */
   getCategories(): void {
-    this.http.get<{ success: boolean; message: string; data: ICategory[] }>(`${this.apiUrl}/categories`)
+    this.http
+      .get<{ success: boolean; message: string; data: ICategory[] }>(
+        `${this.apiUrl}/categories`
+      )
       .subscribe({
-        next: res => this.categories = res.data,
-        error: err => console.error('Error al cargar categorías:', err)
+        next: (res) => (this.categories = res.data),
+        error: (err) => console.error('Error al cargar categorías:', err),
       });
   }
 
   /** Carga ámbitos disponibles */
   getAmbits(): void {
-    this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(`${this.apiUrl}/ambits`)
+    this.http
+      .get<{ success: boolean; message: string; data: IAmbit[] }>(
+        `${this.apiUrl}/ambits`
+      )
       .subscribe({
-        next: res => this.ambits = res.data,
-        error: err => console.error('Error al cargar ámbitos:', err)
+        next: (res) => (this.ambits = res.data),
+        error: (err) => console.error('Error al cargar ámbitos:', err),
       });
   }
 
   /** Devuelve tournaments filtrados por término de búsqueda */
   get filteredTournaments(): ITournament[] {
-    const term = this.filter.toLowerCase().trim();
-    return term
-      ? this.tournaments.filter(t => t.tournamentName.toLowerCase().includes(term))
-      : this.tournaments;
+    const term = (this.filter || '').toLowerCase().trim();
+    if (!term) return this.tournaments || [];
+
+    return (this.tournaments || []).filter((t) => {
+      const displayName = (t as any)?.name ?? (t as any)?.tournamentName ?? '';
+      return String(displayName).toLowerCase().includes(term);
+    });
   }
 
   /** Abre el modal para editar torneo */
   editTournament(tournament: ITournament): void {
-    this.idTournament = tournament.tournamentId;
+    this.idTournament = tournament?.tournamentId ?? null;
 
-    const categoryIds = tournament.categories?.map(c => c.categoryId) ?? [];
-    const modalityIds = tournament.modalities?.map(m => m.modalityId) ?? [];
+    // Normalizar ids (si vienen como objetos, extraerlos; si ya son ids, dejarlos)
+    const categoryIds = (tournament as any)?.categories
+      ? (tournament as any).categories.map((c: any) => c?.categoryId ?? c)
+      : (tournament as any)?.categoryIds ?? [];
+
+    const modalityIds = (tournament as any)?.modalities
+      ? (tournament as any).modalities.map((m: any) => m?.modalityId ?? m)
+      : (tournament as any)?.modalityIds ?? [];
+
+    // Ambit puede venir como objeto o como id
+    const ambitId =
+      (tournament as any)?.ambit?.ambitId ??
+      (tournament as any)?.ambitId ??
+      (tournament as any)?.ambit ??
+      '';
+
+    // name puede venir como name o tournamentName
+    const name =
+      (tournament as any)?.name ?? (tournament as any)?.tournamentName ?? '';
 
     this.tournamentForm.patchValue({
-      name: tournament.tournamentName,
-      organizer: tournament.organizer,
+      name,
+      organizer: tournament?.organizer ?? '',
       categoryIds,
       modalityIds,
-      startDate: tournament.startDate,
-      endDate: tournament.endDate,
-      ambitId: tournament.ambit,
-      location: tournament.location,
-      stage: tournament.stage,
-      status: tournament.status
+      startDate: this.toYMDStrict((tournament as any)?.startDate) ?? '',
+      endDate: this.toYMDStrict((tournament as any)?.endDate) ?? '',
+      ambitId,
+      location: tournament?.location ?? '',
+      stage: tournament?.stage ?? '',
+      status: tournament?.status ?? false,
     });
 
-    this.tournamentForm.updateValueAndValidity({ onlySelf: false, emitEvent: false });
+    this.tournamentForm.updateValueAndValidity({
+      onlySelf: false,
+      emitEvent: false,
+    });
     this.openModal(this.modalTournamentRef);
   }
 
@@ -176,19 +218,26 @@ export class TournamentsComponent implements OnInit {
     const isEdit = !!this.idTournament;
 
     const request = isEdit
-      ? this.http.put(`${this.apiUrl}/tournaments/${this.idTournament}`, payload)
+      ? this.http.put(
+          `${this.apiUrl}/tournaments/${this.idTournament}`,
+          payload
+        )
       : this.http.post(`${this.apiUrl}/tournaments`, payload);
 
     request.subscribe({
       next: () => {
-        Swal.fire('Éxito', isEdit ? 'Torneo actualizado' : 'Torneo creado', 'success');
+        Swal.fire(
+          'Éxito',
+          isEdit ? 'Torneo actualizado' : 'Torneo creado',
+          'success'
+        );
         this.getTournaments();
         this.closeModal();
       },
-      error: err => {
+      error: (err) => {
         console.error('Error al guardar torneo:', err);
         Swal.fire('Error', err.error?.message || 'Algo salió mal', 'error');
-      }
+      },
     });
   }
 
@@ -203,7 +252,7 @@ export class TournamentsComponent implements OnInit {
       cancelButtonColor: '#6c757d',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-    }).then(result => {
+    }).then((result) => {
       if (result.isConfirmed) {
         this.http.delete(`${this.apiUrl}/tournaments/${id}`).subscribe({
           next: () => {
@@ -212,7 +261,7 @@ export class TournamentsComponent implements OnInit {
           },
           error: () => {
             Swal.fire('Error', 'No se pudo eliminar el torneo', 'error');
-          }
+          },
         });
       }
     });
@@ -246,12 +295,12 @@ export class TournamentsComponent implements OnInit {
 
   /** Retorna string de modalidades */
   getModalitiesString(tournament: ITournament): string {
-    return tournament?.modalities?.map(m => m.name).join(', ') || '-';
+    return tournament?.modalities?.map((m) => m.name).join(', ') || '-';
   }
 
   /** Retorna string de categorías */
   getCategoriesString(tournament: ITournament): string {
-    return tournament?.categories?.map(c => c.name).join(', ') || '-';
+    return tournament?.categories?.map((c) => c.name).join(', ') || '-';
   }
 
   /**

@@ -28,15 +28,11 @@ describe('ClubsComponent', () => {
     clubId: 1,
     name: 'Club X',
     description: 'Descripción del Club',
-    foundationDate: '2021-01-01',
+    foundationDate: new Date('2020-01-01'),
     city: 'Ciudad',
     status: true,
     imageUrl: '',
-    members: [mockUser],
-    ranking: 1,
-    score: 1000,
-    logros: [],
-    torneos: [],
+    members: [mockUser]
   };
 
   beforeEach(async () => {

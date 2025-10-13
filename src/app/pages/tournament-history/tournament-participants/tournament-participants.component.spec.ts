@@ -1,10 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import Swal from 'sweetalert2';
 import { TournamentParticipantsComponent } from './tournament-participants.component';
 import { environment } from 'src/environments/environment';
 import { ITournament } from 'src/app/model/tournament.interface';
 import { IUser } from 'src/app/model/user.interface';
+import { IRole } from 'src/app/model/role.interface';
 
 describe('TournamentParticipantsComponent', () => {
   let component: TournamentParticipantsComponent;
@@ -14,48 +18,41 @@ describe('TournamentParticipantsComponent', () => {
 
   const mockTournament: ITournament = {
     tournamentId: 1,
-    name: 'Torneo de Prueba',
+    tournamentName: 'Torneo de Prueba',
     organizer: 'Organizador',
     imageUrl: 'test.jpg',
     modalities: [],
     categories: [],
-    modalityIds: [],
-    categoryIds: [],
-    lugar: 'Ciudad Prueba',
-    startDate: '2020-01-01',
-    endDate: '2020-01-02',
-    ambitId: 1,
-    ambitName: 'Nacional',
+    startDate: new Date('2020-01-01'),
+    endDate: new Date('2020-01-02'),
+    ambit: { ambitId: 1, name: 'Nacional' },
     location: 'Estadio Central',
     stage: 'Final',
-    status: true
+    status: true,
   };
 
   const mockPlayers: IUser[] = [
     {
       userId: 1,
       personId: 1,
-      roleId: 1,
       clubId: 1,
       document: '123',
       nickname: 'player1',
       fullName: 'Jugador Uno',
       fullSurname: 'Apellido',
       email: 'jugador@uno.com',
-      roleDescription: 'Jugador',
       phone: '999999',
       gender: 'M',
-      category: '',
-      modality: '',
-      rama: '',
-      team: ''
-    }
+      password: 'dummy',
+      roles: [] as IRole[],
+      sub: '1',
+    },
   ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      declarations: [TournamentParticipantsComponent]
+      declarations: [TournamentParticipantsComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TournamentParticipantsComponent);
@@ -99,7 +96,7 @@ describe('TournamentParticipantsComponent', () => {
 
     // 💡 Cierra la request que se dispara después del fallo
     const pending = httpMock.match(`${apiUrl}/tournaments/1/players`);
-    pending.forEach(req => req.flush({}));
+    pending.forEach((req) => req.flush({}));
 
     expect(swalSpy).toHaveBeenCalledWith(
       'Error',
@@ -138,10 +135,10 @@ describe('TournamentParticipantsComponent', () => {
 
   it('should build cards correctly in updateCards', () => {
     component.modalities = [
-      { modalityId: 1, name: 'Individual', description: '', status: true }
+      { modalityId: 1, name: 'Individual', description: '', status: true },
     ];
     component.categories = [
-      { categoryId: 1, name: 'A', description: '', status: true }
+      { categoryId: 1, name: 'A', description: '', status: true },
     ];
 
     component.updateCards();

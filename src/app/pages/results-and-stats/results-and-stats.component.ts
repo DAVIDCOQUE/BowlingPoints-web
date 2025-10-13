@@ -55,9 +55,9 @@ export class ResultsAndStatsComponent {
     this.http.get<{ success: boolean; data: ITournament[] }>(`${environment.apiUrl}/tournaments`)
       .subscribe({
         next: res => {
-          this.tournaments = res.data;
+          this.tournaments = res.data ?? [];
           // Para pruebas, seleccionamos el primero automáticamente
-          this.selectedTournament = this.tournaments[0] || null;
+          this.selectedTournament = this.tournaments.length ? this.tournaments[0] : null;
         },
         error: err => console.error('Error al cargar torneos:', err)
       });

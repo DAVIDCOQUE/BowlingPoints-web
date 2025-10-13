@@ -1,23 +1,20 @@
 import { IUser } from "src/app/model/user.interface";
+import { IRole } from 'src/app/model/role.interface';
 
 export const mockUser: IUser = {
   sub: 'abc123',
   userId: 1,
   personId: 1,
-  roleId: 2,
   clubId: 1,
   document: '1234567890',
-  photoUrl: null,
+  photoUrl: '',
   nickname: 'jperez',
   fullName: 'Juan',
   fullSurname: 'Pérez',
   email: 'juan.perez@example.com',
-  roleDescription: 'Entrenador',
   phone: '3001234567',
   gender: 'Masculino',
-  roles: ['Entrenador'],
+  roles: [{ roleId: 2, description: 'Entrenador' }] as IRole[],
+  password: 'dummy-password',
   roleInClub: 'ENTRENADOR',
-  joinjoinedAt: '2022-01-01',
-  averageScore: 180,
-  bestGame: '250'
 };

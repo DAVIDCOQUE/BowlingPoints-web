@@ -1,7 +1,15 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { TournamentsComponent } from './tournaments.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { dateRangeValidator } from 'src/app/shared/validators/date-range.validator';
 import { of } from 'rxjs';
@@ -19,7 +27,7 @@ describe('TournamentsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, HttpClientTestingModule, FormsModule],
       declarations: [TournamentsComponent],
-      providers: [{ provide: NgbModal, useValue: modalServiceSpy }]
+      providers: [{ provide: NgbModal, useValue: modalServiceSpy }],
     }).compileComponents();
   });
 
@@ -39,10 +47,18 @@ describe('TournamentsComponent', () => {
   });
 
   function mockNgOnInitRequests() {
-    httpMock.expectOne(`${component.apiUrl}/tournaments`).flush({ success: true, data: [] });
-    httpMock.expectOne(`${component.apiUrl}/modalities`).flush({ success: true, data: [] });
-    httpMock.expectOne(`${component.apiUrl}/categories`).flush({ success: true, data: [] });
-    httpMock.expectOne(`${component.apiUrl}/ambits`).flush({ success: true, data: [] });
+    httpMock
+      .expectOne(`${component.apiUrl}/tournaments`)
+      .flush({ success: true, data: [] });
+    httpMock
+      .expectOne(`${component.apiUrl}/modalities`)
+      .flush({ success: true, data: [] });
+    httpMock
+      .expectOne(`${component.apiUrl}/categories`)
+      .flush({ success: true, data: [] });
+    httpMock
+      .expectOne(`${component.apiUrl}/ambits`)
+      .flush({ success: true, data: [] });
     httpMock.expectOne('https://api-colombia.com/api/v1/Department').flush([]);
   }
 
@@ -62,12 +78,12 @@ describe('TournamentsComponent', () => {
       organizer: 'Org',
       categories: [{ categoryId: 1, name: 'Cat 1' }],
       modalities: [{ modalityId: 2, name: 'Mod 1' }],
-      startDate: '2025-10-10',
-      endDate: '2025-10-12',
+      startDate: new Date('2025-10-10'),
+      endDate: new Date('2025-10-12'),
       ambitId: 1,
       location: 'City',
       stage: 'Etapa',
-      status: true
+      status: true,
     };
 
     component.editTournament(mockTournament as any);
@@ -94,13 +110,13 @@ describe('TournamentsComponent', () => {
 
   it('should return filtered tournaments', () => {
     component.tournaments = [
-      { name: 'Torneo A' } as any,
-      { name: 'Torneo B' } as any
+      { tournamentName: 'Torneo A' } as any,
+      { tournamentName: 'Otro' } as any,
     ];
-    component.filter = 'a';
+    component.filter = 'torneo';
     const result = component.filteredTournaments;
     expect(result.length).toBe(1);
-    expect(result[0].name).toBe('Torneo A');
+    expect((result[0] as any).tournamentName).toBe('Torneo A');
   });
 
   it('should return formatted modalities string', () => {
@@ -126,37 +142,43 @@ describe('TournamentsComponent', () => {
     expect(component.toYMDStrict(null)).toBeNull();
   });
 
+  it('should not submit form if invalid', () => {
+    component.tournamentForm = component.fb.group(
+      {
+        name: [''],
+        organizer: [''],
+        modalityIds: [''],
+        categoryIds: [''],
+        startDate: ['2025-01-10'],
+        endDate: ['2025-01-05'], // ⛔ fecha inválida: end < start
+        ambitId: [''],
+        location: [''],
+        stage: [''],
+        status: [''],
+      },
+      {
+        validators: dateRangeValidator('startDate', 'endDate', {
+          allowEqual: true,
+        }),
+      }
+    );
 
- it('should not submit form if invalid', () => {
-  component.tournamentForm = component.fb.group({
-    name: [''],
-    organizer: [''],
-    modalityIds: [''],
-    categoryIds: [''],
-    startDate: ['2025-01-10'],
-    endDate: ['2025-01-05'], // ⛔ fecha inválida: end < start
-    ambitId: [''],
-    location: [''],
-    stage: [''],
-    status: [''],
-  }, {
-    validators: dateRangeValidator('startDate', 'endDate', { allowEqual: true })
+    spyOn(Swal, 'fire');
+    spyOn(component['http'], 'post');
+
+    component.tournamentForm.markAllAsTouched();
+    expect(component.tournamentForm.valid).toBeFalse(); // ✅ ahora sí es inválido
+
+    component.saveForm();
+
+    expect(component['http'].post).not.toHaveBeenCalled();
+    expect(Swal.fire).not.toHaveBeenCalled();
   });
 
-  spyOn(Swal, 'fire');
-  spyOn(component['http'], 'post');
-
-  component.tournamentForm.markAllAsTouched();
-  expect(component.tournamentForm.valid).toBeFalse(); // ✅ ahora sí es inválido
-
-  component.saveForm();
-
-  expect(component['http'].post).not.toHaveBeenCalled();
-  expect(Swal.fire).not.toHaveBeenCalled();
-});
-
   it('should confirm and call deleteTournament', fakeAsync(() => {
-    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true } as any));
+    spyOn(Swal, 'fire').and.returnValue(
+      Promise.resolve({ isConfirmed: true } as any)
+    );
     spyOn(component['http'], 'delete').and.returnValue(of({}));
     spyOn(component, 'getTournaments');
 
