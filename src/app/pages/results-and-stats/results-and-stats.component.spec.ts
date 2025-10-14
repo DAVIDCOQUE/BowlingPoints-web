@@ -7,8 +7,9 @@ import {
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { of } from 'rxjs';
 import { environment } from '../../../environments/environment';
+// opcional si tienes errores de plantilla:
+// import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ResultsAndStatsComponent', () => {
   let component: ResultsAndStatsComponent;
@@ -25,6 +26,7 @@ describe('ResultsAndStatsComponent', () => {
       declarations: [ResultsAndStatsComponent],
       imports: [HttpClientTestingModule, FormsModule],
       providers: [{ provide: NgbModal, useValue: modalServiceSpy }],
+      // schemas: [NO_ERRORS_SCHEMA], // descomenta si fallan elementos de la plantilla
     }).compileComponents();
 
     fixture = TestBed.createComponent(ResultsAndStatsComponent);
@@ -32,7 +34,7 @@ describe('ResultsAndStatsComponent', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  /** Helper para responder a las llamadas iniciales del ngOnInit() */
+  /** Responde a las llamadas de ngOnInit() */
   const flushInitRequests = () => {
     const reqTournaments = httpMock.expectOne(`${apiUrl}/tournaments`);
     reqTournaments.flush({
@@ -100,16 +102,16 @@ describe('ResultsAndStatsComponent', () => {
   });
 
   it('should open file input when calling openFileInput()', () => {
-    const clickSpy = spyOn(document, 'createElement').and.callThrough();
+    const createSpy = spyOn(document, 'createElement').and.callThrough();
     component.openFileInput();
-    expect(clickSpy).toHaveBeenCalledWith('input');
+    expect(createSpy).toHaveBeenCalledWith('input');
   });
 
   it('should handle file selection and show Swal alert', () => {
     const file = new File(['dummy'], 'test.xlsx', {
       type: 'application/vnd.ms-excel',
     });
-    const event = { target: { files: [file] } };
+    const event = { target: { files: [file] } } as any; // el handler acepta Event, casteamos
     const swalSpy = spyOn(Swal, 'fire');
     component.onFileSelected(event);
     expect(component.selectedFile).toBe(file);
@@ -119,7 +121,8 @@ describe('ResultsAndStatsComponent', () => {
   it('should open modal', () => {
     fixture.detectChanges();
     flushInitRequests();
-    component.openModal('mock-template');
+    // openModal ahora espera un TemplateRef: usamos un dummy y casteamos
+    component.openModal({} as any);
     expect(modalServiceSpy.open).toHaveBeenCalled();
   });
 
@@ -134,12 +137,16 @@ describe('ResultsAndStatsComponent', () => {
     fixture.detectChanges();
     flushInitRequests();
 
+    // Simulamos confirmación inmediata del Swal
     spyOn(Swal, 'fire').and.returnValue(
       Promise.resolve({ isConfirmed: true }) as any
     );
     spyOn(component, 'loadResults');
 
-    await component.deleteResult(1);
+    component.deleteResult(1);
+
+    // Espera a que se resuelvan las promesas del .then(...)
+    await fixture.whenStable();
 
     const req = httpMock.expectOne(`${apiUrl}/results/1`);
     expect(req.request.method).toBe('DELETE');

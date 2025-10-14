@@ -3,10 +3,10 @@ import { AmbitComponent } from './ambit.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { IAmbit } from 'src/app/model/ambit.interface';
-import { TemplateRef } from '@angular/core';
-import { AmbitApiService } from 'src/app/services/ambit-api.service';
 import { of } from 'rxjs';
+import { IAmbit } from 'src/app/model/ambit.interface';
+import { AmbitApiService } from 'src/app/services/ambit-api.service';
+import Swal from 'sweetalert2';
 
 describe('AmbitComponent', () => {
   let component: AmbitComponent;
@@ -19,12 +19,17 @@ describe('AmbitComponent', () => {
   };
 
   beforeEach(async () => {
-    // Crear spy para el servicio
-    const ambitServiceSpy = jasmine.createSpyObj('AmbitApiService', ['getAmbits', 'create', 'update', 'delete']);
+    const ambitServiceSpy = jasmine.createSpyObj('AmbitApiService', [
+      'getAmbits', 'createAmbit', 'updateAmbit', 'deleteAmbit'
+    ]);
 
     await TestBed.configureTestingModule({
       declarations: [AmbitComponent],
-      imports: [ReactiveFormsModule, HttpClientTestingModule, FormsModule],
+      imports: [
+        ReactiveFormsModule,
+        FormsModule, // necesario por [(ngModel)] en el HTML
+        HttpClientTestingModule
+      ],
       providers: [
         { provide: NgbModal, useValue: modalServiceMock },
         { provide: AmbitApiService, useValue: ambitServiceSpy }
@@ -35,8 +40,11 @@ describe('AmbitComponent', () => {
     component = fixture.componentInstance;
     ambitService = TestBed.inject(AmbitApiService) as jasmine.SpyObj<AmbitApiService>;
 
-    // Configurar respuesta por defecto
+    // Mocks por defecto
     ambitService.getAmbits.and.returnValue(of([]));
+
+    // Mock de SweetAlert
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
 
     fixture.detectChanges();
   });
@@ -45,7 +53,7 @@ describe('AmbitComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize form invalid', () => {
+  it('should initialize form as invalid', () => {
     expect(component.ambitForm.valid).toBeFalse();
   });
 
@@ -79,8 +87,7 @@ describe('AmbitComponent', () => {
   it('should reset form and open modal when creating new', () => {
     component.idAmbit = null;
     component.ambitForm.patchValue({ name: 'Test', status: true });
-    component.openModal({} as TemplateRef<any>);
-
+    component.openModal({} as any);
     expect(component.ambitForm.value.name).toBeNull();
   });
 
@@ -94,5 +101,56 @@ describe('AmbitComponent', () => {
     component.filter = 'algo';
     component.clear();
     expect(component.filter).toBe('');
+  });
+
+  it('should mark form as touched if invalid and not submit', () => {
+    component.ambitForm.patchValue({ name: '', status: null });
+    spyOn(component.ambitForm, 'markAllAsTouched');
+    component.saveForm();
+    expect(component.ambitForm.markAllAsTouched).toHaveBeenCalled();
+  });
+
+  it('should create ambit via service', () => {
+    const payload = { name: 'New Ambit', status: true, description: '' };
+    component.ambitForm.patchValue(payload);
+    ambitService.createAmbit.and.returnValue(of({}));
+
+    component.saveForm();
+
+    expect(ambitService.createAmbit).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        name: 'New Ambit',
+        status: true
+      })
+    );
+  });
+
+  it('should update ambit via service', () => {
+    const payload = { name: 'Updated Ambit', status: true, description: '' };
+    component.idAmbit = 1;
+    component.ambitForm.patchValue(payload);
+    ambitService.updateAmbit.and.returnValue(of({}));
+
+    component.saveForm();
+
+    expect(ambitService.updateAmbit).toHaveBeenCalledWith(
+      1,
+      jasmine.objectContaining({
+        name: 'Updated Ambit',
+        status: true
+      })
+    );
+  });
+
+  it('should delete ambit if confirmed', async () => {
+    ambitService.deleteAmbit.and.returnValue(of({}));
+    await component.deleteAmbit(1);
+    expect(ambitService.deleteAmbit).toHaveBeenCalledWith(1);
+  });
+
+  it('should not delete ambit if user cancels', async () => {
+    (Swal.fire as jasmine.Spy).and.returnValue(Promise.resolve({ isConfirmed: false }) as any);
+    await component.deleteAmbit(2);
+    expect(ambitService.deleteAmbit).not.toHaveBeenCalled();
   });
 });

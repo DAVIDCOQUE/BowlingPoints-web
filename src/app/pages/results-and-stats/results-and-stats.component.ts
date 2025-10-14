@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, TemplateRef, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject } from 'rxjs';
@@ -15,32 +15,41 @@ import { ICategory } from '../../model/category.interface';
   templateUrl: './results-and-stats.component.html',
   styleUrls: ['./results-and-stats.component.css']
 })
-export class ResultsAndStatsComponent {
+export class ResultsAndStatsComponent implements OnInit {
 
-  @ViewChild('modalResult') modalResultRef: any;
+  // Referencia al template del modal. Tipar evita usar `any`.
+  @ViewChild('modalResult', { static: false }) modalResultRef!: TemplateRef<unknown>;
+
+  // Indicador de carga reactivo por si se quiere enlazar en plantilla.
   isLoading$ = new BehaviorSubject<boolean>(false);
 
+  // Estado principal
   selectedTournament: ITournament | null = null;
   tournaments: ITournament[] = [];
   results: IResults[] = [];
   filteredResults: IResults[] = [];
 
+  // Filtros
   categories: ICategory[] = [];
   modalities: IModality[] = [];
-  selectedCategory: string = '';
-  selectedModality: string = '';
-  selectedRama: string = '';
+  selectedCategory = '';
+  selectedModality = '';
+  selectedRama = '';
 
+  // Archivo seleccionado para importación
   selectedFile: File | null = null;
 
+  // Centralizamos la URL base para evitar repetir `environment.apiUrl`
+  private readonly apiUrl = environment.apiUrl;
+
   constructor(
-    private http: HttpClient,
-    private modalService: NgbModal
+    private readonly http: HttpClient,
+    private readonly modalService: NgbModal
   ) {}
 
-  // ==========================================================
-  // 🔹 INICIALIZACIÓN
-  // ==========================================================
+  // ----------------------------------------------------------
+  // Ciclo de vida
+  // ----------------------------------------------------------
   ngOnInit(): void {
     this.loadTournaments();
     this.loadCategories();
@@ -48,72 +57,77 @@ export class ResultsAndStatsComponent {
     this.loadResults();
   }
 
-  // ==========================================================
-  // 📡 CARGA DE DATOS DESDE EL BACKEND
-  // ==========================================================
+  // ----------------------------------------------------------
+  // Carga de datos desde el backend
+  // ----------------------------------------------------------
   loadTournaments(): void {
-    this.http.get<{ success: boolean; data: ITournament[] }>(`${environment.apiUrl}/tournaments`)
+    this.http
+      .get<{ success: boolean; data: ITournament[] }>(`${this.apiUrl}/tournaments`)
       .subscribe({
-        next: res => {
+        next: (res) => {
           this.tournaments = res.data ?? [];
-          // Para pruebas, seleccionamos el primero automáticamente
+          // Para pruebas o UX básica, seleccionar el primero si existe
           this.selectedTournament = this.tournaments.length ? this.tournaments[0] : null;
         },
-        error: err => console.error('Error al cargar torneos:', err)
+        error: (err) => console.error('Error al cargar torneos:', err),
       });
   }
 
   loadCategories(): void {
-    this.http.get<{ success: boolean; data: ICategory[] }>(`${environment.apiUrl}/categories`)
+    this.http
+      .get<{ success: boolean; data: ICategory[] }>(`${this.apiUrl}/categories`)
       .subscribe({
-        next: res => this.categories = res.data,
-        error: err => console.error('Error al cargar categorías:', err)
+        next: (res) => (this.categories = res.data ?? []),
+        error: (err) => console.error('Error al cargar categorías:', err),
       });
   }
 
   loadModalities(): void {
-    this.http.get<{ success: boolean; data: IModality[] }>(`${environment.apiUrl}/modalities`)
+    this.http
+      .get<{ success: boolean; data: IModality[] }>(`${this.apiUrl}/modalities`)
       .subscribe({
-        next: res => this.modalities = res.data,
-        error: err => console.error('Error al cargar modalidades:', err)
+        next: (res) => (this.modalities = res.data ?? []),
+        error: (err) => console.error('Error al cargar modalidades:', err),
       });
   }
 
   loadResults(): void {
-    this.http.get<{ success: boolean; data: IResults[] }>(`${environment.apiUrl}/results`)
+    this.http
+      .get<{ success: boolean; data: IResults[] }>(`${this.apiUrl}/results`)
       .subscribe({
-        next: res => {
-          this.results = res.data;
-          this.filteredResults = res.data;
+        next: (res) => {
+          this.results = res.data ?? [];
+          this.filteredResults = this.results;
         },
-        error: err => console.error('Error al cargar resultados:', err)
+        error: (err) => console.error('Error al cargar resultados:', err),
       });
   }
 
-  // ==========================================================
-  // 🧮 FILTROS
-  // ==========================================================
+  // ----------------------------------------------------------
+  // Filtros
+  // ----------------------------------------------------------
   onFilterChange(): void {
-    this.filteredResults = this.results.filter(r =>
-      (!this.selectedCategory || r.category?.categoryId === +this.selectedCategory) &&
-      (!this.selectedModality || r.modality?.modalityId === +this.selectedModality) &&
+    this.filteredResults = this.results.filter((r) =>
+      (!this.selectedCategory || r.category?.categoryId === Number(this.selectedCategory)) &&
+      (!this.selectedModality || r.modality?.modalityId === Number(this.selectedModality)) &&
       (!this.selectedRama || r.rama?.toLowerCase() === this.selectedRama.toLowerCase())
     );
   }
 
-  // ==========================================================
-  // 📤 CARGA DE ARCHIVO EXCEL
-  // ==========================================================
+  // ----------------------------------------------------------
+  // Carga de archivo Excel
+  // ----------------------------------------------------------
   openFileInput(): void {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.xlsx, .xls';
-    input.onchange = (event: any) => this.onFileSelected(event);
+    input.onchange = (event) => this.onFileSelected(event as Event);
     input.click();
   }
 
-  onFileSelected(event: any): void {
-    const file: File = event.target.files[0];
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
     if (!file) return;
 
     this.selectedFile = file;
@@ -121,19 +135,20 @@ export class ResultsAndStatsComponent {
       icon: 'info',
       title: 'Archivo seleccionado',
       text: `Archivo: ${file.name}`,
-      confirmButtonText: 'Aceptar'
+      confirmButtonText: 'Aceptar',
     });
 
-    // Aquí luego podrás implementar la lógica con XLSX
+    // Aquí se puede implementar importación con XLSX cuando corresponda:
     // this.importExcel(file);
   }
 
-  // ==========================================================
-  // 🗑️ ACCIONES DE RESULTADOS
-  // ==========================================================
+  // ----------------------------------------------------------
+  // Acciones sobre resultados
+  // ----------------------------------------------------------
   editResult(result: IResults): void {
     this.modalService.open(this.modalResultRef);
-    console.log('Editar resultado', result);
+    // Mantener logs de desarrollo con moderación
+    // console.log('Editar resultado', result);
   }
 
   deleteResult(id: number): void {
@@ -145,24 +160,28 @@ export class ResultsAndStatsComponent {
       confirmButtonColor: '#d33',
       cancelButtonColor: '#6c757d',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then(result => {
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`${environment.apiUrl}/results/${id}`).subscribe({
+        this.http.delete(`${this.apiUrl}/results/${id}`).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'Resultado eliminado correctamente', 'success');
             this.loadResults();
           },
-          error: () => Swal.fire('Error', 'No se pudo eliminar el resultado', 'error')
+          // Importante: el callback no debe devolver una Promesa.
+          // Usamos un cuerpo de función con llaves para garantizar `void`.
+          error: () => {
+            Swal.fire('Error', 'No se pudo eliminar el resultado', 'error');
+          },
         });
       }
     });
   }
 
-  // ==========================================================
-  // 🔚 MODALES
-  // ==========================================================
-  openModal(content: any): void {
+  // ----------------------------------------------------------
+  // Modales
+  // ----------------------------------------------------------
+  openModal(content: TemplateRef<unknown>): void {
     this.modalService.open(content, { size: 'lg' });
   }
 
