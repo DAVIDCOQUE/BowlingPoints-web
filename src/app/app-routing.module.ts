@@ -27,7 +27,7 @@ import { ResultsComponent } from './pages/results/results.component';
 import { TournamentParticipantsComponent } from './pages/tournament-history/tournament-participants/tournament-participants.component';
 import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
