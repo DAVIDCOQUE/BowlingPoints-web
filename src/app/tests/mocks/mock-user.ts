@@ -1,5 +1,6 @@
 import { IUser } from "src/app/model/user.interface";
 import { IRole } from 'src/app/model/role.interface';
+import { MOCK_USER_PASSWORD } from '../constants/mock-user.constants';
 
 export const mockUser: IUser = {
   sub: 'abc123',
@@ -15,6 +16,6 @@ export const mockUser: IUser = {
   phone: '3001234567',
   gender: 'Masculino',
   roles: [{ roleId: 2, description: 'Entrenador' }] as IRole[],
-  password: 'dummy-password',
+  password: MOCK_USER_PASSWORD,
   roleInClub: 'ENTRENADOR',
 };

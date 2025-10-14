@@ -51,6 +51,13 @@ export class AuthService {
     });
   }
 
+  /** Hace login y retorna el token */
+  login(username: string, password: string): Observable<string> {
+    return this.http
+      .post<{ token: string }>(`${this.baseUrl}/auth/login`, { userName: username, password })
+      .pipe(map((res) => res.token));
+  }
+
   /** Cierra sesión */
   logout(): void {
     localStorage.removeItem('jwt_token');
