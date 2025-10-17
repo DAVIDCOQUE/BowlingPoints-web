@@ -103,7 +103,22 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "codeCoverage": true
+            "codeCoverage": true,
+             "codeCoverageExclude": [
+              "src/main.ts",
+              "src/polyfills.ts",
+              "src/test.ts",
+              "**/*.module.ts",
+              "**/*.routing.module.ts",
+              "src/environments/**",
+              "**/index.ts",
+              "**/*.d.ts",
+              "**/*.interface.ts",
+              "**/*.model.ts",
+              "**/__mocks__/**",
+              "src/app/tests/**",
+              "**/*.(mock|fixture|stubs).ts"
+            ]
           }
         },
         "lint": {
