@@ -15,21 +15,41 @@ export class ClubApiService {
   /**
    * Obtiene todos los clubes con sus miembros
    */
+  /**
+    * Obtiene todos los clubes con sus miembros
+    */
   getClubs(): Observable<IClubs[]> {
     return this.http
       .get<{ success: boolean; message: string; data: any[] }>(`${this.baseUrl}/clubs`)
-      .pipe(
-        map(res => (res?.data ?? []).map((c: any) => ({
-          clubId: c.clubId,
-          name: c.name,
-          foundationDate: c.foundationDate ?? c.FoundationDate ?? null,
-          city: c.city,
-          description: c.description,
-          imageUrl: c.imageUrl ?? c.imageURL ?? null,
-          status: c.status,
-          members: c.members
-        } as IClubs)))
-      );
+      .pipe(map(res => (res?.data ?? []).map(c => this.mapClub(c))));
+  }
+
+  /**
+   * Obtiene un club específico por su ID
+   */
+  getClubById(id: number): Observable<IClubs> {
+    return this.http
+      .get<{ success: boolean; message: string; data: any }>(`${this.baseUrl}/clubs/${id}`)
+      .pipe(map(res => this.mapClub(res?.data)));
+  }
+
+  /**
+   * Mapea el objeto club desde la API normalizando propiedades
+   */
+  private mapClub(c: any): IClubs {
+    return {
+      clubId: c?.clubId,
+      name: c?.name,
+      foundationDate: c?.foundationDate ?? c?.FoundationDate ?? null,
+      city: c?.city,
+      description: c?.description,
+      imageUrl: c?.imageUrl ?? c?.imageURL ?? c?.image ?? null,
+      status: c?.status,
+      members: (c?.members ?? []).map((m: any) => ({
+        ...m,
+        photoUrl: m?.photoUrl ?? m?.photourl ?? m?.photoURL ?? null
+      }))
+    } as IClubs;
   }
 
   /**

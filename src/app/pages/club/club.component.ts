@@ -1,10 +1,9 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
-import { environment } from 'src/environments/environment';
 import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
 import { AuthService } from 'src/app/auth/auth.service';
+import { ClubApiService } from 'src/app/services/club-api.service';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 
@@ -15,16 +14,12 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ClubComponent implements OnInit, OnDestroy {
 
-  private readonly http = inject(HttpClient);
+  private readonly clubApi = inject(ClubApiService);
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
 
-  public apiUrl = environment.apiUrl;
-
   private userSub?: Subscription;
   public usuariosLoaded = false;
-
-  // UI State
 
   miClub: IClubs | null = null;
   clubId: number | null = null;
@@ -34,7 +29,6 @@ export class ClubComponent implements OnInit, OnDestroy {
   miembros: IUser[] = [];
 
   ngOnInit(): void {
-
     const idFromRoute = this.route.snapshot.paramMap.get('id');
 
     if (idFromRoute) {
@@ -69,16 +63,15 @@ export class ClubComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.http.get<IClubs>(`${this.apiUrl}/clubs/${this.clubId}/details`)
-      .subscribe({
-        next: club => {
-          this.miClub = club;
-        },
-        error: () => {
-          this.miClub = null;
-          Swal.fire('Error', 'No se pudieron cargar los datos de tu club', 'error');
-        }
-      });
+    this.clubApi.getClubById(this.clubId).subscribe({
+      next: club => {
+        this.miClub = club;
+      },
+      error: () => {
+        this.miClub = null;
+        Swal.fire('Error', 'No se pudieron cargar los datos de tu club', 'error');
+      }
+    });
   }
 
   /** Maneja error al cargar imagen */
@@ -87,8 +80,12 @@ export class ClubComponent implements OnInit, OnDestroy {
     target.src = defaultPath;
   }
 
-  // --- Helpers de vista para miClub ---
+  /** Retorna la URL base de la API */
+  get apiUrl(): string {
+    return this.clubApi.apiUrl;
+  }
 
+  // --- Helpers de vista para miClub ---
   hasMembers(): boolean {
     if (!this.miClub) return false;
     return Array.isArray(this.miClub.members) && this.miClub.members.length > 0;
