@@ -1,12 +1,15 @@
 import { Component, OnInit, ViewChild, TemplateRef, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 
 import { IUser } from '../../model/user.interface';
 import { IRole } from '../../model/role.interface';
 import { UserApiService } from 'src/app/services/user-api.service';
+import { CategoryApiService } from 'src/app/services/category-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { ICategory } from 'src/app/model/category.interface';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-users',
@@ -24,6 +27,9 @@ export class UsersComponent implements OnInit {
 
   /** Listado de roles */
   roles: IRole[] = [];
+
+  /** Listado de categorías */
+  categories: ICategory[] = [];
 
   /** Lista de géneros disponibles */
   genders: string[] = ['Masculino', 'Femenino'];
@@ -45,6 +51,7 @@ export class UsersComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly modalService = inject(NgbModal);
   private readonly userApi = inject(UserApiService);
+  private readonly categoryApi = inject(CategoryApiService);
   private readonly authService = inject(AuthService);
 
   /**
@@ -54,6 +61,7 @@ export class UsersComponent implements OnInit {
     this.initForm();
     this.getUsers();
     this.getRoles();
+    this.getCategories();
   }
 
   get apiUrl(): string {
@@ -65,18 +73,21 @@ export class UsersComponent implements OnInit {
    */
   initForm(): void {
     this.userForm = this.formBuilder.group({
-      nickname: ['', Validators.required],
-      photoUrl: [''],
       document: ['', Validators.required],
       fullName: ['', Validators.required],
       fullSurname: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', Validators.required],
+      birthDate: [''],
       gender: ['', Validators.required],
-      roleId: ['', Validators.required],
+      phone: [''],
+      photoUrl: [''],
+      categories: [[]],
+      roles: [[], Validators.required],
       password: [''],
       confirm: ['']
     });
+
+    this.userForm.setValidators(this.passwordsMatchValidator);
   }
 
   /**
@@ -84,18 +95,30 @@ export class UsersComponent implements OnInit {
    */
   getUsers(): void {
     this.userApi.getUsers().subscribe({
-      next: res => this.usuarios = res,
+      next: res => {
+        this.usuarios = res;
+        console.log('Usuarios cargados:', this.usuarios);
+      },
       error: err => console.error('Error al cargar usuarios:', err)
     });
   }
-
   /**
    * Obtiene todos los roles desde la API
    */
   getRoles(): void {
     this.userApi.getRoles().subscribe({
-      next: res => this.roles = res,
+      next: res => { this.roles = res, console.log('roles cargados:', this.roles); },
       error: err => console.error('Error al cargar roles:', err)
+    });
+  }
+
+  /**
+   * Obtiene todas las categorías desde la API
+   */
+  getCategories(): void {
+    this.categoryApi.getCategories().subscribe({
+      next: res => { this.categories = res, console.log('categorías cargadas:', this.categories); },
+      error: err => console.error('Error al cargar categorías:', err)
     });
   }
 
@@ -107,12 +130,12 @@ export class UsersComponent implements OnInit {
     if (!term) return this.usuarios;
 
     return this.usuarios.filter(user =>
-      user.nickname.toLowerCase().includes(term) ||
       user.fullName.toLowerCase().includes(term) ||
       user.fullSurname.toLowerCase().includes(term) ||
       user.email.toLowerCase().includes(term) ||
-      user.phone.toLowerCase().includes(term) ||
-      user.roles.some(r => r.description.toLowerCase().includes(term))
+      String(user.phone ?? '').toLowerCase().includes(term) ||
+      user.categories?.some(c => ((c as any).name ?? (c as any).description ?? '').toLowerCase().includes(term)) ||
+      (user.roles?.some(r => r.name.toLowerCase().includes(term)) ?? false)
     );
   }
 
@@ -123,7 +146,6 @@ export class UsersComponent implements OnInit {
     this.idUser = user.userId;
 
     this.userForm.patchValue({
-      nickname: user.nickname,
       document: user.document,
       photoUrl: user.photoUrl || '',
       email: user.email,
@@ -131,17 +153,21 @@ export class UsersComponent implements OnInit {
       fullSurname: user.fullSurname,
       phone: user.phone,
       gender: user.gender,
-      roleId: this.getRoleIdByDescription(user.roles[0]?.description),
+      birthDate: this.toDateInput(user.birthDate as any),
+      categories: (user.categories ?? []).map(c => c.categoryId),
+      roles: (user.roles ?? []).map(r => r.roleId),
       password: '',
       confirm: ''
     });
 
+    this.setPasswordValidatorsForMode(true);
     this.openModal(this.modalUserRef);
   }
 
   /**
    * Guarda el formulario (crea o actualiza un usuario)
    */
+
   saveForm(): void {
     if (this.userForm.invalid) {
       this.userForm.markAllAsTouched();
@@ -152,16 +178,14 @@ export class UsersComponent implements OnInit {
 
     const isEdit = !!this.idUser;
     const formValue = this.userForm.getRawValue();
-    const roleDescription = this.getRoleDescriptionById(formValue.roleId);
 
-    const role: IRole = {
-      roleId: formValue.roleId,
-      description: roleDescription,
-    };
-
+    const roleIds: number[] = formValue.roles ?? [];
+    const roleList: IRole[] = roleIds.map(roleId => ({
+      roleId,
+      name: this.getRoleNameById(roleId)
+    }));
 
     const payload: Partial<IUser> & { password?: string } = {
-      nickname: formValue.nickname,
       photoUrl: formValue.photoUrl,
       document: formValue.document,
       email: formValue.email,
@@ -169,7 +193,9 @@ export class UsersComponent implements OnInit {
       fullSurname: formValue.fullSurname,
       phone: formValue.phone,
       gender: formValue.gender,
-      roles: [role]
+      birthDate: formValue.birthDate || null,
+      categories: (formValue.categories ?? []).map((id: number) => ({ categoryId: id })),
+      roles: (formValue.roles ?? []).map((id: number) => ({ roleId: id }))
     };
 
     if (!isEdit || formValue.password) {
@@ -180,20 +206,20 @@ export class UsersComponent implements OnInit {
       ? this.userApi.updateUser(this.idUser!, payload)
       : this.userApi.createUser(payload);
 
-    request.subscribe({
-      next: () => {
-        Swal.fire('Éxito', isEdit ? 'Usuario actualizado correctamente' : 'Usuario creado exitosamente', 'success');
-        this.getUsers();
-        this.closeModal();
-        this.loading = false;
-      },
-      error: err => {
-        console.error('Error al guardar:', err);
-        const msg = err.error?.message || 'Ocurrió un error al procesar la solicitud';
-        Swal.fire('Error', msg, 'error');
-        this.loading = false;
-      }
-    });
+    request
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: () => {
+          Swal.fire('Éxito', isEdit ? 'Usuario actualizado correctamente' : 'Usuario creado exitosamente', 'success');
+          this.getUsers();
+          this.closeModal();
+        },
+        error: err => {
+          console.error('Error al guardar:', err);
+          const msg = err.error?.message || 'Ocurrió un error al procesar la solicitud';
+          Swal.fire('Error', msg, 'error');
+        }
+      });
   }
 
   /**
@@ -230,13 +256,23 @@ export class UsersComponent implements OnInit {
   openModal(content: unknown): void {
     if (!this.idUser) {
       this.userForm.reset({
+        document: '',
+        fullName: '',
+        fullSurname: '',
+        email: '',
+        birthDate: null,
         gender: null,
-        roleId: null
+        phone: '',
+        photoUrl: '',
+        categories: [],
+        roles: [],
+        password: '',
+        confirm: ''
       });
+      this.setPasswordValidatorsForMode(false);
     }
     this.modalService.open(content);
   }
-
   /**
    * Cierra el modal y resetea el formulario
    */
@@ -253,21 +289,33 @@ export class UsersComponent implements OnInit {
     this.filter = '';
   }
 
-  /**
-   * Devuelve la descripción del rol según su ID
-   */
-  getRoleDescriptionById(roleId: number): string {
-    const role = this.roles.find(r => r.roleId === roleId);
-    return role ? role.description : '';
+  private setPasswordValidatorsForMode(isEdit: boolean): void {
+    const passwordCtrl = this.userForm.get('password');
+    const confirmCtrl = this.userForm.get('confirm');
+
+    if (!passwordCtrl || !confirmCtrl) return;
+
+    if (isEdit) {
+      passwordCtrl.setValidators([Validators.minLength(3)]);
+      confirmCtrl.clearValidators();
+    } else {
+      passwordCtrl.setValidators([Validators.required, Validators.minLength(3)]);
+      confirmCtrl.setValidators([Validators.required]);
+    }
+
+    passwordCtrl.updateValueAndValidity({ emitEvent: false });
+    confirmCtrl.updateValueAndValidity({ emitEvent: false });
+    this.userForm.updateValueAndValidity({ emitEvent: false });
   }
 
-  /**
-   * Devuelve el ID del rol según su descripción
-   */
-  getRoleIdByDescription(description: string): number | null {
-    const role = this.roles.find(r => r.description === description);
-    return role ? role.roleId : null;
-  }
+  private readonly passwordsMatchValidator: ValidatorFn = (group: AbstractControl) => {
+    const pass = group.get('password')?.value;
+    const confirm = group.get('confirm')?.value;
+    if (!pass && !confirm) return null; // en edición se permiten vacías
+    return pass === confirm ? null : { passwordsMismatch: true };
+  };
+
+
 
   /**
    * Reemplaza una imagen rota con una por defecto
@@ -277,9 +325,33 @@ export class UsersComponent implements OnInit {
     target.src = defaultPath;
   }
 
-  getRoleDescriptions(user: IUser): string {
+  /*
+   * Devuelve true si las contraseñas no coinciden y alguno de los campos ha sido tocado
+   */
+  get passwordMismatchVisible(): boolean {
+    const touched = (this.userForm.get('confirm')?.touched ?? false) || (this.userForm.get('password')?.touched ?? false);
+    return this.userForm.hasError('passwordsMismatch') && touched;
+  }
+
+  /** Devuelve el nombre del rol según su ID */
+  getRoleNameById(roleId: number): string {
+    const role = this.roles.find(r => r.roleId === roleId);
+    return role ? role.name : '';
+  }
+
+  /** Devuelve los nombres de los roles del usuario */
+  getRoleNames(user: IUser): string {
     return Array.isArray(user.roles)
-      ? user.roles.map(r => r.description).join(', ')
+      ? user.roles.map(r => r.name).join(', ')
       : '';
+  }
+
+  // Convierte Date/ISO a 'yyyy-MM-dd' para input[type="date"]
+  private toDateInput(value: string | Date | null | undefined): string | null {
+    if (!value) return null;
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return null;
+    const tzAdjusted = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return tzAdjusted.toISOString().slice(0, 10);
   }
 }

@@ -1,3 +1,4 @@
+import { ICategory } from "./category.interface";
 import { IClubs } from "./clubs.interface";
 import { IRole } from './role.interface';
 
@@ -7,6 +8,7 @@ export interface IUser {
   password: string;
   attemptsLogin?: number;
   lastLoginAt?: Date;
+  categories: ICategory[];
   roles: IRole[];
   personId: number;
   document?: string;

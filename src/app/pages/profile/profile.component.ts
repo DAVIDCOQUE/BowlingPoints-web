@@ -81,7 +81,7 @@ export class ProfileComponent implements OnInit {
           fullSurname: user.fullSurname,
           phone: user.phone,
           gender: user.gender,
-          roleId: this.getRoleIdByDescription(user.roleDescription || ''),
+          roleId: this.getRoleIdByName(user.roleName || ''),
           password: '',
           confirm: ''
         });
@@ -123,15 +123,15 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  /** Retorna el ID de rol según su descripción */
-  getRoleIdByDescription(description: string): number | null {
-    const role = this.roles.find(r => r.description === description);
+  /** Retorna el ID de rol según su nombre */
+  getRoleIdByName(name: string): number | null {
+    const role = this.roles.find(r => r.name === name);
     return role ? role.roleId : null;
   }
 
   /** Retorna la descripción del rol según su ID */
   getRoleDescription(roleId: number): string {
-    return this.roles.find(r => r.roleId === roleId)?.description || '';
+    return this.roles.find(r => r.roleId === roleId)?.name || '';
   }
 
   /** Manejador para error de carga de imagen */
