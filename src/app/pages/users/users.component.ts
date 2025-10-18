@@ -54,6 +54,12 @@ export class UsersComponent implements OnInit {
   private readonly categoryApi = inject(CategoryApiService);
   private readonly authService = inject(AuthService);
 
+
+  status = [
+    { valor: true, etiqueta: 'Activo' },
+    { valor: false, etiqueta: 'Inactivo' }
+  ];
+
   /**
    * Hook de inicialización
    */
@@ -82,6 +88,7 @@ export class UsersComponent implements OnInit {
       phone: [''],
       photoUrl: [''],
       categories: [[]],
+      status: [true, Validators.required],
       roles: [[], Validators.required],
       password: [''],
       confirm: ['']
@@ -134,6 +141,7 @@ export class UsersComponent implements OnInit {
       user.fullSurname.toLowerCase().includes(term) ||
       user.email.toLowerCase().includes(term) ||
       String(user.phone ?? '').toLowerCase().includes(term) ||
+        this.getStatusLabel(user.status ?? false).toLowerCase().includes(term) ||
       user.categories?.some(c => ((c as any).name ?? (c as any).description ?? '').toLowerCase().includes(term)) ||
       (user.roles?.some(r => r.name.toLowerCase().includes(term)) ?? false)
     );
@@ -156,6 +164,7 @@ export class UsersComponent implements OnInit {
       birthDate: this.toDateInput(user.birthDate as any),
       categories: (user.categories ?? []).map(c => c.categoryId),
       roles: (user.roles ?? []).map(r => r.roleId),
+      status: user.status,
       password: '',
       confirm: ''
     });
@@ -179,11 +188,8 @@ export class UsersComponent implements OnInit {
     const isEdit = !!this.idUser;
     const formValue = this.userForm.getRawValue();
 
-    const roleIds: number[] = formValue.roles ?? [];
-    const roleList: IRole[] = roleIds.map(roleId => ({
-      roleId,
-      name: this.getRoleNameById(roleId)
-    }));
+    const statusValue: boolean =
+      typeof formValue.status === 'string' ? formValue.status === 'true' : !!formValue.status;
 
     const payload: Partial<IUser> & { password?: string } = {
       photoUrl: formValue.photoUrl,
@@ -194,6 +200,7 @@ export class UsersComponent implements OnInit {
       phone: formValue.phone,
       gender: formValue.gender,
       birthDate: formValue.birthDate || null,
+      status: statusValue,
       categories: (formValue.categories ?? []).map((id: number) => ({ categoryId: id })),
       roles: (formValue.roles ?? []).map((id: number) => ({ roleId: id }))
     };
@@ -266,6 +273,7 @@ export class UsersComponent implements OnInit {
         photoUrl: '',
         categories: [],
         roles: [],
+        status: true,
         password: '',
         confirm: ''
       });
@@ -323,6 +331,11 @@ export class UsersComponent implements OnInit {
   onImgError(event: Event, defaultPath: string): void {
     const target = event.target as HTMLImageElement;
     target.src = defaultPath;
+  }
+
+  /** Devuelve la etiqueta de estado según su valor booleano */
+  getStatusLabel(value: boolean): string {
+    return value ? 'Activo' : 'Inactivo';
   }
 
   /*

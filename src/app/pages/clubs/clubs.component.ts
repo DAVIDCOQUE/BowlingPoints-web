@@ -34,7 +34,7 @@ export class ClubsComponent implements OnInit {
 
   clubForm!: FormGroup;
 
-  estados = [
+  status = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' }
   ];

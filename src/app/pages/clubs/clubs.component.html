@@ -30,7 +30,11 @@
   <!-- LISTADO DE CLUBES ----------------------------------------------->
   <div class="row">
     <div class="col-md-3" *ngFor="let club of filteredClubes">
-      <div class="card mb-4">
+      <div class="card mb-4 position-relative">
+        <!-- Píldora de estado -->
+        <span class="status-pill" [ngClass]="club.status ? 'status-active' : 'status-inactive'">
+          {{ club.status ? 'Activo' : 'Inactivo' }}
+        </span>
         <img [src]="apiUrl + club.imageUrl" (error)="onImgError($event, 'assets/img/clubDefault.png')"
           class="card-img-top mt-4" [alt]="club.name" />
 
@@ -149,8 +153,8 @@
             'is-valid': clubForm.controls['status'].valid
           }">
               <option [ngValue]="null" disabled>Seleccione un estado</option>
-              <option *ngFor="let estado of estados" [ngValue]="estado.valor">
-                {{ estado.etiqueta }}
+              <option *ngFor="let status of status" [ngValue]="status.valor">
+                {{ status.etiqueta }}
               </option>
             </select>
           </div>

@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { map, Observable } from 'rxjs';
 import { IClubs } from '../model/clubs.interface';
-import { IUser } from '../model/user.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -11,13 +10,26 @@ import { IUser } from '../model/user.interface';
 export class ClubApiService {
   private readonly baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Obtiene todos los clubes con sus miembros
    */
   getClubs(): Observable<IClubs[]> {
-    return this.http.get<IClubs[]>(`${this.baseUrl}/clubs/with-members`);
+    return this.http
+      .get<{ success: boolean; message: string; data: any[] }>(`${this.baseUrl}/clubs`)
+      .pipe(
+        map(res => (res?.data ?? []).map((c: any) => ({
+          clubId: c.clubId,
+          name: c.name,
+          foundationDate: c.foundationDate ?? c.FoundationDate ?? null,
+          city: c.city,
+          description: c.description,
+          imageUrl: c.imageUrl ?? c.imageURL ?? null,
+          status: c.status,
+          members: c.members
+        } as IClubs)))
+      );
   }
 
   /**
@@ -31,7 +43,7 @@ export class ClubApiService {
    * Crea un nuevo club con sus miembros
    */
   createClub(payload: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/clubs/create-with-members`, payload);
+    return this.http.post(`${this.baseUrl}/clubs`, payload);
   }
 
   /**
