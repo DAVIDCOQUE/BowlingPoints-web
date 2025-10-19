@@ -5,6 +5,8 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { IUser } from '../model/user.interface';
+import { ICategory } from '../model/category.interface';
+import { IRole } from '../model/role.interface';
 import { environment } from 'src/environments/environment';
 
 describe('AuthService', () => {
@@ -23,7 +25,8 @@ describe('AuthService', () => {
     email: 'john@example.com',
     phone: '123456789',
     gender: 'M',
-    roles: [{ roleId: 1, description: 'ADMIN' }],
+    categories: [] as ICategory[],
+    roles: [{ roleId: 1, name: 'ADMIN' } as IRole],
     status: true,
     createdAt: new Date('2023-01-01'),
     updatedAt: new Date('2023-01-02'),
@@ -44,13 +47,17 @@ describe('AuthService', () => {
       imports: [HttpClientTestingModule],
     });
 
+    localStorage.clear();
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
-    localStorage.clear();
   });
 
   afterEach(() => {
     httpMock.verify();
+  });
+
+  it('debería exponer environment.apiUrl en baseUrl', () => {
+    expect(service.baseUrl).toBe(environment.apiUrl);
   });
 
   it('debería crearse correctamente', () => {
@@ -139,6 +146,92 @@ describe('AuthService', () => {
   });
 
   // ✅ Pruebas para hasRole()
+
+  it('inicializa user / user$ desde localStorage cuando existe "user"', () => {
+    const saved: IUser = { ...mockUser };
+    localStorage.setItem('user', JSON.stringify(saved));
+
+    // Creamos un TestBed nuevo para forzar un nuevo AuthService
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ imports: [HttpClientTestingModule] });
+    const fresh = TestBed.inject(AuthService);
+
+    expect(fresh.user).toEqual(saved);
+
+    let emitted!: IUser;
+    fresh.user$.subscribe((v) => {
+      emitted = v as IUser;
+    });
+
+    expect(emitted).toEqual(saved);
+  });
+
+  it('user$ emite cambios cuando el subject interno hace next', (done) => {
+    const nuevo = { ...mockUser, userId: 999 };
+    (service as any).userSubject.next(nuevo);
+
+    service.user$.subscribe((val) => {
+      expect(val).toEqual(nuevo);
+      done();
+    });
+  });
+
+  it('setAuthData(): si fetchUser falla, hace console.error y no setea user', () => {
+    const logSpy = spyOn(console, 'error');
+
+    // Dispara setAuthData → internamente llama a fetchUser()
+    service.setAuthData('token-err');
+
+    // Forzamos error en /users/me
+    const req = httpMock.expectOne(`${environment.apiUrl}/users/me`);
+    expect(req.request.method).toBe('GET');
+    req.flush('Error', { status: 500, statusText: 'Server Error' });
+
+    // Se mantiene el token, pero NO se setea user, y se loguea el error
+    expect(localStorage.getItem('jwt_token')).toBe('token-err');
+    expect(service.user).toBeNull();
+    expect(logSpy).toHaveBeenCalledWith(
+      'Error al obtener usuario tras login:',
+      jasmine.anything()
+    );
+  });
+
+  it('login(): hace POST a /auth/login y retorna el token mapeado', () => {
+    let emitted: string | undefined;
+
+    service.login('john', 'secret').subscribe((t) => (emitted = t));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
+    expect(req.request.method).toBe('POST');
+    // Ojo: en el servicio es { userName: username, password }
+    expect(req.request.body).toEqual({ userName: 'john', password: 'secret' });
+
+    req.flush({ token: 'abc123' });
+
+    expect(emitted).toBe('abc123');
+  });
+
+  it('logout(): elimina jwt_token y user del storage y emite null', (done) => {
+    // Sembramos datos para comprobar que realmente los borra
+    localStorage.setItem('jwt_token', 'tkn');
+    localStorage.setItem('user', JSON.stringify({ foo: 'bar' }));
+
+    // Observamos la emisión a null
+    service.user$.subscribe((val) => {
+      if (val === null) {
+        expect(localStorage.getItem('jwt_token')).toBeNull();
+        expect(localStorage.getItem('user')).toBeNull();
+        done();
+      }
+    });
+
+    service.logout();
+  });
+
+  it('getToken(): devuelve el token almacenado', () => {
+    localStorage.setItem('jwt_token', 'stored-token');
+    expect(service.getToken()).toBe('stored-token');
+  });
 
   it('debería devolver true si el usuario tiene el rol requerido', () => {
     const payload = btoa(
