@@ -61,8 +61,8 @@
                     }}</span>
                 </div>
               </td>
-              <td>{{ tournament.tournamentName || "-" }}</td>
-              <td>{{ tournament.ambit || "-" }}</td>
+              <td>{{ tournament.name || "-" }}</td>
+              <td>{{ tournament.ambitName || "-" }}</td>
               <td>{{ tournament.location || "-" }}</td>
 
               <td>{{ getModalitiesString(tournament) }}</td>
@@ -248,21 +248,6 @@
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">Causa</label>
-                <select class="form-select" formControlName="stage" [ngClass]="{
-                    'is-invalid':
-                      tournamentForm.controls['stage'].invalid &&
-                      tournamentForm.controls['stage'].touched,
-                    'is-valid': tournamentForm.controls['stage'].valid
-                  }">
-                  <option [ngValue]="null" disabled>Causa...</option>
-                  <option *ngFor="let cause of causes" [ngValue]="cause.name">
-                    {{ cause.name }}
-                  </option>
-                </select>
-              </div>
-
-              <div class="col-md-6">
                 <label class="form-label">Estado</label>
                 <select class="form-select" formControlName="status" [ngClass]="{
                     'is-invalid':
@@ -278,6 +263,23 @@
                   </option>
                 </select>
               </div>
+
+
+              <div class="col-md-6">
+                <label class="form-label">Causa (Estado)</label>
+                <select class="form-select" formControlName="stage" [ngClass]="{
+                    'is-invalid':
+                      tournamentForm.controls['stage'].invalid &&
+                      tournamentForm.controls['stage'].touched,
+                    'is-valid': tournamentForm.controls['stage'].valid
+                  }">
+                  <option [ngValue]="null" disabled>Causa...</option>
+                  <option *ngFor="let cause of causes" [ngValue]="cause.name">
+                    {{ cause.name }}
+                  </option>
+                </select>
+              </div>
+
             </div>
           </form>
         </div>

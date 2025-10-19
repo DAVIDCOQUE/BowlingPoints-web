@@ -18,7 +18,7 @@ describe('TournamentParticipantsComponent', () => {
 
   const mockTournament: ITournament = {
     tournamentId: 1,
-    tournamentName: 'Torneo de Prueba',
+    name: 'Torneo de Prueba',
     organizer: 'Organizador',
     imageUrl: 'test.jpg',
     modalities: [],

@@ -101,14 +101,14 @@ describe('ResultsComponent', () => {
         score: 100,
         rama: 'M',
         roundNumber: 1,
-        tournament: { tournamentId: 1, tournamentName: 'Torneo A' } as any,
+        tournament: { tournamentId: 1, name: 'Torneo A' } as any,
       },
       {
         resultId: 2,
         score: 120,
         rama: 'F',
         roundNumber: 1,
-        tournament: { tournamentId: 2, tournamentName: 'Otro' } as any,
+        tournament: { tournamentId: 2, name: 'Otro' } as any,
       },
     ] as any;
 
@@ -116,7 +116,7 @@ describe('ResultsComponent', () => {
     const filtered = component.filteredResult;
 
     expect(filtered.length).toBe(1);
-    expect(filtered[0].tournament!.tournamentName).toBe('Torneo A');
+    expect(filtered[0].tournament!.name).toBe('Torneo A');
   });
 
   it('should clear filter', () => {

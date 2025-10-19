@@ -76,7 +76,7 @@ describe('TournamentlistComponent', () => {
       data: [
         {
           tournamentId: 1,
-          tournamentName: 'Torneo Nacional',
+          name: 'Torneo Nacional',
           organizer: 'Liga',
           imageUrl: 'default.jpg',
           modalities: [],
@@ -97,7 +97,7 @@ describe('TournamentlistComponent', () => {
     req2.flush(mockTorneos);
 
     expect(component.listaTorneos.length).toBe(1);
-    expect(component.listaTorneos[0].tournamentName).toBe('Torneo Nacional');
+    expect(component.listaTorneos[0].name).toBe('Torneo Nacional');
   });
 
   it('debería navegar al dashboard al llamar goBack()', () => {

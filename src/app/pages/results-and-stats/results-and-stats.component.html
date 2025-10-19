@@ -3,14 +3,14 @@
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <h3 class="text-center text-primary fw-bold mb-3">
-        Torneo: {{ selectedTournament?.tournamentName || '---' }}
+        Torneo: {{ selectedTournament?.name || '---' }}
       </h3>
 
       <div class="row g-3">
         <div class="col-md-6">
           <p><strong>Organizador:</strong> {{ selectedTournament?.organizer || '-' }}</p>
           <p><strong>Ubicación:</strong> {{ selectedTournament?.location || '-' }}</p>
-          <p><strong>Ámbito:</strong> {{ selectedTournament?.ambit || '-' }}</p>
+          <p><strong>Ámbito:</strong> {{ selectedTournament?.ambitName || '-' }}</p>
         </div>
         <div class="col-md-6">
           <p><strong>Fecha Inicio:</strong> {{ selectedTournament?.startDate | date:'dd/MM/yyyy' }}</p>

@@ -39,7 +39,7 @@ describe('ResultsAndStatsComponent', () => {
     const reqTournaments = httpMock.expectOne(`${apiUrl}/tournaments`);
     reqTournaments.flush({
       success: true,
-      data: [{ tournamentId: 1, tournamentName: 'Torneo A' }],
+      data: [{ tournamentId: 1, name: 'Torneo A' }],
     });
 
     const reqCategories = httpMock.expectOne(`${apiUrl}/categories`);
@@ -72,7 +72,7 @@ describe('ResultsAndStatsComponent', () => {
     fixture.detectChanges();
     flushInitRequests();
     expect(component.tournaments.length).toBe(1);
-    expect(component.selectedTournament?.tournamentName).toBe('Torneo A');
+    expect(component.selectedTournament?.name).toBe('Torneo A');
   });
 
   it('should filter results by category, modality and rama', () => {

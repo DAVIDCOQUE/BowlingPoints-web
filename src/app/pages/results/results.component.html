@@ -54,7 +54,7 @@
           <ng-container>
             <tr *ngFor="let result of filteredResult">
               <td>{{ result.resultId }}</td>
-              <td>{{ result.tournament?.tournamentName || '-' }}</td>
+              <td>{{ result.tournament?.name || '-' }}</td>
               <td>{{ result.category }}</td>
               <td>{{ result.modality || '-' }}</td>
               <td>{{ result.rama || '-' }}</td>
@@ -109,7 +109,7 @@
           }">
                   <option [ngValue]="null" disabled>Torneo...</option>
                   <option *ngFor="let tournament of tournaments" [ngValue]="tournament.tournamentId">
-                    {{ tournament.tournamentName }}
+                    {{ tournament.name }}
                   </option>
                 </select>
               </div>

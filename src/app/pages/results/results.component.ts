@@ -159,7 +159,7 @@ export class ResultsComponent implements OnInit {
 
     return term
       ? this.results.filter(result =>
-        result.tournament?.tournamentName?.toLowerCase().includes(term)
+        result.tournament?.name?.toLowerCase().includes(term)
       )
       : this.results;
   }

@@ -4,8 +4,8 @@ import { IModality } from './modality.interface';
 import { ITeam } from './team.interface';
 export interface ITournament {
   tournamentId: number;
-  tournamentName: string;
-  ambit?: IAmbit;
+  name: string;
+  ambitName?: IAmbit;
   startDate?: Date;
   endDate?: Date;
   status?: boolean;

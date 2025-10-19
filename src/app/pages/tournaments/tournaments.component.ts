@@ -1,8 +1,6 @@
 import { Component, ViewChild, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { environment } from '../../../environments/environment';
 import Swal from 'sweetalert2';
 
 // Interfaces
@@ -10,6 +8,9 @@ import { ITournament } from '../../model/tournament.interface';
 import { IModality } from '../../model/modality.interface';
 import { IAmbit } from 'src/app/model/ambit.interface';
 import { ICategory } from 'src/app/model/category.interface';
+
+// Servicios
+import { TournamentsService } from 'src/app/services/tournaments.service';
 
 // Validator
 import { dateRangeValidator } from 'src/app/shared/validators/date-range.validator';
@@ -20,19 +21,13 @@ import { dateRangeValidator } from 'src/app/shared/validators/date-range.validat
   styleUrls: ['./tournaments.component.css'],
 })
 export class TournamentsComponent implements OnInit {
-  /** Refs a modales */
   @ViewChild('modalTournament') modalTournamentRef!: unknown;
   @ViewChild('modalSetResultTournament') modalSetResultTournamentRef!: unknown;
 
-  /** Inyecciones modernas */
-  public readonly fb = inject(FormBuilder);
-  private readonly http = inject(HttpClient);
+  private readonly tournamentsService = inject(TournamentsService);
   private readonly modalService = inject(NgbModal);
+  public readonly fb = inject(FormBuilder);
 
-  /** API base */
-  readonly apiUrl = environment.apiUrl;
-
-  /** Estado general */
   filter = '';
   idTournament: number | null = null;
   selectedTournament: ITournament | null = null;
@@ -45,13 +40,11 @@ export class TournamentsComponent implements OnInit {
 
   tournamentForm: FormGroup = new FormGroup({});
 
-  /** Estados de torneo */
   estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' },
   ];
 
-  /** Causas de estado */
   causes = [
     { causeId: 1, name: 'Programado' },
     { causeId: 2, name: 'En curso' },
@@ -62,6 +55,10 @@ export class TournamentsComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    this.loadData();
+  }
+
+  loadData(): void {
     this.getTournaments();
     this.getModalitys();
     this.getCategories();
@@ -69,7 +66,6 @@ export class TournamentsComponent implements OnInit {
     this.getAmbits();
   }
 
-  /** Inicializa el formulario reactivo con validaciones */
   initForm(): void {
     this.tournamentForm = this.fb.group(
       {
@@ -84,72 +80,47 @@ export class TournamentsComponent implements OnInit {
         stage: ['', Validators.required],
         status: ['', Validators.required],
       },
-      {
-        validators: dateRangeValidator('startDate', 'endDate', {
-          allowEqual: true,
-        }),
-      }
+      { validators: dateRangeValidator('startDate', 'endDate', { allowEqual: true }) }
     );
   }
 
-  /** Carga tournaments desde la API */
   getTournaments(): void {
-    this.http
-      .get<{ success: boolean; message: string; data: ITournament[] }>(
-        `${this.apiUrl}/tournaments`
-      )
-      .subscribe({
-        next: (res) => (this.tournaments = res.data),
-        error: (err) => console.error('Error al cargar tournaments:', err),
-      });
+    this.tournamentsService.getTournaments().subscribe({
+      next: (res) => {
+        console.log('Respuesta de getTournaments:', res);
+        this.tournaments = res.data;
+        console.log('this.tournaments después de asignar:', this.tournaments);
+      },
+      error: (err) => console.error('Error al cargar torneos:', err),
+    });
   }
 
-  /** Carga departamentos desde API externa */
-  getDepartments(): void {
-    this.http
-      .get<{ id: number; name: string }[]>(
-        `https://api-colombia.com/api/v1/Department`
-      )
-      .subscribe({
-        next: (res) => (this.departments = res),
-        error: (err) => console.error('Error al cargar departamentos:', err),
-      });
-  }
-
-  /** Carga modalidades disponibles */
   getModalitys(): void {
-    this.http
-      .get<{ success: boolean; message: string; data: IModality[] }>(
-        `${this.apiUrl}/modalities`
-      )
-      .subscribe({
-        next: (res) => (this.modalities = res.data),
-        error: (err) => console.error('Error al cargar modalidades:', err),
-      });
+    this.tournamentsService.getModalities().subscribe({
+      next: (res) => (this.modalities = res.data),
+      error: (err) => console.error('Error al cargar modalidades:', err),
+    });
   }
 
-  /** Carga categorías disponibles */
   getCategories(): void {
-    this.http
-      .get<{ success: boolean; message: string; data: ICategory[] }>(
-        `${this.apiUrl}/categories`
-      )
-      .subscribe({
-        next: (res) => (this.categories = res.data),
-        error: (err) => console.error('Error al cargar categorías:', err),
-      });
+    this.tournamentsService.getCategories().subscribe({
+      next: (res) => (this.categories = res.data),
+      error: (err) => console.error('Error al cargar categorías:', err),
+    });
   }
 
-  /** Carga ámbitos disponibles */
   getAmbits(): void {
-    this.http
-      .get<{ success: boolean; message: string; data: IAmbit[] }>(
-        `${this.apiUrl}/ambits`
-      )
-      .subscribe({
-        next: (res) => (this.ambits = res.data),
-        error: (err) => console.error('Error al cargar ámbitos:', err),
-      });
+    this.tournamentsService.getAmbits().subscribe({
+      next: (res) => (this.ambits = res.data),
+      error: (err) => console.error('Error al cargar ámbitos:', err),
+    });
+  }
+
+  getDepartments(): void {
+    this.tournamentsService.getDepartments().subscribe({
+      next: (res) => (this.departments = res),
+      error: (err) => console.error('Error al cargar departamentos:', err),
+    });
   }
 
   /** Devuelve tournaments filtrados por término de búsqueda */
@@ -204,10 +175,10 @@ export class TournamentsComponent implements OnInit {
       onlySelf: false,
       emitEvent: false,
     });
+
     this.openModal(this.modalTournamentRef);
   }
 
-  /** Guarda un torneo nuevo o actualizado */
   saveForm(): void {
     if (this.tournamentForm.invalid) {
       this.tournamentForm.markAllAsTouched();
@@ -216,21 +187,13 @@ export class TournamentsComponent implements OnInit {
 
     const payload = this.tournamentForm.value;
     const isEdit = !!this.idTournament;
-
     const request = isEdit
-      ? this.http.put(
-          `${this.apiUrl}/tournaments/${this.idTournament}`,
-          payload
-        )
-      : this.http.post(`${this.apiUrl}/tournaments`, payload);
+      ? this.tournamentsService.updateTournament(this.idTournament!, payload)
+      : this.tournamentsService.createTournament(payload);
 
     request.subscribe({
       next: () => {
-        Swal.fire(
-          'Éxito',
-          isEdit ? 'Torneo actualizado' : 'Torneo creado',
-          'success'
-        );
+        Swal.fire('Éxito', isEdit ? 'Torneo actualizado' : 'Torneo creado', 'success');
         this.getTournaments();
         this.closeModal();
       },
@@ -241,7 +204,6 @@ export class TournamentsComponent implements OnInit {
     });
   }
 
-  /** Elimina un torneo con confirmación */
   deleteTournament(id: number): void {
     Swal.fire({
       title: '¿Eliminar torneo?',
@@ -254,7 +216,7 @@ export class TournamentsComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`${this.apiUrl}/tournaments/${id}`).subscribe({
+        this.tournamentsService.deleteTournament(id).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'Torneo eliminado correctamente', 'success');
             this.getTournaments();
