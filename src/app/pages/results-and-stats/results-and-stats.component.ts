@@ -45,7 +45,7 @@ export class ResultsAndStatsComponent implements OnInit {
   constructor(
     private readonly http: HttpClient,
     private readonly modalService: NgbModal
-  ) {}
+  ) { }
 
   // ----------------------------------------------------------
   // Ciclo de vida
@@ -108,8 +108,8 @@ export class ResultsAndStatsComponent implements OnInit {
   // ----------------------------------------------------------
   onFilterChange(): void {
     this.filteredResults = this.results.filter((r) =>
-      (!this.selectedCategory || r.category?.categoryId === Number(this.selectedCategory)) &&
-      (!this.selectedModality || r.modality?.modalityId === Number(this.selectedModality)) &&
+      // (!this.selectedCategory || r.category?.categoryId === Number(this.selectedCategory)) &&
+      // (!this.selectedModality || r.modality?.modalityId === Number(this.selectedModality)) &&
       (!this.selectedRama || r.rama?.toLowerCase() === this.selectedRama.toLowerCase())
     );
   }

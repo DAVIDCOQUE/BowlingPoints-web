@@ -4,20 +4,34 @@ import { ITournament } from './tournament.interface';
 import { IModality } from './modality.interface';
 import { IUser } from './user.interface';
 export interface IResults {
-
   resultId: number;
   score: number;
-  laneNumber?: number;
-  lineNumber?: number;
-  rama: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  deletedAt?: Date;
-  category?: ICategory;
-  person?: IUser;
-  team?: ITeam;
-  roundNumber: number;
-  tournament?: ITournament;
-  modality?: IModality;
 
+  /** Datos de pista y línea */
+  laneNumber: number;
+  lineNumber: number;
+
+  /** Rama (masculino/femenino) */
+  rama: string;
+
+  /** IDs relacionales */
+  personId?: number | null;
+  teamId?: number | null;
+  tournamentId?: number | null;
+  categoryId?: number | null;
+  modalityId?: number | null;
+  roundId?: number | null;
+
+  /** Nombres descriptivos (para mostrar sin hacer joins) */
+  personName?: string | null;
+  teamName?: string | null;
+  tournamentName?: string | null;
+  categoryName?: string | null;
+  modalityName?: string | null;
+  roundNumber?: number | null;
+
+  /** Fechas opcionales (si el backend las envía) */
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  deletedAt?: Date | string;
 }

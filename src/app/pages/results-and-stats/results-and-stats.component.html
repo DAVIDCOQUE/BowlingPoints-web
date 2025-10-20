@@ -92,13 +92,13 @@
           <tbody>
             <tr *ngFor="let result of filteredResults">
               <td>{{ result.resultId }}</td>
-              <td>{{ result.tournament || '-' }}</td>
-              <td>{{ result.category || '-' }}</td>
-              <td>{{ result.modality?.name || '-' }}</td>
+              <td>{{ result.tournamentName || '-' }}</td>
+              <td>{{ result.categoryName || '-' }}</td>
+              <td>{{ result.modalityName || '-' }}</td>
               <td>{{ result.rama || '-' }}</td>
               <td>{{ result.roundNumber || '-' }}</td>
-              <td>{{ result.person || '-' }}</td>
-              <td>{{ result.team || '-' }}</td>
+              <td>{{ result.personName || '-' }}</td>
+              <td>{{ result.teamName || '-' }}</td>
               <td>{{ result.laneNumber || '-' }}</td>
               <td>{{ result.lineNumber || '-' }}</td>
               <td>{{ result.score || '-' }}</td>
