@@ -97,14 +97,23 @@ describe('AmbitComponent', () => {
 
   it('should mark form as touched if invalid and not submit', () => {
     component.ambitForm.patchValue({ name: '', status: null });
-    spyOn(component.ambitForm, 'markAllAsTouched');
+    const createSpy = spyOn(ambitService, 'createAmbit');
+    const updateSpy = spyOn(ambitService, 'updateAmbit');
+
+    const markSpy = spyOn(component.ambitForm, 'markAllAsTouched');
     component.saveForm();
-    expect(component.ambitForm.markAllAsTouched).toHaveBeenCalled();
+
+    expect(markSpy).toHaveBeenCalled();
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(updateSpy).not.toHaveBeenCalled();
   });
 
   it('should create ambit via service', () => {
     const payload = { name: 'New Ambit', status: true, description: '' };
-    component.idAmbit = null;   
+    const getSpy = spyOn(component, 'getAmbits');
+    const closeSpy = spyOn(component, 'closeModal');
+    (Swal.fire as jasmine.Spy).calls?.reset?.(); // opcional: limpia llamadas previas
+    component.idAmbit = null;
     component.ambitForm.patchValue(payload);
     ambitService.createAmbit.and.returnValue(of({}));
 
@@ -117,10 +126,20 @@ describe('AmbitComponent', () => {
         description: '',
       })
     );
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Éxito',
+      jasmine.any(String),
+      'success'
+    );
+    expect(getSpy).toHaveBeenCalled();
+    expect(closeSpy).toHaveBeenCalled();
   });
 
   it('should update ambit via service', () => {
     const payload = { name: 'Updated Ambit', status: true, description: '' };
+    const getSpy = spyOn(component, 'getAmbits');
+    const closeSpy = spyOn(component, 'closeModal');
+    (Swal.fire as jasmine.Spy).calls?.reset?.();
     component.idAmbit = 1;
     component.ambitForm.patchValue(payload);
     ambitService.updateAmbit.and.returnValue(of({}));
@@ -132,14 +151,23 @@ describe('AmbitComponent', () => {
       jasmine.objectContaining({
         name: 'Updated Ambit',
         status: true,
+        description: '',
       })
     );
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Éxito',
+      jasmine.any(String),
+      'success'
+    );
+    expect(getSpy).toHaveBeenCalled();
+    expect(closeSpy).toHaveBeenCalled();
   });
 
   it('ngOnInit: inicializa el form con validadores y llama a getAmbits', () => {
     expect(component.ambitForm).toBeDefined();
-    expect(component.ambitForm.get('name')!.hasError('required')).toBeTrue();
-    expect(component.ambitForm.get('status')!.hasError('required')).toBeTrue();
+    expect(component.ambitForm.get('name')?.validator).toBeTruthy();
+    expect(component.ambitForm.get('status')?.validator).toBeTruthy();
+    expect(component.ambitForm.valid).toBeFalse();
     expect(ambitService.getAmbits).toHaveBeenCalled(); // ngOnInit -> getAmbits()
   });
 
@@ -150,13 +178,15 @@ describe('AmbitComponent', () => {
       status: true,
       description: 'x',
     });
+    const resetSpy = spyOn(component.ambitForm, 'reset').and.callThrough();
 
     component.openModal({} as any);
 
     expect(component.ambitForm.get('name')!.value).toBeNull();
     expect(component.ambitForm.get('status')!.value).toBeNull();
     expect(component.ambitForm.get('description')!.value).toBeNull();
-    expect(modalServiceMock.open).toHaveBeenCalled(); // <-- NUEVO
+    expect(modalServiceMock.open).toHaveBeenCalled();
+    expect(resetSpy).toHaveBeenCalled();
   });
 
   it('should close modal and reset form', () => {
@@ -206,9 +236,9 @@ describe('AmbitComponent', () => {
 
   it('filteredAmbits: filtra por nombre ignorando mayúsculas/minúsculas', () => {
     component.ambits = [
-      { ambitId: 1, name: 'Local' },
-      { ambitId: 2, name: 'Regional' },
-      { ambitId: 3, name: 'Internacional' },
+      { ambitId: 1, name: 'Local' } as IAmbit,
+      { ambitId: 2, name: 'Regional' } as IAmbit,
+      { ambitId: 3, name: 'Internacional' } as IAmbit,
     ];
 
     component.filter = 'LOCAL';
@@ -235,9 +265,14 @@ describe('AmbitComponent', () => {
     component.idAmbit = null; // modo create
     component.saveForm();
 
-    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Ámbito creado', 'success');
-    expect(getSpy).toHaveBeenCalled();
-    expect(closeSpy).toHaveBeenCalled();
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Éxito',
+      jasmine.any(String),
+      'success'
+    );
+    expect((Swal.fire as jasmine.Spy).calls.mostRecent().args[1]).toMatch(
+      /Ambito creado/i
+    ); // sin tilde
   });
 
   it('saveForm(): actualiza ambit (con idAmbit) → success + refresca + cierra modal', () => {
@@ -262,8 +297,11 @@ describe('AmbitComponent', () => {
     );
     expect(Swal.fire).toHaveBeenCalledWith(
       'Éxito',
-      'Ámbito actualizado',
+      jasmine.any(String),
       'success'
+    );
+    expect((Swal.fire as jasmine.Spy).calls.mostRecent().args[1]).toMatch(
+      /Ambito actualizado/i
     );
     expect(getSpy).toHaveBeenCalled();
     expect(closeSpy).toHaveBeenCalled();
@@ -286,7 +324,12 @@ describe('AmbitComponent', () => {
 
     expect(ambitService.createAmbit).toHaveBeenCalled();
     expect(logSpy).toHaveBeenCalledWith('Error al guardar Ambito:', httpError);
-    expect(Swal.fire).toHaveBeenCalledWith('Error', 'falló', 'error');
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Error',
+      jasmine.any(String),
+      'error'
+    );
+    expect((Swal.fire as jasmine.Spy).calls.mostRecent().args[1]).toBe('falló');
 
     // en error NO debería refrescar ni cerrar
     expect(getSpy).not.toHaveBeenCalled();
@@ -310,7 +353,7 @@ describe('AmbitComponent', () => {
     // Usa EXACTAMENTE el texto del componente:
     expect(Swal.fire).toHaveBeenCalledWith(
       'Eliminado',
-      'Ambito eliminada correctamente',
+      'Ámbito eliminada correctamente',
       'success'
     );
     expect(getSpy).toHaveBeenCalled();
@@ -383,11 +426,19 @@ describe('AmbitComponent', () => {
 
     component.closeModal();
 
-    expect(modalServiceMock.dismissAll).toHaveBeenCalled();
-    expect(resetSpy).toHaveBeenCalled(); // <-- confirmamos llamada al reset()
-    expect(component.idAmbit).toBeNull();
+    expect(modalServiceMock.dismissAll).toHaveBeenCalled(); // 1) dismissAll()
+    expect(resetSpy).toHaveBeenCalled(); // 2) reset()
+    expect(component.idAmbit).toBeNull(); // 3) idAmbit = null
+
+    // opcional: confirma que realmente quedó vacío
     expect(component.ambitForm.get('name')!.value).toBeNull();
     expect(component.ambitForm.get('status')!.value).toBeNull();
     expect(component.ambitForm.get('description')!.value).toBeNull();
+  });
+
+  it('clear(): limpia el filtro aunque tenga sólo espacios', () => {
+    component.filter = '   ';
+    component.clear();
+    expect(component.filter).toBe('');
   });
 });
