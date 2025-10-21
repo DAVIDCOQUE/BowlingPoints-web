@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { AmbitApiService } from './ambit-api.service';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { environment } from 'src/environments/environment';
 import { IAmbit } from 'src/app/model/ambit.interface';
 
@@ -13,7 +16,7 @@ describe('AmbitApiService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [AmbitApiService]
+      providers: [AmbitApiService],
     });
 
     service = TestBed.inject(AmbitApiService);
@@ -32,7 +35,7 @@ describe('AmbitApiService', () => {
         description: 'First ambit',
         status: true,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       {
         ambitId: 2,
@@ -40,8 +43,8 @@ describe('AmbitApiService', () => {
         description: 'Second ambit',
         status: false,
         createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     ];
 
     service.getAmbits().subscribe((ambits) => {
@@ -51,18 +54,29 @@ describe('AmbitApiService', () => {
 
     const req = httpMock.expectOne(apiUrl);
     expect(req.request.method).toBe('GET');
-    req.flush({
-      success: true,
-      message: 'Ambits fetched successfully',
-      data: mockAmbits
+    req.flush({ success: true, message: 'ok', data: mockAmbits });
+  });
+
+  it('debe propagar error HTTP en getAmbits', () => {
+    let captured: any;
+    service.getAmbits().subscribe({
+      next: () => fail('debería fallar'),
+      error: (e) => (captured = e),
     });
+
+    const req = httpMock.expectOne(apiUrl);
+    expect(req.request.method).toBe('GET');
+    req.flush({ message: 'boom' }, { status: 500, statusText: 'Server Error' });
+
+    expect(captured).toBeTruthy();
+    expect(captured.status).toBe(500);
   });
 
   it('debe crear un ambit (createAmbit)', () => {
     const payload: Partial<IAmbit> = {
       name: 'Nuevo Ámbito',
       description: 'Descripción breve',
-      status: true
+      status: true,
     };
 
     service.createAmbit(payload).subscribe((response) => {
@@ -79,7 +93,7 @@ describe('AmbitApiService', () => {
     const id = 3;
     const payload: Partial<IAmbit> = {
       name: 'Ambit actualizado',
-      status: false
+      status: false,
     };
 
     service.updateAmbit(id, payload).subscribe((response) => {
@@ -96,11 +110,11 @@ describe('AmbitApiService', () => {
     const id = 4;
 
     service.deleteAmbit(id).subscribe((response) => {
-      expect(response).toEqual({ success: true });
+      expect(response).toBeUndefined(); // sin cuerpo -> undefined
     });
 
     const req = httpMock.expectOne(`${apiUrl}/${id}`);
     expect(req.request.method).toBe('DELETE');
-    req.flush({ success: true });
+    req.flush(null, { status: 204, statusText: 'No Content' });
   });
 });
