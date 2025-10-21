@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TournamentSummaryComponent } from './rtournament-summary.component';
+import { TournamentSummaryComponent } from './tournament-summary.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';

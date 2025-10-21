@@ -3,8 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
 
-import { IClubs } from 'src/app/model/clubs.interface';
-import { IUser } from 'src/app/model/user.interface';
 import { ITournament } from 'src/app/model/tournament.interface';
 import { IAmbit } from 'src/app/model/ambit.interface';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -20,17 +18,12 @@ export class DashboardComponent {
   /** URL base de la API */
   public readonly apiUrl = environment.apiUrl;
 
-  /** Datos generales del dashboard */
-  dashboard: any;
-
   /** Listado de torneos activos */
-  tournaments: ITournament[] = [];
-
-  /** Listado de clubes destacados */
-  clubs: IClubs[] = [];
+  inProgressTournaments: ITournament[] = [];
+  scheduledOrPostponedTournaments: ITournament[] = [];
 
   /** Listado de jugadores destacados */
-  players: IUserResult[] = [];
+  topPlayers: IUserResult[] = [];
 
   /** Listado de ámbitos disponibles */
   ambits: IAmbit[] = [];
@@ -54,11 +47,12 @@ export class DashboardComponent {
       .subscribe({
         next: res => {
           const data = res.data;
-          this.dashboard = data;
-          this.tournaments = data.activeTournaments ?? [];
-          this.clubs = data.topClubs ?? [];
-          this.players = data.topPlayers ?? [];
+          this.inProgressTournaments = data.inProgressTournaments ?? [];
+          this.scheduledOrPostponedTournaments = data.scheduledOrPostponedTournaments ?? [];
+          this.topPlayers = data.topPlayers ?? [];
           this.ambits = data.ambits ?? [];
+          console.log('Dashboard data:', data);
+
         },
         error: err => {
           console.error('Error al cargar datos del dashboard:', err);

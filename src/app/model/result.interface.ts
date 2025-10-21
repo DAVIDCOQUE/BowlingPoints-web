@@ -12,7 +12,8 @@ export interface IResults {
   lineNumber: number;
 
   /** Rama (masculino/femenino) */
-  rama: string;
+  branch: string;
+  branchId: number;
 
   /** IDs relacionales */
   personId?: number | null;

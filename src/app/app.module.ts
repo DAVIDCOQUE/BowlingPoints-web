@@ -12,7 +12,7 @@ import { MaterialModule } from '../app/material.module';
 import { PlayersComponent } from './pages/players/players.component';
 import { FooterComponent } from './layouts/footer/footer.component';
 import { ProfileComponent } from './pages/profile/profile.component';
-import { TournamentSummaryComponent } from './pages/tournament-history/tournament-summary/rtournament-summary.component';
+import { TournamentSummaryComponent } from './pages/tournament-history/tournament-summary/tournament-summary.component';
 import { TournamentDetailsComponent } from './pages/tournament-history/tournament-details/tournament-details.component';
 import { PlayerDetailsComponent } from './pages/tournament-history/player-details/player-details.component';
 import { TournamentlistComponent } from './pages/tournament-history/tournament-list/tournament-list.component';
@@ -44,7 +44,7 @@ import { AmbitComponent } from './pages/ambit/ambit.component';
 import { ResultsComponent } from './pages/results/results.component';
 import { LoadingComponent } from './components/loading/loading.component';
 import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
-
+import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
 
 @NgModule({
   declarations: [
@@ -74,6 +74,7 @@ import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-
     ResultsComponent,
     LoadingComponent,
     ResultsAndStatsComponent,
+    TournamentResultComponent,
     TournamentParticipantsComponent
   ],
   imports: [

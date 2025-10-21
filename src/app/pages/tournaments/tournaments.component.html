@@ -40,6 +40,7 @@
             <th>Lugar</th>
             <th>Modalidad</th>
             <th>Categoria</th>
+            <th>Ramas</th>
             <th>Estado</th>
             <th>Aciones</th>
           </tr>
@@ -67,6 +68,7 @@
 
               <td>{{ getModalitiesString(tournament) }}</td>
               <td>{{ getCategoriesString(tournament) }}</td>
+              <td>{{ getBranchesString(tournament) }}</td>
               <td>
                 {{ tournament.stage || "-" }}
                 <span class="ms-2 fw-semibold" [ngClass]="tournament.status ? 'text-success' : 'text-danger'">
@@ -78,7 +80,7 @@
                 <div class="d-flex justify-content-center gap-2">
                   <!-- Botón Cargar resultados - Rojo suave -->
                   <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                    routerLink="/torneos-result" style="
+                    [routerLink]="['/tournament-results', tournament.tournamentId]" style="
                       background-color: rgba(13, 180, 75, 0.1);
                       color: #28a745;
                       border-radius: 0.5rem;
@@ -245,6 +247,18 @@
                     {{ department.name }}
                   </option>
                 </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Ramas</label>
+                <ng-select [items]="branches" bindLabel="name" bindValue="branchId" [multiple]="true"
+                  formControlName="branchIds" [ngClass]="{
+                        'is-invalid':
+                          tournamentForm.controls['branchIds'].invalid &&
+                          tournamentForm.controls['branchIds'].touched,
+                        'is-valid': tournamentForm.controls['branchIds'].valid
+                        }">
+                </ng-select>
               </div>
 
               <div class="col-md-6">

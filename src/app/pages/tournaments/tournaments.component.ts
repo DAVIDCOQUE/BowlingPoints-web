@@ -14,6 +14,8 @@ import { TournamentsService } from 'src/app/services/tournaments.service';
 
 // Validator
 import { dateRangeValidator } from 'src/app/shared/validators/date-range.validator';
+import { BranchesService } from 'src/app/services/branch-api.service';
+import { IBranch } from 'src/app/model/branch.interface';
 
 @Component({
   selector: 'app-tournaments',
@@ -25,6 +27,7 @@ export class TournamentsComponent implements OnInit {
   @ViewChild('modalSetResultTournament') modalSetResultTournamentRef!: unknown;
 
   private readonly tournamentsService = inject(TournamentsService);
+  private readonly branchesService = inject(BranchesService);
   private readonly modalService = inject(NgbModal);
   public readonly fb = inject(FormBuilder);
 
@@ -35,6 +38,7 @@ export class TournamentsComponent implements OnInit {
   tournaments: ITournament[] = [];
   modalities: IModality[] = [];
   categories: ICategory[] = [];
+  branches: IBranch[] = [];
   ambits: IAmbit[] = [];
   departments: { id: number; name: string }[] = [];
 
@@ -61,6 +65,7 @@ export class TournamentsComponent implements OnInit {
   loadData(): void {
     this.getTournaments();
     this.getModalitys();
+    this.getBranches();
     this.getCategories();
     this.getDepartments();
     this.getAmbits();
@@ -76,6 +81,7 @@ export class TournamentsComponent implements OnInit {
         startDate: ['', Validators.required],
         endDate: ['', Validators.required],
         ambitId: ['', Validators.required],
+        branchIds: ['', Validators.required],
         location: [''],
         stage: ['', Validators.required],
         status: ['', Validators.required],
@@ -113,6 +119,16 @@ export class TournamentsComponent implements OnInit {
     this.tournamentsService.getAmbits().subscribe({
       next: (res) => (this.ambits = res.data),
       error: (err) => console.error('Error al cargar ámbitos:', err),
+    });
+  }
+
+  getBranches(): void {
+    this.branchesService.getAll().subscribe({
+      next: (res) => {
+        console.log('Respuesta de getBranches - data:', res);
+        this.branches = res;
+      },
+      error: (err) => console.error('Error al cargar ramas:', err),
     });
   }
 
@@ -154,6 +170,11 @@ export class TournamentsComponent implements OnInit {
       (tournament as any)?.ambit ??
       '';
 
+    // Branch puede venir como objeto o como id
+    const branchIds = (tournament as any)?.branches
+      ? (tournament as any).branches.map((b: any) => b?.branchId ?? b)
+      : (tournament as any)?.branchIds ?? [];
+
     // name puede venir como name o tournamentName
     const name =
       (tournament as any)?.name ?? (tournament as any)?.tournamentName ?? '';
@@ -166,6 +187,7 @@ export class TournamentsComponent implements OnInit {
       startDate: this.toYMDStrict((tournament as any)?.startDate) ?? '',
       endDate: this.toYMDStrict((tournament as any)?.endDate) ?? '',
       ambitId,
+      branchIds,
       location: tournament?.location ?? '',
       stage: tournament?.stage ?? '',
       status: tournament?.status ?? false,
@@ -185,7 +207,16 @@ export class TournamentsComponent implements OnInit {
       return;
     }
 
-    const payload = this.tournamentForm.value;
+    const raw = this.tournamentForm.value;
+    const payload = {
+      ...raw,
+      ambitId:
+        raw.ambitId !== null && raw.ambitId !== undefined && raw.ambitId !== ''
+          ? Number(raw.ambitId)
+          : raw.ambitId,
+      branchIds: raw.branchIds?.map((id: any) => Number(id)) ?? [],
+    };
+
     const isEdit = !!this.idTournament;
     const request = isEdit
       ? this.tournamentsService.updateTournament(this.idTournament!, payload)
@@ -263,6 +294,11 @@ export class TournamentsComponent implements OnInit {
   /** Retorna string de categorías */
   getCategoriesString(tournament: ITournament): string {
     return tournament?.categories?.map((c) => c.name).join(', ') || '-';
+  }
+
+  /** Retorna string de ramas */
+  getBranchesString(tournament: ITournament): string {
+    return tournament?.branches?.map((b) => b.name).join(', ') || '-';
   }
 
   /**

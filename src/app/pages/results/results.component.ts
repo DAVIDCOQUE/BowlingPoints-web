@@ -35,7 +35,6 @@ export class ResultsComponent implements OnInit {
   public tournaments: ITournament[] = [];
   public categories: ICategory[] = [];
   public modalities: IModality[] = [];
-  public rounds: IRound[] = [];
   public persons: IUser[] = [];
   public teams: ITeam[] = [];
 
@@ -44,6 +43,8 @@ export class ResultsComponent implements OnInit {
 
   public readonly laneNumbers = Array.from({ length: 12 }, (_, i) => ({ laneNumber: i + 1 }));
   public readonly lineNumbers = Array.from({ length: 12 }, (_, i) => ({ lineNumber: i + 1 }));
+
+  roundNumbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   ngOnInit(): void {
     this.initForm();
@@ -69,7 +70,6 @@ export class ResultsComponent implements OnInit {
     this.getResults();
     this.getTournaments();
     this.getModalitys();
-    this.getRounds();
     this.getUsers();
     this.getTeams();
     this.getCategories();
@@ -97,12 +97,6 @@ export class ResultsComponent implements OnInit {
   private getModalitys(): void {
     this.resultsService.getModalities().subscribe({
       next: (res) => (this.modalities = res.data),
-    });
-  }
-
-  private getRounds(): void {
-    this.resultsService.getRounds().subscribe({
-      next: (res) => (this.rounds = res.data),
     });
   }
 
