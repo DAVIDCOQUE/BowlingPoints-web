@@ -18,6 +18,9 @@ import { ITournamentRegistration } from 'src/app/model/tournament-registration.i
 import { TournamentsService } from 'src/app/services/tournaments.service';
 import { UserApiService } from 'src/app/services/user-api.service';
 import { ITeam } from 'src/app/model/team.interface';
+import { ResultsService } from 'src/app/services/results.service';
+import { IBranch } from 'src/app/model/branch.interface';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-tournament-result',
@@ -37,13 +40,14 @@ export class TournamentResultComponent implements OnInit {
   selectedTournament: ITournament | null = null;
   categories: ICategory[] = [];
   modalities: IModality[] = [];
-  branches: any[] = [];
+  branches: IBranch[] = [];
   teams: ITeam[] = [];
 
 
   // Jugadores registrados
   players: IUser[] = [];
   registrations: ITournamentRegistration[] = [];
+  filteredRegistrations: ITournamentRegistration[] = [];
   idPlayer: number | null = null;
   playerForm: FormGroup = new FormGroup({});
 
@@ -58,9 +62,11 @@ export class TournamentResultComponent implements OnInit {
   roundNumbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   // Filtros resultados
-  selectedCategory = '';
-  selectedModality = '';
   selectedBranch = '';
+  selectedRound: number | null = null;
+
+  // Filtro jugadores
+  selectedBranchPlayer = '';
 
   // Extras
   readonly estados = [
@@ -77,6 +83,8 @@ export class TournamentResultComponent implements OnInit {
   private readonly modalService = inject(NgbModal);
   private readonly userApiService = inject(UserApiService);
   private readonly tournamentsService = inject(TournamentsService);
+  private readonly resultsService = inject(ResultsService);
+  private readonly location = inject(Location);
 
   // ================== CICLO DE VIDA ==================
   ngOnInit(): void {
@@ -134,7 +142,11 @@ export class TournamentResultComponent implements OnInit {
     this.http
       .get<ITournamentRegistration[]>(`${this.apiUrl}/registrations/tournament/${this.tournamentId}`)
       .subscribe({
-        next: (res) => (this.registrations = res || []),
+        next: (res) => {
+          this.registrations = res || [];
+          this.filteredRegistrations = this.registrations;
+          this.onFilterPlayerChange();
+        },
         error: (err) => {
           console.error('Error al cargar jugadores registrados:', err);
           Swal.fire('Error', 'No se pudieron cargar los jugadores registrados', 'error');
@@ -161,7 +173,7 @@ export class TournamentResultComponent implements OnInit {
       categoryId: [null, Validators.required],
       modalityId: [null, Validators.required],
       branchId: [null, Validators.required],
-      roundId: [null, Validators.required],
+      roundNumber: [null, Validators.required],
       laneNumber: [null, Validators.required],
       lineNumber: [null, Validators.required],
       score: [null, Validators.required],
@@ -170,13 +182,13 @@ export class TournamentResultComponent implements OnInit {
 
   openModal(content: TemplateRef<unknown>): void {
     if (content === this.modalPlayerRef) {
-      this.initPlayerForm();
-      this.idPlayer = null;
+      if (!this.idPlayer) this.initPlayerForm(); // Solo si es nuevo
     }
+
     if (content === this.modalResultRef) {
-      this.initResultForm();
-      this.idResult = null;
+      if (!this.idResult) this.initResultForm(); // Solo si es nuevo
     }
+
     this.modalService.open(content, { size: 'lg' });
   }
 
@@ -259,18 +271,29 @@ export class TournamentResultComponent implements OnInit {
   loadResults(): void {
     if (!this.tournamentId) return;
 
-    this.http
-      .get<{ success: boolean; data: IResults[] }>(`${this.apiUrl}/results/tournament/${this.tournamentId}`)
+    const selectedBranchId = this.selectedBranch
+      ? this.branches.find(b => b.name.toLowerCase() === this.selectedBranch.toLowerCase())?.branchId
+      : undefined;
+
+    const selectedRoundNumber = this.selectedRound ?? undefined;
+
+    this.resultsService.getResultsFiltered(this.tournamentId, selectedBranchId, selectedRoundNumber)
       .subscribe({
-        next: res => {
-          this.results = res.data ?? [];
+        next: (res) => {
+          this.results = res ?? [];
           this.filteredResults = this.results;
         },
-        error: err => console.error('Error al cargar resultados:', err)
+        error: (err) => {
+          console.error('Error al cargar resultados:', err);
+          Swal.fire('Error', 'No se pudieron cargar los resultados', 'error');
+        }
       });
   }
 
+
   editResult(result: IResults): void {
+
+    console.log('Result recibido:', result);
     this.idResult = result.resultId ?? null;
     this.resultForm.patchValue({
       personId: result.personId ?? null,
@@ -279,7 +302,7 @@ export class TournamentResultComponent implements OnInit {
       categoryId: result.categoryId,
       modalityId: result.modalityId,
       branchId: result.branchId ?? null,
-      roundId: result.roundId,
+      roundNumber: result.roundNumber ?? null,
       laneNumber: result.laneNumber,
       lineNumber: result.lineNumber,
       score: result.score,
@@ -346,11 +369,27 @@ export class TournamentResultComponent implements OnInit {
   // ================== FILTROS ==================
 
   onFilterChange(): void {
-    const branch = (this.selectedBranch || '').toLowerCase();
+    this.loadResults();
+  }
 
-    this.filteredResults = this.results.filter(r =>
-      (!branch || (r.branch || '').toLowerCase() === branch)
-    );
+  clearFilters(): void {
+    this.selectedBranch = '';
+    this.selectedRound = null;
+    this.onFilterChange();
+  }
+
+  onFilterPlayerChange(): void {
+    const branch = (this.selectedBranchPlayer || '').toLowerCase().trim();
+
+    this.filteredRegistrations = this.registrations.filter(p => {
+      const matchBranch = !branch || (p.branchName || '').toLowerCase().includes(branch);
+      return matchBranch;
+    });
+  }
+
+  clearPlayerFilters(): void {
+    this.selectedBranchPlayer = '';
+    this.onFilterPlayerChange();
   }
 
   // ================== UTILIDADES ==================
@@ -375,5 +414,13 @@ export class TournamentResultComponent implements OnInit {
       text: `Archivo: ${file.name}`,
       confirmButtonText: 'Aceptar',
     });
+  }
+
+  onImgError(event: Event, fallback: string): void {
+    (event.target as HTMLImageElement).src = fallback;
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

@@ -93,7 +93,7 @@ describe('ResultsAndStatsComponent', () => {
 
     component.selectedCategory = '1';
     component.selectedModality = '1';
-    component.selectedRama = 'Masculina';
+    component.selectedBranch = 'Masculina';
 
     component.onFilterChange();
 

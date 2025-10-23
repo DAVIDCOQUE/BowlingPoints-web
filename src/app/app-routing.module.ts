@@ -27,6 +27,7 @@ import { ResultsComponent } from './pages/results/results.component';
 import { TournamentParticipantsComponent } from './pages/tournament-history/tournament-participants/tournament-participants.component';
 import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
 import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
+import { TournamentDetailsSummaryComponent } from './pages/tournament-history/tournament-details-summary/tournament-details-summary.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -41,6 +42,7 @@ export const routes: Routes = [
       { path: 'tournament-list/:ambitId', component: TournamentlistComponent },
       { path: 'tournament-summary/:tournamentId', component: TournamentSummaryComponent },
       { path: 'tournament-details/:tournamentId/:modalityId', component: TournamentDetailsComponent },
+      { path: 'tournament-details-summary/:tournamentId', component: TournamentDetailsSummaryComponent },
       { path: 'tournament-participants/:tournamentId', component: TournamentParticipantsComponent },
       { path: 'player-details/:userId', component: PlayerDetailsComponent },
 

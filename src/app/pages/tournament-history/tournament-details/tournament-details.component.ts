@@ -3,21 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { environment } from 'src/environments/environment';
-
-interface ITournamentSummary {
-  tournamentId: number;
-  tournamentName: string;
-  // Agrega más propiedades si existen en la respuesta
-}
-
-interface IPlayerScore {
-  personId: number;
-  playerName: string;
-  clubName: string;
-  scores: number[];
-  total: number;
-  promedio: number;
-}
+import {
+  IPlayerScore,
+  IModality,
+  IRound,
+  ITournamentSummary,
+  IHighestLine,
+  IResultsResponse
+} from 'src/app/model/result-details.interface';
 
 @Component({
   selector: 'app-tournament-details',
@@ -26,70 +19,97 @@ interface IPlayerScore {
 })
 export class TournamentDetailsComponent implements OnInit {
 
-  // Inyecciones modernas
-  public readonly apiUrl = environment.apiUrl;
+  // Inyecciones
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
 
-  // Parámetros extraídos desde la URL
-  public readonly tournamentId: number = Number(inject(ActivatedRoute).snapshot.paramMap.get('tournamentId'));
-  public readonly modalityId: number = Number(inject(ActivatedRoute).snapshot.paramMap.get('modalityId'));
+  // Parámetros de ruta
+  public readonly tournamentId: number = Number(this.route.snapshot.paramMap.get('tournamentId'));
+  public modalityId: number = Number(this.route.snapshot.paramMap.get('modalityId'));
+  public roundNumber: number = 1;
 
-  // Datos del torneo
-  public resumenTorneo: ITournamentSummary | null = null;
+  // Datos
   public players: IPlayerScore[] = [];
+  public modalities: IModality[] = [];
+  public rounds: number[] = [];
+  public resumenTorneo: ITournamentSummary | null = null;
+
+  public promedioRonda: number = 0;
+  public promediosPorLinea: Record<string, number> = {};
+  public mayorLinea: IHighestLine | null = null;
+
+  public nombreModalidad: string = '';
+
   public maxJuegos: number = 0;
 
   ngOnInit(): void {
-    this.getResumenTorneo();
-    this.getDetalleTorneo();
+    this.loadResultsTable();
+    this.loadResultsTable2();
   }
 
   /**
-   * Consulta el resumen del torneo
+   * Carga los resultados desde la API
    */
-  getResumenTorneo(): void {
-    this.http.get<{ success: boolean; data: ITournamentSummary }>(
-      `${environment.apiUrl}/results/tournament-summary?tournamentId=${this.tournamentId}`
-    ).subscribe({
-      next: (res) => this.resumenTorneo = res.data,
-      error: err => console.error('Error cargando resumen del torneo:', err)
-    });
-  }
+  loadResultsTable(): void {
+    const url = `${environment.apiUrl}/results/tournament-table?tournamentId=${this.tournamentId}&modalityId=${this.modalityId}&roundNumber=${this.roundNumber}`;
 
-  /**
-   * Consulta los resultados por modalidad y calcula el máximo de juegos
-   */
-  getDetalleTorneo(): void {
-    this.http.get<{ success: boolean; data: IPlayerScore[] }>(
-      `${environment.apiUrl}/results/table?tournamentId=${this.tournamentId}&modalityId=${this.modalityId}`
-    ).subscribe({
-      next: res => {
-        this.players = Array.isArray(res.data) ? res.data : [];
+    this.http.get<IResultsResponse>(url).subscribe({
+      next: data => {
+        console.log(' Datos cargados correctamente:', data);
+
+        this.resumenTorneo = data.tournament || null;
+        this.players = data.results || [];
+        this.modalities = data.modalities || [];
+
+        const modalidadActual = this.modalities.find(m => m.modalityId === this.modalityId);
+        this.nombreModalidad = modalidadActual?.name || 'Sin modalidad';
+
+        this.rounds = data.rounds || [];
+
+        this.promedioRonda = data.avgByRound || 0;
+        this.promediosPorLinea = data.avgByLine || {};
+        this.mayorLinea = data.highestLine || null;
+
         this.maxJuegos = this.getMaxJuegos(this.players);
       },
-      error: err => console.error('Error cargando detalle del torneo:', err)
+      error: err => {
+        console.error(' Error cargando datos:', err);
+      }
     });
   }
 
-  /**
-   * Consulta los resultados generales del torneo (por género)
-   */
-  getDetalleTorenoTodoEvento(): void {
-    this.http.get<{ success: boolean; data: IPlayerScore[] }>(
-      `${environment.apiUrl}/results/by-gender?tournamentId=${this.tournamentId}`
-    ).subscribe({
-      next: res => {
-        this.players = Array.isArray(res.data) ? res.data : [];
+
+   loadResultsTable2(): void {
+    const url = `${environment.apiUrl}/results/by-modality?tournamentId=${this.tournamentId}&roundNumber=${this.roundNumber}`;
+
+    this.http.get<IResultsResponse>(url).subscribe({
+      next: data => {
+        console.log(' Datos cargados correctamente:', data);
+
+        this.resumenTorneo = data.tournament || null;
+        this.players = data.results || [];
+        this.modalities = data.modalities || [];
+
+        const modalidadActual = this.modalities.find(m => m.modalityId === this.modalityId);
+        this.nombreModalidad = modalidadActual?.name || 'Sin modalidad';
+
+        this.rounds = data.rounds || [];
+
+        this.promedioRonda = data.avgByRound || 0;
+        this.promediosPorLinea = data.avgByLine || {};
+        this.mayorLinea = data.highestLine || null;
+
         this.maxJuegos = this.getMaxJuegos(this.players);
       },
-      error: err => console.error('Error cargando detalle por género:', err)
+      error: err => {
+        console.error(' Error cargando datos:', err);
+      }
     });
   }
 
   /**
-   * Calcula el número máximo de juegos jugados por cualquier jugador
+   * Retorna el número máximo de juegos por jugador
    */
   private getMaxJuegos(players: IPlayerScore[]): number {
     return players.reduce((max, p) =>
@@ -98,7 +118,14 @@ export class TournamentDetailsComponent implements OnInit {
   }
 
   /**
-   * Navega hacia atrás
+   * Imagen fallback
+   */
+  onImgError(event: any, fallbackUrl: string): void {
+    event.target.src = fallbackUrl;
+  }
+
+  /**
+   * Volver atrás
    */
   goBack(): void {
     this.location.back();

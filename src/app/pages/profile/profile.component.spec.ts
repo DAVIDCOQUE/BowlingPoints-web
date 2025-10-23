@@ -16,13 +16,14 @@ describe('ProfileComponent', () => {
   let roleService: jasmine.SpyObj<RoleApiService>;
 
   const mockRoles: IRole[] = [
-    { roleId: 1, description: 'Administrador' },
-    { roleId: 2, description: 'Usuario' },
+    { roleId: 1, name: 'Administrador' },
+    { roleId: 2, name: 'Usuario' },
   ];
 
   const mockUser: IUser = {
     userId: 10,
     personId: 101,
+    categories: [],
     clubId: 5,
     nickname: 'testuser',
     document: '12345678',
@@ -32,7 +33,7 @@ describe('ProfileComponent', () => {
     email: 'test@example.com',
     phone: '5551234567',
     gender: 'Masculino',
-    roles: [{ roleId: 1, description: 'Administrador' }],
+    roles: [{ roleId: 1, name: 'Administrador' }],
     createdAt: new Date('2023-10-01T00:00:00Z'),
     updatedAt: new Date('2023-10-02T00:00:00Z'),
     status: true,
@@ -90,7 +91,7 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
 
     expect(component.roles.length).toBe(2);
-    expect(component.roles[0].description).toBe('Administrador');
+    expect(component.roles[0].name).toBe('Administrador');
   });
 
   it('debe cargar el usuario actual y llenar el formulario', () => {
@@ -109,9 +110,9 @@ describe('ProfileComponent', () => {
     expect(result).toBe('assets/img/profile.png');
   });
 
-  it('debe retornar rolId dado la descripción', () => {
+  it('debe retornar rolId dado el nombre', () => {
     component.roles = mockRoles;
-    const roleId = component.getRoleIdByDescription('Usuario');
+    const roleId = component.getRoleIdByName('Usuario');
     expect(roleId).toBe(2);
   });
 
