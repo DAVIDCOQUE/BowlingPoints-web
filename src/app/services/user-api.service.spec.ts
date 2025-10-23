@@ -21,7 +21,6 @@ describe('UserApiService', () => {
       imports: [HttpClientTestingModule],
       providers: [UserApiService],
     });
-
     service = TestBed.inject(UserApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -30,40 +29,53 @@ describe('UserApiService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
+  it('debe crearse correctamente', () => {
     expect(service).toBeTruthy();
   });
 
   describe('#getUsers', () => {
-    it('should GET users and map to res.data', (done) => {
-      const mockUsers = [
-        { userId: 1, email: 'a@a.com', name: 'A' },
-        { userId: 2, email: 'b@b.com', name: 'B' },
-      ] as unknown as IUser[];
+    it('debe realizar un GET y devolver usuarios (mapeo correcto)', (done) => {
+      const mockUsers: IUser[] = [
+        {
+          userId: 1,
+          fullName: 'Sara Arteaga',
+          fullSurname: 'A.',
+          email: 'sara@example.com',
+          nickname: 'saraA',
+          password: '123',
+          roles: [],
+          document: '12345',
+          phone: '5551234',
+          gender: 'F',
+          personId: 1,
+          clubId: 1,
+          sub: '',
+          categories: [],
+        },
+      ];
 
-      // espiamos el console.log del tap
-      const logSpy = spyOn(console, 'log');
+      const consoleSpy = spyOn(console, 'log');
 
       service.getUsers().subscribe((users) => {
-        expect(users.length).toBe(2);
-        expect(users[0].userId).toBe(1);
-        expect(logSpy).toHaveBeenCalled(); // el tap se ejecutó
+        expect(users.length).toBe(1);
+        expect(users[0].email).toBe('sara@example.com');
+        expect(consoleSpy).toHaveBeenCalled();
         done();
       });
 
       const req = httpMock.expectOne(usersUrl);
       expect(req.request.method).toBe('GET');
-      req.flush({
-        success: true,
-        message: 'ok',
-        data: mockUsers,
-      });
+      req.flush({ success: true, message: 'ok', data: mockUsers });
     });
   });
 
   describe('#createUser', () => {
-    it('should POST to /users with payload', (done) => {
-      const payload = { email: 'new@user.com', name: 'New' };
+    it('debe realizar un POST al endpoint /users', (done) => {
+      const payload: Partial<IUser> = {
+        fullName: 'Nuevo Usuario',
+        email: 'nuevo@example.com',
+        categories: [],
+      };
 
       service.createUser(payload).subscribe((res) => {
         expect(res).toEqual({ success: true });
@@ -78,9 +90,12 @@ describe('UserApiService', () => {
   });
 
   describe('#updateUser', () => {
-    it('should PUT to /users/:id with payload', (done) => {
+    it('debe realizar un PUT al endpoint /users/:id', (done) => {
       const id = 7;
-      const payload: Partial<IUser> = { fullName: 'Updated' };
+      const payload: Partial<IUser> = {
+        fullName: 'Actualizado',
+        categories: [],
+      };
 
       service.updateUser(id, payload).subscribe((res) => {
         expect(res).toEqual({ success: true });
@@ -95,7 +110,7 @@ describe('UserApiService', () => {
   });
 
   describe('#deleteUser', () => {
-    it('should DELETE /users/:id', (done) => {
+    it('debe realizar un DELETE al endpoint /users/:id y retornar respuesta', (done) => {
       const id = 3;
 
       service.deleteUser(id).subscribe((res) => {
@@ -103,30 +118,28 @@ describe('UserApiService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(`${usersUrl}/${id}`);
+      const req = httpMock.expectOne(`${environment.apiUrl}/users/${id}`);
       expect(req.request.method).toBe('DELETE');
       req.flush({ success: true });
     });
   });
 
   describe('#getRoles', () => {
-    it('should GET roles and map to res.data', (done) => {
-      // ✅ IRole usa "description"
-      const mockRoles: IRole[] = [
-        { roleId: 1, description: 'Admin' },
-        { roleId: 2, description: 'User' },
+    it('debe realizar un GET al endpoint /roles y mapear la respuesta correctamente', (done) => {
+      const mockRoles = [
+        { roleId: 1, name: 'Admin' },
+        { roleId: 2, name: 'User' },
       ];
 
       service.getRoles().subscribe((roles) => {
         expect(roles.length).toBe(2);
-        expect(roles[1].description).toBe('User'); // ✅
+        expect(roles[1].name).toBe('User');
         done();
       });
 
-      const req = httpMock.expectOne(rolesUrl);
+      const req = httpMock.expectOne(`${environment.apiUrl}/roles`);
       expect(req.request.method).toBe('GET');
       req.flush({ success: true, message: 'ok', data: mockRoles });
     });
   });
-
 });

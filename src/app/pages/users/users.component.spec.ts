@@ -9,6 +9,10 @@ import { IRole } from 'src/app/model/role.interface';
 import { AuthService } from 'src/app/auth/auth.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { UserApiService } from 'src/app/services/user-api.service';
+import { Validators } from '@angular/forms';
+import { IUser } from 'src/app/model/user.interface';
+import { HttpTestingController } from '@angular/common/http/testing';
+import { FormGroup, FormControl } from '@angular/forms';
 
 // Mock mínimo para AuthService
 class AuthServiceMock {
@@ -25,25 +29,30 @@ class UserApiServiceMock {
   updateUser = jasmine
     .createSpy('updateUser')
     .and.returnValue(of({ ok: true }));
+  deleteUser = jasmine
+    .createSpy('deleteUser')
+    .and.returnValue(of({ ok: true }));
 }
 
 function fillValidForm(c: UsersComponent, roleId = 2, password = 'secret') {
   c.roles = [
-    { roleId: 1, description: 'Admin' },
-    { roleId: 2, description: 'Jugador' },
+    { roleId: 1, name: 'Admin' },
+    { roleId: 2, name: 'Jugador' },
   ] as any;
 
-  c.userForm.setValue({
-    nickname: 'tester',
-    photoUrl: '/img/t.png',
+  c.userForm.patchValue({
     document: '123',
-    email: 't@x.com',
     fullName: 'Test',
     fullSurname: 'User',
+    email: 't@x.com',
     phone: '555',
     gender: 'Masculino',
-    roleId,
+    photoUrl: '/img/t.png',
+    categories: [],
+    roles: [roleId],
+    status: true,
     password,
+    confirm: password,
   });
 }
 
@@ -51,6 +60,7 @@ describe('UsersComponent', () => {
   let component: UsersComponent;
   let fixture: ComponentFixture<UsersComponent>;
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
+  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     modalServiceSpy = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
@@ -69,6 +79,13 @@ describe('UsersComponent', () => {
     fixture = TestBed.createComponent(UsersComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  it('debe retornar la URL base desde el AuthService', () => {
+    const mockUrl = 'http://localhost:8080/api';
+    (component as any).authService = { baseUrl: mockUrl };
+    expect(component.apiUrl).toBe(mockUrl);
   });
 
   it('should create the component', () => {
@@ -80,11 +97,40 @@ describe('UsersComponent', () => {
     expect(component.userForm.controls['nickname']).toBeDefined();
   });
 
+  it('debe ejecutar los métodos de carga en ngOnInit', () => {
+    const spyInit = spyOn(component, 'initForm');
+    const spyUsers = spyOn(component, 'getUsers');
+    const spyRoles = spyOn(component, 'getRoles');
+    const spyCategories = spyOn(component, 'getCategories');
+
+    component.ngOnInit();
+
+    expect(spyInit).toHaveBeenCalled();
+    expect(spyUsers).toHaveBeenCalled();
+    expect(spyRoles).toHaveBeenCalled();
+    expect(spyCategories).toHaveBeenCalled();
+  });
+
   it('should mark form as touched if invalid on submit', () => {
     spyOn(Swal, 'fire');
     component.userForm.patchValue({ nickname: '' }); // required
     component.saveForm();
     expect(Swal.fire).not.toHaveBeenCalled();
+  });
+
+  it('debe inicializar correctamente el formulario con sus validadores', () => {
+    component.initForm();
+
+    const form = component.userForm;
+
+    // Validamos que el formulario se haya creado
+    expect(form).toBeTruthy();
+    expect(form.contains('email')).toBeTrue();
+    expect(form.contains('password')).toBeTrue();
+
+    // Validamos que algunos campos tengan validadores
+    expect(form.get('email')?.hasValidator(Validators.required)).toBeTrue();
+    expect(form.get('email')?.hasValidator(Validators.email)).toBeTrue();
   });
 
   it('should open modal and reset form for new user', () => {
@@ -109,7 +155,8 @@ describe('UsersComponent', () => {
         userId: 1,
         nickname: 'testUser',
         password: 'dummy',
-        roles: [] as IRole[],
+        roles: [{ roleId: 1, name: 'Admin' }] as any,
+        categories: [],
         fullName: 'Juan',
         fullSurname: 'Pérez',
         document: '123',
@@ -118,8 +165,14 @@ describe('UsersComponent', () => {
         gender: 'Masculino',
         personId: 1,
         clubId: 1,
-        sub: '',
-      },
+        club2: { clubId: 1, name: 'Club Uno' },
+        status: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: undefined,
+        lastLoginAt: new Date(),
+        sub: 'sub01',
+      } as IUser,
     ];
 
     component.filter = 'juan';
@@ -127,24 +180,56 @@ describe('UsersComponent', () => {
     expect(filtered.length).toBe(1);
   });
 
+  it('debe cargar los datos del usuario seleccionado al editar', () => {
+    const mockUser = {
+      userId: 10,
+      document: '123',
+      fullName: 'Juan',
+      fullSurname: 'Pérez',
+      email: 'juan@test.com',
+      phone: '123456',
+      gender: 'Masculino',
+      status: true,
+      birthDate: new Date('1990-01-01'),
+      photoUrl: 'foto.png',
+      roles: [{ roleId: 1 }] as any,
+      categories: [{ categoryId: 2 }] as any,
+    };
+
+    component.userForm.patchValue = jasmine.createSpy('patchValue');
+    component.editUser(mockUser as any);
+
+    expect(component.idUser).toBe(10);
+    expect(component.userForm.patchValue).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        fullName: 'Juan',
+        email: 'juan@test.com',
+        gender: 'Masculino',
+      })
+    );
+  });
+
   it('should patch form and open modal when editing user', () => {
     const mockUser = {
       userId: 1,
-      personId: 1,
       nickname: 'testUser',
       password: 'dummy',
-      roles: [] as IRole[],
+      roles: [{ roleId: 1, name: 'Admin' }],
       fullName: 'Juan',
       fullSurname: 'Pérez',
       document: '123',
       email: 'juan@test.com',
       phone: '123456',
       gender: 'Masculino',
+      personId: 1,
       clubId: 1,
       sub: '1',
-    };
+      categories: [],
+      lastLoginAt: new Date(),
+      status: true,
+    } as any;
 
-    component.roles = [{ roleId: 1, description: 'Administrador' }];
+    component.roles = [{ roleId: 1, name: 'Admin' } as any];
     component.editUser(mockUser);
     expect(component.userForm.value.nickname).toBe('testUser');
     expect(modalServiceSpy.open).toHaveBeenCalled();
@@ -156,16 +241,30 @@ describe('UsersComponent', () => {
     expect(component.filter).toBe('');
   });
 
-  it('should return role description by ID', () => {
-    component.roles = [{ roleId: 1, description: 'Admin' }];
-    const desc = component.getRoleDescriptionById(1);
-    expect(desc).toBe('Admin');
+  it('debe devolver todos los usuarios si el filtro está vacío o solo espacios', () => {
+    component.usuarios = [
+      { userId: 1, fullName: 'Juan Pérez' } as any,
+      { userId: 2, fullName: 'Ana Gómez' } as any,
+    ];
+
+    component.filter = ''; // vacío
+    expect(component.usuariosFiltrados.length).toBe(2);
+
+    component.filter = '   '; // espacios
+    expect(component.usuariosFiltrados.length).toBe(2);
   });
 
-  it('should return role ID by description', () => {
-    component.roles = [{ roleId: 5, description: 'Usuario' }];
-    const roleId = component.getRoleIdByDescription('Usuario');
-    expect(roleId).toBe(5);
+  it('debe filtrar usuarios por nombre o apellido', () => {
+    component.usuarios = [
+      { userId: 1, fullName: 'Juan Pérez', fullSurname: 'Pérez' } as any,
+      { userId: 2, fullName: 'Ana Gómez', fullSurname: 'Gómez' } as any,
+    ];
+
+    component.filter = 'juan';
+    const result = component.usuariosFiltrados;
+
+    expect(result.length).toBe(1);
+    expect(result[0].fullName).toContain('Juan');
   });
 
   it('should fallback to default image on error', () => {
@@ -184,6 +283,32 @@ describe('UsersComponent', () => {
     svc.baseUrl = 'https://api.mocked.example';
     expect(component.apiUrl).toBe('https://api.mocked.example');
   });
+
+  it('debe cargar usuarios correctamente desde la API', () => {
+    const mockUsuarios = [{ userId: 1, fullName: 'Juan Pérez' }];
+
+    fixture.detectChanges(); // dispara ngOnInit
+    const req = httpMock.expectOne(`${component.apiUrl}/users`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockUsuarios); // simula respuesta exitosa
+
+    expect(component.usuarios.length).toBe(1);
+    expect(component.usuarios[0].fullName).toBe('Juan Pérez');
+  });
+
+  it('debe manejar error al cargar usuarios', () => {
+    const consoleSpy = spyOn(console, 'error');
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${component.apiUrl}/users`);
+    req.error(new ErrorEvent('Network error'));
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error al cargar usuarios:',
+      jasmine.any(ErrorEvent)
+    );
+  });
+
   it('getUsers() debe asignar this.usuarios cuando la API responde (happy path)', () => {
     const api = TestBed.inject(UserApiService) as unknown as UserApiServiceMock;
     const mock = [
@@ -220,11 +345,24 @@ describe('UsersComponent', () => {
     expect(component.usuarios).toEqual(snapshot); // no debe sobreescribir en error
   });
 
+  it('debe manejar error al cargar roles', () => {
+    const consoleSpy = spyOn(console, 'error');
+    component.getRoles();
+
+    const req = httpMock.expectOne(`${component.apiUrl}/roles`);
+    req.error(new ErrorEvent('Network error'));
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error al cargar roles:',
+      jasmine.any(ErrorEvent)
+    );
+  });
+
   it('getRoles() debe asignar this.roles cuando la API responde (happy path)', () => {
     const api = TestBed.inject(UserApiService) as unknown as UserApiServiceMock;
     const mockRoles: IRole[] = [
-      { roleId: 1, description: 'Admin' },
-      { roleId: 2, description: 'Jugador' },
+      { roleId: 1, name: 'Admin' },
+      { roleId: 2, name: 'Jugador' },
     ] as IRole[];
 
     api.getRoles.and.returnValue(of(mockRoles));
@@ -242,7 +380,7 @@ describe('UsersComponent', () => {
 
     const logSpy = spyOn(console, 'error');
 
-    const snapshot: IRole[] = [{ roleId: 99, description: 'Keep' } as IRole];
+    const snapshot: IRole[] = [{ roleId: 99, name: 'Keep' } as IRole];
     component.roles = [...snapshot]; // estado previo para verificar que no cambie
 
     component.getRoles(); // act
@@ -417,5 +555,357 @@ describe('UsersComponent', () => {
 
     expect(id).toBe(20);
     expect(payload.password).toBe('newPass'); // presente en edición si se proporcionó
+  });
+
+  it('debe cargar categorías correctamente desde la API', () => {
+    const mockCategorias = [{ categoryId: 1, name: 'Senior' }];
+    component.getCategories();
+
+    const req = httpMock.expectOne(`${component.apiUrl}/categories`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockCategorias);
+
+    expect(component.categories.length).toBe(1);
+    expect(component.categories[0].name).toBe('Senior');
+  });
+
+  it('debe manejar error al cargar categorías', () => {
+    const consoleSpy = spyOn(console, 'error');
+    component.getCategories();
+
+    const req = httpMock.expectOne(`${component.apiUrl}/categories`);
+    req.error(new ErrorEvent('Network error'));
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error al cargar categorías:',
+      jasmine.any(ErrorEvent)
+    );
+  });
+
+  it('debe marcar el formulario como touched y salir si es inválido', () => {
+    component.userForm.markAllAsTouched = jasmine.createSpy('markAllAsTouched');
+    spyOnProperty(component.userForm, 'invalid', 'get').and.returnValue(true);
+
+    component.saveForm();
+
+    expect(component.userForm.markAllAsTouched).toHaveBeenCalled();
+    expect(component.loading).toBeFalsy();
+  });
+
+  it('debe preparar payload correctamente cuando el formulario es válido (modo creación)', () => {
+    spyOnProperty(component.userForm, 'invalid', 'get').and.returnValue(false);
+
+    component.userForm.getRawValue = jasmine
+      .createSpy('getRawValue')
+      .and.returnValue({
+        photoUrl: 'test.png',
+        document: '123',
+        email: 'juan@test.com',
+        fullName: 'Juan',
+        fullSurname: 'Pérez',
+        phone: '123456',
+        gender: 'Masculino',
+        birthDate: new Date('1990-01-01'),
+        status: true,
+        categories: [1],
+        roles: [2],
+      });
+
+    component.idUser = null;
+    component.loading = false;
+
+    component.saveForm();
+
+    expect(component.loading).toBeTrue();
+    expect(component.userForm.getRawValue).toHaveBeenCalled();
+  });
+
+  describe('UsersComponent - saveForm() con llamadas al API', () => {
+    beforeEach(() => {
+      (component as any)['userApi'] = jasmine.createSpyObj('userApi', [
+        'updateUser',
+        'createUser',
+      ]);
+      spyOn(Swal, 'fire');
+      spyOn(component, 'getUsers');
+      spyOn(component, 'closeModal');
+    });
+
+    it('debe actualizar usuario correctamente cuando isEdit = true', () => {
+      spyOnProperty(component.userForm, 'invalid', 'get').and.returnValue(
+        false
+      );
+      component.userForm.getRawValue = jasmine
+        .createSpy()
+        .and.returnValue({ password: '1234' });
+      component.idUser = 99;
+
+      const mockRequest = of({}); // simulamos observable exitoso
+      ((component as any)['userApi'].updateUser as jasmine.Spy).and.returnValue(
+        mockRequest
+      );
+
+      component.saveForm();
+
+      expect(component['userApi'].updateUser).toHaveBeenCalled();
+      expect(Swal.fire).toHaveBeenCalledWith(
+        'Éxito',
+        'Usuario actualizado correctamente',
+        'success'
+      );
+      expect(component.getUsers).toHaveBeenCalled();
+      expect(component.closeModal).toHaveBeenCalled();
+      expect(component.loading).toBeFalse(); // finalize()
+    });
+
+    it('debe manejar el error al crear usuario correctamente', () => {
+      spyOnProperty(component.userForm, 'invalid', 'get').and.returnValue(
+        false
+      );
+      component.userForm.getRawValue = jasmine
+        .createSpy()
+        .and.returnValue({ password: '1234' });
+      component.idUser = null;
+
+      const mockError = { error: { message: 'Fallo en servidor' } };
+      const mockRequest = throwError(() => mockError);
+      ((component as any)['userApi'].createUser as jasmine.Spy).and.returnValue(
+        mockRequest
+      );
+
+      component.saveForm();
+
+      expect(component['userApi'].createUser).toHaveBeenCalled();
+      expect(Swal.fire).toHaveBeenCalledWith(
+        'Error',
+        'Fallo en servidor',
+        'error'
+      );
+      expect(component.loading).toBeFalse(); // finalize()
+    });
+  });
+
+  it('debe manejar el caso cuando status viene como string', () => {
+    spyOnProperty(component.userForm, 'invalid', 'get').and.returnValue(true);
+
+    component.userForm.getRawValue = jasmine
+      .createSpy('getRawValue')
+      .and.returnValue({
+        status: 'true',
+        photoUrl: '',
+        categories: [],
+        roles: [],
+      });
+
+    component.idUser = 5; // modo edición
+
+    component.saveForm();
+
+    expect(component.loading).toBeTrue();
+    expect(component.userForm.getRawValue).toHaveBeenCalled();
+  });
+
+  it('debe eliminar el usuario cuando se confirma la alerta', async () => {
+    const api = TestBed.inject(UserApiService) as unknown as UserApiServiceMock;
+    spyOn(Swal, 'fire').and.returnValue(
+      Promise.resolve({ isConfirmed: true }) as any
+    );
+    const getUsersSpy = spyOn(component, 'getUsers');
+
+    await component.deleteUser(10);
+
+    expect(api.deleteUser).toHaveBeenCalledWith(10);
+    expect(getUsersSpy).toHaveBeenCalled();
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Eliminado',
+      'El usuario ha sido eliminado',
+      'success'
+    );
+  });
+
+  it('no debe eliminar si el usuario cancela la alerta', async () => {
+    const api = TestBed.inject(UserApiService) as unknown as UserApiServiceMock;
+    spyOn(Swal, 'fire').and.returnValue(
+      Promise.resolve({ isConfirmed: false }) as any
+    );
+
+    await component.deleteUser(10);
+
+    expect(api.deleteUser).not.toHaveBeenCalled();
+  });
+
+  describe('openModal y closeModal', () => {
+    it('debe resetear el formulario y abrir el modal si no hay idUser', () => {
+      component.idUser = null;
+      const modalSpy = spyOn(component['modalService'], 'open');
+      const resetSpy = spyOn(component.userForm, 'reset');
+
+      component.openModal('fake-template');
+
+      expect(resetSpy).toHaveBeenCalled();
+      expect(modalSpy).toHaveBeenCalledWith('fake-template');
+    });
+
+    it('no debe resetear el formulario si ya hay idUser', () => {
+      component.idUser = 10;
+      const resetSpy = spyOn(component.userForm, 'reset');
+      const modalSpy = spyOn(component['modalService'], 'open');
+
+      component.openModal('fake-template');
+
+      expect(resetSpy).not.toHaveBeenCalled();
+      expect(modalSpy).toHaveBeenCalled();
+    });
+
+    it('debe cerrar el modal y limpiar el formulario', () => {
+      const dismissSpy = spyOn(component['modalService'], 'dismissAll');
+      const resetSpy = spyOn(component.userForm, 'reset');
+
+      component.closeModal();
+
+      expect(dismissSpy).toHaveBeenCalled();
+      expect(resetSpy).toHaveBeenCalled();
+      expect(component.idUser).toBeNull();
+    });
+
+    describe('setPasswordValidatorsForMode', () => {
+      it('debe asignar solo minLength si está en modo edición', () => {
+        // Simular formulario
+        const passwordCtrl = component.userForm.get('password')!;
+        const confirmCtrl = component.userForm.get('confirm')!;
+
+        // Ejecutar modo edición
+        component['setPasswordValidatorsForMode'](true);
+
+        // Validamos que tenga solo minLength
+        const passErrors = passwordCtrl.validator?.({} as any);
+        const confErrors = confirmCtrl.validator?.({} as any);
+
+        expect(passErrors).toBeNull(); // minLength(3) no falla con objeto vacío
+        expect(confErrors).toBeNull(); // sin validators
+      });
+
+      it('debe asignar required y minLength si está en modo creación', () => {
+        const passwordCtrl = component.userForm.get('password')!;
+        const confirmCtrl = component.userForm.get('confirm')!;
+
+        // Ejecutar modo creación
+        component['setPasswordValidatorsForMode'](false);
+
+        // Validamos que haya validadores requeridos
+        passwordCtrl.setValue('');
+        confirmCtrl.setValue('');
+
+        expect(passwordCtrl.errors?.['required']).toBeTruthy();
+        expect(confirmCtrl.errors?.['required']).toBeTruthy();
+      });
+    });
+
+    describe('passwordsMatchValidator', () => {
+      let formGroup: FormGroup;
+
+      beforeEach(() => {
+        formGroup = component['formBuilder'].group({
+          password: [''],
+          confirm: [''],
+        });
+      });
+
+      it('debe retornar null si ambas contraseñas están vacías', () => {
+        formGroup.patchValue({ password: '', confirm: '' });
+        const result = component['passwordsMatchValidator'](formGroup);
+        expect(result).toBeNull();
+      });
+
+      it('debe retornar null si las contraseñas coinciden', () => {
+        formGroup.patchValue({ password: 'abc123', confirm: 'abc123' });
+        const result = component['passwordsMatchValidator'](formGroup);
+        expect(result).toBeNull();
+      });
+
+      it('debe retornar error si las contraseñas no coinciden', () => {
+        formGroup.patchValue({ password: 'abc123', confirm: 'xyz' });
+        const result = component['passwordsMatchValidator'](formGroup);
+        expect(result).toEqual({ passwordsMismatch: true });
+      });
+    });
+
+    it('debe retornar true si hay error y los campos fueron tocados', () => {
+      component.userForm.setErrors({ passwordsMismatch: true });
+      component.userForm.get('password')?.markAsTouched();
+      expect(component.passwordMismatchVisible).toBeTrue();
+    });
+  });
+  // ------------------------------------------------------
+  // 🧩 Tests unitarios de métodos utilitarios del componente
+  // ------------------------------------------------------
+
+  describe('Métodos utilitarios del UsersComponent', () => {
+    describe('getStatusLabel()', () => {
+      it('debe retornar "Activo" si el valor es true', () => {
+        expect(component.getStatusLabel(true)).toBe('Activo');
+      });
+
+      it('debe retornar "Inactivo" si el valor es false', () => {
+        expect(component.getStatusLabel(false)).toBe('Inactivo');
+      });
+    });
+
+    describe('passwordMismatchVisible', () => {
+      it('debe retornar false cuando no hay error de passwordsMismatch', () => {
+        component.userForm.setErrors(null);
+        expect(component.passwordMismatchVisible).toBeFalse();
+      });
+
+      it('debe retornar true cuando hay error passwordsMismatch y los campos fueron tocados', () => {
+        component.userForm.setErrors({ passwordsMismatch: true });
+        component.userForm.get('password')?.markAsTouched();
+        expect(component.passwordMismatchVisible).toBeTrue();
+      });
+
+      it('debe retornar false cuando no hay campos tocados', () => {
+        component.userForm.setErrors({ passwordsMismatch: true });
+        component.userForm.get('password')?.markAsUntouched();
+        component.userForm.get('confirm')?.markAsUntouched();
+        expect(component.passwordMismatchVisible).toBeFalse();
+      });
+    });
+
+    describe('getRoleNameById()', () => {
+      it('debe retornar el nombre del rol si existe', () => {
+        component.roles = [
+          { roleId: 1, name: 'Admin' } as any,
+          { roleId: 2, name: 'Jugador' } as any,
+        ];
+        expect(component.getRoleNameById(2)).toBe('Jugador');
+      });
+
+      it('debe retornar cadena vacía si el rol no existe', () => {
+        component.roles = [{ roleId: 1, name: 'Admin' } as any];
+        expect(component.getRoleNameById(99)).toBe('');
+      });
+    });
+
+    describe('getRoleNames()', () => {
+      it('debe retornar los nombres concatenados de los roles', () => {
+        const mockUser = {
+          roles: [{ name: 'Admin' }, { name: 'Entrenador' }],
+        } as any;
+        const result = component.getRoleNames(mockUser);
+        expect(result).toBe('Admin, Entrenador');
+      });
+
+      it('debe retornar una cadena vacía si el usuario no tiene roles', () => {
+        const mockUser = { roles: [] } as any;
+        const result = component.getRoleNames(mockUser);
+        expect(result).toBe('');
+      });
+
+      it('debe retornar cadena vacía si roles es null o undefined', () => {
+        const mockUser = { roles: null } as any;
+        const result = component.getRoleNames(mockUser);
+        expect(result).toBe('');
+      });
+    });
   });
 });

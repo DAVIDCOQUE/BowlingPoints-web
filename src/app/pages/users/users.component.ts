@@ -1,5 +1,17 @@
-import { Component, OnInit, ViewChild, TemplateRef, inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  TemplateRef,
+  inject,
+} from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 
@@ -14,7 +26,7 @@ import { finalize } from 'rxjs';
 @Component({
   selector: 'app-users',
   templateUrl: './users.component.html',
-  styleUrls: ['./users.component.css']
+  styleUrls: ['./users.component.css'],
 })
 export class UsersComponent implements OnInit {
   @ViewChild('modalUser') modalUserRef!: TemplateRef<unknown>;
@@ -54,10 +66,9 @@ export class UsersComponent implements OnInit {
   private readonly categoryApi = inject(CategoryApiService);
   private readonly authService = inject(AuthService);
 
-
   status = [
     { valor: true, etiqueta: 'Activo' },
-    { valor: false, etiqueta: 'Inactivo' }
+    { valor: false, etiqueta: 'Inactivo' },
   ];
 
   /**
@@ -91,7 +102,7 @@ export class UsersComponent implements OnInit {
       status: [true, Validators.required],
       roles: [[], Validators.required],
       password: [''],
-      confirm: ['']
+      confirm: [''],
     });
 
     this.userForm.setValidators(this.passwordsMatchValidator);
@@ -102,11 +113,11 @@ export class UsersComponent implements OnInit {
    */
   getUsers(): void {
     this.userApi.getUsers().subscribe({
-      next: res => {
+      next: (res) => {
         this.usuarios = res;
         console.log('Usuarios cargados:', this.usuarios);
       },
-      error: err => console.error('Error al cargar usuarios:', err)
+      error: (err) => console.error('Error al cargar usuarios:', err),
     });
   }
   /**
@@ -114,8 +125,10 @@ export class UsersComponent implements OnInit {
    */
   getRoles(): void {
     this.userApi.getRoles().subscribe({
-      next: res => { this.roles = res, console.log('roles cargados:', this.roles); },
-      error: err => console.error('Error al cargar roles:', err)
+      next: (res) => {
+        (this.roles = res), console.log('roles cargados:', this.roles);
+      },
+      error: (err) => console.error('Error al cargar roles:', err),
     });
   }
 
@@ -124,8 +137,11 @@ export class UsersComponent implements OnInit {
    */
   getCategories(): void {
     this.categoryApi.getCategories().subscribe({
-      next: res => { this.categories = res, console.log('categorías cargadas:', this.categories); },
-      error: err => console.error('Error al cargar categorías:', err)
+      next: (res) => {
+        (this.categories = res),
+          console.log('categorías cargadas:', this.categories);
+      },
+      error: (err) => console.error('Error al cargar categorías:', err),
     });
   }
 
@@ -136,14 +152,23 @@ export class UsersComponent implements OnInit {
     const term = this.filter.toLowerCase().trim();
     if (!term) return this.usuarios;
 
-    return this.usuarios.filter(user =>
-      user.fullName.toLowerCase().includes(term) ||
-      user.fullSurname.toLowerCase().includes(term) ||
-      user.email.toLowerCase().includes(term) ||
-      String(user.phone ?? '').toLowerCase().includes(term) ||
-        this.getStatusLabel(user.status ?? false).toLowerCase().includes(term) ||
-      user.categories?.some(c => ((c as any).name ?? (c as any).description ?? '').toLowerCase().includes(term)) ||
-      (user.roles?.some(r => r.name.toLowerCase().includes(term)) ?? false)
+    return this.usuarios.filter(
+      (user) =>
+        user.fullName.toLowerCase().includes(term) ||
+        user.fullSurname.toLowerCase().includes(term) ||
+        user.email.toLowerCase().includes(term) ||
+        String(user.phone ?? '')
+          .toLowerCase()
+          .includes(term) ||
+        this.getStatusLabel(user.status ?? false)
+          .toLowerCase()
+          .includes(term) ||
+        user.categories?.some((c) =>
+          ((c as any).name ?? (c as any).description ?? '')
+            .toLowerCase()
+            .includes(term)
+        ) ||
+        (user.roles?.some((r) => r.name.toLowerCase().includes(term)) ?? false)
     );
   }
 
@@ -162,11 +187,11 @@ export class UsersComponent implements OnInit {
       phone: user.phone,
       gender: user.gender,
       birthDate: this.toDateInput(user.birthDate as any),
-      categories: (user.categories ?? []).map(c => c.categoryId),
-      roles: (user.roles ?? []).map(r => r.roleId),
+      categories: (user.categories ?? []).map((c) => c.categoryId),
+      roles: (user.roles ?? []).map((r) => r.roleId),
       status: user.status,
       password: '',
-      confirm: ''
+      confirm: '',
     });
 
     this.setPasswordValidatorsForMode(true);
@@ -189,7 +214,9 @@ export class UsersComponent implements OnInit {
     const formValue = this.userForm.getRawValue();
 
     const statusValue: boolean =
-      typeof formValue.status === 'string' ? formValue.status === 'true' : !!formValue.status;
+      typeof formValue.status === 'string'
+        ? formValue.status === 'true'
+        : !!formValue.status;
 
     const payload: Partial<IUser> & { password?: string } = {
       photoUrl: formValue.photoUrl,
@@ -201,8 +228,10 @@ export class UsersComponent implements OnInit {
       gender: formValue.gender,
       birthDate: formValue.birthDate || null,
       status: statusValue,
-      categories: (formValue.categories ?? []).map((id: number) => ({ categoryId: id })),
-      roles: (formValue.roles ?? []).map((id: number) => ({ roleId: id }))
+      categories: (formValue.categories ?? []).map((id: number) => ({
+        categoryId: id,
+      })),
+      roles: (formValue.roles ?? []).map((id: number) => ({ roleId: id })),
     };
 
     if (!isEdit || formValue.password) {
@@ -213,20 +242,25 @@ export class UsersComponent implements OnInit {
       ? this.userApi.updateUser(this.idUser!, payload)
       : this.userApi.createUser(payload);
 
-    request
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: () => {
-          Swal.fire('Éxito', isEdit ? 'Usuario actualizado correctamente' : 'Usuario creado exitosamente', 'success');
-          this.getUsers();
-          this.closeModal();
-        },
-        error: err => {
-          console.error('Error al guardar:', err);
-          const msg = err.error?.message || 'Ocurrió un error al procesar la solicitud';
-          Swal.fire('Error', msg, 'error');
-        }
-      });
+    request.pipe(finalize(() => (this.loading = false))).subscribe({
+      next: () => {
+        Swal.fire(
+          'Éxito',
+          isEdit
+            ? 'Usuario actualizado correctamente'
+            : 'Usuario creado exitosamente',
+          'success'
+        );
+        this.getUsers();
+        this.closeModal();
+      },
+      error: (err) => {
+        console.error('Error al guardar:', err);
+        const msg =
+          err.error?.message || 'Ocurrió un error al procesar la solicitud';
+        Swal.fire('Error', msg, 'error');
+      },
+    });
   }
 
   /**
@@ -241,7 +275,7 @@ export class UsersComponent implements OnInit {
       confirmButtonColor: '#d33',
       cancelButtonColor: '#6c757d',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
         this.userApi.deleteUser(id).subscribe({
@@ -251,42 +285,56 @@ export class UsersComponent implements OnInit {
           },
           error: () => {
             Swal.fire('Error', 'No se pudo eliminar el usuario', 'error');
-          }
+          },
         });
       }
     });
   }
 
   /**
-   * Abre el modal para crear o editar usuario
+   * Objeto base para inicializar o limpiar el formulario
+   */
+  private readonly EMPTY_USER = {
+    document: '',
+    fullName: '',
+    fullSurname: '',
+    email: '',
+    birthDate: null,
+    gender: null,
+    phone: '',
+    photoUrl: '',
+    categories: [] as any[],
+    roles: [] as any[],
+    status: true,
+    password: '',
+    confirm: '',
+  };
+
+  /**
+   * Abre el modal para crear o editar usuario.
+   * Si no hay idUser, inicializa el formulario en blanco.
+   * @param content - Referencia del contenido del modal.
    */
   openModal(content: unknown): void {
-    if (!this.idUser) {
-      this.userForm.reset({
-        document: '',
-        fullName: '',
-        fullSurname: '',
-        email: '',
-        birthDate: null,
-        gender: null,
-        phone: '',
-        photoUrl: '',
-        categories: [],
-        roles: [],
-        status: true,
-        password: '',
-        confirm: ''
-      });
-      this.setPasswordValidatorsForMode(false);
+    // Si el usuario ya existe, solo abrimos el modal
+    if (this.idUser) {
+      this.modalService.open(content);
+      return;
     }
+
+    // Si es creación, limpiamos el formulario y configuramos validadores
+    this.userForm.reset(this.EMPTY_USER);
+    this.setPasswordValidatorsForMode(false);
+
     this.modalService.open(content);
   }
+
   /**
-   * Cierra el modal y resetea el formulario
+   * Cierra el modal y limpia el formulario.
    */
   closeModal(): void {
-    this.modalService.dismissAll();
-    this.userForm.reset();
+    this.modalService?.dismissAll();
+    this.userForm.reset(this.EMPTY_USER);
     this.idUser = null;
   }
 
@@ -297,33 +345,59 @@ export class UsersComponent implements OnInit {
     this.filter = '';
   }
 
+  /**
+   * Configura los validadores de contraseña según el modo (edición o creación).
+   * @param isEdit - true si el formulario está en modo edición.
+   */
   private setPasswordValidatorsForMode(isEdit: boolean): void {
     const passwordCtrl = this.userForm.get('password');
     const confirmCtrl = this.userForm.get('confirm');
 
-    if (!passwordCtrl || !confirmCtrl) return;
-
-    if (isEdit) {
-      passwordCtrl.setValidators([Validators.minLength(3)]);
-      confirmCtrl.clearValidators();
-    } else {
-      passwordCtrl.setValidators([Validators.required, Validators.minLength(3)]);
-      confirmCtrl.setValidators([Validators.required]);
+    if (!passwordCtrl || !confirmCtrl) {
+      return; // Salida temprana → mejora legibilidad
     }
 
-    passwordCtrl.updateValueAndValidity({ emitEvent: false });
-    confirmCtrl.updateValueAndValidity({ emitEvent: false });
-    this.userForm.updateValueAndValidity({ emitEvent: false });
+    const passwordValidators = [Validators.minLength(3)];
+    const confirmValidators = [];
+
+    if (!isEdit) {
+      passwordValidators.unshift(Validators.required);
+      confirmValidators.push(Validators.required);
+    }
+
+    passwordCtrl.setValidators(passwordValidators);
+    confirmCtrl.setValidators(confirmValidators);
+
+    [passwordCtrl, confirmCtrl, this.userForm].forEach((ctrl) =>
+      ctrl.updateValueAndValidity({ emitEvent: false })
+    );
   }
 
-  private readonly passwordsMatchValidator: ValidatorFn = (group: AbstractControl) => {
-    const pass = group.get('password')?.value;
-    const confirm = group.get('confirm')?.value;
-    if (!pass && !confirm) return null; // en edición se permiten vacías
-    return pass === confirm ? null : { passwordsMismatch: true };
+  /**
+   * Valida que las contraseñas coincidan.
+   * Permite campos vacíos en modo edición.
+   */
+  private readonly passwordsMatchValidator: ValidatorFn = (
+    group: AbstractControl
+  ) => {
+    const passwordCtrl = group.get('password');
+    const confirmCtrl = group.get('confirm');
+
+    if (!passwordCtrl || !confirmCtrl) {
+      return null; // seguridad nula → evita acceso a propiedades de null
+    }
+
+    const pass = passwordCtrl.value;
+    const confirm = confirmCtrl.value;
+
+    // Early return → mejora legibilidad
+    if (!pass && !confirm) {
+      return null; // En edición se permiten vacías
+    }
+
+    const mismatch = pass !== confirm;
+    return mismatch ? { passwordsMismatch: true } : null;
   };
-
-
 
   /**
    * Reemplaza una imagen rota con una por defecto
@@ -342,20 +416,22 @@ export class UsersComponent implements OnInit {
    * Devuelve true si las contraseñas no coinciden y alguno de los campos ha sido tocado
    */
   get passwordMismatchVisible(): boolean {
-    const touched = (this.userForm.get('confirm')?.touched ?? false) || (this.userForm.get('password')?.touched ?? false);
+    const touched =
+      (this.userForm.get('confirm')?.touched ?? false) ||
+      (this.userForm.get('password')?.touched ?? false);
     return this.userForm.hasError('passwordsMismatch') && touched;
   }
 
   /** Devuelve el nombre del rol según su ID */
   getRoleNameById(roleId: number): string {
-    const role = this.roles.find(r => r.roleId === roleId);
+    const role = this.roles.find((r) => r.roleId === roleId);
     return role ? role.name : '';
   }
 
   /** Devuelve los nombres de los roles del usuario */
   getRoleNames(user: IUser): string {
     return Array.isArray(user.roles)
-      ? user.roles.map(r => r.name).join(', ')
+      ? user.roles.map((r) => r.name).join(', ')
       : '';
   }
 

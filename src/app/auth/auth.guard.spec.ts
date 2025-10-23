@@ -1,43 +1,43 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
+import { AuthService } from './auth.service';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let authServiceMock: jasmine.SpyObj<AuthService>;
+  let routerMock: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    authServiceSpy = jasmine.createSpyObj('AuthService', ['isLoggedIn']);
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    authServiceMock = jasmine.createSpyObj('AuthService', ['isLoggedIn']);
+    routerMock = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
       providers: [
         AuthGuard,
-        { provide: AuthService, useValue: authServiceSpy },
-        { provide: Router, useValue: routerSpy }
+        { provide: AuthService, useValue: authServiceMock },
+        { provide: Router, useValue: routerMock }
       ]
     });
 
     guard = TestBed.inject(AuthGuard);
   });
 
-  it('should allow access when user is logged in', () => {
-    authServiceSpy.isLoggedIn.and.returnValue(true);
+  it('debe permitir el acceso si el usuario está logueado', () => {
+    authServiceMock.isLoggedIn.and.returnValue(true);
 
     const result = guard.canActivate();
 
     expect(result).toBeTrue();
-    expect(routerSpy.navigate).not.toHaveBeenCalled();
+    expect(routerMock.navigate).not.toHaveBeenCalled();
   });
 
-  it('should redirect to /login when user is not logged in', () => {
-    authServiceSpy.isLoggedIn.and.returnValue(false);
+  it('debe redirigir a /login si el usuario no está logueado', () => {
+    authServiceMock.isLoggedIn.and.returnValue(false);
 
     const result = guard.canActivate();
 
     expect(result).toBeFalse();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
   });
 });
