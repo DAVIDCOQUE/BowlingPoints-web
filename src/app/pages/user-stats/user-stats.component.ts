@@ -196,7 +196,7 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
   }
 
   /** Navega al resumen de un torneo */
-  resumenTorneo(id: number): void {
+  resumenToreno(id: number): void {
     this.router.navigate(['/resumen-torneo', id]);
   }
 
