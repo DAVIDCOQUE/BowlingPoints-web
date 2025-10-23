@@ -32,9 +32,9 @@ export class TournamentSummaryComponent implements OnInit {
   categories: ICategory[] = [];
   modalities: IModality[] = [];
   branches: IBranch[] = [];
-
   // Jugadores registrados en el torneo
   players: ITournamentRegistration[] = [];
+
 
   // Inyección de dependencias
   private readonly http = inject(HttpClient);
@@ -63,7 +63,12 @@ export class TournamentSummaryComponent implements OnInit {
           this.selectedTournament = response.data ?? null;
           this.categories = response.data?.categories ?? [];
           this.modalities = response.data?.modalities ?? [];
-          this.branches = response.data?.branches ?? [];
+          this.branches =
+            (response.data?.branchPlayerCounts && response.data.branchPlayerCounts.length > 0)
+              ? response.data.branchPlayerCounts
+              : (response.data?.branches && response.data.branches.length > 0)
+                ? response.data.branches
+                : [];
           this.players = response.data?.tournamentRegistrations ?? [];
 
           if (!this.selectedTournament) {
@@ -76,11 +81,6 @@ export class TournamentSummaryComponent implements OnInit {
         }
       });
   }
-
-  getPlayersCountByCategory(categoryId: number): number {
-    return this.players.filter(p => p.categoryId === categoryId).length;
-  }
-
   /**
    * Volver a la página anterior
    */

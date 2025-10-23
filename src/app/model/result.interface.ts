@@ -12,7 +12,7 @@ export interface IResults {
   lineNumber: number;
 
   /** Rama (masculino/femenino) */
-  branch: string;
+  branchName: string;
   branchId: number;
 
   /** IDs relacionales */

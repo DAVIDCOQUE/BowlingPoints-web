@@ -22,6 +22,7 @@ export class ProfileComponent implements OnInit {
 
   /** Lista de roles y géneros */
   roles: IRole[] = [];
+  roleDisplay: string = '';
   genders: string[] = ['Masculino', 'Femenino', 'No binario', 'Prefiero no decirlo'];
 
   /** Control de visibilidad de contraseñas */
@@ -81,11 +82,12 @@ export class ProfileComponent implements OnInit {
           fullSurname: user.fullSurname,
           phone: user.phone,
           gender: user.gender,
-          roleId: this.getRoleIdByName(user.roleName || ''),
+          roleIds: user.roles?.map((r: any) => r.roleId) || [],
           password: '',
           confirm: ''
         });
 
+         this.roleDisplay = user.roles?.map((r: any) => r.name).join(', ') || '';
         console.log('Usuario cargado en perfil:', user);
 
         // Previsualiza avatar (foto del backend o imagen por defecto)
@@ -197,5 +199,13 @@ export class ProfileComponent implements OnInit {
         });
       }
     });
+  }
+
+  getRolesDescription(roleIds: number[]): string {
+    if (!Array.isArray(roleIds)) return '';
+    return this.roles
+      .filter(r => roleIds.includes(r.roleId))
+      .map(r => r.name)
+      .join(', ');
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -25,6 +25,25 @@ export class ResultsService {
       `${this.apiUrl}/results`
     );
   }
+
+  getResultsFiltered(
+    tournamentId: number,
+    branchId?: number,
+    roundNumber?: number
+  ): Observable<IResults[]> {
+    let params = new HttpParams().set('tournamentId', tournamentId.toString());
+
+    if (branchId !== undefined && branchId !== null) {
+      params = params.set('branchId', branchId.toString());
+    }
+
+    if (roundNumber !== undefined && roundNumber !== null) {
+      params = params.set('roundNumber', roundNumber.toString());
+    }
+
+    return this.http.get<IResults[]>(`${this.apiUrl}/results/filter`, { params });
+  }
+
 
   createResult(payload: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/results`, payload);
