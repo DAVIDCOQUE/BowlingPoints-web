@@ -55,7 +55,7 @@
               <td>{{ result.tournamentName || '-' }}</td>
               <td>{{ result.categoryName || '-' }}</td>
               <td>{{ result.modalityName || '-' }}</td>
-              <td>{{ result.rama || '-' }}</td>
+              <td>{{ result.branch || '-' }}</td>
               <td>{{ result.roundNumber || '-' }}</td>
               <td>{{ result.personName || '-' }}</td>
               <td>{{ result.teamName || 'N/A' }}</td>
@@ -157,8 +157,8 @@
                 <label class="form-label">Ronda</label>
                 <select class="form-select" formControlName="roundId">
                   <option [ngValue]="null" disabled>Ronda...</option>
-                  <option *ngFor="let round of rounds" [ngValue]="round.roundId">
-                    {{ round.roundNumber }}
+                  <option *ngFor="let round of roundNumbers" [ngValue]="round">
+                    {{ round }}
                   </option>
                 </select>
               </div>

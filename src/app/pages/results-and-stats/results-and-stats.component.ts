@@ -17,39 +17,35 @@ import { ICategory } from '../../model/category.interface';
 })
 export class ResultsAndStatsComponent implements OnInit {
 
-  // Referencia al template del modal. Tipar evita usar `any`.
   @ViewChild('modalResult', { static: false }) modalResultRef!: TemplateRef<unknown>;
 
-  // Indicador de carga reactivo por si se quiere enlazar en plantilla.
   isLoading$ = new BehaviorSubject<boolean>(false);
 
-  // Estado principal
   selectedTournament: ITournament | null = null;
   tournaments: ITournament[] = [];
   results: IResults[] = [];
   filteredResults: IResults[] = [];
 
-  // Filtros
+  allTournaments: string[] = [];
+
   categories: ICategory[] = [];
   modalities: IModality[] = [];
   selectedCategory = '';
   selectedModality = '';
-  selectedRama = '';
+  selectedBranch = '';
 
-  // Archivo seleccionado para importación
   selectedFile: File | null = null;
 
-  // Centralizamos la URL base para evitar repetir `environment.apiUrl`
   private readonly apiUrl = environment.apiUrl;
+
+  // Estadísticas agrupadas por jugador
+  playerStats: PlayerStats[] = [];
 
   constructor(
     private readonly http: HttpClient,
     private readonly modalService: NgbModal
   ) { }
 
-  // ----------------------------------------------------------
-  // Ciclo de vida
-  // ----------------------------------------------------------
   ngOnInit(): void {
     this.loadTournaments();
     this.loadCategories();
@@ -58,15 +54,69 @@ export class ResultsAndStatsComponent implements OnInit {
   }
 
   // ----------------------------------------------------------
+  // Interfaces internas para estadísticas
+  // ----------------------------------------------------------
+
+  private calculateAverage(values: number[]): number {
+    if (!values.length) return 0;
+    const sum = values.reduce((acc, val) => acc + val, 0);
+    return sum / values.length;
+  }
+
+  private groupResultsByPlayerAndTournament(results: IResults[]): void {
+    const grouped = new Map<string, Map<string, number[]>>();
+    const tournamentSet = new Set<string>();
+
+    for (const result of results) {
+      const playerName = result.personName || 'Desconocido';
+      const tournamentName = result.tournamentName || 'Sin torneo';
+
+      tournamentSet.add(tournamentName);
+
+      if (!grouped.has(playerName)) {
+        grouped.set(playerName, new Map());
+      }
+
+      const tournaments = grouped.get(playerName)!;
+
+      if (!tournaments.has(tournamentName)) {
+        tournaments.set(tournamentName, []);
+      }
+
+      tournaments.get(tournamentName)!.push(result.score ?? 0);
+    }
+
+    this.allTournaments = Array.from(tournamentSet).sort(); // Orden opcional
+    this.playerStats = Array.from(grouped.entries()).map(([playerName, tournamentsMap]) => {
+      const tournaments: PlayerTournamentStats[] = [];
+
+      for (const [tournamentName, scores] of tournamentsMap.entries()) {
+        const avg = this.calculateAverage(scores);
+        tournaments.push({ tournamentName, average: avg });
+      }
+
+      const allAverages = tournaments.map(t => t.average);
+      const totalAverage = this.calculateAverage(allAverages);
+
+      return {
+        name: playerName,
+        tournaments,
+        totalAverage
+      };
+    });
+  }
+
+
+  // ----------------------------------------------------------
   // Carga de datos desde el backend
   // ----------------------------------------------------------
+
   loadTournaments(): void {
     this.http
       .get<{ success: boolean; data: ITournament[] }>(`${this.apiUrl}/tournaments`)
       .subscribe({
         next: (res) => {
           this.tournaments = res.data ?? [];
-          // Para pruebas o UX básica, seleccionar el primero si existe
           this.selectedTournament = this.tournaments.length ? this.tournaments[0] : null;
         },
         error: (err) => console.error('Error al cargar torneos:', err),
@@ -98,6 +148,7 @@ export class ResultsAndStatsComponent implements OnInit {
         next: (res) => {
           this.results = res.data ?? [];
           this.filteredResults = this.results;
+          this.groupResultsByPlayerAndTournament(this.filteredResults);
         },
         error: (err) => console.error('Error al cargar resultados:', err),
       });
@@ -106,17 +157,20 @@ export class ResultsAndStatsComponent implements OnInit {
   // ----------------------------------------------------------
   // Filtros
   // ----------------------------------------------------------
+
   onFilterChange(): void {
-    this.filteredResults = this.results.filter((r) =>
-      // (!this.selectedCategory || r.category?.categoryId === Number(this.selectedCategory)) &&
-      // (!this.selectedModality || r.modality?.modalityId === Number(this.selectedModality)) &&
-      (!this.selectedRama || r.rama?.toLowerCase() === this.selectedRama.toLowerCase())
+    const filtered = this.results.filter((r) =>
+      (!this.selectedBranch || r.branch?.toLowerCase() === this.selectedBranch.toLowerCase())
     );
+
+    this.filteredResults = filtered;
+    this.groupResultsByPlayerAndTournament(filtered);
   }
 
   // ----------------------------------------------------------
   // Carga de archivo Excel
   // ----------------------------------------------------------
+
   openFileInput(): void {
     const input = document.createElement('input');
     input.type = 'file';
@@ -138,16 +192,16 @@ export class ResultsAndStatsComponent implements OnInit {
       confirmButtonText: 'Aceptar',
     });
 
-    // Aquí se puede implementar importación con XLSX cuando corresponda:
+    // Futuro: Implementar importación
     // this.importExcel(file);
   }
 
   // ----------------------------------------------------------
   // Acciones sobre resultados
   // ----------------------------------------------------------
+
   editResult(result: IResults): void {
     this.modalService.open(this.modalResultRef);
-    // Mantener logs de desarrollo con moderación
     // console.log('Editar resultado', result);
   }
 
@@ -168,8 +222,6 @@ export class ResultsAndStatsComponent implements OnInit {
             Swal.fire('Eliminado', 'Resultado eliminado correctamente', 'success');
             this.loadResults();
           },
-          // Importante: el callback no debe devolver una Promesa.
-          // Usamos un cuerpo de función con llaves para garantizar `void`.
           error: () => {
             Swal.fire('Error', 'No se pudo eliminar el resultado', 'error');
           },
@@ -178,9 +230,12 @@ export class ResultsAndStatsComponent implements OnInit {
     });
   }
 
+
+
   // ----------------------------------------------------------
   // Modales
   // ----------------------------------------------------------
+
   openModal(content: TemplateRef<unknown>): void {
     this.modalService.open(content, { size: 'lg' });
   }
@@ -188,4 +243,25 @@ export class ResultsAndStatsComponent implements OnInit {
   closeModal(): void {
     this.modalService.dismissAll();
   }
+
+  getPlayerAverage(player: PlayerStats, torneo: string): number | null {
+    const match = player.tournaments.find(t => t.tournamentName === torneo);
+    return match ? match.average : null;
+  }
+
+}
+
+// ----------------------------------------------------------
+// Interfaces auxiliares internas
+// ----------------------------------------------------------
+
+interface PlayerTournamentStats {
+  tournamentName: string;
+  average: number;
+}
+
+interface PlayerStats {
+  name: string;
+  tournaments: PlayerTournamentStats[];
+  totalAverage: number;
 }

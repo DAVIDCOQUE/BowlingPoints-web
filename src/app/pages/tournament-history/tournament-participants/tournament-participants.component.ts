@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, inject } from '@angular/core';
 import Swal from 'sweetalert2';
-import { environment } from 'src/environments/environment';
 
 // Interfaces
 import { ITournament } from 'src/app/model/tournament.interface';
 import { ICategory } from 'src/app/model/category.interface';
 import { IModality } from 'src/app/model/modality.interface';
-import { IUserResult } from 'src/app/model/userResult.inteface';
+import { ActivatedRoute } from '@angular/router';
+import { TournamentsService } from 'src/app/services/tournaments.service';
+import { BehaviorSubject, finalize } from 'rxjs';
+import { ITournamentRegistration } from 'src/app/model/tournament-registration.interface';
+import { IBranch } from 'src/app/model/branch.interface';
 
 @Component({
   selector: 'app-tournament-participants',
@@ -15,63 +17,73 @@ import { IUserResult } from 'src/app/model/userResult.inteface';
   styleUrls: ['./tournament-participants.component.css']
 })
 export class TournamentParticipantsComponent implements OnInit {
-  readonly apiUrl = environment.apiUrl;
+
+  // Estado general
+  isLoading$ = new BehaviorSubject<boolean>(false);
+
+  tournamentId: number | null = null;
 
   selectedTournament: ITournament | null = null;
   categories: ICategory[] = [];
   modalities: IModality[] = [];
-  ramas: string[] = ['Masculina', 'Femenina', 'Mixta'];
-  players: IUserResult[] = [];
+  branches: IBranch[] = [];
+  players: ITournamentRegistration[] = [];
 
+  // Cards para mostrar catálogos
   cards: { title: string; items: any[] }[] = [];
 
-  constructor(private http: HttpClient) { }
+  private readonly route = inject(ActivatedRoute);
+  private readonly tournamentsService = inject(TournamentsService);
 
   ngOnInit(): void {
-    this.loadTournament();
-    this.loadPlayers();
+    const idFromRoute = this.route.snapshot.paramMap.get('tournamentId');
+    this.tournamentId = idFromRoute ? Number(idFromRoute) : null;
+    if (this.tournamentId) {
+      this.loadTournamentById(this.tournamentId);
+    }
   }
 
   /** =====================
    *  CARGA DE INFORMACIÓN
    *  ===================== */
+  loadTournamentById(id: number): void {
+    this.isLoading$.next(true);
+    this.tournamentsService
+      .getTournamentById(id)
+      .pipe(finalize(() => this.isLoading$.next(false)))
+      .subscribe({
+        next: (tournament) => {
+          this.selectedTournament = tournament.data || null;
+          this.categories = tournament.data?.categories || [];
+          this.modalities = tournament.data?.modalities || [];
+          this.branches = tournament.data?.branches || [];
+          this.players = tournament.data?.tournamentRegistrations || [];
 
-  loadTournament(): void {
-    // Puedes reemplazar el id estático por un parámetro de ruta más adelante
-    this.http.get<{ success: boolean; data: ITournament }>(`${this.apiUrl}/tournaments/1`).subscribe({
-      next: res => {
-        this.selectedTournament = res.data;
-        this.updateCards();
-      },
-      error: () => {
-        Swal.fire('Error', 'No se pudo cargar la información del torneo', 'error');
-      }
-    });
+          this.buildCards();
+
+          if (!this.selectedTournament) {
+            Swal.fire('Atención', 'No se encontró el torneo solicitado', 'info');
+          }
+        },
+        error: (err) => {
+          console.error('Error al cargar torneo:', err);
+          Swal.fire('Error', 'No se pudo cargar el torneo', 'error');
+        }
+      });
   }
 
-
-  loadPlayers(): void {
-    // Endpoint de ejemplo — adáptalo al real de tu API
-    this.http.get<{ success: boolean; data: IUserResult[] }>(`${this.apiUrl}/tournaments/1/players`).subscribe({
-      next: res => {
-        this.players = res.data;
-      },
-      error: () => {
-        Swal.fire('Error', 'No se pudieron cargar los jugadores inscritos', 'error');
-      }
-    });
-  }
-
-  /** =====================
-   *  FUNCIONES AUXILIARES
-   *  ===================== */
-
-  updateCards(): void {
+  private buildCards(): void {
     this.cards = [
-      { title: 'Modalidades', items: this.modalities },
-      { title: 'Categorías', items: this.categories },
-      { title: 'Ramas', items: this.ramas }
+      { title: 'Modalidades', items: this.modalities || [] },
+      { title: 'Categorías', items: this.categories || [] },
+      { title: 'Ramas', items: this.branches || [] },
     ];
+  }
+
+  getStatusLabel(status: any): string {
+    if (status === true) return 'Activo';
+    if (status === false) return 'Inactivo';
+    return 'N/D';
   }
 
   onImgError(event: Event, fallback: string): void {

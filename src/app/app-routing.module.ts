@@ -14,7 +14,7 @@ import { TournamentsComponent } from './pages/tournaments/tournaments.component'
 import { UsersComponent } from './pages/users/users.component';
 import { TournamentlistComponent } from './pages/tournament-history/tournament-list/tournament-list.component';
 import { TournamentDetailsComponent } from './pages/tournament-history/tournament-details/tournament-details.component';
-import { TournamentSummaryComponent } from './pages/tournament-history/tournament-summary/rtournament-summary.component';
+import { TournamentSummaryComponent } from './pages/tournament-history/tournament-summary/tournament-summary.component';
 import { PlayerDetailsComponent } from './pages/tournament-history/player-details/player-details.component';
 
 import { AuthGuard } from './auth/auth.guard';
@@ -26,6 +26,7 @@ import { AmbitComponent } from './pages/ambit/ambit.component';
 import { ResultsComponent } from './pages/results/results.component';
 import { TournamentParticipantsComponent } from './pages/tournament-history/tournament-participants/tournament-participants.component';
 import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
+import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -38,9 +39,9 @@ export const routes: Routes = [
       // VISITANTES (sin login, sin protección)
       { path: 'dashboard', component: DashboardComponent },
       { path: 'tournament-list/:ambitId', component: TournamentlistComponent },
-      { path: 'tournament-participants/:tournamentId', component: TournamentParticipantsComponent },
       { path: 'tournament-summary/:tournamentId', component: TournamentSummaryComponent },
       { path: 'tournament-details/:tournamentId/:modalityId', component: TournamentDetailsComponent },
+      { path: 'tournament-participants/:tournamentId', component: TournamentParticipantsComponent },
       { path: 'player-details/:userId', component: PlayerDetailsComponent },
 
       // JUGADORES (rol: JUGADOR, ENTRENADOR, ADMIN)
@@ -59,6 +60,7 @@ export const routes: Routes = [
       { path: 'clubs', component: ClubsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ADMIN'] } },
       { path: 'users', component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
       { path: 'tournaments', component: TournamentsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
+      { path: 'tournament-results/:tournamentId', component: TournamentResultComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
       { path: 'results-stats', component: ResultsAndStatsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
       { path: 'reults', component: ResultsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
       { path: 'modalitys', component: ModalityComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },

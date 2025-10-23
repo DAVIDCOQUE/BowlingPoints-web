@@ -1,27 +1,15 @@
 <div class="container mt-4">
-  <!-- Encabezado del Torneo -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-body">
-      <h3 class="text-center text-primary fw-bold mb-3">
-        Torneo: {{ selectedTournament?.name || '---' }}
-      </h3>
 
-      <div class="row g-3">
-        <div class="col-md-6">
-          <p><strong>Organizador:</strong> {{ selectedTournament?.organizer || '-' }}</p>
-          <p><strong>Ubicación:</strong> {{ selectedTournament?.location || '-' }}</p>
-          <p><strong>Ámbito:</strong> {{ selectedTournament?.ambitName || '-' }}</p>
-        </div>
-        <div class="col-md-6">
-          <p><strong>Fecha Inicio:</strong> {{ selectedTournament?.startDate | date:'dd/MM/yyyy' }}</p>
-          <p><strong>Fecha Fin:</strong> {{ selectedTournament?.endDate | date:'dd/MM/yyyy' }}</p>
-          <p><strong>Estado:</strong> {{ selectedTournament?.status || 'Activo' }}</p>
-        </div>
-      </div>
-    </div>
+  <!-- Título y descripción -->
+  <div class="mb-4 text-center">
+    <h2 class="text-primary fw-bold">📊 Resultados y Estadísticas de Jugadores</h2>
+    <p class="text-muted fs-6 mb-0">
+      Visualiza el desempeño de cada jugador por torneo. Filtra por categoría, modalidad y rama para ver promedios
+      específicos y comparativos entre torneos.
+    </p>
   </div>
 
-  <!-- Filtros principales -->
+  <!-- Filtros -->
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <div class="row g-3 align-items-end">
@@ -43,82 +31,46 @@
 
         <div class="col-md-3">
           <label class="form-label">Rama</label>
-          <select class="form-select form-select-sm" [(ngModel)]="selectedRama" (change)="onFilterChange()">
+          <select class="form-select form-select-sm" [(ngModel)]="selectedBranch" (change)="onFilterChange()">
             <option value="">Todas</option>
             <option value="Masculina">Masculina</option>
             <option value="Femenina">Femenina</option>
             <option value="Mixta">Mixta</option>
           </select>
         </div>
-
-        <div class="col-md-3 text-end">
-          <button class="btn btn-outline-primary btn-sm me-2" (click)="openFileInput()">
-            <i class="fas fa-file-excel me-1"></i> Cargar Excel
-          </button>
-          <input type="file" #excelInput accept=".xlsx, .xls" hidden (change)="onFileSelected($event)" />
-
-          <button class="btn btn-success btn-sm" (click)="openModal(modalResultRef)">
-            <i class="fas fa-plus-circle me-1"></i> Nuevo Resultado
-          </button>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- Tabla de resultados -->
+  <!-- Tabla horizontal de promedios por jugador -->
   <div class="card shadow-sm">
     <div class="card-body">
-      <h5 class="fw-bold mb-3 text-secondary">Resultados del Torneo</h5>
-
       <div class="table-responsive">
-        <table class="table table-hover table-sm align-middle text-center border">
+        <table class="table table-bordered table-sm text-center align-middle">
           <thead class="table-light">
-            <tr class="fw-bold">
-              <th>ID</th>
-              <th>Torneo</th>
-              <th>Categoría</th>
-              <th>Modalidad</th>
-              <th>Rama</th>
-              <th>Ronda</th>
-              <th>Jugador</th>
-              <th>Equipo</th>
-              <th>Pista</th>
-              <th>Línea Jugada</th>
-              <th>Puntaje</th>
-              <th>Acciones</th>
+            <tr>
+              <th class="text-primary">Jugador</th>
+              <th *ngFor="let torneo of allTournaments" class="text-secondary">{{ torneo }}</th>
+              <th class="table-secondary">Total Promedio</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr *ngFor="let result of filteredResults">
-              <td>{{ result.resultId }}</td>
-              <td>{{ result.tournamentName || '-' }}</td>
-              <td>{{ result.categoryName || '-' }}</td>
-              <td>{{ result.modalityName || '-' }}</td>
-              <td>{{ result.rama || '-' }}</td>
-              <td>{{ result.roundNumber || '-' }}</td>
-              <td>{{ result.personName || '-' }}</td>
-              <td>{{ result.teamName || '-' }}</td>
-              <td>{{ result.laneNumber || '-' }}</td>
-              <td>{{ result.lineNumber || '-' }}</td>
-              <td>{{ result.score || '-' }}</td>
-              <td>
-                <div class="d-flex justify-content-center gap-2">
-                  <button class="btn btn-outline-primary btn-sm" (click)="editResult(result)">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn btn-outline-danger btn-sm" (click)="deleteResult(result.resultId)">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
+            <tr *ngFor="let player of playerStats">
+              <td class="fw-bold text-primary">{{ player.name }}</td>
+              <td *ngFor="let torneo of allTournaments">
+               {{ getPlayerAverage(player, torneo) !== null ? (getPlayerAverage(player, torneo) | number:'1.0-0') : '-' }}
+              </td>
+              <td class="fw-bold table-secondary">
+                {{ player.totalAverage | number:'1.0-0' }}
               </td>
             </tr>
-            <tr *ngIf="!filteredResults?.length">
-              <td colspan="12" class="text-muted py-3">No hay resultados disponibles.</td>
+            <tr *ngIf="!playerStats.length">
+              <td [attr.colspan]="allTournaments.length + 2" class="text-muted py-3">No hay datos para mostrar.</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
+
 </div>

@@ -22,6 +22,12 @@ export class TournamentsService {
     );
   }
 
+  getTournamentById(id: number): Observable<{ success: boolean; message: string; data: ITournament | null }> {
+    return this.http.get<{ success: boolean; message: string; data: ITournament | null }>(
+      `${this.apiUrl}/tournaments/${id}`
+    );
+  }
+
   getModalities(): Observable<{ success: boolean; message: string; data: IModality[] }> {
     return this.http.get<{ success: boolean; message: string; data: IModality[] }>(
       `${this.apiUrl}/modalities`

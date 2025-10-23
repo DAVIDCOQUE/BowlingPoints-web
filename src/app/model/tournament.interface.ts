@@ -1,7 +1,9 @@
 import { IAmbit } from './ambit.interface';
+import { IBranch } from './branch.interface';
 import { ICategory } from './category.interface';
 import { IModality } from './modality.interface';
 import { ITeam } from './team.interface';
+import { ITournamentRegistration } from './tournament-registration.interface';
 export interface ITournament {
   tournamentId: number;
   name: string;
@@ -19,5 +21,7 @@ export interface ITournament {
 
   categories?: ICategory[];
   modalities?: IModality[];
+  tournamentRegistrations?: ITournamentRegistration[];
+  branches?: IBranch[];
   teams?: ITeam[];
 }
