@@ -18,6 +18,7 @@ export class TournamentDetailsSummaryComponent implements OnInit {
 
   // Parámetros de ruta
   public readonly tournamentId: number = Number(this.route.snapshot.paramMap.get('tournamentId'));
+  public readonly branchId: number = Number(this.route.snapshot.paramMap.get('branchId'));
 
   // Datos
   public resumenTorneo: any = null;
@@ -38,11 +39,7 @@ export class TournamentDetailsSummaryComponent implements OnInit {
    * Carga los resultados generales del torneo desde la API
    */
   loadGeneralResults(): void {
-    let url = `${environment.apiUrl}/results/by-modality?tournamentId=${this.tournamentId}`;
-
-    if (this.roundNumber != null) {
-      url += `&roundNumber=${this.roundNumber}`;
-    }
+    let url = `${environment.apiUrl}/results/by-modality?tournamentId=${this.tournamentId}&roundNumber=${this.roundNumber}&branchId=${this.branchId}`;
 
     this.http.get<any>(url).subscribe({
       next: res => {

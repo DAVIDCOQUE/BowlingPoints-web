@@ -4,48 +4,49 @@ import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-export interface IEstadisticas {
-  tournamentsWon: number;
+/** -----------------------------
+ * NUEVO MODELO: coincide con el backend
+ * ----------------------------- */
+export interface UserDashboardStats {
+  avgScoreGeneral: number;
+  bestLine: number;
   totalTournaments: number;
-  totalStrikes: number;
-  avgScore: number;
-  bestGame: number;
+  totalLines: number;
+  bestTournamentAvg: TournamentAvg;
+  avgPerTournament: TournamentAvg[];
+  avgPerModality: ModalityAvg[];
+  scoreDistribution: ScoreRange[];
 }
 
-export interface ITorneoResumen {
+export interface TournamentAvg {
   tournamentId: number;
-  name: string;
-  startDate: string;
-  lugar: string;
-  modalidad: string;
-  categoria: string;
-  bestScore: number;
+  tournamentName: string;
   imageUrl: string;
-  resultados: number;
+  average: number;
+  startDate: string;
 }
 
+export interface ModalityAvg {
+  modalityName: string;
+  average: number;
+}
+
+export interface ScoreRange {
+  label: string; // Ejemplo: "130–160"
+  count: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class UserStatsApiService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
-  /** Obtiene estadísticas generales del usuario */
-  getResumenEstadisticas(userId: number): Observable<IEstadisticas> {
-    return this.http.get<{ success: boolean; data: IEstadisticas }>(
-      `${this.apiUrl}/api/user-stats/summary?userId=${userId}`
-    ).pipe(
-      map(res => res.data)
-    );
+  /** 🔹 Obtiene todas las estadísticas del dashboard del usuario */
+  getDashboardStats(userId: number): Observable<UserDashboardStats> {
+    return this.http
+      .get<{ success: boolean; data: UserDashboardStats }>(
+        `${this.apiUrl}/api/user-stats/dashboard?userId=${userId}`
+      )
+      .pipe(map(res => res.data));
   }
-
-  /** Obtiene los torneos más destacados del usuario */
-  getTopTorneos(userId: number): Observable<ITorneoResumen[]> {
-    return this.http.get<{ success: boolean; data: ITorneoResumen[] }>(
-      `${this.apiUrl}/api/user-stats/top-tournaments?userId=${userId}`
-    ).pipe(
-      map(res => res.data)
-    );
-  }
-
 }

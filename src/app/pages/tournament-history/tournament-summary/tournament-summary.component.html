@@ -46,7 +46,7 @@
       <div class="row g-3" *ngIf="branches.length > 0; else noBranches">
         <div class="col-12" *ngFor="let branch of branches">
           <div class="card shadow-sm h-100 border-0 rounded-4 text-center card_h"
-            [routerLink]="['/tournament-details-summary', tournamentId]">
+            [routerLink]="['/tournament-details-summary', tournamentId, branch.branchId]">
             <div class="card-body d-flex flex-column justify-content-center align-items-center p-3">
               <h4 class="fw-semibold mb-2">{{ branch.name }}</h4>
               <h5 class="badge bg-success bg-opacity-10 text-success fw-semibold px-3">

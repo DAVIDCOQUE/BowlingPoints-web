@@ -8,13 +8,41 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
-import {
-  ITorneoResumen,
-  IEstadisticas,
-  UserStatsApiService,
-} from 'src/app/services/user-stats-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { UserStatsApiService } from 'src/app/services/user-stats-api.service';
 import Swal from 'sweetalert2';
+
+import { environment } from '../../../environments/environment';
+
+// Interfaces de la respuesta del backend
+interface UserDashboardStats {
+  avgScoreGeneral: number;
+  bestLine: number;
+  totalTournaments: number;
+  totalLines: number;
+  bestTournamentAvg: TournamentAvg;
+  avgPerTournament: TournamentAvg[];
+  avgPerModality: ModalityAvg[];
+  scoreDistribution: ScoreRange[];
+}
+
+interface TournamentAvg {
+  tournamentId: number;
+  tournamentName: string;
+  imageUrl: string;
+  average: number;
+  startDate: string;
+}
+
+interface ModalityAvg {
+  modalityName: string;
+  average: number;
+}
+
+interface ScoreRange {
+  label: string;
+  count: number;
+}
 
 @Component({
   selector: 'app-user-stats',
@@ -23,198 +51,255 @@ import Swal from 'sweetalert2';
 })
 export class UserStatsComponent implements OnInit, AfterViewInit {
   @ViewChild('lineChartCanvas') lineChartCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('lineChartCanvas2')
-  lineChartCanvas2!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('barChartModalidad') barChartCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('pieChartDistribucion') scoreDistChartCanvas!: ElementRef<HTMLCanvasElement>;
+
 
   private readonly router = inject(Router);
   private readonly userStatsApi = inject(UserStatsApiService);
   private readonly authService = inject(AuthService);
 
-  public userId: number = 0;
-  public torneos: ITorneoResumen[] = [];
-  public topTorneos: ITorneoResumen[] = [];
-  public estadisticas: IEstadisticas = {
-    tournamentsWon: 0,
-    totalTournaments: 0,
-    totalStrikes: 0,
-    avgScore: 0,
-    bestGame: 0,
-  };
 
-  public imagenesEstadisticas: Record<string, string> = {
-    torneo: 'assets/img/torneoDefault.png',
-    chuzas: 'assets/img/chuzas.png',
-    promedio: 'assets/img/promedio.png',
-    mejorJuego: 'assets/img/mejor-juego.png',
-  };
+  public readonly apiUrl = environment.apiUrl;
+  public userId: number = 0;
+  public dashboardStats!: UserDashboardStats;
 
   private lineChartInstance?: Chart;
-  private barChartInstance2?: Chart;
+  private barChartInstance?: Chart;
+  private scoreDistChartInstance?: Chart;
 
   constructor() {
     Chart.register(...registerables);
     this.initializeUser();
   }
 
-  /** Inicializa datos de usuario desde el almacenamiento */
+  ngOnInit(): void {
+    if (this.userId > 0) {
+      this.loadDashboardStats();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.renderAllCharts(); // Intenta renderizar una vez montado el DOM
+  }
+
   private initializeUser(): void {
     const user = this.getUserFromStorage();
     this.userId = user?.userId ?? 0;
   }
 
-  ngOnInit(): void {
-    if (this.userId > 0) {
-      this.cargarEstadisticas();
-      this.cargarTopTorneos();
-    }
-  }
-
-  get apiUrl(): string {
-    return this.authService.baseUrl;
-  }
-
-  ngAfterViewInit(): void {
-    this.updateCharts();
-  }
-
-  /** Carga estadísticas generales del usuario */
-  private cargarEstadisticas(): void {
-    this.userStatsApi.getResumenEstadisticas(this.userId).subscribe({
-      next: (data) => (this.estadisticas = data),
-      error: () => this.handleError('estadísticas'),
+  /** Llama al backend y carga las estadísticas */
+  private loadDashboardStats(): void {
+    this.userStatsApi.getDashboardStats(this.userId).subscribe({
+      next: (data) => {
+        this.dashboardStats = data;
+        console.log('📊 Estadísticas dashboard cargadas:', this.dashboardStats);
+        this.renderAllCharts();
+      },
+      error: () => this.handleError('estadísticas del dashboard'),
     });
   }
 
-  /** Carga los torneos destacados del usuario */
-  private cargarTopTorneos(): void {
-    this.userStatsApi.getTopTorneos(this.userId).subscribe({
-      next: (torneos) => {
-        this.topTorneos = torneos;
-        this.torneos = torneos;
-        this.updateCharts();
-      },
-      error: () => this.handleError('torneos'),
-    });
+  /** Renderiza todos los gráficos */
+  private renderAllCharts(): void {
+    if (!this.dashboardStats) return;
+
+    if (this.lineChartCanvas && !this.lineChartInstance) this.renderLineChart();
+    if (this.barChartCanvas && !this.barChartInstance) this.renderBarChart();
+    if (this.scoreDistChartCanvas && !this.scoreDistChartInstance)
+      this.renderScoreDistributionChart();
   }
 
-  /** Crea gráficos si aún no están creados */
-  private updateCharts(): void {
-    const charts = [
-      {
-        canvas: this.lineChartCanvas,
-        instance: this.lineChartInstance,
-        create: () => this.createLineChart(),
-      },
-      {
-        canvas: this.lineChartCanvas2,
-        instance: this.barChartInstance2,
-        create: () => this.createBarChart2(),
-      },
-    ];
+  /** Gráfico de línea - promedio por torneo */
+  private renderLineChart(): void {
+    const labels = this.dashboardStats.avgPerTournament.map(t => t.tournamentName);
+    const data = this.dashboardStats.avgPerTournament.map(t => t.average);
 
-    charts.forEach(({ canvas, instance, create }) => {
-      if (canvas && !instance) create();
-    });
-  }
+    // Gradiente para el fondo de la línea
+    const ctx = this.lineChartCanvas.nativeElement.getContext('2d');
+    if (!ctx) return;
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(0, 123, 255, 0.4)');
+    gradient.addColorStop(1, 'rgba(0, 123, 255, 0)');
 
-  /** Crea el gráfico de líneas */
-  private createLineChart(): void {
-    const labels = this.torneos.map((t) => t.name);
-    const data = this.torneos.map((t) => t.resultados);
-    this.lineChartInstance = this.createChartBase(
-      'line',
-      this.lineChartCanvas,
-      labels,
-      data
-    );
-  }
-
-  /** Crea el gráfico de barras */
-  private createBarChart2(): void {
-    const labels = this.torneos.map((t) => t.name);
-    const data = this.torneos.map((t) => t.resultados);
-    this.barChartInstance2 = this.createChartBase(
-      'bar',
-      this.lineChartCanvas2,
-      labels,
-      data
-    );
-  }
-
-  /** Crea la configuración base para cualquier gráfico */
-  private createChartBase(
-    type: 'line' | 'bar',
-    canvas: ElementRef<HTMLCanvasElement>,
-    labels: string[],
-    data: number[]
-  ): Chart {
-    return new Chart(canvas.nativeElement, {
-      type,
+    this.lineChartInstance = new Chart(ctx, {
+      type: 'line',
       data: {
         labels,
-        datasets: [
-          {
-            label: 'Resultados por Torneo',
-            data,
-            fill: type === 'line',
-            backgroundColor:
-              type === 'line'
-                ? 'rgba(0, 123, 255, 0.1)'
-                : [
-                    'rgba(0, 123, 255, 0.5)',
-                    'rgba(40, 167, 69, 0.5)',
-                    'rgba(255, 193, 7, 0.5)',
-                    'rgba(220, 53, 69, 0.5)',
-                  ],
-            borderColor:
-              type === 'line'
-                ? '#007bff'
-                : ['#007bff', '#28a745', '#ffc107', '#dc3545'],
-            borderWidth: 1,
-            tension: 0.3,
-          },
-        ],
+        datasets: [{
+          label: 'Promedio por Torneo',
+          data,
+          fill: true,
+          backgroundColor: gradient,
+          borderColor: '#007bff',
+          borderWidth: 2,
+          pointBackgroundColor: '#007bff',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          tension: 0.4
+        }]
       },
       options: {
-        responsive: false,
+        responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: true, position: 'top' },
+          legend: {
+            position: 'top',
+            labels: { font: { size: 13 }, color: '#444' }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            titleFont: { size: 14 },
+            bodyFont: { size: 13 }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#555', font: { size: 12 } },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#555', stepSize: 20 },
+            grid: { color: 'rgba(0,0,0,0.05)' }
+          }
         },
         animation: {
-          duration: 1500,
-          easing: 'easeOutBounce',
-        },
-        scales:
-          type === 'bar'
-            ? {
-                y: { beginAtZero: true },
-              }
-            : undefined,
+          duration: 1000,
+          easing: 'easeOutQuart'
+        }
+      }
+    });
+  }
+  /** Gráfico de barras - promedio por modalidad */
+  private renderBarChart(): void {
+    const labels = this.dashboardStats.avgPerModality.map(m => m.modalityName);
+    const data = this.dashboardStats.avgPerModality.map(m => m.average);
+
+    this.barChartInstance = new Chart(this.barChartCanvas.nativeElement, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Promedio por Modalidad',
+          data,
+          backgroundColor: 'rgba(40, 167, 69, 0.5)',
+          borderColor: '#28a745',
+          borderWidth: 2,
+          borderRadius: 8,
+          hoverBackgroundColor: 'rgba(40, 167, 69, 0.8)',
+          maxBarThickness: 60
+        }]
       },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { font: { size: 13 }, color: '#444' }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            titleFont: { size: 14 },
+            bodyFont: { size: 13 }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#555', font: { size: 12 } },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#555', stepSize: 20 },
+            grid: { color: 'rgba(0,0,0,0.05)' }
+          }
+        },
+        animation: {
+          duration: 800,
+          easing: 'easeOutQuart'
+        }
+      }
     });
   }
 
-  /** Navega al resumen de un torneo */
-  resumenToreno(id: number): void {
-    this.router.navigate(['/resumen-torneo', id]);
+
+  /** Gráfico de barras - distribución de puntajes */
+  private renderScoreDistributionChart(): void {
+    const labels = this.dashboardStats.scoreDistribution.map(s => s.label);
+    const data = this.dashboardStats.scoreDistribution.map(s => s.count);
+
+    // 🎨 Paleta dinámica (una para cada rango)
+    const colors = [
+      'rgba(255, 99, 132, 0.6)',   // rojo
+      'rgba(255, 159, 64, 0.6)',   // naranja
+      'rgba(255, 205, 86, 0.6)',   // amarillo
+      'rgba(75, 192, 192, 0.6)',   // verde agua
+      'rgba(54, 162, 235, 0.6)',   // azul
+      'rgba(153, 102, 255, 0.6)'   // violeta
+    ];
+
+    this.scoreDistChartInstance = new Chart(this.scoreDistChartCanvas.nativeElement, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Distribución de Puntajes',
+          data,
+          backgroundColor: colors.slice(0, labels.length),
+          borderColor: colors.slice(0, labels.length).map(c => c.replace('0.6', '1')),
+          borderWidth: 2,
+          borderRadius: 6,
+          hoverBackgroundColor: colors.slice(0, labels.length).map(c => c.replace('0.6', '0.8')),
+          maxBarThickness: 50
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { font: { size: 13 }, color: '#444' }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            titleFont: { size: 14 },
+            bodyFont: { size: 13 }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#555', font: { size: 12 } },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#555', stepSize: 1 },
+            grid: { color: 'rgba(0,0,0,0.05)' }
+          }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'easeOutQuart'
+        }
+      }
+    });
   }
 
-  /** Reemplaza la imagen si no carga */
+  /** Reemplazo de imagen en caso de error */
   onImgError(event: Event, defaultPath: string): void {
     const target = event?.target;
     if (target instanceof HTMLImageElement) {
       target.src = defaultPath;
-    } else {
-      console.warn('Elemento no válido para reemplazar imagen.');
     }
   }
 
-  /** Obtiene el usuario del localStorage */
+  /** Obtener usuario desde localStorage */
   private getUserFromStorage(): { userId: number } | null {
     const raw = localStorage.getItem('user');
     if (!raw) return null;
-
     try {
       const parsed = JSON.parse(raw);
       return parsed && typeof parsed.userId === 'number' ? parsed : null;
@@ -224,12 +309,20 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /** Manejo de errores */
   private handleError(context: string): void {
     Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: `❌ No se pudieron cargar los ${context}.`,
+      text: `❌ No se pudieron cargar las ${context}.`,
       confirmButtonColor: '#dc3545',
     });
   }
+
+  public imagenesEstadisticas: Record<string, string> = {
+    torneo: 'assets/img/torneoDefault.png',
+    chuzas: 'assets/img/chuzas.png',
+    promedio: 'assets/img/promedio.png',
+    mejorJuego: 'assets/img/mejor-juego.png',
+  };
 }

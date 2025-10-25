@@ -42,7 +42,7 @@ export const routes: Routes = [
       { path: 'tournament-list/:ambitId', component: TournamentlistComponent },
       { path: 'tournament-summary/:tournamentId', component: TournamentSummaryComponent },
       { path: 'tournament-details/:tournamentId/:modalityId', component: TournamentDetailsComponent },
-      { path: 'tournament-details-summary/:tournamentId', component: TournamentDetailsSummaryComponent },
+      { path: 'tournament-details-summary/:tournamentId/:branchId', component: TournamentDetailsSummaryComponent },
       { path: 'tournament-participants/:tournamentId', component: TournamentParticipantsComponent },
       { path: 'player-details/:userId', component: PlayerDetailsComponent },
 
