@@ -72,10 +72,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "BowlingPoints:build:production"
+              "buildTarget": "BowlingPoints:build:production"
             },
             "development": {
-              "browserTarget": "BowlingPoints:build:development"
+              "buildTarget": "BowlingPoints:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -83,7 +83,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "BowlingPoints:build"
+            "buildTarget": "BowlingPoints:build"
           }
         },
         "test": {
