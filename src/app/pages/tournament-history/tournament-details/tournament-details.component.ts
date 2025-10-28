@@ -45,7 +45,6 @@ export class TournamentDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadResultsTable();
-    this.loadResultsTable2();
   }
 
   /**
@@ -53,35 +52,6 @@ export class TournamentDetailsComponent implements OnInit {
    */
   loadResultsTable(): void {
     const url = `${environment.apiUrl}/results/tournament-table?tournamentId=${this.tournamentId}&modalityId=${this.modalityId}&roundNumber=${this.roundNumber}`;
-
-    this.http.get<IResultsResponse>(url).subscribe({
-      next: data => {
-        console.log(' Datos cargados correctamente:', data);
-
-        this.resumenTorneo = data.tournament || null;
-        this.players = data.results || [];
-        this.modalities = data.modalities || [];
-
-        const modalidadActual = this.modalities.find(m => m.modalityId === this.modalityId);
-        this.nombreModalidad = modalidadActual?.name || 'Sin modalidad';
-
-        this.rounds = data.rounds || [];
-
-        this.promedioRonda = data.avgByRound || 0;
-        this.promediosPorLinea = data.avgByLine || {};
-        this.mayorLinea = data.highestLine || null;
-
-        this.maxJuegos = this.getMaxJuegos(this.players);
-      },
-      error: err => {
-        console.error(' Error cargando datos:', err);
-      }
-    });
-  }
-
-
-   loadResultsTable2(): void {
-    const url = `${environment.apiUrl}/results/by-modality?tournamentId=${this.tournamentId}&roundNumber=${this.roundNumber}`;
 
     this.http.get<IResultsResponse>(url).subscribe({
       next: data => {
