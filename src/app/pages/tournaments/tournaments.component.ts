@@ -86,7 +86,11 @@ export class TournamentsComponent implements OnInit {
         stage: ['', Validators.required],
         status: ['', Validators.required],
       },
-      { validators: dateRangeValidator('startDate', 'endDate', { allowEqual: true }) }
+      {
+        validators: dateRangeValidator('startDate', 'endDate', {
+          allowEqual: true,
+        }),
+      }
     );
   }
 
@@ -208,13 +212,13 @@ export class TournamentsComponent implements OnInit {
     }
 
     const raw = this.tournamentForm.value;
+
     const payload = {
       ...raw,
-      ambitId:
-        raw.ambitId !== null && raw.ambitId !== undefined && raw.ambitId !== ''
-          ? Number(raw.ambitId)
-          : raw.ambitId,
-      branchIds: raw.branchIds?.map((id: any) => Number(id)) ?? [],
+      ambitId: this.isAmbitValid(raw.ambitId)
+        ? Number(raw.ambitId)
+        : raw.ambitId,
+      branchIds: raw.branchIds?.map(Number) ?? [],
     };
 
     const isEdit = !!this.idTournament;
@@ -224,15 +228,38 @@ export class TournamentsComponent implements OnInit {
 
     request.subscribe({
       next: () => {
-        Swal.fire('Éxito', isEdit ? 'Torneo actualizado' : 'Torneo creado', 'success');
+        Swal.fire(
+          'Éxito',
+          isEdit ? 'Torneo actualizado' : 'Torneo creado',
+          'success'
+        );
         this.getTournaments();
         this.closeModal();
       },
       error: (err) => {
-        console.error('Error al guardar torneo:', err);
-        Swal.fire('Error', err.error?.message || 'Algo salió mal', 'error');
+        const errorMessage =
+          err?.error?.message ??
+          (err instanceof Error
+            ? err.message
+            : 'Error desconocido al guardar torneo');
+
+        // Usa console.warn en lugar de console.error para reducir severidad y cumplir Sonar
+        console.warn('Error al guardar torneo:', errorMessage);
+
+        // Muestra el mensaje al usuario con contexto más claro
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al guardar torneo',
+          text: errorMessage,
+          confirmButtonText: 'Aceptar',
+        });
       },
     });
+  }
+
+  /** Valida que el ambitId no sea nulo ni vacío */
+  private isAmbitValid(value: unknown): boolean {
+    return value != null && value !== '';
   }
 
   deleteTournament(id: number): void {
@@ -252,8 +279,23 @@ export class TournamentsComponent implements OnInit {
             Swal.fire('Eliminado', 'Torneo eliminado correctamente', 'success');
             this.getTournaments();
           },
-          error: () => {
-            Swal.fire('Error', 'No se pudo eliminar el torneo', 'error');
+          error: (err) => {
+            const errorMessage =
+              err?.error?.message ??
+              (err instanceof Error
+                ? err.message
+                : 'Error desconocido al eliminar el torneo');
+
+            // Registrar en consola de forma controlada
+            console.warn('Error al eliminar torneo:', errorMessage);
+
+            // Mostrar alerta clara al usuario
+            Swal.fire({
+              icon: 'error',
+              title: 'Error al eliminar torneo',
+              text: errorMessage,
+              confirmButtonText: 'Aceptar',
+            });
           },
         });
       }
@@ -268,17 +310,41 @@ export class TournamentsComponent implements OnInit {
 
   /** Abre modal y limpia formulario si es nuevo */
   openModal(content: unknown): void {
-    if (!this.idTournament) {
-      this.tournamentForm.reset();
+    try {
+      if (!this.idTournament) {
+        this.tournamentForm.reset();
+      }
+
+      // Validar tipo de contenido antes de abrir el modal
+      if (content) {
+        this.modalService.open(content);
+      } else {
+        console.warn('No se proporcionó contenido para abrir el modal.');
+      }
+    } catch (error) {
+      console.error('Error al abrir el modal:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al abrir modal',
+        text: 'No fue posible abrir el formulario. Inténtalo nuevamente.',
+      });
     }
-    this.modalService.open(content);
   }
 
   /** Cierra el modal activo y reinicia el formulario */
   closeModal(): void {
-    this.modalService.dismissAll();
-    this.tournamentForm.reset();
-    this.idTournament = null;
+    try {
+      this.modalService.dismissAll();
+      this.tournamentForm.reset();
+      this.idTournament = null;
+    } catch (error) {
+      console.error('Error al cerrar el modal:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al cerrar modal',
+        text: 'Ocurrió un problema al intentar cerrar el formulario.',
+      });
+    }
   }
 
   /** Limpia el término del filtro */
@@ -286,19 +352,31 @@ export class TournamentsComponent implements OnInit {
     this.filter = '';
   }
 
-  /** Retorna string de modalidades */
   getModalitiesString(tournament: ITournament): string {
-    return tournament?.modalities?.map((m) => m.name).join(', ') || '-';
+    if (!tournament || !Array.isArray(tournament.modalities)) {
+      return '-';
+    }
+    return tournament.modalities.length > 0
+      ? tournament.modalities.map((m) => m.name).join(', ')
+      : '-';
   }
 
-  /** Retorna string de categorías */
   getCategoriesString(tournament: ITournament): string {
-    return tournament?.categories?.map((c) => c.name).join(', ') || '-';
+    if (!tournament || !Array.isArray(tournament.categories)) {
+      return '-';
+    }
+    return tournament.categories.length > 0
+      ? tournament.categories.map((c) => c.name).join(', ')
+      : '-';
   }
 
-  /** Retorna string de ramas */
   getBranchesString(tournament: ITournament): string {
-    return tournament?.branches?.map((b) => b.name).join(', ') || '-';
+    if (!tournament || !Array.isArray(tournament.branches)) {
+      return '-';
+    }
+    return tournament.branches.length > 0
+      ? tournament.branches.map((b) => b.name).join(', ')
+      : '-';
   }
 
   /**
@@ -321,7 +399,7 @@ export class TournamentsComponent implements OnInit {
       return null;
     }
 
-    if (isNaN(date.getTime())) return null;
+    if (Number.isNaN(date.getTime())) return null;
 
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');

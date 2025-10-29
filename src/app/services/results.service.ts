@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -20,9 +20,37 @@ export class ResultsService {
   private readonly apiUrl = environment.apiUrl;
 
   /** --- Resultados --- */
-  getResults(): Observable<{ success: boolean; message: string; data: IResults[] }> {
-    return this.http.get<{ success: boolean; message: string; data: IResults[] }>(
-      `${this.apiUrl}/results`
+  getResults(): Observable<{
+    success: boolean;
+    message: string;
+    data: IResults[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      message: string;
+      data: IResults[];
+    }>(`${this.apiUrl}/results`);
+  }
+
+  /** --- Resultados filtrados --- */
+  getResultsFiltered(
+    tournamentId: number,
+    branchId?: number,
+    roundNumber?: number
+  ): Observable<IResults[]> {
+    let params = new HttpParams();
+
+    if (branchId) {
+      params = params.set('branchId', branchId.toString());
+    }
+
+    if (roundNumber) {
+      params = params.set('roundNumber', roundNumber.toString());
+    }
+
+    return this.http.get<IResults[]>(
+      `${this.apiUrl}/results/tournament/${tournamentId}`,
+      { params }
     );
   }
 
@@ -39,25 +67,47 @@ export class ResultsService {
   }
 
   /** --- Catálogos auxiliares --- */
-  getTournaments(): Observable<{ success: boolean; message: string; data: ITournament[] }> {
-    return this.http.get<{ success: boolean; message: string; data: ITournament[] }>(
-      `${this.apiUrl}/tournaments`
-    );
+  getTournaments(): Observable<{
+    success: boolean;
+    message: string;
+    data: ITournament[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      message: string;
+      data: ITournament[];
+    }>(`${this.apiUrl}/tournaments`);
   }
 
-  getCategories(): Observable<{ success: boolean; message: string; data: ICategory[] }> {
-    return this.http.get<{ success: boolean; message: string; data: ICategory[] }>(
-      `${this.apiUrl}/categories`
-    );
+  getCategories(): Observable<{
+    success: boolean;
+    message: string;
+    data: ICategory[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      message: string;
+      data: ICategory[];
+    }>(`${this.apiUrl}/categories`);
   }
 
-  getModalities(): Observable<{ success: boolean; message: string; data: IModality[] }> {
-    return this.http.get<{ success: boolean; message: string; data: IModality[] }>(
-      `${this.apiUrl}/modalities`
-    );
+  getModalities(): Observable<{
+    success: boolean;
+    message: string;
+    data: IModality[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      message: string;
+      data: IModality[];
+    }>(`${this.apiUrl}/modalities`);
   }
 
-  getRounds(): Observable<{ success: boolean; message: string; data: IRound[] }> {
+  getRounds(): Observable<{
+    success: boolean;
+    message: string;
+    data: IRound[];
+  }> {
     return this.http.get<{ success: boolean; message: string; data: IRound[] }>(
       `${this.apiUrl}/rounds`
     );

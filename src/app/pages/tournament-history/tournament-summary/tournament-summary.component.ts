@@ -4,8 +4,6 @@ import { HttpClient } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { BehaviorSubject, finalize } from 'rxjs';
 import Swal from 'sweetalert2';
-
-import { environment } from 'src/environments/environment';
 import { TournamentsService } from 'src/app/services/tournaments.service';
 
 import { ICategory } from 'src/app/model/category.interface';
