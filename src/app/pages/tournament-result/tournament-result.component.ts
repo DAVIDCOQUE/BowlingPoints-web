@@ -25,8 +25,8 @@ import { TournamentsService } from 'src/app/services/tournaments.service';
 import { UserApiService } from 'src/app/services/user-api.service';
 import { ITeam } from 'src/app/model/team.interface';
 import { ResultsService } from 'src/app/services/results.service';
+import { IBranch } from 'src/app/model/branch.interface';
 import { Location } from '@angular/common';
-
 
 @Component({
   selector: 'app-tournament-result',
@@ -48,12 +48,13 @@ export class TournamentResultComponent implements OnInit {
   selectedTournament: ITournament | null = null;
   categories: ICategory[] = [];
   modalities: IModality[] = [];
-  branches: any[] = [];
+  branches: IBranch[] = [];
   teams: ITeam[] = [];
 
   // Jugadores registrados
   players: IUser[] = [];
   registrations: ITournamentRegistration[] = [];
+  filteredRegistrations: ITournamentRegistration[] = [];
   idPlayer: number | null = null;
   playerForm: FormGroup = new FormGroup({});
 
@@ -81,7 +82,6 @@ export class TournamentResultComponent implements OnInit {
 
   //  Añadir estas nuevas propiedades:
   selectedBranchPlayer = '';
-  filteredRegistrations: ITournamentRegistration[] = [];
 
   // Extras
   readonly estados = [
@@ -163,7 +163,11 @@ export class TournamentResultComponent implements OnInit {
         `${this.apiUrl}/registrations/tournament/${this.tournamentId}`
       )
       .subscribe({
-        next: (res) => (this.registrations = res || []),
+        next: (res) => {
+          this.registrations = res || [];
+          this.filteredRegistrations = this.registrations;
+          this.onFilterPlayerChange();
+        },
         error: (err) => {
           console.error('Error al cargar jugadores registrados:', err);
           Swal.fire(
@@ -186,6 +190,18 @@ export class TournamentResultComponent implements OnInit {
     });
   }
 
+  private fillPlayerForm(reg: ITournamentRegistration): void {
+  this.playerForm.patchValue({
+    personId: reg.personId ?? null,
+    categoryId: reg.categoryId ?? null,
+    modalityId: reg.modalityId ?? null,
+    branchId: reg.branchId ?? null,
+    teamId: reg.teamId ?? null,
+    status: reg.status ?? true,
+  });
+}
+
+
   initResultForm(): void {
     this.resultForm = this.fb.group({
       personId: [null],
@@ -194,7 +210,7 @@ export class TournamentResultComponent implements OnInit {
       categoryId: [null, Validators.required],
       modalityId: [null, Validators.required],
       branchId: [null, Validators.required],
-      roundId: [null, Validators.required],
+      roundNumber: [null, Validators.required],
       laneNumber: [null, Validators.required],
       lineNumber: [null, Validators.required],
       score: [null, Validators.required],
@@ -202,16 +218,12 @@ export class TournamentResultComponent implements OnInit {
   }
 
   openModal(content: TemplateRef<unknown>): void {
-    if (!content) return;
+    if (content === this.modalPlayerRef) {
+      if (!this.idPlayer) this.initPlayerForm(); // Solo si es nuevo
+    }
 
-    switch (content) {
-      case this.modalPlayerRef:
-        if (!this.idPlayer) this.initPlayerForm();
-        break;
-
-      case this.modalResultRef:
-        if (!this.idResult) this.initResultForm();
-        break;
+    if (content === this.modalResultRef) {
+      if (!this.idResult) this.initResultForm(); // Solo si es nuevo
     }
 
     this.modalService.open(content, { size: 'lg' });
@@ -309,73 +321,41 @@ export class TournamentResultComponent implements OnInit {
   loadResults(): void {
     if (!this.tournamentId) return;
 
-    const selectedBranchId = this.getSelectedBranchId();
+    const selectedBranchId = this.selectedBranch
+      ? this.branches.find(b => b.name.toLowerCase() === this.selectedBranch.toLowerCase())?.branchId
+      : undefined;
+
     const selectedRoundNumber = this.selectedRound ?? undefined;
 
-    this.resultsService
-      .getResultsFiltered(
-        this.tournamentId,
-        selectedBranchId,
-        selectedRoundNumber
-      )
+    this.resultsService.getResultsFiltered(this.tournamentId, selectedBranchId, selectedRoundNumber)
       .subscribe({
-        next: (res) => this.handleResultsSuccess(res),
-        error: (err) => this.handleResultsError(err),
+        next: (res) => {
+          this.results = res ?? [];
+          this.filteredResults = this.results;
+        },
+        error: (err) => {
+          console.error('Error al cargar resultados:', err);
+          Swal.fire('Error', 'No se pudieron cargar los resultados', 'error');
+        }
       });
   }
 
-  private getSelectedBranchId(): number | undefined {
-    if (!this.selectedBranch) return undefined;
-    const branch = this.branches.find(
-      (b) => b.name.toLowerCase() === this.selectedBranch.toLowerCase()
-    );
-    return branch?.branchId;
-  }
-
-  private handleResultsSuccess(res: any): void {
-    this.results = res ?? [];
-    this.filteredResults = this.results;
-  }
-
-  private handleResultsError(err: any): void {
-    console.error('Error al cargar resultados:', err);
-    void Swal.fire('Error', 'No se pudieron cargar los resultados', 'error');
-  }
 
   editResult(result: IResults): void {
-    if (!result) {
-      Swal.fire('Error', 'No se encontró información del resultado', 'error');
-      return;
-    }
 
-    // Extraer valores con defaults legibles
-    const {
-      resultId,
-      personId,
-      teamId,
-      tournamentId,
-      categoryId,
-      modalityId,
-      branchId,
-      roundNumber,
-      laneNumber,
-      lineNumber,
-      score,
-    } = result;
-
-    this.idResult = resultId ?? null;
-
+    console.log('Result recibido:', result);
+    this.idResult = result.resultId ?? null;
     this.resultForm.patchValue({
-      personId: personId ?? null,
-      teamId: teamId ?? null,
-      tournamentId: tournamentId ?? null,
-      categoryId: categoryId ?? null,
-      modalityId: modalityId ?? null,
-      branchId: branchId ?? null,
-      roundNumber: roundNumber ?? null,
-      laneNumber: laneNumber ?? null,
-      lineNumber: lineNumber ?? null,
-      score: score ?? null,
+      personId: result.personId ?? null,
+      teamId: result.teamId ?? null,
+      tournamentId: result.tournamentId,
+      categoryId: result.categoryId,
+      modalityId: result.modalityId,
+      branchId: result.branchId ?? null,
+      roundNumber: result.roundNumber ?? null,
+      laneNumber: result.laneNumber,
+      lineNumber: result.lineNumber,
+      score: result.score,
     });
 
     this.openModal(this.modalResultRef);
@@ -470,36 +450,24 @@ export class TournamentResultComponent implements OnInit {
     this.loadResults();
   }
 
-  /** Limpia filtros de resultados */
   clearFilters(): void {
     this.selectedBranch = '';
     this.selectedRound = null;
-    this.triggerFilterReload();
-  }
-
-  /** Limpia filtros de jugadores */
-  clearPlayerFilters(): void {
-    this.selectedBranchPlayer = '';
-    this.triggerPlayerFilterReload();
-  }
-
-  /** Centraliza recarga de filtros de resultados */
-  private triggerFilterReload(): void {
     this.onFilterChange();
   }
 
-  /** Centraliza recarga de filtros de jugadores */
-  private triggerPlayerFilterReload(): void {
-    this.onFilterPlayerChange();
+  onFilterPlayerChange(): void {
+    const branch = (this.selectedBranchPlayer || '').toLowerCase().trim();
+
+    this.filteredRegistrations = this.registrations.filter(p => {
+      const matchBranch = !branch || (p.branchName || '').toLowerCase().includes(branch);
+      return matchBranch;
+    });
   }
 
-  /** Aplica filtro a registros */
-  onFilterPlayerChange(): void {
-    const branch = (this.selectedBranchPlayer ?? '').toLowerCase().trim();
-
-    this.filteredRegistrations = this.registrations.filter(
-      this.matchesBranch(branch)
-    );
+  clearPlayerFilters(): void {
+    this.selectedBranchPlayer = '';
+    this.onFilterPlayerChange();
   }
 
   /** Función pura para mejorar legibilidad */
@@ -542,16 +510,5 @@ export class TournamentResultComponent implements OnInit {
 
   goBack(): void {
     this.location.back();
-  }
-
-  private fillPlayerForm(reg: ITournamentRegistration): void {
-    this.playerForm.patchValue({
-      personId: reg.personId,
-      categoryId: reg.categoryId,
-      modalityId: reg.modalityId,
-      branchId: reg.branchId,
-      teamId: reg.teamId ?? null,
-      status: reg.status,
-    });
   }
 }

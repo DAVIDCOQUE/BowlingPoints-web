@@ -1,5 +1,5 @@
 <div class="container mt-4">
-  <h1 class="text-center">Top jugadores</h1>
+  <h1 class="text-center">Jugadores</h1>
   <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
     <!-- Filtro -->
     <div class="d-flex flex-column flex-md-row align-items-start gap-2">
@@ -23,10 +23,10 @@
           <tr class="fw-bold">
             <th>Foto</th>
             <th>Nombre</th>
-            <th>promedio puntuación</th>
+            <th>Promedio puntuación</th>
             <th>Mejor juego</th>
-            <th>Títulos ganados</th>
-            <th>Aciones</th>
+            <th>Torneos Jugados</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -35,8 +35,8 @@
                 alt="foto" width="40" height="40" class="rounded-circle"></td>
 
             <td class="align-items-center">{{ player.fullName }}</td>
-            <td>{{ player.averageScore }}</td>
-            <td>{{ player.bestGame || '-' }}</td>
+            <td>{{ (player.averageScore | number:'1.2-2') || '-' }}</td>
+            <td>{{ (player.bestGame | number:'1.2-2') || '-' }}</td>
             <td>{{ player.joinjoinedAt || '-' }}</td>
             <td class="text-center"><button class="btn btn-sm px-2" [routerLink]="['/detalle-jugador', player.personId]"
                 style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">

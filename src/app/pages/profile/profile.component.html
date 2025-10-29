@@ -33,7 +33,7 @@
           <input formControlName="nickname" type="text" class="form-control" placeholder="nickname" [ngClass]="{
                 'is-invalid': userForm.controls['nickname'].invalid && userForm.controls['nickname'].touched,
                 'is-valid': userForm.controls['nickname'].valid
-              }" />
+              }"  readonly />
         </div>
       </div>
       <div class="col">
@@ -42,7 +42,7 @@
           <input formControlName="document" type="document" class="form-control" placeholder="document" [ngClass]="{
                 'is-invalid': userForm.controls['document'].invalid && userForm.controls['document'].touched,
                 'is-valid': userForm.controls['document'].valid
-              }" />
+              }" readonly />
         </div>
       </div>
     </div>
@@ -106,8 +106,8 @@
 
       <div class="col">
         <div class="form-group">
-          <label for="firstName">Rol</label>
-          <input class="form-control" [value]="getRoleDescription(userForm.value.roleId)" readonly />
+          <label for="role">Rol</label>
+          <input class="form-control" [value]="roleDisplay" readonly />
         </div>
       </div>
     </div>

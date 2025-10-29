@@ -1,138 +1,136 @@
 <div class="container py-4">
-  <hr>
-  <!-- Tarjetas estadísticas -->
-  <div class="row g-4 mb-3">
+  <!-- 🔹 Tarjetas resumen -->
+  <div class="row g-4 mb-4">
+    <!-- Total Torneos -->
     <div class="col-md-3">
-      <div class="card border-0 shadow-sm h-100 rounded-4">
-        <!-- Cabecera optimizada -->
-        <div class="d-flex justify-content-center align-items-center bg-primary text-white py-1 rounded-top">
-          <span class="badge bg-warning text-dark" style="font-size: 1rem; padding: 6px 12px;">
-            Torneos Ganados
-          </span>
-        </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-center">
-          <img [src]="imagenesEstadisticas['torneo']" alt="icono" width="50" class="mb-1 mt-1">
-          <h1 class="fw-bold"> {{ (estadisticas?.tournamentsWon ?? 0) + '/' + (estadisticas?.totalTournaments ?? 0) }}
-          </h1>
+      <div class="card border-0 shadow-sm h-100 rounded-4 text-center">
+        <div class="card-body">
+          <img [src]="imagenesEstadisticas['torneo']" width="50" class="mb-2" />
+          <h4>Total Torneos</h4>
+          <h2 class="fw-bold text-primary">{{ dashboardStats?.totalTournaments ?? 0 }}</h2>
         </div>
       </div>
     </div>
 
+    <!-- Total Líneas -->
     <div class="col-md-3">
-      <div class="card border-0 shadow-sm h-100 rounded-4">
-        <!-- Cabecera optimizada -->
-        <div class="d-flex justify-content-center align-items-center bg-primary text-white py-1 rounded-top">
-          <span class="badge bg-warning text-dark" style="font-size: 1rem; padding: 6px 12px;">
-            Chuzas Totales
-          </span>
-        </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-center">
-          <img [src]="imagenesEstadisticas['chuzas']" alt="icono" width="50" class="mb-1 mt-1">
-          <h1 class="fw-bold">{{ estadisticas?.totalStrikes || 0}}</h1>
+      <div class="card border-0 shadow-sm h-100 rounded-4 text-center">
+        <div class="card-body">
+          <img [src]="imagenesEstadisticas['chuzas']" width="50" class="mb-2" />
+          <h4>Líneas Jugadas</h4>
+          <h2 class="fw-bold text-primary">{{ dashboardStats?.totalLines ?? 0 }}</h2>
         </div>
       </div>
     </div>
 
+    <!-- Promedio General -->
     <div class="col-md-3">
-      <div class="card border-0 shadow-sm h-100 rounded-4">
-        <!-- Cabecera optimizada -->
-        <div class="d-flex justify-content-center align-items-center bg-primary text-white py-1 rounded-top">
-          <span class="badge bg-warning text-dark" style="font-size: 1rem; padding: 6px 12px;">
-            Promedio
-          </span>
-        </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-center">
-          <img [src]="imagenesEstadisticas['promedio']" alt="icono" width="50" class="mb-1 mt-1">
-          <h1 class="fw-bold">{{ estadisticas?.avgScore || 0}}</h1>
+      <div class="card border-0 shadow-sm h-100 rounded-4 text-center">
+        <div class="card-body">
+          <img [src]="imagenesEstadisticas['promedio']" width="50" class="mb-2" />
+          <h4>Promedio General</h4>
+          <h2 class="fw-bold text-success">{{ dashboardStats?.avgScoreGeneral | number: '1.2-2' }}</h2>
         </div>
       </div>
     </div>
 
+    <!-- Mejor Línea -->
     <div class="col-md-3">
-      <div class="card border-0 shadow-sm h-100 rounded-4">
-        <!-- Cabecera optimizada -->
-        <div class="d-flex justify-content-center align-items-center bg-primary text-white py-1 rounded-top">
-          <span class="badge bg-warning text-dark" style="font-size: 1rem; padding: 6px 12px;">
-            Mejor Puntaje
-          </span>
-        </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-center">
-          <img [src]="imagenesEstadisticas['mejorJuego']" alt="icono" width="50" class="mb-1 mt-1">
-          <h1 class="fw-bold">{{ estadisticas?.bestGame || 0}}</h1>
-        </div>
-      </div>
-    </div>
-  </div>
-  <hr>
-  <!-- Gráficas -->
-  <div class="row g-4 mb-5">
-    <div class="col-md-6">
-      <h3 class="mb-3">📈 Puntaje Mensual</h3>
-      <div class="card shadow-sm border-0 rounded-2 h-100" style="min-height: 300px;">
-        <div class="card-body d-flex justify-content-center align-items-center">
-          <canvas #lineChartCanvas style="width: 100%; height: 300px;"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <h3 class="mb-3">📊 Total Acumulado</h3>
-      <div class="card shadow-sm border-0 rounded-2 h-100" style="min-height: 300px;">
-        <div class="card-body d-flex justify-content-center align-items-center">
-          <canvas #lineChartCanvas2 style="width: 100%; height: 300px;"></canvas>
+      <div class="card border-0 shadow-sm h-100 rounded-4 text-center">
+        <div class="card-body">
+          <img [src]="imagenesEstadisticas['mejorJuego']" width="50" class="mb-2" />
+          <h4>Mejor Línea</h4>
+          <h2 class="fw-bold text-danger">{{ dashboardStats?.bestLine ?? 0 }}</h2>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Históricos -->
+  <hr>
+
+  <!-- Promedio por Torneo -->
   <div class="row g-4 mb-4">
     <div class="col-12">
-      <hr>
-      <h3 class="mb-3">🏆 3 Mejores Torneos Jugados</h3>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table
-            class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
-            <thead class="bg-light-secondary align-middle">
-              <tr class="fw-bold">
-                <th>ID</th>
-                <th>Foto</th>
-                <th>Nombre</th>
-                <th>Fecha Inicio</th>
-                <th>Lugar</th>
-                <th>Mi Categoría / Modalidad</th>
-                <th>Mi Resultados</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let torneo of topTorneos">
-                <td>{{ torneo.tournamentId }}</td>
-                <td><img [src]="apiUrl + torneo.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
-                    alt="foto" width="40" height="40" class="rounded-circle"></td>
-                <td>{{ torneo.name }}</td>
-                <td>{{ torneo.startDate }}</td>
-                <td>{{ torneo.lugar }}</td>
-                <td>{{ torneo.modalidad }} {{ torneo.categoria }}</td>
-                <td>{{ torneo.bestScore }}</td>
-                <td class="text-center"><button class="btn btn-sm px-2" (click)="resumenToreno(torneo.tournamentId)"
-                    style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
-                    <i class="fa-solid fa-eye"></i> </button></td>
-              </tr>
-              <!-- Mensaje vacío en la tabla -->
-              <tr *ngIf="!topTorneos || topTorneos.length === 0">
-                <td colspan="8">
-                  <div class="alert alert-warning text-center my-3 py-2 rounded-3 fw-semibold m-0">
-                    <i class="bi bi-emoji-frown"></i> No hay torneos para mostrar.
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <h4 class="mb-2 d-flex align-items-center gap-2">
+        <i class="fa-solid fa-chart-line text-primary"></i> Promedio por Torneo
+      </h4>
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body" style="position: relative; height: 280px;">
+          <canvas #lineChartCanvas></canvas>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Gráficas -->
+  <div class="row g-4 mb-5">
+    <!-- Promedio por modalidad -->
+    <div class="col-md-6">
+      <h4 class="mb-2 d-flex align-items-center gap-2">
+        <i class="fa-solid fa-bowling-ball text-success"></i> Promedio por Modalidad
+      </h4>
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+          <canvas #barChartModalidad height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribución de puntajes -->
+    <div class="col-md-6">
+      <h4 class="mb-2 d-flex align-items-center gap-2">
+        <i class="fa-solid fa-chart-column text-warning"></i> Distribución de Puntajes
+      </h4>
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+          <canvas #pieChartDistribucion height="220"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- 🔹 Mejores Torneos -->
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <h4 class="mb-3">🏆 Mejores Torneos</h4>
+      <div class="table-responsive">
+        <table class="table table-hover table-sm text-center align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Promedio</th>
+              <th>Fecha Inicio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let torneo of dashboardStats?.avgPerTournament; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>
+                <img [src]="apiUrl + torneo.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
+                  alt="img" width="40" height="40" class="rounded-circle" />
+              </td>
+              <td>{{ torneo.tournamentName }}</td>
+              <td>{{ torneo.average | number: '1.2-2' }}</td>
+              <td>{{ torneo.startDate | date: 'mediumDate' }}</td>
+
+              <td class="text-center"><button class="btn btn-sm px-2"
+                  [routerLink]="['/tournament-summary', torneo.tournamentId]"
+                  style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                  <i class="fa-solid fa-eye"></i> </button></td>
+            </tr>
+            <tr *ngIf="!dashboardStats?.avgPerTournament?.length">
+              <td colspan="6">
+                <div class="alert alert-warning">No hay torneos para mostrar.</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

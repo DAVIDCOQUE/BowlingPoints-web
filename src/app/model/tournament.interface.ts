@@ -23,5 +23,6 @@ export interface ITournament {
   modalities?: IModality[];
   tournamentRegistrations?: ITournamentRegistration[];
   branches?: IBranch[];
+  branchPlayerCounts?: IBranch[];
   teams?: ITeam[];
 }

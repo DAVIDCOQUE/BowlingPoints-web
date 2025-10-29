@@ -38,31 +38,41 @@
       </div>
     </div>
 
-    <!-- Categorías del torneo -->
+    <!-- Ramas del torneo -->
     <div class="col-md-6">
-      <div class="row g-3">
-        <div class="col-12" *ngFor="let category of categories">
+      <h3 class="text-center">🎳 Ramas</h3>
+
+      <!-- Si hay ramas -->
+      <div class="row g-3" *ngIf="branches.length > 0; else noBranches">
+        <div class="col-12" *ngFor="let branch of branches">
           <div class="card shadow-sm h-100 border-0 rounded-4 text-center card_h"
-            [routerLink]="['/detalle-torneo', tournamentId, category.categoryId]">
+            [routerLink]="['/tournament-details-summary', tournamentId, branch.branchId]">
             <div class="card-body d-flex flex-column justify-content-center align-items-center p-3">
-              <h4 class="fw-semibold mb-2">{{ category.name }}</h4>
-              <h5 class="badge bg-success bg-opacity-10 text-success fw-semibold px-3 py-2">
-                Total Jugadores: {{ getPlayersCountByCategory(category.categoryId) }}
+              <h4 class="fw-semibold mb-2">{{ branch.name }}</h4>
+              <h5 class="badge bg-success bg-opacity-10 text-success fw-semibold px-3">
+                Total Jugadores: {{ branch.playerCount || 'N/A' }}
               </h5>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Si NO hay ramas -->
+      <ng-template #noBranches>
+        <div class="text-center mt-3 text-muted">
+          <p>No hay resultados por rama.</p>
+        </div>
+      </ng-template>
     </div>
 
   </div>
 
   <!-- Modalidades -->
   <h3 class="text-center mb-4">🎳 Modalidades</h3>
-  <div class="row g-3">
-    <div class="col-6 col-md-3" *ngFor="let modality of modalities">
-      <div class="card text-center shadow-sm border-0 rounded-4 bg-light card_h"
-        [routerLink]="['/detalle-torneo', tournamentId, modality.modalityId]">
+  <div class="row g-3 justify-content-center">
+    <div class="col-10 col-sm-6 col-md-4 col-lg-3 d-flex" *ngFor="let modality of modalities">
+      <div class="card text-center shadow-sm border-0 rounded-4 bg-light card_h w-100"
+        [routerLink]="['/tournament-details', tournamentId, modality.modalityId]">
         <div class="card-body p-3">
           <h4 class="mb-0 fw-semibold">{{ modality.name }}</h4>
         </div>

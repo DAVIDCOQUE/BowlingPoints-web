@@ -1,34 +1,99 @@
 <div class="container mt-4">
 
-  <!-- 🏆 ENCABEZADO DEL TORNEO -->
-  <div class="card shadow-sm mb-4 border-0">
-    <div class="card-body">
-      <h3 class="text-center text-primary fw-bold mb-4">
-        Torneo: {{ selectedTournament?.name || '---' }}
-      </h3>
+  <!-- Botón Atrás -->
+  <button class="btn btn-outline-secondary mb-3" (click)="goBack()">
+    <i class="fas fa-arrow-left me-2"></i> Volver
+  </button>
 
-      <div class="row g-4">
-        <div class="col-md-6">
-          <p><i class="fas fa-user text-primary me-2"></i><strong>Organizador:</strong> {{ selectedTournament?.organizer
-            || '-' }}</p>
-          <p><i class="fas fa-map-marker-alt text-danger me-2"></i><strong>Ubicación:</strong> {{
-            selectedTournament?.location || '-' }}</p>
-          <p><i class="fas fa-globe text-info me-2"></i><strong>Ámbito:</strong> {{ selectedTournament?.ambitName }}</p>
-        </div>
-        <div class="col-md-6">
-          <p><i class="fas fa-calendar-alt text-warning me-2"></i><strong>Fecha Inicio:</strong> {{
-            selectedTournament?.startDate | date:'dd/MM/yyyy' }}</p>
-          <p><i class="fas fa-calendar-check text-success me-2"></i><strong>Fecha Fin:</strong> {{
-            selectedTournament?.endDate | date:'dd/MM/yyyy' }}</p>
-          <p><i class="fas fa-info-circle text-secondary me-2"></i><strong>Estado:</strong>
+  <!-- 🏆 INFORMACIÓN GENERAL DEL TORNEO COMPLETA -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="row g-0 align-items-center">
+
+      <!-- Logo -->
+      <div class="col-md-3 text-center p-4">
+        <img [src]="selectedTournament?.imageUrl || 'assets/img/clubDefault.png'"
+          (error)="onImgError($event, 'assets/img/clubDefault.png')" alt="Logo torneo"
+          class="img-fluid rounded-circle border shadow-sm" width="120" height="120" />
+      </div>
+
+      <!-- Información del torneo -->
+      <div class="col-md-9 p-4">
+        <h2 class="fw-bold mb-3 text-primary">
+          {{ selectedTournament?.name || 'Nombre del Torneo' }}
+        </h2>
+
+        <div class="row gy-2 text-muted">
+          <div class="col-md-6">
+            <i class="fas fa-calendar-alt text-warning me-2"></i>
+            <strong>Inicio:</strong> {{ selectedTournament?.startDate | date:'dd/MM/yyyy' }}
+          </div>
+          <div class="col-md-6">
+            <i class="fas fa-calendar-check text-success me-2"></i>
+            <strong>Fin:</strong> {{ selectedTournament?.endDate | date:'dd/MM/yyyy' }}
+          </div>
+
+          <div class="col-md-6">
+            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+            <strong>Ubicación:</strong> {{ selectedTournament?.location || 'No especificada' }}
+          </div>
+          <div class="col-md-6">
+            <i class="fas fa-user text-primary me-2"></i>
+            <strong>Organizador:</strong> {{ selectedTournament?.organizer || 'N/D' }}
+          </div>
+
+          <div class="col-md-6">
+            <i class="fas fa-globe text-info me-2"></i>
+            <strong>Ámbito:</strong> {{ selectedTournament?.ambitName || '-' }}
+          </div>
+          <div class="col-md-6">
+            <i class="fas fa-info-circle text-secondary me-2"></i>
+            <strong>Estado:</strong>
             <span class="badge" [ngClass]="selectedTournament?.status ? 'text-bg-success' : 'text-bg-secondary'">
               {{ selectedTournament?.status ? 'Activo' : 'Inactivo' }}
             </span>
-          </p>
+          </div>
+        </div>
+
+        <!-- Categorías, Modalidades y Ramas -->
+        <div class="mt-4 row gy-2">
+          <div class="col-md-4">
+            <i class="fas fa-layer-group text-primary me-2"></i>
+            <strong>Categorías:</strong>
+            <span *ngIf="categories?.length; else noCat">
+              <span *ngFor="let cat of categories; let i = index">
+                {{ cat.name }}<span *ngIf="i < categories.length - 1">, </span>
+              </span>
+            </span>
+            <ng-template #noCat><em class="text-muted">Ninguna</em></ng-template>
+          </div>
+
+          <div class="col-md-4">
+            <i class="fas fa-puzzle-piece text-success me-2"></i>
+            <strong>Modalidades:</strong>
+            <span *ngIf="modalities?.length; else noMod">
+              <span *ngFor="let mod of modalities; let i = index">
+                {{ mod.name }}<span *ngIf="i < modalities.length - 1">, </span>
+              </span>
+            </span>
+            <ng-template #noMod><em class="text-muted">Ninguna</em></ng-template>
+          </div>
+
+          <div class="col-md-4">
+            <i class="fas fa-venus-mars text-danger me-2"></i>
+            <strong>Ramas:</strong>
+            <span *ngIf="branches?.length; else noBranch">
+              <span *ngFor="let branch of branches; let i = index">
+                {{ branch.name }}<span *ngIf="i < branches.length - 1">, </span>
+              </span>
+            </span>
+            <ng-template #noBranch><em class="text-muted">Ninguna</em></ng-template>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
+
 
   <!-- 👥 JUGADORES INSCRITOS -->
   <div class="card shadow-sm mb-4 border-0">
@@ -41,6 +106,23 @@
           </button>
           <button class="btn btn-success btn-sm" (click)="openModal(modalPlayerRef)">
             <i class="fas fa-plus-circle me-1"></i> Nuevo Jugador
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros jugadores -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-10">
+          <label class="form-label">Rama</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedBranchPlayer"
+            (change)="onFilterPlayerChange()">
+            <option value="">Todas</option>
+            <option *ngFor="let b of branches" [value]="b.name">{{ b.name }}</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-outline-secondary btn-sm w-100" (click)="clearPlayerFilters()">
+            <i class="fas fa-eraser me-1"></i> Limpiar
           </button>
         </div>
       </div>
@@ -60,7 +142,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let p of registrations; let i = index">
+            <tr *ngFor="let p of filteredRegistrations; let i = index">
               <td>{{ i + 1 }}</td>
               <td>{{ p.personFullName || '-' }}</td>
               <td>{{ p.categoryName || '-' }}</td>
@@ -78,7 +160,7 @@
                 </div>
               </td>
             </tr>
-            <tr *ngIf="!registrations?.length">
+            <tr *ngIf="!filteredRegistrations?.length">
               <td colspan="7" class="text-muted py-3">No hay jugadores cargados.</td>
             </tr>
           </tbody>
@@ -87,7 +169,7 @@
     </div>
   </div>
 
-  <!-- 🎯 RESULTADOS -->
+  <!--  RESULTADOS -->
   <div class="card shadow-sm border-0">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -104,28 +186,24 @@
 
       <!-- Filtros -->
       <div class="row g-3 mb-3">
-        <div class="col-md-4">
-          <label class="form-label">Categoría</label>
-          <select class="form-select form-select-sm" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
-            <option value="">Todas</option>
-            <option *ngFor="let c of categories" [value]="c.categoryId">{{ c.name }}</option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Modalidad</label>
-          <select class="form-select form-select-sm" [(ngModel)]="selectedModality" (change)="onFilterChange()">
-            <option value="">Todas</option>
-            <option *ngFor="let m of modalities" [value]="m.modalityId">{{ m.name }}</option>
-          </select>
-        </div>
-        <div class="col-md-4">
+        <div class="col-md-5">
           <label class="form-label">Rama</label>
           <select class="form-select form-select-sm" [(ngModel)]="selectedBranch" (change)="onFilterChange()">
             <option value="">Todas</option>
-            <option value="Masculina">Masculina</option>
-            <option value="Femenina">Femenina</option>
-            <option value="Mixta">Mixta</option>
+            <option *ngFor="let b of branches" [value]="b.name">{{ b.name }}</option>
           </select>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label">Ronda</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedRound" (change)="onFilterChange()">
+            <option [ngValue]="null">Todas</option>
+            <option *ngFor="let r of roundNumbers" [ngValue]="r">{{ r }}</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-outline-secondary btn-sm w-100" (click)="clearFilters()">
+            <i class="fas fa-eraser me-1"></i> Limpiar
+          </button>
         </div>
       </div>
 
@@ -154,7 +232,7 @@
               <td>{{ result.tournamentName || selectedTournament?.name || '-' }}</td>
               <td>{{ result.categoryName || '-' }}</td>
               <td>{{ result.modalityName || '-' }}</td>
-              <td>{{ result.branch || '-' }}</td>
+              <td>{{ result.branchName || '-' }}</td>
               <td>{{ result.roundNumber || '-' }}</td>
               <td>{{ result.personName || '-' }}</td>
               <td>{{ result.teamName || '-' }}</td>
@@ -182,29 +260,6 @@
   </div>
 
 </div>
-
-
-<!-- Modal: Nuevo Resultado --> <ng-template #modalResult>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title">Nuevo Resultado</h5> <button type="button" class="btn-close" aria-label="Close"
-        (click)="closeModal()"></button>
-    </div>
-    <div class="modal-body"> <!-- Form de ejemplo -->
-      <div class="row g-3">
-        <div class="col-md-6"> <label class="form-label">Jugador</label> <input class="form-control form-control-sm"
-            placeholder="Nombre del jugador" /> </div>
-        <div class="col-md-3"> <label class="form-label">Ronda</label> <input type="number"
-            class="form-control form-control-sm" /> </div>
-        <div class="col-md-3"> <label class="form-label">Puntaje</label> <input type="number"
-            class="form-control form-control-sm" /> </div>
-      </div>
-    </div>
-    <div class="modal-footer"> <button class="btn btn-secondary btn-sm" (click)="closeModal()">Cancelar</button> <button
-        class="btn btn-primary btn-sm">Guardar</button> </div>
-  </div>
-
-</ng-template>
 
 <!-- Modal: Nuevo Jugador -->
 <ng-template #modalPlayer>
@@ -253,7 +308,8 @@
               formControlName="branchId"
               [ngClass]="{ 'is-invalid': playerForm.controls['branchId'].invalid && playerForm.controls['branchId'].touched, 'is-valid': playerForm.controls['branchId'].valid }">
               <option [ngValue]="null" disabled>Seleccione rama</option>
-              <option *ngFor="let branch of selectedTournament?.branches" [ngValue]="branch.branchId"> {{ branch.name }}
+              <option *ngFor="let branch of selectedTournament?.branches" [ngValue]="branch.branchId"> {{ branch.name
+                }}
               </option>
             </select>
             <div class="invalid-feedback"
@@ -274,127 +330,153 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer"> <button type="button" class="btn btn-secondary btn-sm"
-          (click)="closeModal()">Cancelar</button> <button type="submit" class="btn btn-primary btn-sm"
-          [disabled]="playerForm.invalid || loading"> <span *ngIf="loading"
-            class="spinner-border spinner-border-sm me-1"></span> Guardar </button> </div>
+      <div class="modal-footer">
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+          <button type="button" class="btn btn-success" [disabled]="playerForm.invalid"
+            (click)="savePlayer()">Guardar</button>
+        </div>
+      </div>
     </form>
   </div>
 </ng-template>
 
 
-<!--  Modal: Nuevo Resultado -->
+<!-- Modal: Nuevo Resultado -->
 <ng-template #modalResult>
   <div class="modal-content">
     <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
-      <h2 class="modal-title flex-grow-1 m-0">
+      <h5 class="modal-title flex-grow-1 m-0">
         {{ idResult ? 'Editar' : 'Registrar' }} Resultado
-      </h2>
+      </h5>
       <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
-        style="filter: brightness(0) invert(1);"></button>
+        style="filter: brightness(0) invert(1);">
+      </button>
     </div>
 
-    <div class="modal-body">
-      <form [formGroup]="resultForm" novalidate>
+    <form [formGroup]="resultForm" (ngSubmit)="saveResult()">
+      <div class="modal-body">
         <div class="row g-3">
+          <!-- Categoría -->
           <div class="col-md-6">
-            <label class="form-label">Categoría</label>
-            <select class="form-select" formControlName="categoryId">
+            <label class="form-label">Categoría *</label>
+            <select class="form-select" formControlName="categoryId"
+              [ngClass]="{ 'is-invalid': resultForm.controls['categoryId'].invalid && resultForm.controls['categoryId'].touched }">
               <option [ngValue]="null" disabled>Categoría...</option>
               <option *ngFor="let category of categories" [ngValue]="category.categoryId">
                 {{ category.name }}
               </option>
             </select>
+            <div class="invalid-feedback">Seleccione una categoría.</div>
           </div>
 
+          <!-- Modalidad -->
           <div class="col-md-6">
-            <label class="form-label">Modalidad</label>
-            <select class="form-select" formControlName="modalityId">
+            <label class="form-label">Modalidad *</label>
+            <select class="form-select" formControlName="modalityId"
+              [ngClass]="{ 'is-invalid': resultForm.controls['modalityId'].invalid && resultForm.controls['modalityId'].touched }">
               <option [ngValue]="null" disabled>Modalidad...</option>
               <option *ngFor="let modality of modalities" [ngValue]="modality.modalityId">
                 {{ modality.name }}
               </option>
             </select>
+            <div class="invalid-feedback">Seleccione una modalidad.</div>
           </div>
 
-          <!-- Campo de Rama -->
+          <!-- Rama -->
           <div class="col-md-6">
-            <label class="form-label">Rama</label>
-            <select class="form-select" formControlName="rama" [ngClass]="{
-                    'is-invalid':
-                      resultForm.controls['rama'].invalid &&
-                      resultForm.controls['rama'].touched
-                  }">
+            <label class="form-label">Rama *</label>
+            <select class="form-select" formControlName="branchId"
+              [ngClass]="{ 'is-invalid': resultForm.controls['branchId'].invalid && resultForm.controls['branchId'].touched }">
               <option [ngValue]="null" disabled>Seleccione rama...</option>
-              <option value="masculino">Masculino</option>
-              <option value="femenino">Femenino</option>
+              <option *ngFor="let branch of branches" [ngValue]="branch.branchId">
+                {{ branch.name }}
+              </option>
             </select>
+            <div class="invalid-feedback">Seleccione una rama.</div>
           </div>
 
+          <!-- Ronda -->
           <div class="col-md-6">
-            <label class="form-label">Ronda</label>
-            <select class="form-select" formControlName="roundId">
+            <label class="form-label">Ronda *</label>
+            <select class="form-select" formControlName="roundNumber"
+              [ngClass]="{ 'is-invalid': resultForm.controls['roundNumber'].invalid && resultForm.controls['roundNumber'].touched }">
               <option [ngValue]="null" disabled>Ronda...</option>
               <option *ngFor="let round of roundNumbers" [ngValue]="round">
                 {{ round }}
               </option>
             </select>
+            <div class="invalid-feedback">Seleccione una ronda.</div>
           </div>
 
+          <!-- Jugador -->
           <div class="col-md-6">
-            <label class="form-label">Jugador</label>
-            <select class="form-select" formControlName="personId">
+            <label class="form-label">Jugador *</label>
+            <select class="form-select" formControlName="personId"
+              [ngClass]="{ 'is-invalid': resultForm.controls['personId'].invalid && resultForm.controls['personId'].touched }">
               <option [ngValue]="null" disabled>Jugador...</option>
-              <option *ngFor="let person of players" [ngValue]="person.userId">
+              <option *ngFor="let person of players" [ngValue]="person.personId">
                 {{ person.fullName }}
               </option>
             </select>
+            <div class="invalid-feedback">Seleccione un jugador.</div>
           </div>
 
+          <!-- Equipo -->
           <div class="col-md-6">
             <label class="form-label">Equipo</label>
             <select class="form-select" formControlName="teamId">
-              <option [ngValue]="null" disabled>Equipo...</option>
+              <option [ngValue]="null">Sin equipo</option>
               <option *ngFor="let team of teams" [ngValue]="team.teamId">
                 {{ team.nameTeam }}
               </option>
             </select>
           </div>
 
+          <!-- Pista -->
           <div class="col-md-6">
-            <label class="form-label">Pista</label>
-            <select class="form-select" formControlName="laneNumber">
+            <label class="form-label">Pista *</label>
+            <select class="form-select" formControlName="laneNumber"
+              [ngClass]="{ 'is-invalid': resultForm.controls['laneNumber'].invalid && resultForm.controls['laneNumber'].touched }">
               <option [ngValue]="null" disabled>Pista...</option>
               <option *ngFor="let lane of laneNumbers" [ngValue]="lane.laneNumber">
                 {{ lane.laneNumber }}
               </option>
             </select>
+            <div class="invalid-feedback">Seleccione una pista.</div>
           </div>
 
+          <!-- Línea Jugada -->
           <div class="col-md-6">
-            <label class="form-label">Línea Jugada</label>
-            <select class="form-select" formControlName="lineNumber">
+            <label class="form-label">Línea Jugada *</label>
+            <select class="form-select" formControlName="lineNumber"
+              [ngClass]="{ 'is-invalid': resultForm.controls['lineNumber'].invalid && resultForm.controls['lineNumber'].touched }">
               <option [ngValue]="null" disabled>Línea...</option>
               <option *ngFor="let line of lineNumbers" [ngValue]="line.lineNumber">
                 {{ line.lineNumber }}
               </option>
             </select>
+            <div class="invalid-feedback">Seleccione una línea jugada.</div>
           </div>
 
+          <!-- Puntaje -->
           <div class="col-md-6">
-            <label class="form-label">Puntaje</label>
-            <input formControlName="score" type="number" class="form-control" placeholder="Puntaje" />
+            <label class="form-label">Puntaje *</label>
+            <input formControlName="score" type="number" class="form-control" placeholder="Puntaje"
+              [ngClass]="{ 'is-invalid': resultForm.controls['score'].invalid && resultForm.controls['score'].touched }" />
+            <div class="invalid-feedback">Ingrese un puntaje válido.</div>
           </div>
         </div>
-      </form>
-    </div>
-
-    <div class="modal-footer">
-      <div class="d-flex justify-content-end gap-2">
-        <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
-        <button type="button" class="btn btn-success" [disabled]="resultForm.invalid"
-          (click)="saveResult()">Guardar</button>
       </div>
-    </div>
+
+      <div class="modal-footer">
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn-success" [disabled]="resultForm.invalid">
+            Guardar
+          </button>
+        </div>
+      </div>
+    </form>
   </div>
 </ng-template>

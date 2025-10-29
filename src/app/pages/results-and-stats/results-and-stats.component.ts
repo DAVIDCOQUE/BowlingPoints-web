@@ -6,9 +6,19 @@ import Swal from 'sweetalert2';
 import { environment } from '../../../environments/environment';
 
 import { ITournament } from '../../model/tournament.interface';
-import { IModality } from '../../model/modality.interface';
 import { IResults } from '../../model/result.interface';
 import { ICategory } from '../../model/category.interface';
+
+interface PlayerTournamentStats {
+  tournamentName: string;
+  average: number;
+}
+
+interface PlayerStats {
+  name: string;
+  tournaments: PlayerTournamentStats[];
+  totalAverage: number;
+}
 
 @Component({
   selector: 'app-results-and-stats',
@@ -29,9 +39,7 @@ export class ResultsAndStatsComponent implements OnInit {
   allTournaments: string[] = [];
 
   categories: ICategory[] = [];
-  modalities: IModality[] = [];
   selectedCategory = '';
-  selectedModality = '';
   selectedBranch = '';
 
   selectedFile: File | null = null;
@@ -49,7 +57,6 @@ export class ResultsAndStatsComponent implements OnInit {
   ngOnInit(): void {
     this.loadTournaments();
     this.loadCategories();
-    this.loadModalities();
     this.loadResults();
   }
 
@@ -132,15 +139,6 @@ export class ResultsAndStatsComponent implements OnInit {
       });
   }
 
-  loadModalities(): void {
-    this.http
-      .get<{ success: boolean; data: IModality[] }>(`${this.apiUrl}/modalities`)
-      .subscribe({
-        next: (res) => (this.modalities = res.data ?? []),
-        error: (err) => console.error('Error al cargar modalidades:', err),
-      });
-  }
-
   loadResults(): void {
     this.http
       .get<{ success: boolean; data: IResults[] }>(`${this.apiUrl}/results`)
@@ -160,7 +158,7 @@ export class ResultsAndStatsComponent implements OnInit {
 
   onFilterChange(): void {
     const filtered = this.results.filter((r) =>
-      (!this.selectedBranch || r.branch?.toLowerCase() === this.selectedBranch.toLowerCase())
+      (!this.selectedBranch || r.branchName?.toLowerCase() === this.selectedBranch.toLowerCase())
     );
 
     this.filteredResults = filtered;
@@ -249,19 +247,7 @@ export class ResultsAndStatsComponent implements OnInit {
     return match ? match.average : null;
   }
 
+
+
 }
 
-// ----------------------------------------------------------
-// Interfaces auxiliares internas
-// ----------------------------------------------------------
-
-interface PlayerTournamentStats {
-  tournamentName: string;
-  average: number;
-}
-
-interface PlayerStats {
-  name: string;
-  tournaments: PlayerTournamentStats[];
-  totalAverage: number;
-}

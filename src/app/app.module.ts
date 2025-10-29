@@ -45,6 +45,7 @@ import { ResultsComponent } from './pages/results/results.component';
 import { LoadingComponent } from './components/loading/loading.component';
 import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
 import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
+import { TournamentDetailsSummaryComponent } from './pages/tournament-history/tournament-details-summary/tournament-details-summary.component';
 
 @NgModule({
   declarations: [
@@ -75,7 +76,8 @@ import { TournamentResultComponent } from './pages/tournament-result/tournament-
     LoadingComponent,
     ResultsAndStatsComponent,
     TournamentResultComponent,
-    TournamentParticipantsComponent
+    TournamentParticipantsComponent,
+    TournamentDetailsSummaryComponent
   ],
   imports: [
     CommonModule,
