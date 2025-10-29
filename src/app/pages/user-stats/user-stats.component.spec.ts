@@ -38,71 +38,47 @@ describe('UserStatsComponent', () => {
 
   it('debe crear el componente', () => {
     fixture.detectChanges();
-
-    // Mock para estadisticas
-    httpMock.expectOne(`${component.apiUrl}/api/user-stats/summary?userId=42`)
-      .flush({ success: true, data: component.estadisticas });
-
-    // Mock para torneos top
-    httpMock.expectOne(`${component.apiUrl}/api/user-stats/top-tournaments?userId=42`)
-      .flush({ success: true, data: [] });
+    httpMock
+      .expectOne(`${component.apiUrl}/api/user-stats/dashboard?userId=42`)
+      .flush({ success: true, data: {
+        avgScoreGeneral: 180,
+        bestLine: 250,
+        totalTournaments: 5,
+        totalLines: 50,
+        bestTournamentAvg: { tournamentId: 1, tournamentName: 'Open', imageUrl: '', average: 190, startDate: '2024-01-01' },
+        avgPerTournament: [],
+        avgPerModality: [],
+        scoreDistribution: []
+      } });
 
     expect(component).toBeTruthy();
   });
 
-  it('debe asignar estadísticas correctamente', () => {
+  it('debe asignar dashboardStats correctamente', () => {
     fixture.detectChanges();
 
     const mockStats = {
-      tournamentsWon: 2,
+      avgScoreGeneral: 181,
+      bestLine: 255,
       totalTournaments: 10,
-      totalStrikes: 30,
-      avgScore: 180,
-      bestGame: 250
+      totalLines: 120,
+      bestTournamentAvg: { tournamentId: 1, tournamentName: 'Liga', imageUrl: '', average: 200, startDate: '2024-02-01' },
+      avgPerTournament: [],
+      avgPerModality: [],
+      scoreDistribution: []
     };
 
-    httpMock.expectOne(`${component.apiUrl}/api/user-stats/summary?userId=42`)
+    httpMock
+      .expectOne(`${component.apiUrl}/api/user-stats/dashboard?userId=42`)
       .flush({ success: true, data: mockStats });
 
-    httpMock.expectOne(`${component.apiUrl}/api/user-stats/top-tournaments?userId=42`)
-      .flush({ success: true, data: [] });
-
-    expect(component.estadisticas.totalTournaments).toBe(10);
-    expect(component.estadisticas.avgScore).toBe(180);
+    expect(component.dashboardStats.totalTournaments).toBe(10);
+    expect(component.dashboardStats.bestLine).toBe(255);
   });
 
-  it('debe asignar torneos top correctamente', () => {
-    fixture.detectChanges();
+  // Ya no existen llamadas separadas a top-tournaments; se incluye en dashboard
 
-    const mockTorneos = [
-      {
-        tournamentId: 1,
-        name: 'Torneo Ejemplo',
-        startDate: '2025-01-01',
-        lugar: 'Club X',
-        modalidad: 'Individual',
-        categoria: 'A',
-        bestScore: 200,
-        imageUrl: '',
-        resultados: 210
-      }
-    ];
-
-    httpMock.expectOne(`${component.apiUrl}/api/user-stats/summary?userId=42`)
-      .flush({ success: true, data: component.estadisticas });
-
-    httpMock.expectOne(`${component.apiUrl}/api/user-stats/top-tournaments?userId=42`)
-      .flush({ success: true, data: mockTorneos });
-
-    expect(component.topTorneos.length).toBe(1);
-    expect(component.torneos.length).toBe(1);
-    expect(component.torneos[0].name).toBe('Torneo Ejemplo');
-  });
-
-  it('debe navegar al resumen del torneo', () => {
-    component.resumenToreno(5);
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/resumen-torneo', 5]);
-  });
+  // El método resumenToreno no existe en el componente actual
 
   it('debe manejar error en imagen', () => {
     const mockEvent = {

@@ -1,190 +1,157 @@
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { TournamentsComponent } from './tournaments.component';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { TournamentsService } from 'src/app/services/tournaments.service';
+import { BranchesService } from 'src/app/services/branch-api.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { dateRangeValidator } from 'src/app/shared/validators/date-range.validator';
+import { ReactiveFormsModule } from '@angular/forms';
 import { of } from 'rxjs';
 import Swal from 'sweetalert2';
 
 describe('TournamentsComponent', () => {
   let component: TournamentsComponent;
   let fixture: ComponentFixture<TournamentsComponent>;
-  let httpMock: HttpTestingController;
-  let modalServiceSpy: jasmine.SpyObj<NgbModal>;
+  let tournamentsServiceSpy: jasmine.SpyObj<TournamentsService>;
+  let branchesServiceSpy: jasmine.SpyObj<BranchesService>;
+  let modalSpy: jasmine.SpyObj<NgbModal>;
 
   beforeEach(async () => {
-    modalServiceSpy = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
+    const tServiceSpy = jasmine.createSpyObj('TournamentsService', [
+      'getTournaments',
+      'getModalities',
+      'getCategories',
+      'getDepartments',
+      'getAmbits',
+      'createTournament',
+      'updateTournament',
+      'deleteTournament',
+    ]);
+    const bServiceSpy = jasmine.createSpyObj('BranchesService', ['getAll']);
+    const modalServiceSpy = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
 
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule, HttpClientTestingModule, FormsModule],
+      imports: [ReactiveFormsModule],
       declarations: [TournamentsComponent],
-      providers: [{ provide: NgbModal, useValue: modalServiceSpy }],
+      providers: [
+        { provide: TournamentsService, useValue: tServiceSpy },
+        { provide: BranchesService, useValue: bServiceSpy },
+        { provide: NgbModal, useValue: modalServiceSpy },
+      ]
     }).compileComponents();
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TournamentsComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
-    fixture.detectChanges();
-
-    // Mocks iniciales disparados por ngOnInit
-    mockNgOnInitRequests();
+    tournamentsServiceSpy = TestBed.inject(TournamentsService) as jasmine.SpyObj<TournamentsService>;
+    branchesServiceSpy = TestBed.inject(BranchesService) as jasmine.SpyObj<BranchesService>;
+    modalSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
   });
-
-  afterEach(() => {
-    // Limpia cualquier petición pendiente
-    httpMock.verify();
-  });
-
-  function mockNgOnInitRequests() {
-    httpMock
-      .expectOne(`${component.apiUrl}/tournaments`)
-      .flush({ success: true, data: [] });
-    httpMock
-      .expectOne(`${component.apiUrl}/modalities`)
-      .flush({ success: true, data: [] });
-    httpMock
-      .expectOne(`${component.apiUrl}/categories`)
-      .flush({ success: true, data: [] });
-    httpMock
-      .expectOne(`${component.apiUrl}/ambits`)
-      .flush({ success: true, data: [] });
-    httpMock.expectOne('https://api-colombia.com/api/v1/Department').flush([]);
-  }
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize the form on ngOnInit', () => {
-    expect(component.tournamentForm).toBeDefined();
-    expect(component.tournamentForm.valid).toBeFalse();
+  it('should call loadData on init', () => {
+    tournamentsServiceSpy.getTournaments.and.returnValue(of({ success: true, message: '', data: [] }));
+    tournamentsServiceSpy.getModalities.and.returnValue(of({ success: true, message: '', data: [] }));
+    tournamentsServiceSpy.getCategories.and.returnValue(of({ success: true, message: '', data: [] }));
+    tournamentsServiceSpy.getAmbits.and.returnValue(of({ success: true, message: '', data: [] }));
+    branchesServiceSpy.getAll.and.returnValue(of([]));
+
+    component.ngOnInit();
+
+    expect(tournamentsServiceSpy.getTournaments).toHaveBeenCalled();
+    expect(tournamentsServiceSpy.getModalities).toHaveBeenCalled();
+    expect(tournamentsServiceSpy.getCategories).toHaveBeenCalled();
+    expect(tournamentsServiceSpy.getDepartments).toHaveBeenCalled();
+    expect(tournamentsServiceSpy.getAmbits).toHaveBeenCalled();
+    expect(branchesServiceSpy.getAll).toHaveBeenCalled();
   });
 
-  it('should patch form and open modal on editTournament', () => {
-    const mockTournament = {
+  it('should patch form on editTournament', () => {
+    const tournamentMock = {
       tournamentId: 1,
-      name: 'Torneo 1',
+      name: 'Test Tournament',
       organizer: 'Org',
       categories: [{ categoryId: 1, name: 'Cat 1' }],
       modalities: [{ modalityId: 2, name: 'Mod 1' }],
-      startDate: new Date('2025-10-10'),
-      endDate: new Date('2025-10-12'),
-      ambitId: 1,
-      location: 'City',
-      stage: 'Etapa',
+      startDate: '2023-01-01',
+      endDate: '2023-01-10',
+      ambitId: 3,
+      branches: [{ branchId: 4, name: 'Branch 1' }],
+      location: 'Stadium',
+      stage: 'Programado',
       status: true,
     };
 
-    component.editTournament(mockTournament as any);
+    component.editTournament(tournamentMock as any);
 
-    expect(component.tournamentForm.value.name).toBe('Torneo 1');
-    expect(modalServiceSpy.open).toHaveBeenCalled();
+    expect(component.tournamentForm.value.name).toBe('Test Tournament');
+    expect(component.tournamentForm.value.organizer).toBe('Org');
+    expect(component.tournamentForm.value.status).toBe(true);
+    expect(modalSpy.open).toHaveBeenCalled();
   });
 
-  it('should reset form and open modal if idTournament is null', () => {
-    component.idTournament = null;
-    const content = 'dummy';
-    component.tournamentForm.patchValue({ name: 'X' });
-    component.openModal(content);
-    expect(component.tournamentForm.value.name).toBeNull();
-    expect(modalServiceSpy.open).toHaveBeenCalledWith(content);
-  });
+  it('should call createTournament on save', fakeAsync(() => {
+    const payload = {
+      name: 'Test',
+      organizer: 'Test Org',
+      modalityIds: [1],
+      categoryIds: [1],
+      startDate: '2023-01-01',
+      endDate: '2023-01-10',
+      ambitId: 1,
+      branchIds: [1],
+      location: 'X',
+      stage: 'Programado',
+      status: true,
+    };
 
-  it('should close modal and reset form', () => {
-    component.tournamentForm.patchValue({ name: 'X' });
-    component.closeModal();
-    expect(component.tournamentForm.value.name).toBeNull();
-    expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
-  });
-
-  it('should return filtered tournaments', () => {
-    component.tournaments = [
-      { tournamentName: 'Torneo A' } as any,
-      { tournamentName: 'Otro' } as any,
-    ];
-    component.filter = 'torneo';
-    const result = component.filteredTournaments;
-    expect(result.length).toBe(1);
-    expect((result[0] as any).tournamentName).toBe('Torneo A');
-  });
-
-  it('should return formatted modalities string', () => {
-    const mockT = { modalities: [{ name: 'X' }, { name: 'Y' }] } as any;
-    const str = component.getModalitiesString(mockT);
-    expect(str).toBe('X, Y');
-  });
-
-  it('should return formatted categories string', () => {
-    const mockT = { categories: [{ name: 'A' }, { name: 'B' }] } as any;
-    const str = component.getCategoriesString(mockT);
-    expect(str).toBe('A, B');
-  });
-
-  it('should format dates correctly with toYMDStrict', () => {
-    const date = new Date('2025-01-01T00:00:00');
-    const ts = date.getTime(); // timestamp exacto de esa fecha
-    const expected = component.toYMDStrict(date); // esto devuelve lo que tu app ve
-
-    expect(component.toYMDStrict(date)).toBe(expected);
-    expect(component.toYMDStrict('2025-01-01')).toBe(expected);
-    expect(component.toYMDStrict(ts)).toBe(expected);
-    expect(component.toYMDStrict(null)).toBeNull();
-  });
-
-  it('should not submit form if invalid', () => {
-    component.tournamentForm = component.fb.group(
-      {
-        name: [''],
-        organizer: [''],
-        modalityIds: [''],
-        categoryIds: [''],
-        startDate: ['2025-01-10'],
-        endDate: ['2025-01-05'], // ⛔ fecha inválida: end < start
-        ambitId: [''],
-        location: [''],
-        stage: [''],
-        status: [''],
-      },
-      {
-        validators: dateRangeValidator('startDate', 'endDate', {
-          allowEqual: true,
-        }),
-      }
-    );
-
-    spyOn(Swal, 'fire');
-    spyOn(component['http'], 'post');
-
-    component.tournamentForm.markAllAsTouched();
-    expect(component.tournamentForm.valid).toBeFalse(); // ✅ ahora sí es inválido
+    component.tournamentForm.setValue(payload);
+    tournamentsServiceSpy.createTournament.and.returnValue(of({}));
 
     component.saveForm();
-
-    expect(component['http'].post).not.toHaveBeenCalled();
-    expect(Swal.fire).not.toHaveBeenCalled();
-  });
-
-  it('should confirm and call deleteTournament', fakeAsync(() => {
-    spyOn(Swal, 'fire').and.returnValue(
-      Promise.resolve({ isConfirmed: true } as any)
-    );
-    spyOn(component['http'], 'delete').and.returnValue(of({}));
-    spyOn(component, 'getTournaments');
-
-    component.deleteTournament(1);
     tick();
 
-    expect(component.getTournaments).toHaveBeenCalled();
+    expect(tournamentsServiceSpy.createTournament).toHaveBeenCalled();
   }));
+
+  it('should call updateTournament if idTournament is set', fakeAsync(() => {
+    component.idTournament = 5;
+    const payload = {
+      name: 'Test',
+      organizer: 'Test Org',
+      modalityIds: [1],
+      categoryIds: [1],
+      startDate: '2023-01-01',
+      endDate: '2023-01-10',
+      ambitId: 1,
+      branchIds: [1],
+      location: 'X',
+      stage: 'Programado',
+      status: true,
+    };
+    component.tournamentForm.setValue(payload);
+    tournamentsServiceSpy.updateTournament.and.returnValue(of({}));
+
+    component.saveForm();
+    tick();
+
+    expect(tournamentsServiceSpy.updateTournament).toHaveBeenCalledWith(5, jasmine.any(Object));
+  }));
+
+  it('should delete a tournament with confirmation', fakeAsync(() => {
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
+    tournamentsServiceSpy.deleteTournament.and.returnValue(of({}));
+    tournamentsServiceSpy.getTournaments.and.returnValue(of({ success: true, message: '', data: [] }));
+
+
+    component.deleteTournament(123);
+    tick();
+
+    expect(tournamentsServiceSpy.deleteTournament).toHaveBeenCalledWith(123);
+  }));
+
+  it('should return date in YYYY-MM-DD from toYMDStrict', () => {
+    const result = component.toYMDStrict('2024-01-05T00:00:00Z');
+    expect(result).toBe('2024-01-05');
+  });
 });

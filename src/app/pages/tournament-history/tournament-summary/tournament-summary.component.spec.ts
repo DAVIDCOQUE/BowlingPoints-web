@@ -1,83 +1,121 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { TournamentSummaryComponent } from './tournament-summary.component';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import Swal from 'sweetalert2';
 import { Location } from '@angular/common';
-import { environment } from 'src/environments/environment';
+import { TournamentsService } from 'src/app/services/tournaments.service';
 
 describe('TournamentSummaryComponent', () => {
   let component: TournamentSummaryComponent;
   let fixture: ComponentFixture<TournamentSummaryComponent>;
-  let httpMock: HttpTestingController;
+  let tournamentsServiceSpy: jasmine.SpyObj<TournamentsService>;
   let locationSpy: jasmine.SpyObj<Location>;
 
-  const dummyResumen = {
-    tournamentName: 'Torneo Nacional',
-    organizer: 'Liga Nacional',
-    startDate: '2025-01-01',
-    endDate: '2025-01-05',
-    categories: ['Juvenil', 'Elite'],
-    modalities: ['Individual', 'Parejas']
-  };
-
   beforeEach(async () => {
-    const locationMock = jasmine.createSpyObj('Location', ['back']);
-
     await TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
       declarations: [TournamentSummaryComponent],
+      imports: [HttpClientTestingModule],
       providers: [
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } },
-        { provide: Location, useValue: locationMock }
-      ]
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: () => '1' // Simula el ID desde la ruta
+              }
+            }
+          }
+        },
+        {
+          provide: TournamentsService,
+          useValue: jasmine.createSpyObj('TournamentsService', ['getTournamentById'])
+        },
+        {
+          provide: Location,
+          useValue: jasmine.createSpyObj('Location', ['back'])
+        }
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA] // Ignora <app-header> y otros componentes no declarados
     }).compileComponents();
 
     fixture = TestBed.createComponent(TournamentSummaryComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
+    tournamentsServiceSpy = TestBed.inject(TournamentsService) as jasmine.SpyObj<TournamentsService>;
     locationSpy = TestBed.inject(Location) as jasmine.SpyObj<Location>;
-
-    fixture.detectChanges(); // ejecuta ngOnInit()
   });
 
-  afterEach(() => {
-    httpMock.verify(); // Verifica que no haya requests pendientes
-  });
-
-  it('debería crearse correctamente', () => {
-    // 🔄 Flush de la request de ngOnInit()
-    httpMock.expectOne(`${environment.apiUrl}/results/tournament-summary?tournamentId=1`)
-      .flush({ success: true, data: dummyResumen });
-
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('debería obtener el resumen del torneo', () => {
-    const req = httpMock.expectOne(`${environment.apiUrl}/results/tournament-summary?tournamentId=1`);
-    expect(req.request.method).toBe('GET');
+  it('should load tournament and assign fallback branches', fakeAsync(() => {
+    const mockResponse = {
+      success: true,
+      message: '',
+      data: {
+        tournamentId: 1,
+        name: 'Torneo Test',
+        categories: [{ categoryId: 1, name: 'Cat A' }],
+        modalities: [{ modalityId: 1, name: 'Mod A', status: true }],
+        branches: [{
+          branchId: 1,
+          name: 'Branch A',
+          description: 'Desc',
+          status: true
+        }],
+        branchPlayerCounts: [], // <-- vacío para probar el fallback a "branches"
+        tournamentRegistrations: [{
+          registrationId: 1,
+          tournamentId: 1,
+          personId: 1,
+          personFullName: 'Jugador 1',
+          categoryId: 1,
+          categoryName: 'Cat A',
+          modalityId: 1,
+          modalityName: 'Mod A',
+          branchId: 1,
+          branchName: 'Branch A',
+          teamId: 1,
+          teamName: 'Equipo 1',
+          status: true,
+          registrationDate: new Date(),
+          createdBy: 'admin',
+          updatedBy: 'admin',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }]
+      }
+    };
 
-    req.flush({ success: true, data: dummyResumen });
+    tournamentsServiceSpy.getTournamentById.and.returnValue(of(mockResponse));
 
-    expect(component.resumenTorneo).toEqual(dummyResumen);
-  });
+    fixture.detectChanges();
+    tick(); // Finalizar observable
 
-  it('debería manejar errores al cargar resumen del torneo', () => {
-    const consoleSpy = spyOn(console, 'error');
-    const req = httpMock.expectOne(`${environment.apiUrl}/results/tournament-summary?tournamentId=1`);
+    expect(component.selectedTournament?.name).toBe('Torneo Test');
+    expect(component.categories.length).toBe(1);
+    expect(component.modalities.length).toBe(1);
+    expect(component.branches.length).toBe(1); // <-- fallback correcto
+    expect(component.players.length).toBe(1);
+  }));
 
-    req.flush({ message: 'Error' }, { status: 500, statusText: 'Server Error' });
+  it('should show info alert if tournament not found', fakeAsync(() => {
+    spyOn(Swal, 'fire');
+    tournamentsServiceSpy.getTournamentById.and.returnValue(
+      of({ success: true, message: '', data: null }) // ← ahora sí cumple con la interfaz
+    );
 
-    expect(consoleSpy).toHaveBeenCalled();
-    expect(component.resumenTorneo).toBeNull();
-  });
+    fixture.detectChanges();
+    tick();
 
-  it('debería volver atrás al llamar goBack()', () => {
-    // Flush para evitar request abierta
-    httpMock.expectOne(`${environment.apiUrl}/results/tournament-summary?tournamentId=1`)
-      .flush({ success: true, data: dummyResumen });
+    expect(Swal.fire).toHaveBeenCalledWith('Atención', 'No se encontró el torneo solicitado', 'info');
+  }));
 
+  it('should go back on goBack()', () => {
     component.goBack();
-
     expect(locationSpy.back).toHaveBeenCalled();
   });
 });

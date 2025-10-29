@@ -23,7 +23,6 @@ import { UnauthorizedComponent } from './auth/unauthorized/unauthorized.componen
 import { ModalityComponent } from './pages/modality/modality.component';
 import { CategoriesComponent } from './pages/categories/categories.component';
 import { AmbitComponent } from './pages/ambit/ambit.component';
-import { ResultsComponent } from './pages/results/results.component';
 import { TournamentParticipantsComponent } from './pages/tournament-history/tournament-participants/tournament-participants.component';
 import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
 import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
@@ -64,7 +63,6 @@ export const routes: Routes = [
       { path: 'tournaments', component: TournamentsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
       { path: 'tournament-results/:tournamentId', component: TournamentResultComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
       { path: 'results-stats', component: ResultsAndStatsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
-      { path: 'reults', component: ResultsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
       { path: 'modalitys', component: ModalityComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
       { path: 'categories', component: CategoriesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
       { path: 'ambits', component: AmbitComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
