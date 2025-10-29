@@ -1,0 +1,6 @@
+
+::ng-deep .modal-content {
+  max-width: 900px;   /* O el ancho que quieras */
+  width: 100%;
+  margin: auto;
+}

@@ -1,5 +1,3 @@
-
-
 export const environment = {
   production: false,
   appName: 'BowlingPoints',
@@ -7,4 +5,3 @@ export const environment = {
   apiUrl: 'http://localhost:9999',
   webUrl: 'http://localhost:4200'
 };
-

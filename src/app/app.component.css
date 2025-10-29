@@ -5,7 +5,8 @@
   border: 1.5px solid #e5e7eb;
   border-radius: 8px;
   background: #fff;
-  padding: 0 32px 0 10px !important; /* Espacio sólo para la flecha */
+  padding: 0 32px 0 10px !important;
+  /* Espacio sólo para la flecha */
   font-size: 15px;
   box-shadow: none;
   transition: border-color 0.22s, box-shadow 0.22s;
@@ -50,6 +51,7 @@
   font-size: 15px;
   opacity: 0.7;
 }
+
 ::ng-deep ng-select .ng-value .ng-value-icon:hover {
   color: #ef5350;
   opacity: 1;
@@ -86,7 +88,7 @@
   background: #fff !important;
   border: 1.5px solid #e5e7eb;
   border-radius: 10px;
-  box-shadow: 0 8px 32px 0 rgba(60, 72, 88, 0.12), 0 1.5px 8px 0 rgba(60,72,88,0.10);
+  box-shadow: 0 8px 32px 0 rgba(60, 72, 88, 0.12), 0 1.5px 8px 0 rgba(60, 72, 88, 0.10);
   margin-top: 6px;
   padding: 4px 0;
 }
@@ -99,18 +101,22 @@
   color: #23262f;
   transition: background 0.16s, color 0.16s;
 }
+
 ::ng-deep .ng-dropdown-panel .ng-option-selected {
   background: #e3f2fd;
   color: #1976d2;
   font-weight: 500;
 }
+
 ::ng-deep .ng-dropdown-panel .ng-option:hover {
   background: #f5f7fa;
   color: #1780c2;
 }
+
 ::ng-deep ng-select .ng-clear-wrapper {
   display: none !important;
 }
+
 /* Flecha tipo select bien alineada y visible */
 ::ng-deep ng-select .ng-arrow-wrapper {
   position: absolute;

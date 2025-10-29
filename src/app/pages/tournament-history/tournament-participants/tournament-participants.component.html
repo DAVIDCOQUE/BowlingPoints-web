@@ -1,0 +1,98 @@
+<div class="container py-4">
+  <!-- INFORMACIÓN GENERAL DEL TORNEO -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="row g-0 align-items-center">
+      <!-- Logo -->
+      <div class="col-md-3 text-center p-4">
+        <img
+          [src]="selectedTournament?.imageUrl || 'assets/img/clubDefault.png'"
+          (error)="onImgError($event, 'assets/img/clubDefault.png')"
+          alt="Logo torneo"
+          class="img-fluid rounded-circle border shadow-sm"
+          width="120"
+          height="120"
+        />
+      </div>
+
+      <!-- Información del torneo -->
+      <div class="col-md-9 p-4">
+        <h2 class="fw-bold mb-1">{{ selectedTournament?.name || 'Nombre del Torneo' }}</h2>
+
+        <div class="row text-muted">
+          <div class="col-md-6"><b>Inicio:</b> {{ selectedTournament?.startDate | date }}</div>
+          <div class="col-md-6"><b>Ubicación:</b> {{ selectedTournament?.location || 'No especificada' }}</div>
+          <div class="col-md-6"><b>Estado:</b> {{ getStatusLabel(selectedTournament?.status) }}</div>
+          <div class="col-md-6"><b>Organizador:</b> {{ selectedTournament?.organizer || 'N/D' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>-->
+
+  <!-- SECCIONES DE MODALIDADES / CATEGORÍAS / RAMAS -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4" *ngFor="let card of cards">
+      <div class="card text-center shadow-sm border-0 rounded-4 py-4">
+        <h4 class="fw-bold mb-2">{{ card.title }}</h4>
+
+        <ng-container *ngIf="card.items && card.items.length; else noData">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item" *ngFor="let item of card.items">
+              {{ item.name || item }}
+            </li>
+          </ul>
+        </ng-container>
+
+        <ng-template #noData>
+          <div class="alert alert-warning my-2 py-2 rounded-3 fw-semibold">
+            <i class="bi bi-exclamation-triangle"></i> No hay datos.
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA DE JUGADORES INSCRITOS -->
+  <div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-primary text-white rounded-top-4">
+      <h5 class="mb-0">
+        <i class="bi bi-trophy me-2"></i> Jugadores Inscritos
+      </h5>
+    </div>
+
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Modalidad</th>
+            <th>Rama</th>
+            <th>Equipo</th>
+          </tr>
+        </thead>
+
+        <tbody *ngIf="players && players.length; else noPlayers">
+          <tr *ngFor="let player of players; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ player.personFullName }}</td>
+            <td>{{ player.categoryName }}</td>
+            <td>{{ player.modalityName }}</td>
+            <td>{{ player.branchName }}</td>
+            <td>{{ player.teamName || 'N/A' }}</td>
+          </tr>
+        </tbody>
+
+        <ng-template #noPlayers>
+          <tbody>
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">
+                <i class="bi bi-people"></i> No hay jugadores inscritos.
+              </td>
+            </tr>
+          </tbody>
+        </ng-template>
+      </table>
+    </div>
+  </div>
+</div>

@@ -18,6 +18,9 @@
 
     <!-- Botón Crear -->
     <div>
+      <button class="btn btn-success btn-sm  align-items-center me-2" style="height: 36px; width: 150px;">
+        <i class="fas fa-file-excel"></i> Cargar Usuarios
+      </button>
       <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
         (click)="openModal(modalUser)">
         <i class="fas fa-plus-circle me-1"></i> Crear
@@ -40,6 +43,7 @@
             <th class="align-middle">Genero</th>
             <th class="align-middle">Teléfono</th>
             <th class="align-middle d-none d-sm-table-cell">Rol</th>
+            <th class="align-middle d-none d-sm-table-cell">Estado</th>
             <th class="align-middle">Acciones</th>
           </tr>
         </thead>
@@ -62,21 +66,26 @@
             <td class="align-middle d-none d-md-table-cell">{{ user.email }}</td>
             <td class="align-middle">{{ user.gender }}</td>
             <td class="align-middle">{{ user.phone }}</td>
-            <td class="align-middle d-none d-sm-table-cell">{{ user.roleDescription }}</td>
+            <td class="align-middle d-none d-sm-table-cell"> {{ getRoleNames(user) }}</td>
+            <td class="align-middle d-none d-sm-table-cell">
+              <span class="badge" [ngClass]="(user.status ?? false) ? 'bg-success' : 'bg-danger'">
+                {{ getStatusLabel(user.status ?? false) }}
+              </span>
+            </td>
             <td class="align-middle">
               <div class="d-flex justify-content-center gap-2">
                 <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                    style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
-                    (click)="editUser(user)">
-                    <i class="fas fa-edit"></i>
-                  </button>
+                  style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
+                  (click)="editUser(user)">
+                  <i class="fas fa-edit"></i>
+                </button>
 
-                  <!-- Botón Eliminar - Rojo suave -->
-                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                    (click)="deleteUser(user.userId)"
-                    style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
-                    <i class="fas fa-trash"></i>
-                  </button>
+                <!-- Botón Eliminar - Rojo suave -->
+                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                  (click)="deleteUser(user.userId)"
+                  style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                  <i class="fas fa-trash"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -99,18 +108,19 @@
         <form [formGroup]="userForm" novalidate>
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">nickname</label>
-              <input formControlName="nickname" type="text" class="form-control" placeholder="nickname" [ngClass]="{
-                'is-invalid': userForm.controls['nickname'].invalid && userForm.controls['nickname'].touched,
-                'is-valid': userForm.controls['nickname'].valid
-              }" />
-            </div>
-
-            <div class="col-md-6">
               <label class="form-label"># Documento</label>
               <input formControlName="document" type="text" class="form-control" placeholder="1.123.456.789" [ngClass]="{
                 'is-invalid': userForm.controls['document'].invalid && userForm.controls['document'].touched,
                 'is-valid': userForm.controls['document'].valid
+              }" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label ">Fecha de nacimiento</label>
+              <input type="date" formControlName="birthDate" class="form-control" [ngClass]="{
+                'is-invalid':
+                  userForm.controls['birthDate'].invalid &&
+                  userForm.controls['birthDate'].touched,
+                'is-valid': userForm.controls['birthDate'].valid
               }" />
             </div>
 
@@ -158,16 +168,39 @@
               </select>
             </div>
 
-            <!-- Select de Rol -->
             <div class="col-md-6">
-              <label class="form-label">Rol</label>
-              <select class="form-select" formControlName="roleId" [ngClass]="{
-                    'is-invalid': userForm.controls['roleId'].invalid && userForm.controls['roleId'].touched,
-                    'is-valid': userForm.controls['roleId'].valid
-                  }">
-                <option [ngValue]="null" disabled>Seleccione un rol</option>
-                <option *ngFor="let rol of roles" [ngValue]="rol.roleId">{{ rol.description }}</option>
+              <label class="form-label">Estado</label>
+              <select class="form-select" formControlName="status" [ngClass]="{
+            'is-invalid': userForm.controls['status'].invalid && userForm.controls['status'].touched,
+            'is-valid': userForm.controls['status'].valid
+          }">
+                <option [ngValue]="null" disabled>Seleccione un estado</option>
+                <option *ngFor="let status of status" [ngValue]="status.valor">
+                  {{ status.etiqueta }}
+                </option>
               </select>
+            </div>
+
+            <!-- Select múltiple de Roles con ng-select -->
+            <div class="col-md-6">
+              <label class="form-label">Roles</label>
+              <ng-select [items]="roles" bindLabel="name" bindValue="roleId" [multiple]="true" formControlName="roles"
+                [ngClass]="{
+      'is-invalid': userForm.controls['roles'].invalid && userForm.controls['roles'].touched,
+      'is-valid': userForm.controls['roles'].valid
+    }">
+              </ng-select>
+            </div>
+
+            <!-- Select múltiple de Categorías con ng-select -->
+            <div class="col-md-6">
+              <label class="form-label">Categorías</label>
+              <ng-select [items]="categories" bindLabel="description" bindValue="categoryId" [multiple]="true"
+                formControlName="categories" [ngClass]="{
+      'is-invalid': userForm.controls['categories'].invalid && userForm.controls['categories'].touched,
+      'is-valid': userForm.controls['categories'].valid
+    }">
+              </ng-select>
             </div>
 
             <div class="col-md-6 position-relative">
@@ -178,7 +211,8 @@
                 'is-valid': userForm.controls['password'].valid
               }" />
               <i class="fa-solid" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"
-                (click)="showPassword = !showPassword"
+                (click)="showPassword = !showPassword" (keydown.enter)="showPassword = !showPassword" tabindex="0"
+                role="button" aria-label="Mostrar u ocultar contraseña"
                 style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
               </i>
             </div>
@@ -192,8 +226,13 @@
               }" />
               <i class="fa-solid" [class.fa-eye]="showConfirmPassword" [class.fa-eye-slash]="!showConfirmPassword"
                 (click)="showConfirmPassword = !showConfirmPassword"
+                (keydown.enter)="showConfirmPassword = !showConfirmPassword" tabindex="0" role="button"
+                aria-label="Mostrar u ocultar confirmación de contraseña"
                 style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
               </i>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="passwordMismatchVisible">
+              Las contraseñas no coinciden.
             </div>
           </div>
         </form>
@@ -202,8 +241,10 @@
       <div class="modal-footer">
         <div class="d-flex justify-content-end gap-2">
           <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
-          <button type="button" class="btn btn-success" [disabled]="userForm.invalid"
-            (click)="saveForm()">Guardar</button>
+          <button type="button" class="btn btn-success" [disabled]="userForm.invalid || loading" (click)="saveForm()">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            {{ idUser ? 'Actualizar' : 'Guardar' }}
+          </button>
         </div>
       </div>
     </div>

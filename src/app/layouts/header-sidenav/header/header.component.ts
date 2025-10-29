@@ -1,6 +1,7 @@
 import { Component, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { IRole } from 'src/app/model/role.interface';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -13,16 +14,17 @@ export class HeaderComponent implements OnInit {
 
   isGuest = false;
   userEmail: string | null = null;
-  userId: string | null = null;
-  userRole: string = '';
+  userDocument: string | null = null;
+  userRole!: IRole | string;
 
   constructor(private router: Router, private authService: AuthService) { }
 
   ngOnInit(): void {
     this.isGuest = this.authService.isGuest();
     const decoded = this.authService.decodeToken();
-    this.userEmail = decoded?.correo || null;
-    this.userId = decoded?.sub || null;
+    console.log('Decoded Token:', decoded);
+    this.userEmail = decoded?.email || null;
+    this.userDocument = decoded?.sub || null;
     this.userRole = decoded?.roles?.[0] || 'INVITADO';
   }
 

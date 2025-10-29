@@ -1,290 +1,482 @@
 <div class="container mt-4">
-  <h1 class="text-center">Torneo : </h1>
 
-  <p><strong>Ubicación:</strong> </p>
-  <p><strong>Fechas:</strong> </p>
+  <!-- Botón Atrás -->
+  <button class="btn btn-outline-secondary mb-3" (click)="goBack()">
+    <i class="fas fa-arrow-left me-2"></i> Volver
+  </button>
 
-  <h5>Rondas</h5>
-  <ul>
+  <!-- 🏆 INFORMACIÓN GENERAL DEL TORNEO COMPLETA -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="row g-0 align-items-center">
 
-  </ul>
-
-  <h5>Categorías</h5>
-  <ul>
-
-  </ul>
-
-  <h5>Modalidades</h5>
-  <ul>
-
-  </ul>
-
-  <hr />
-
-
-  <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
-    <!-- Filtro -->
-    <div class="d-flex flex-column flex-md-row align-items-start gap-2">
-      <div>
-        <label class="form-label mb-1">Buscar</label>
-        <input type="text" class="form-control form-control-sm" style="height: 36px; width: 250px;" placeholder="Buscar"
-          [(ngModel)]="filter" name="filter" />
+      <!-- Logo -->
+      <div class="col-md-3 text-center p-4">
+        <img [src]="selectedTournament?.imageUrl || 'assets/img/clubDefault.png'"
+          (error)="onImgError($event, 'assets/img/clubDefault.png')" alt="Logo torneo"
+          class="img-fluid rounded-circle border shadow-sm" width="120" height="120" />
       </div>
-      <div class="d-flex gap-2 pt-md-4">
-        <button class="btn btn-outline-secondary btn-sm  align-items-center" style="height: 36px; width: 100px;"
-          (click)="clear()">
-          <i class="fas fa-times me-1"></i> Limpiar
-        </button>
-        <button class="btn btn btn-outline-primary btn-sm  align-items-center" style="height: 36px; width: 100px;"
-          (click)="search()">
-          <i class="fas fa-search me-1"></i> Buscar
-        </button>
-      </div>
-    </div>
 
-    <!-- Botón Crear -->
-    <div class="d-flex gap-2 pt-md-4">
-      <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
-        (click)="openModal(modalSetResultTournament)">
-        <i class="fas fa-plus-circle me-1"></i> Cargar
-      </button>
+      <!-- Información del torneo -->
+      <div class="col-md-9 p-4">
+        <h2 class="fw-bold mb-3 text-primary">
+          {{ selectedTournament?.name || 'Nombre del Torneo' }}
+        </h2>
+
+        <div class="row gy-2 text-muted">
+          <div class="col-md-6">
+            <i class="fas fa-calendar-alt text-warning me-2"></i>
+            <strong>Inicio:</strong> {{ selectedTournament?.startDate | date:'dd/MM/yyyy' }}
+          </div>
+          <div class="col-md-6">
+            <i class="fas fa-calendar-check text-success me-2"></i>
+            <strong>Fin:</strong> {{ selectedTournament?.endDate | date:'dd/MM/yyyy' }}
+          </div>
+
+          <div class="col-md-6">
+            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+            <strong>Ubicación:</strong> {{ selectedTournament?.location || 'No especificada' }}
+          </div>
+          <div class="col-md-6">
+            <i class="fas fa-user text-primary me-2"></i>
+            <strong>Organizador:</strong> {{ selectedTournament?.organizer || 'N/D' }}
+          </div>
+
+          <div class="col-md-6">
+            <i class="fas fa-globe text-info me-2"></i>
+            <strong>Ámbito:</strong> {{ selectedTournament?.ambitName || '-' }}
+          </div>
+          <div class="col-md-6">
+            <i class="fas fa-info-circle text-secondary me-2"></i>
+            <strong>Estado:</strong>
+            <span class="badge" [ngClass]="selectedTournament?.status ? 'text-bg-success' : 'text-bg-secondary'">
+              {{ selectedTournament?.status ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Categorías, Modalidades y Ramas -->
+        <div class="mt-4 row gy-2">
+          <div class="col-md-4">
+            <i class="fas fa-layer-group text-primary me-2"></i>
+            <strong>Categorías:</strong>
+            <span *ngIf="categories?.length; else noCat">
+              <span *ngFor="let cat of categories; let i = index">
+                {{ cat.name }}<span *ngIf="i < categories.length - 1">, </span>
+              </span>
+            </span>
+            <ng-template #noCat><em class="text-muted">Ninguna</em></ng-template>
+          </div>
+
+          <div class="col-md-4">
+            <i class="fas fa-puzzle-piece text-success me-2"></i>
+            <strong>Modalidades:</strong>
+            <span *ngIf="modalities?.length; else noMod">
+              <span *ngFor="let mod of modalities; let i = index">
+                {{ mod.name }}<span *ngIf="i < modalities.length - 1">, </span>
+              </span>
+            </span>
+            <ng-template #noMod><em class="text-muted">Ninguna</em></ng-template>
+          </div>
+
+          <div class="col-md-4">
+            <i class="fas fa-venus-mars text-danger me-2"></i>
+            <strong>Ramas:</strong>
+            <span *ngIf="branches?.length; else noBranch">
+              <span *ngFor="let branch of branches; let i = index">
+                {{ branch.name }}<span *ngIf="i < branches.length - 1">, </span>
+              </span>
+            </span>
+            <ng-template #noBranch><em class="text-muted">Ninguna</em></ng-template>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  <hr>
-  <div class="card-body">
-    <div class="table-responsive">
-      <table
-        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
-        <thead class="bg-light-secondary align-middle">
-          <tr class="fw-bold">
-            <th>ID:</th>
-            <th>Torneo</th>
-            <th>Categoria</th>
-            <th>Modalidad</th>
-            <th>Rama</th>
-            <th>Ronda</th>
-            <th>Jugador</th>
-            <th>Equipo</th>
-            <th>Pista</th>
-            <th>Línea Jugada</th>
-            <th>Puntaje</th>
-            <th>Aciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <ng-container>
-            <tr *ngFor="let result of filteredResult">
-              <td>{{ result.resultId }}</td>
-              <td>{{ result.tournamentName || '-' }}</td>
-              <td>{{ result.categoryName }}</td>
-              <td>{{ result.modalityName || '-' }}</td>
-              <td>{{ result.rama || '-' }}</td>
-              <td>{{ result.roundNumber || '-' }}</td>
-              <td>{{ result.personName ||'-' }}</td>
-              <td>{{ result.teamName ||'-' }}</td>
-              <td>{{ result.laneNumber || '-' }}</td>
-              <td>{{ result.lineNumber || '-' }}</td>
-              <td>{{ result.score || '-' }}</td>
+
+
+
+  <!-- 👥 JUGADORES INSCRITOS -->
+  <div class="card shadow-sm mb-4 border-0">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold text-secondary mb-0">Jugadores del Torneo</h5>
+        <div>
+          <button class="btn btn-outline-primary btn-sm me-2">
+            <i class="fas fa-file-excel me-1"></i> Cargar jugadores
+          </button>
+          <button class="btn btn-success btn-sm" (click)="openModal(modalPlayerRef)">
+            <i class="fas fa-plus-circle me-1"></i> Nuevo Jugador
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros jugadores -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-10">
+          <label class="form-label">Rama</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedBranchPlayer"
+            (change)="onFilterPlayerChange()">
+            <option value="">Todas</option>
+            <option *ngFor="let b of branches" [value]="b.name">{{ b.name }}</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-outline-secondary btn-sm w-100" (click)="clearPlayerFilters()">
+            <i class="fas fa-eraser me-1"></i> Limpiar
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla jugadores -->
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle text-center border">
+          <thead class="table-light">
+            <tr class="fw-bold">
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Modalidad</th>
+              <th>Rama</th>
+              <th>Equipo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of filteredRegistrations; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ p.personFullName || '-' }}</td>
+              <td>{{ p.categoryName || '-' }}</td>
+              <td>{{ p.modalityName || '-' }}</td>
+              <td>{{ p.branchName || '-' }}</td>
+              <td>{{ p.teamName || 'N/A' }}</td>
               <td>
                 <div class="d-flex justify-content-center gap-2">
-                  <!-- Botón Editar - Azul suave -->
-                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                    style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
-                    (click)="editResult(result)">
+                  <button class="btn btn-outline-primary btn-sm" (click)="editPlayer(p)">
                     <i class="fas fa-edit"></i>
                   </button>
-
-                  <!-- Botón Eliminar - Rojo suave -->
-                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                    (click)="deleteResult(result.resultId)"
-                    style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                  <button class="btn btn-outline-danger btn-sm" (click)="deletePlayer(p.registrationId)">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
               </td>
             </tr>
-          </ng-container>
-        </tbody>
-      </table>
+            <tr *ngIf="!filteredRegistrations?.length">
+              <td colspan="7" class="text-muted py-3">No hay jugadores cargados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!--  RESULTADOS -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold text-secondary mb-0">Resultados del Torneo</h5>
+        <div>
+          <button class="btn btn-outline-primary btn-sm me-2">
+            <i class="fas fa-file-excel me-1"></i> Cargar Resultados
+          </button>
+          <button class="btn btn-success btn-sm" (click)="openModal(modalResultRef)">
+            <i class="fas fa-plus-circle me-1"></i> Nuevo Resultado
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-5">
+          <label class="form-label">Rama</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedBranch" (change)="onFilterChange()">
+            <option value="">Todas</option>
+            <option *ngFor="let b of branches" [value]="b.name">{{ b.name }}</option>
+          </select>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label">Ronda</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedRound" (change)="onFilterChange()">
+            <option [ngValue]="null">Todas</option>
+            <option *ngFor="let r of roundNumbers" [ngValue]="r">{{ r }}</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-outline-secondary btn-sm w-100" (click)="clearFilters()">
+            <i class="fas fa-eraser me-1"></i> Limpiar
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla resultados -->
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle text-center border">
+          <thead class="table-light">
+            <tr class="fw-bold">
+              <th>ID</th>
+              <th>Torneo</th>
+              <th>Categoría</th>
+              <th>Modalidad</th>
+              <th>Rama</th>
+              <th>Ronda</th>
+              <th>Jugador</th>
+              <th>Equipo</th>
+              <th>Pista</th>
+              <th>Línea Jugada</th>
+              <th>Puntaje</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let result of filteredResults">
+              <td>{{ result.resultId }}</td>
+              <td>{{ result.tournamentName || selectedTournament?.name || '-' }}</td>
+              <td>{{ result.categoryName || '-' }}</td>
+              <td>{{ result.modalityName || '-' }}</td>
+              <td>{{ result.branchName || '-' }}</td>
+              <td>{{ result.roundNumber || '-' }}</td>
+              <td>{{ result.personName || '-' }}</td>
+              <td>{{ result.teamName || '-' }}</td>
+              <td>{{ result.laneNumber || '-' }}</td>
+              <td>{{ result.lineNumber || '-' }}</td>
+              <td>{{ result.score || '-' }}</td>
+              <td>
+                <div class="d-flex justify-content-center gap-2">
+                  <button class="btn btn-outline-primary btn-sm" (click)="editResult(result)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" (click)="deleteResult(result.resultId)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!filteredResults?.length">
+              <td colspan="12" class="text-muted py-3">No hay resultados disponibles.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Nuevo Jugador -->
+<ng-template #modalPlayer>
+  <div class="modal-content">
+    <div class="modal-header bg-primary text-white">
+      <h5 class="modal-title">{{ idPlayer ? 'Editar' : 'Nuevo' }} Jugador</h5> <button type="button"
+        class="btn-close btn-close-white" aria-label="Close" (click)="closeModal()"></button>
+    </div>
+    <form [formGroup]="playerForm" (ngSubmit)="savePlayer()">
+      <div class="modal-body">
+        <div class="row g-3"> <!-- Persona -->
+          <div class="col-md-6"> <label class="form-label">Persona *</label> <select class="form-select form-select-sm"
+              formControlName="personId"
+              [ngClass]="{ 'is-invalid': playerForm.controls['personId'].invalid && playerForm.controls['personId'].touched, 'is-valid': playerForm.controls['personId'].valid }">
+              <option [ngValue]="null" disabled>Seleccione persona</option>
+              <option *ngFor="let player of players" [ngValue]="player.personId"> {{ player.fullName }} {{
+                player.fullSurname }} </option>
+            </select>
+            <div class="invalid-feedback"
+              *ngIf="playerForm.controls['personId'].invalid && playerForm.controls['personId'].touched"> Debe
+              seleccionar una persona. </div>
+          </div> <!-- Categoría -->
+          <div class="col-md-6"> <label class="form-label">Categoría *</label> <select
+              class="form-select form-select-sm" formControlName="categoryId"
+              [ngClass]="{ 'is-invalid': playerForm.controls['categoryId'].invalid && playerForm.controls['categoryId'].touched, 'is-valid': playerForm.controls['categoryId'].valid }">
+              <option [ngValue]="null" disabled>Seleccione categoría</option>
+              <option *ngFor="let cat of selectedTournament?.categories" [ngValue]="cat.categoryId"> {{ cat.name }}
+              </option>
+            </select>
+            <div class="invalid-feedback"
+              *ngIf="playerForm.controls['categoryId'].invalid && playerForm.controls['categoryId'].touched"> Debe
+              seleccionar una categoría. </div>
+          </div> <!-- Modalidad -->
+          <div class="col-md-6"> <label class="form-label">Modalidad *</label> <select
+              class="form-select form-select-sm" formControlName="modalityId"
+              [ngClass]="{ 'is-invalid': playerForm.controls['modalityId'].invalid && playerForm.controls['modalityId'].touched, 'is-valid': playerForm.controls['modalityId'].valid }">
+              <option [ngValue]="null" disabled>Seleccione modalidad</option>
+              <option *ngFor="let mod of selectedTournament?.modalities" [ngValue]="mod.modalityId"> {{ mod.name }}
+              </option>
+            </select>
+            <div class="invalid-feedback"
+              *ngIf="playerForm.controls['modalityId'].invalid && playerForm.controls['modalityId'].touched"> Debe
+              seleccionar una modalidad. </div>
+          </div> <!-- Rama -->
+          <div class="col-md-6"> <label class="form-label">Rama *</label> <select class="form-select form-select-sm"
+              formControlName="branchId"
+              [ngClass]="{ 'is-invalid': playerForm.controls['branchId'].invalid && playerForm.controls['branchId'].touched, 'is-valid': playerForm.controls['branchId'].valid }">
+              <option [ngValue]="null" disabled>Seleccione rama</option>
+              <option *ngFor="let branch of selectedTournament?.branches" [ngValue]="branch.branchId"> {{ branch.name
+                }}
+              </option>
+            </select>
+            <div class="invalid-feedback"
+              *ngIf="playerForm.controls['branchId'].invalid && playerForm.controls['branchId'].touched"> Debe
+              seleccionar una rama. </div>
+          </div> <!-- Equipo -->
+          <!-- <div class="col-md-6"> <label class="form-label">Equipo *</label> <select class="form-select form-select-sm" formControlName="teamId" [ngClass]="{ 'is-invalid': playerForm.controls['teamId'].invalid && playerForm.controls['teamId'].touched, 'is-valid': playerForm.controls['teamId'].valid }"> <option [ngValue]="null" disabled>Seleccione equipo</option> <option *ngFor="let team of teams" [ngValue]="team.teamId">{{ team.name }}</option> </select> <div class="invalid-feedback" *ngIf="playerForm.controls['teamId'].invalid && playerForm.controls['teamId'].touched"> Debe seleccionar un equipo. </div> </div> -->
+          <!-- Estado -->
+          <div class="col-md-6"> <label class="form-label">Estado *</label> <select class="form-select form-select-sm"
+              formControlName="status"
+              [ngClass]="{ 'is-invalid': playerForm.controls['status'].invalid && playerForm.controls['status'].touched, 'is-valid': playerForm.controls['status'].valid }">
+              <option [ngValue]="null" disabled>Seleccione...</option>
+              <option *ngFor="let st of estados" [ngValue]="st.valor">{{ st.etiqueta }}</option>
+            </select>
+            <div class="invalid-feedback"
+              *ngIf="playerForm.controls['status'].invalid && playerForm.controls['status'].touched"> Debe seleccionar
+              un estado. </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+          <button type="button" class="btn btn-success" [disabled]="playerForm.invalid"
+            (click)="savePlayer()">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+
+<!-- Modal: Nuevo Resultado -->
+<ng-template #modalResult>
+  <div class="modal-content">
+    <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+      <h5 class="modal-title flex-grow-1 m-0">
+        {{ idResult ? 'Editar' : 'Registrar' }} Resultado
+      </h5>
+      <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+        style="filter: brightness(0) invert(1);">
+      </button>
     </div>
 
-    <ng-template #modalResult>
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
-          <h2 class="modal-title flex-grow-1 m-0">
-            {{ idResult ? 'Editar' : 'Crear' }} Torneos
-          </h2>
-          <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
-            style="filter: brightness(0) invert(1);"></button>
-        </div>
+    <form [formGroup]="resultForm" (ngSubmit)="saveResult()">
+      <div class="modal-body">
+        <div class="row g-3">
+          <!-- Categoría -->
+          <div class="col-md-6">
+            <label class="form-label">Categoría *</label>
+            <select class="form-select" formControlName="categoryId"
+              [ngClass]="{ 'is-invalid': resultForm.controls['categoryId'].invalid && resultForm.controls['categoryId'].touched }">
+              <option [ngValue]="null" disabled>Categoría...</option>
+              <option *ngFor="let category of categories" [ngValue]="category.categoryId">
+                {{ category.name }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Seleccione una categoría.</div>
+          </div>
 
-        <div class="modal-body">
-          <form [formGroup]="resultForm" novalidate>
-            <div class="row g-3">
+          <!-- Modalidad -->
+          <div class="col-md-6">
+            <label class="form-label">Modalidad *</label>
+            <select class="form-select" formControlName="modalityId"
+              [ngClass]="{ 'is-invalid': resultForm.controls['modalityId'].invalid && resultForm.controls['modalityId'].touched }">
+              <option [ngValue]="null" disabled>Modalidad...</option>
+              <option *ngFor="let modality of modalities" [ngValue]="modality.modalityId">
+                {{ modality.name }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Seleccione una modalidad.</div>
+          </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Torneo</label>
-                <select class="form-select" formControlName="tournamentId" [ngClass]="{
-            'is-invalid': resultForm.controls['tournamentId'].invalid && resultForm.controls['tournamentId'].touched,
-            'is-valid': resultForm.controls['tournamentId'].valid
-          }">
-                  <option [ngValue]="null" disabled>Torneo...</option>
-                  <option *ngFor="let tournament of tournaments" [ngValue]="tournament.tournamentId">
-                    {{ tournament.name }}
-                  </option>
-                </select>
-              </div>
+          <!-- Rama -->
+          <div class="col-md-6">
+            <label class="form-label">Rama *</label>
+            <select class="form-select" formControlName="branchId"
+              [ngClass]="{ 'is-invalid': resultForm.controls['branchId'].invalid && resultForm.controls['branchId'].touched }">
+              <option [ngValue]="null" disabled>Seleccione rama...</option>
+              <option *ngFor="let branch of branches" [ngValue]="branch.branchId">
+                {{ branch.name }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Seleccione una rama.</div>
+          </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Categoria</label>
-                <select class="form-select" formControlName="categoryId" [ngClass]="{
-            'is-invalid': resultForm.controls['categoryId'].invalid && resultForm.controls['categoryId'].touched,
-            'is-valid': resultForm.controls['categoryId'].valid
-          }">
-                  <option [ngValue]="null" disabled>Categoria...</option>
-                  <option *ngFor="let categori of categories" [ngValue]="categori.categoryId">
-                    {{ categori.name }}
-                  </option>
-                </select>
-              </div>
+          <!-- Ronda -->
+          <div class="col-md-6">
+            <label class="form-label">Ronda *</label>
+            <select class="form-select" formControlName="roundNumber"
+              [ngClass]="{ 'is-invalid': resultForm.controls['roundNumber'].invalid && resultForm.controls['roundNumber'].touched }">
+              <option [ngValue]="null" disabled>Ronda...</option>
+              <option *ngFor="let round of roundNumbers" [ngValue]="round">
+                {{ round }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Seleccione una ronda.</div>
+          </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Modalidad</label>
-                <select class="form-select" formControlName="modalityId" [ngClass]="{
-            'is-invalid': resultForm.controls['modalityId'].invalid && resultForm.controls['modalityId'].touched,
-            'is-valid': resultForm.controls['modalityId'].valid
-          }">
-                  <option [ngValue]="null" disabled>Modalidad...</option>
-                  <option *ngFor="let modality of modalities" [ngValue]="modality.modalityId">
-                    {{ modality.name }}
-                  </option>
-                </select>
-              </div>
+          <!-- Jugador -->
+          <div class="col-md-6">
+            <label class="form-label">Jugador *</label>
+            <select class="form-select" formControlName="personId"
+              [ngClass]="{ 'is-invalid': resultForm.controls['personId'].invalid && resultForm.controls['personId'].touched }">
+              <option [ngValue]="null" disabled>Jugador...</option>
+              <option *ngFor="let person of players" [ngValue]="person.personId">
+                {{ person.fullName }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Seleccione un jugador.</div>
+          </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Ronda</label>
-                <select class="form-select" formControlName="roundId" [ngClass]="{
-            'is-invalid': resultForm.controls['roundId'].invalid && resultForm.controls['roundId'].touched,
-            'is-valid': resultForm.controls['roundId'].valid
-          }">
-                  <option [ngValue]="null" disabled>Ronda...</option>
-                  <option *ngFor="let round of rounds" [ngValue]="round.roundId">
-                    {{ round.roundNumber }}
-                  </option>
-                </select>
-              </div>
+          <!-- Equipo -->
+          <div class="col-md-6">
+            <label class="form-label">Equipo</label>
+            <select class="form-select" formControlName="teamId">
+              <option [ngValue]="null">Sin equipo</option>
+              <option *ngFor="let team of teams" [ngValue]="team.teamId">
+                {{ team.nameTeam }}
+              </option>
+            </select>
+          </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Equipo</label>
-                <select class="form-select" formControlName="teamId" [ngClass]="{
-            'is-invalid': resultForm.controls['teamId'].invalid && resultForm.controls['teamId'].touched,
-            'is-valid': resultForm.controls['teamId'].valid
-          }">
-                  <option [ngValue]="null" disabled>Equipo...</option>
-                  <option *ngFor="let team of teams" [ngValue]="team.teamId">
-                    {{ team.nameTeam }}
-                  </option>
-                </select>
-              </div>
+          <!-- Pista -->
+          <div class="col-md-6">
+            <label class="form-label">Pista *</label>
+            <select class="form-select" formControlName="laneNumber"
+              [ngClass]="{ 'is-invalid': resultForm.controls['laneNumber'].invalid && resultForm.controls['laneNumber'].touched }">
+              <option [ngValue]="null" disabled>Pista...</option>
+              <option *ngFor="let lane of laneNumbers" [ngValue]="lane.laneNumber">
+                {{ lane.laneNumber }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Seleccione una pista.</div>
+          </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Pista</label>
-                <select class="form-select" formControlName="laneNumber" [ngClass]="{
-            'is-invalid': resultForm.controls['laneNumber'].invalid && resultForm.controls['laneNumber'].touched,
-            'is-valid': resultForm.controls['laneNumber'].valid
-          }">
-                  <option [ngValue]="null" disabled>Pista...</option>
-                  <option *ngFor="let laneNumber of laneNumbers" [ngValue]="laneNumber.laneNumber">
-                    {{ laneNumber.laneNumber }}
-                  </option>
-                </select>
-              </div>
+          <!-- Línea Jugada -->
+          <div class="col-md-6">
+            <label class="form-label">Línea Jugada *</label>
+            <select class="form-select" formControlName="lineNumber"
+              [ngClass]="{ 'is-invalid': resultForm.controls['lineNumber'].invalid && resultForm.controls['lineNumber'].touched }">
+              <option [ngValue]="null" disabled>Línea...</option>
+              <option *ngFor="let line of lineNumbers" [ngValue]="line.lineNumber">
+                {{ line.lineNumber }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Seleccione una línea jugada.</div>
+          </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Linea Jugada</label>
-                <select class="form-select" formControlName="lineNumber" [ngClass]="{
-            'is-invalid': resultForm.controls['lineNumber'].invalid && resultForm.controls['lineNumber'].touched,
-            'is-valid': resultForm.controls['lineNumber'].valid
-          }">
-                  <option [ngValue]="null" disabled>Linea...</option>
-                  <option *ngFor="let lineNumber of lineNumbers" [ngValue]="lineNumber.lineNumber">
-                    {{ lineNumber.lineNumber }}
-                  </option>
-                </select>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Puntaje</label>
-                <input formControlName="score" type="number" class="form-control" placeholder="Puntaje" [ngClass]="{
-                'is-invalid': resultForm.controls['score'].invalid && resultForm.controls['score'].touched,
-                'is-valid': resultForm.controls['score'].valid
-              }" />
-              </div>
-            </div>
-
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
-            <button type="button" class="btn btn-success" [disabled]="resultForm.invalid"
-              (click)="saveForm()">Guardar</button>
+          <!-- Puntaje -->
+          <div class="col-md-6">
+            <label class="form-label">Puntaje *</label>
+            <input formControlName="score" type="number" class="form-control" placeholder="Puntaje"
+              [ngClass]="{ 'is-invalid': resultForm.controls['score'].invalid && resultForm.controls['score'].touched }" />
+            <div class="invalid-feedback">Ingrese un puntaje válido.</div>
           </div>
         </div>
       </div>
-    </ng-template>
 
-
-    <ng-template #modalSetResultTournament>
-
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
-          <h2 class="modal-title flex-grow-1 m-0">
-            Cargar Resultados
-          </h2>
-          <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
-            style="filter: brightness(0) invert(1);"></button>
-        </div>
-        <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label"><strong>Torneo: </strong>{{ selectedTournament?.name }}</label>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label"><strong>Organizador: </strong>{{ selectedTournament?.organizer }}</label>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label"><strong>Modalidades: </strong>{{ selectedTournament?.modalityNames?.join(', ')
-                }}</label>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label"><strong>Categorías: </strong>{{ selectedTournament?.categoryNames?.join(', ')
-                }}</label>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label"><strong>Fecha Inicio: </strong>{{ selectedTournament?.startDate | date:
-                'dd/MM/yyyy' }}</label>
-
-            </div>
-            <div class="col-md-6">
-              <label class="form-label"><strong>Fecha Fin: </strong>{{ selectedTournament?.endDate | date: 'dd/MM/yyyy'
-                }}</label>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label"><strong>Ámbito: </strong>{{ selectedTournament?.ambitName }}</label>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label"><strong>Lugar: </strong>{{ selectedTournament?.location }}</label>
-            </div>
-            <!-- Agrega los demás campos igual -->
-          </div>
-        </div>
-        <div class="modal-footer">
-          <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Guardar</button>
-            <!-- Aquí puedes poner el botón de cargar resultados, si lo necesitas -->
-          </div>
+      <div class="modal-footer">
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn-success" [disabled]="resultForm.invalid">
+            Guardar
+          </button>
         </div>
       </div>
-    </ng-template>
+    </form>
+  </div>
+</ng-template>

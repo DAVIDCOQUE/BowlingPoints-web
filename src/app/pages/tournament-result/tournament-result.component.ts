@@ -1,290 +1,426 @@
-import { Component, ViewChild } from '@angular/core';
-import { Router } from '@angular/router'
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, ViewChild, TemplateRef, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { environment } from '../../../environments/environment';
+import { BehaviorSubject, finalize } from 'rxjs';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { ActivatedRoute } from '@angular/router';
+
+import { environment } from '../../../environments/environment';
+
 import { ITournament } from '../../model/tournament.interface';
-import { IModality } from '../../model/modality.interface';
-import { IResults } from 'src/app/model/result.interface';
-import { ICategory } from 'src/app/model/category.interface';
-import { IRound } from 'src/app/model/round.interface';
-import { ITeam } from 'src/app/model/team.interface';
 import { IUser } from 'src/app/model/user.interface';
+import { IResults } from '../../model/result.interface';
+import { ICategory } from '../../model/category.interface';
+import { IModality } from '../../model/modality.interface';
+import { ITournamentRegistration } from 'src/app/model/tournament-registration.interface';
+
+import { TournamentsService } from 'src/app/services/tournaments.service';
+import { UserApiService } from 'src/app/services/user-api.service';
+import { ITeam } from 'src/app/model/team.interface';
+import { ResultsService } from 'src/app/services/results.service';
+import { IBranch } from 'src/app/model/branch.interface';
+import { Location } from '@angular/common';
+
 @Component({
   selector: 'app-tournament-result',
   templateUrl: './tournament-result.component.html',
   styleUrls: ['./tournament-result.component.css']
 })
-export class TournamentResultComponent {
+export class TournamentResultComponent implements OnInit {
+  @ViewChild('modalResult', { static: false }) modalResultRef!: TemplateRef<unknown>;
+  @ViewChild('modalPlayer', { static: false }) modalPlayerRef!: TemplateRef<unknown>;
 
-  @ViewChild('modalResult') modalResultRef: any;
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  // Estado general
+  isLoading$ = new BehaviorSubject<boolean>(false);
+  loading = false;
 
-  filter: string = '';
-  torneo: any;
-
-  selectedTournament: any = null;
-
-
-  results: IResults[] = [];
-
-  tournaments: ITournament[] = [];
+  // Torneo
+  tournamentId: number | null = null;
+  selectedTournament: ITournament | null = null;
   categories: ICategory[] = [];
   modalities: IModality[] = [];
-  rounds: IRound[] = [];
-  persons: IUser[] = [];
+  branches: IBranch[] = [];
   teams: ITeam[] = [];
 
 
+  // Jugadores registrados
+  players: IUser[] = [];
+  registrations: ITournamentRegistration[] = [];
+  filteredRegistrations: ITournamentRegistration[] = [];
+  idPlayer: number | null = null;
+  playerForm: FormGroup = new FormGroup({});
 
+  // Resultados
+  results: IResults[] = [];
+  filteredResults: IResults[] = [];
   resultForm: FormGroup = new FormGroup({});
   idResult: number | null = null;
 
-  laneNumbers = [
-    { laneNumber: 1 },
-    { laneNumber: 2 },
-    { laneNumber: 3 },
-    { laneNumber: 4, },
-    { laneNumber: 5, },
-    { laneNumber: 6 },
-    { laneNumber: 7 },
-    { laneNumber: 8 },
-    { laneNumber: 10 },
-    { laneNumber: 11 },
-    { laneNumber: 12 }
+  public readonly laneNumbers = Array.from({ length: 12 }, (_, i) => ({ laneNumber: i + 1 }));
+  public readonly lineNumbers = Array.from({ length: 12 }, (_, i) => ({ lineNumber: i + 1 }));
+  roundNumbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  // Filtros resultados
+  selectedBranch = '';
+  selectedRound: number | null = null;
+
+  // Filtro jugadores
+  selectedBranchPlayer = '';
+
+  // Extras
+  readonly estados = [
+    { valor: true, etiqueta: 'Activo' },
+    { valor: false, etiqueta: 'Inactivo' },
   ];
+  selectedFile: File | null = null;
 
-  lineNumbers = [
-    { lineNumber: 1 },
-    { lineNumber: 2 },
-    { lineNumber: 3 },
-    { lineNumber: 4, },
-    { lineNumber: 5, },
-    { lineNumber: 6 },
-    { lineNumber: 7 },
-    { lineNumber: 8 },
-    { lineNumber: 10 },
-    { lineNumber: 11 },
-    { lineNumber: 12 }
-  ];
+  // Inyecciones
+  private readonly apiUrl = environment.apiUrl;
+  private readonly fb = inject(FormBuilder);
+  private readonly http = inject(HttpClient);
+  private readonly route = inject(ActivatedRoute);
+  private readonly modalService = inject(NgbModal);
+  private readonly userApiService = inject(UserApiService);
+  private readonly tournamentsService = inject(TournamentsService);
+  private readonly resultsService = inject(ResultsService);
+  private readonly location = inject(Location);
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private http: HttpClient,
-    private modalService: NgbModal
-  ) { }
-
+  // ================== CICLO DE VIDA ==================
   ngOnInit(): void {
-    this.initForm();
-    this.getResults();
-    this.getTournaments();
-    this.getModalitys();
-    this.getRounds();
-    this.getUser();
-    this.getTeams();
-    this.getCategorys();
+    const idFromRoute = this.route.snapshot.paramMap.get('tournamentId');
+    this.tournamentId = idFromRoute ? Number(idFromRoute) : null;
+
+    if (this.tournamentId) {
+      this.loadTournamentById(this.tournamentId);
+    }
+
+    this.initPlayerForm();
+    this.initResultForm();
+    this.loadRegisteredPlayers();
+    this.loadPlayers();
+    this.loadResults();
   }
 
-  initForm(): void {
-    this.resultForm = this.formBuilder.group({
-      personId: ['',],
-      teamId: ['',],
-      tournamentId: ['', Validators.required],
-      categoryId: ['', Validators.required],
-      modalityId: ['', Validators.required],
-      roundId: ['', Validators.required],
-      laneNumber: ['', Validators.required],
-      lineNumber: ['', Validators.required],
-      score: ['', Validators.required],
+  // ================== TORNEO ==================
+
+  loadTournamentById(id: number): void {
+    this.isLoading$.next(true);
+    this.tournamentsService
+      .getTournamentById(id)
+      .pipe(finalize(() => this.isLoading$.next(false)))
+      .subscribe({
+        next: tournament => {
+          this.selectedTournament = tournament.data;
+          this.categories = tournament.data?.categories || [];
+          this.modalities = tournament.data?.modalities || [];
+          this.branches = tournament.data?.branches || [];
+
+          if (!this.selectedTournament) {
+            Swal.fire('Atención', 'No se encontró el torneo solicitado', 'info');
+          }
+        },
+        error: err => {
+          console.error('Error al cargar torneo:', err);
+          Swal.fire('Error', 'No se pudo cargar el torneo', 'error');
+        }
+      });
+  }
+
+  // ================== JUGADORES REGISTRADOS ==================
+
+  loadPlayers(): void {
+    this.userApiService.getUsers().subscribe({
+      next: res => (this.players = res ?? []),
+      error: err => console.error('Error al cargar jugadores:', err)
     });
   }
 
-  getResults(): void {
-    this.http.get<{ success: boolean; message: string; data: IResults[] }>(`${environment.apiUrl}/results`)
-      .subscribe({
-        next: res => {
-          this.results = res.data;
-          console.log('resultados:', res);
+  loadRegisteredPlayers(): void {
+    if (!this.tournamentId) return;
 
+    this.http
+      .get<ITournamentRegistration[]>(`${this.apiUrl}/registrations/tournament/${this.tournamentId}`)
+      .subscribe({
+        next: (res) => {
+          this.registrations = res || [];
+          this.filteredRegistrations = this.registrations;
+          this.onFilterPlayerChange();
         },
-        error: err => {
-          console.error('Error al cargar Resultados:', err);
+        error: (err) => {
+          console.error('Error al cargar jugadores registrados:', err);
+          Swal.fire('Error', 'No se pudieron cargar los jugadores registrados', 'error');
         }
       });
   }
 
-  getTournaments(): void {
-    this.http.get<{ success: boolean; message: string; data: ITournament[] }>(`${environment.apiUrl}/tournaments`)
-      .subscribe({
-        next: res => {
-          this.tournaments = res.data;
-        },
-        error: err => {
-          console.error('Error al cargar torneoses:', err);
-        }
-      });
+  initPlayerForm(): void {
+    this.playerForm = this.fb.group({
+      personId: [null, Validators.required],
+      categoryId: [null, Validators.required],
+      modalityId: [null, Validators.required],
+      branchId: [null, Validators.required],
+      teamId: [null],
+      status: [true, Validators.required]
+    });
   }
 
-  getCategorys(): void {
-    this.http.get<{ success: boolean; message: string; data: ICategory[] }>(`${environment.apiUrl}/categories`)
-      .subscribe({
-        next: res => {
-          this.categories = res.data;
-        },
-        error: err => {
-          console.error('Error al cargar modalidades:', err);
-        }
-      });
+  initResultForm(): void {
+    this.resultForm = this.fb.group({
+      personId: [null],
+      teamId: [null],
+      tournamentId: [this.tournamentId, Validators.required],
+      categoryId: [null, Validators.required],
+      modalityId: [null, Validators.required],
+      branchId: [null, Validators.required],
+      roundNumber: [null, Validators.required],
+      laneNumber: [null, Validators.required],
+      lineNumber: [null, Validators.required],
+      score: [null, Validators.required],
+    });
   }
 
-  getModalitys(): void {
-    this.http.get<{ success: boolean; message: string; data: IModality[] }>(`${environment.apiUrl}/modalities`)
-      .subscribe({
-        next: res => {
-          this.modalities = res.data;
-        },
-        error: err => {
-          console.error('Error al cargar modalidades:', err);
-        }
-      });
-  }
-
-  getRounds(): void {
-    this.http.get<{ success: boolean; message: string; data: IRound[] }>(`${environment.apiUrl}/rounds`)
-      .subscribe({
-        next: res => {
-          this.rounds = res.data;
-        },
-        error: err => {
-          console.error('Error al cargar rondas:', err);
-        }
-      });
-  }
-
-  getUser(): void {
-    this.http.get<{ success: boolean; message: string; data: IUser[] }>(`${environment.apiUrl}/users`)
-      .subscribe({
-        next: res => {
-          this.persons = res.data;
-        },
-        error: err => {
-          console.error('Error al cargar usuarios:', err);
-        }
-      });
-  }
-
-  getTeams(): void {
-    this.http.get<{ success: boolean; message: string; data: ITeam[] }>(`${environment.apiUrl}/teams`)
-      .subscribe({
-        next: res => {
-          this.teams = res.data;
-        },
-        error: err => {
-          console.error('Error al cargar equipos:', err);
-        }
-      });
-  }
-
-  get filteredResult(): IResults[] {
-    const term = this.filter.toLowerCase().trim();
-    return term
-      ? this.results.filter(cat => cat.tournamentName.toLowerCase().includes(term))
-      : this.results;
-  }
-
-  openModal(content: any): void {
-    if (!this.idResult) {
-      this.resultForm.reset();
+  openModal(content: TemplateRef<unknown>): void {
+    if (content === this.modalPlayerRef) {
+      if (!this.idPlayer) this.initPlayerForm(); // Solo si es nuevo
     }
-    this.modalService.open(content);
+
+    if (content === this.modalResultRef) {
+      if (!this.idResult) this.initResultForm(); // Solo si es nuevo
+    }
+
+    this.modalService.open(content, { size: 'lg' });
   }
 
-  openModalResultados(content: any): void {
-    this.modalService.open(content);
+  closeModal(): void {
+    this.modalService.dismissAll();
+    this.idPlayer = null;
+    this.idResult = null;
   }
 
-  editResult(result: IResults): void {
-    this.idResult = result.resultId;
-    this.resultForm.patchValue({ personId: result.personId });
-    this.resultForm.patchValue({ teamId: result.teamId });
-    this.resultForm.patchValue({ tournamentId: result.tournamentId });
-    this.resultForm.patchValue({ categoryId: result.categoryId });
-    this.resultForm.patchValue({ roundId: result.roundId });
-    this.resultForm.patchValue({ modalityId: result.modalityId });
-    this.resultForm.patchValue({ laneNumber: result.laneNumber });
-    this.resultForm.patchValue({ lineNumber: result.lineNumber });
-    this.resultForm.patchValue({ score: result.score });
-    this.openModal(this.modalResultRef);
+  editPlayer(reg: ITournamentRegistration): void {
+    this.idPlayer = reg.registrationId;
+    this.playerForm.patchValue({
+      personId: reg.personId,
+      categoryId: reg.categoryId,
+      modalityId: reg.modalityId,
+      branchId: reg.branchId,
+      teamId: reg.teamId ?? null,
+      status: reg.status
+    });
+    this.openModal(this.modalPlayerRef);
   }
-  saveForm(): void {
-    if (this.resultForm.invalid) {
-      this.resultForm.markAllAsTouched();
+
+  savePlayer(): void {
+    if (this.playerForm.invalid || !this.tournamentId) {
+      this.playerForm.markAllAsTouched();
+      Swal.fire('Error', 'Formulario inválido o torneo no definido', 'error');
       return;
     }
 
-    const payload = this.resultForm.value;
-    const isEdit = !!this.idResult;
-    this.isLoading$.next(true);
+    const payload = {
+      tournamentId: this.tournamentId,
+      ...this.playerForm.value
+    };
 
+    const isEdit = !!this.idPlayer;
     const request = isEdit
-      ? this.http.put(`${environment.apiUrl}/results/${this.idResult}`, payload)
-      : this.http.post(`${environment.apiUrl}/results`, payload);
+      ? this.http.put(`${this.apiUrl}/registrations/${this.idPlayer}`, payload)
+      : this.http.post(`${this.apiUrl}/registrations`, payload);
 
-    request.subscribe({
+    this.loading = true;
+    request.pipe(finalize(() => (this.loading = false))).subscribe({
       next: () => {
-        Swal.fire('Éxito', isEdit ? 'Torneos actualizada' : 'Torneos creada', 'success');
-        this.getResults();
+        Swal.fire('Éxito', isEdit ? 'Jugador actualizado' : 'Jugador agregado', 'success');
         this.closeModal();
-        this.isLoading$.next(false);
+        this.loadRegisteredPlayers();
       },
       error: err => {
-        console.error('Error al guardar torneos:', err);
-        Swal.fire('Error', err.error?.message || 'Algo salió mal', 'error');
-        this.isLoading$.next(false);
+        console.error('Error al guardar jugador:', err);
+        const msg = err.error?.message || 'No se pudo guardar el jugador';
+        Swal.fire('Error', msg, 'error');
       }
     });
   }
 
-  deleteResult(id: number): void {
+  deletePlayer(registrationId: number): void {
     Swal.fire({
-      title: '¿Eliminar torneos?',
+      title: '¿Eliminar jugador del torneo?',
       text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#6c757d',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then(result => {
-      if (result.isConfirmed) {
-        this.http.delete(`${environment.apiUrl}/results/${id}`).subscribe({
+      cancelButtonText: 'Cancelar',
+    }).then((dlg) => {
+      if (dlg.isConfirmed) {
+        this.http.delete(`${this.apiUrl}/registrations/${registrationId}`).subscribe({
           next: () => {
-            Swal.fire('Eliminado', 'Torneos eliminada correctamente', 'success');
-            this.getResults();
+            Swal.fire('Eliminado', 'Jugador eliminado correctamente', 'success');
+            this.loadRegisteredPlayers();
           },
-          error: () => {
-            Swal.fire('Error', 'No se pudo eliminar la torneos', 'error');
-          }
+          error: () => Swal.fire('Error', 'No se pudo eliminar el jugador', 'error'),
         });
       }
     });
   }
 
-  closeModal(): void {
-    this.modalService.dismissAll();
-    this.resultForm.reset();
-    this.idResult = null;
+  // ================== RESULTADOS ==================
+
+  loadResults(): void {
+    if (!this.tournamentId) return;
+
+    const selectedBranchId = this.selectedBranch
+      ? this.branches.find(b => b.name.toLowerCase() === this.selectedBranch.toLowerCase())?.branchId
+      : undefined;
+
+    const selectedRoundNumber = this.selectedRound ?? undefined;
+
+    this.resultsService.getResultsFiltered(this.tournamentId, selectedBranchId, selectedRoundNumber)
+      .subscribe({
+        next: (res) => {
+          this.results = res ?? [];
+          this.filteredResults = this.results;
+        },
+        error: (err) => {
+          console.error('Error al cargar resultados:', err);
+          Swal.fire('Error', 'No se pudieron cargar los resultados', 'error');
+        }
+      });
   }
 
-  search(): void {
-    console.log('Filtro:', this.filter);
+
+  editResult(result: IResults): void {
+
+    console.log('Result recibido:', result);
+    this.idResult = result.resultId ?? null;
+    this.resultForm.patchValue({
+      personId: result.personId ?? null,
+      teamId: result.teamId ?? null,
+      tournamentId: result.tournamentId,
+      categoryId: result.categoryId,
+      modalityId: result.modalityId,
+      branchId: result.branchId ?? null,
+      roundNumber: result.roundNumber ?? null,
+      laneNumber: result.laneNumber,
+      lineNumber: result.lineNumber,
+      score: result.score,
+    });
+    this.openModal(this.modalResultRef);
   }
 
-  clear(): void {
-    this.filter = '';
+  saveResult(): void {
+    if (this.resultForm.invalid || !this.tournamentId) {
+      this.resultForm.markAllAsTouched();
+      Swal.fire('Error', 'Formulario inválido o torneo no definido', 'error');
+      return;
+    }
+
+    const payload = {
+      ...this.resultForm.value,
+      tournamentId: this.tournamentId
+    };
+
+    const isEdit = !!this.idResult;
+    const request = isEdit
+      ? this.http.put(`${this.apiUrl}/results/${this.idResult}`, payload)
+      : this.http.post(`${this.apiUrl}/results`, payload);
+
+    this.loading = true;
+    request.pipe(finalize(() => (this.loading = false))).subscribe({
+      next: () => {
+        Swal.fire('Éxito', isEdit ? 'Resultado actualizado' : 'Resultado creado', 'success');
+        this.closeModal();
+        this.loadResults();
+      },
+      error: err => {
+        console.error('Error al guardar resultado:', err);
+        const msg = err.error?.message || 'No se pudo guardar el resultado';
+        Swal.fire('Error', msg, 'error');
+      }
+    });
+  }
+
+  deleteResult(id?: number): void {
+    if (!id) return;
+    Swal.fire({
+      title: '¿Eliminar resultado?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((dlg) => {
+      if (dlg.isConfirmed) {
+        this.http.delete(`${this.apiUrl}/results/${id}`).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'Resultado eliminado correctamente', 'success');
+            this.loadResults();
+          },
+          error: () => Swal.fire('Error', 'No se pudo eliminar el resultado', 'error'),
+        });
+      }
+    });
+  }
+
+  // ================== FILTROS ==================
+
+  onFilterChange(): void {
+    this.loadResults();
+  }
+
+  clearFilters(): void {
+    this.selectedBranch = '';
+    this.selectedRound = null;
+    this.onFilterChange();
+  }
+
+  onFilterPlayerChange(): void {
+    const branch = (this.selectedBranchPlayer || '').toLowerCase().trim();
+
+    this.filteredRegistrations = this.registrations.filter(p => {
+      const matchBranch = !branch || (p.branchName || '').toLowerCase().includes(branch);
+      return matchBranch;
+    });
+  }
+
+  clearPlayerFilters(): void {
+    this.selectedBranchPlayer = '';
+    this.onFilterPlayerChange();
+  }
+
+  // ================== UTILIDADES ==================
+
+  openFileInputResults(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.xlsx, .xls';
+    input.onchange = (event) => this.onFileSelected(event as Event);
+    input.click();
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (!file) return;
+
+    this.selectedFile = file;
+    Swal.fire({
+      icon: 'info',
+      title: 'Archivo seleccionado',
+      text: `Archivo: ${file.name}`,
+      confirmButtonText: 'Aceptar',
+    });
+  }
+
+  onImgError(event: Event, fallback: string): void {
+    (event.target as HTMLImageElement).src = fallback;
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }
-

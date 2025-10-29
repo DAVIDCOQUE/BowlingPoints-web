@@ -9,17 +9,17 @@ import { LoginComponent } from './auth/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from '../app/material.module';
-import { JugadoresComponent } from './pages/jugadores/jugadores.component';
+import { PlayersComponent } from './pages/players/players.component';
 import { FooterComponent } from './layouts/footer/footer.component';
-import { PerfilComponent } from './pages/perfil/perfil.component';
-import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo/resumen-torneo.component';
-import { DatallesTorneoComponent } from './pages/resultadosTorneos/datalles-torneo/datalles-torneo.component';
-import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jugador/datalles-jugador.component';
-import { ListaTorneosComponent } from './pages/resultadosTorneos/lista-torneos/lista-torneos.component';
+import { ProfileComponent } from './pages/profile/profile.component';
+import { TournamentSummaryComponent } from './pages/tournament-history/tournament-summary/tournament-summary.component';
+import { TournamentDetailsComponent } from './pages/tournament-history/tournament-details/tournament-details.component';
+import { PlayerDetailsComponent } from './pages/tournament-history/player-details/player-details.component';
+import { TournamentlistComponent } from './pages/tournament-history/tournament-list/tournament-list.component';
+import { TournamentParticipantsComponent } from './pages/tournament-history/tournament-participants/tournament-participants.component';
 import { HttpClientModule } from '@angular/common/http';
-import { CarouselComponent } from './layouts/carousel/carousel.component';
-import { ClubesComponent } from './pages/clubes/clubes.component';
-import { CategorysComponent } from './pages/categorys/categorys.component';
+import { ClubsComponent } from './pages/clubs/clubs.component';
+import { CategoriesComponent } from './pages/categories/categories.component';
 import { ModalityComponent } from './pages/modality/modality.component';
 import { BodyComponent } from './layouts/body/body.component';
 
@@ -28,57 +28,56 @@ import { SidebarComponent } from './layouts/header-sidenav/sidebar/sidebar.compo
 
 import { MatIconModule } from '@angular/material/icon';
 import { HeaderComponent } from './layouts/header-sidenav/header/header.component';
-import { MisTorneosComponent } from './pages/mis-torneos/mis-torneos.component';
-import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.component';
+import { UserTournamentsComponent } from './pages/user-tournaments/user-tournaments.component';
+import { UserStatsComponent } from './pages/user-stats/user-stats.component';
 import { ClubComponent } from './pages/club/club.component';
 import { UsersComponent } from './pages/users/users.component';
-import { TorneosComponent } from './pages/torneos/torneos.component';
+import { TournamentsComponent } from './pages/tournaments/tournaments.component';
 import { RouterModule } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtInterceptor } from './auth/jwt.interceptor';
-import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
+import { UnauthorizedComponent } from './auth/unauthorized/unauthorized.component';
 
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AmbitComponent } from './pages/ambit/ambit.component';
 import { ResultsComponent } from './pages/results/results.component';
 import { LoadingComponent } from './components/loading/loading.component';
+import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
 import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
+import { TournamentDetailsSummaryComponent } from './pages/tournament-history/tournament-details-summary/tournament-details-summary.component';
 
-
-
-providers: [
-  { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
-]
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     DashboardComponent,
-    JugadoresComponent,
-    ClubesComponent,
+    PlayersComponent,
+    ClubsComponent,
     FooterComponent,
-    PerfilComponent,
-    ResumenTorneoComponent,
-    DatallesTorneoComponent,
-    DatallesJugadorComponent,
-    ListaTorneosComponent,
-    CarouselComponent,
+    ProfileComponent,
+    TournamentSummaryComponent,
+    TournamentDetailsComponent,
+    PlayerDetailsComponent,
+    TournamentlistComponent,
     BodyComponent,
     SidebarComponent,
     HeaderComponent,
-    MisTorneosComponent,
-    MisResultadosComponent,
+    UserTournamentsComponent,
+    UserStatsComponent,
     ClubComponent,
     UsersComponent,
-    TorneosComponent,
+    TournamentsComponent,
     UnauthorizedComponent,
-    CategorysComponent,
+    CategoriesComponent,
     ModalityComponent,
     AmbitComponent,
     ResultsComponent,
     LoadingComponent,
-    TournamentResultComponent
+    ResultsAndStatsComponent,
+    TournamentResultComponent,
+    TournamentParticipantsComponent,
+    TournamentDetailsSummaryComponent
   ],
   imports: [
     CommonModule,

@@ -7,3 +7,4 @@
 - Torneos: quitar categoría, quitar ID y quitar torneo
 - Agregar el cargue de jugadores en torneo.
 - Agregar boton de cargue masivo a traves de archivo plano para personas/usuarios
+222

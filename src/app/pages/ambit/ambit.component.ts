@@ -1,79 +1,70 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { environment } from '../../../environments/environment';
-import Swal from 'sweetalert2';
 import { IAmbit } from 'src/app/model/ambit.interface';
-
-
+import { AmbitApiService } from 'src/app/services/ambit-api.service';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-ambit',
   templateUrl: './ambit.component.html',
   styleUrls: ['./ambit.component.css']
 })
-export class AmbitComponent {
-  @ViewChild('modalAmbit') ambitRef: any;
+export class AmbitComponent implements OnInit {
 
-  filter: string = '';
-  ambits: IAmbit[] = [];
-  idAmbit: number | null = null;
+  @ViewChild('modalAmbit', { static: true }) modalAmbit!: TemplateRef<unknown>;
 
-  ambitForm: FormGroup = new FormGroup({});
+  private readonly fb = inject(FormBuilder);
+  private readonly modalService = inject(NgbModal);
+  private readonly ambitApi = inject(AmbitApiService); // ✅ inyectar nuevo servicio
 
-  estados = [
+  public filter = '';
+  public ambits: IAmbit[] = [];
+  public idAmbit: number | null = null;
+
+  public ambitForm: FormGroup = new FormGroup({});
+
+  public readonly estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' }
   ];
-
-  constructor(
-    private formBuilder: FormBuilder,
-    private http: HttpClient,
-    private modalService: NgbModal
-  ) { }
 
   ngOnInit(): void {
     this.initForm();
     this.getAmbits();
   }
 
-  initForm(): void {
-    this.ambitForm = this.formBuilder.group({
+  private initForm(): void {
+    this.ambitForm = this.fb.group({
       name: ['', Validators.required],
       description: [''],
       status: ['', Validators.required]
     });
   }
 
-  getAmbits(): void {
-    this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(`${environment.apiUrl}/ambits`)
-      .subscribe({
-        next: res => {
-          this.ambits = res.data;
-        },
-        error: err => {
-          console.error('Error al cargar ambitos:', err);
-        }
-      });
+  public getAmbits(): void {
+    this.ambitApi.getAmbits().subscribe({
+      next: ambits => this.ambits = ambits
+    });
   }
 
   get filteredAmbits(): IAmbit[] {
     const term = this.filter.toLowerCase().trim();
     return term
-      ? this.ambits.filter(cat => cat.name.toLowerCase().includes(term))
+      ? this.ambits.filter(a => a.name.toLowerCase().includes(term))
       : this.ambits;
   }
 
-  editAmbit(ambit: IAmbit): void {
+  public editAmbit(ambit: IAmbit): void {
     this.idAmbit = ambit.ambitId;
-    this.ambitForm.patchValue({ name: ambit.name });
-    this.ambitForm.patchValue({ description: ambit.description });
-    this.ambitForm.patchValue({ status: ambit.status });
-    this.openModal(this.ambitRef);
+    this.ambitForm.patchValue({
+      name: ambit.name,
+      description: ambit.description,
+      status: ambit.status
+    });
+    this.openModal(this.modalAmbit);
   }
 
-  saveForm(): void {
+  public saveForm(): void {
     if (this.ambitForm.invalid) {
       this.ambitForm.markAllAsTouched();
       return;
@@ -83,12 +74,12 @@ export class AmbitComponent {
     const isEdit = !!this.idAmbit;
 
     const request = isEdit
-      ? this.http.put(`${environment.apiUrl}/ambits/${this.idAmbit}`, payload)
-      : this.http.post(`${environment.apiUrl}/ambits`, payload);
+      ? this.ambitApi.updateAmbit(this.idAmbit!, payload)
+      : this.ambitApi.createAmbit(payload);
 
     request.subscribe({
       next: () => {
-        Swal.fire('Éxito', isEdit ? 'Ambito actualizada' : 'Ambito creada', 'success');
+        Swal.fire('Éxito', isEdit ? 'Ambito actualizado' : 'Ambito creado', 'success');
         this.getAmbits();
         this.closeModal();
       },
@@ -99,7 +90,7 @@ export class AmbitComponent {
     });
   }
 
-  deleteAmbit(id: number): void {
+  public deleteAmbit(id: number): void {
     Swal.fire({
       title: '¿Eliminar Ambito?',
       text: 'Esta acción no se puede deshacer.',
@@ -111,10 +102,10 @@ export class AmbitComponent {
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (result.isConfirmed) {
-        this.http.delete(`${environment.apiUrl}/ambits/${id}`).subscribe({
+        this.ambitApi.deleteAmbit(id).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'Ambito eliminada correctamente', 'success');
-            this.getAmbits();
+            this.getAmbits()
           },
           error: () => {
             Swal.fire('Error', 'No se pudo eliminar la Ambito', 'error');
@@ -124,20 +115,20 @@ export class AmbitComponent {
     });
   }
 
-  openModal(content: any): void {
+  public openModal(content: TemplateRef<unknown>): void {
     if (!this.idAmbit) {
       this.ambitForm.reset();
     }
     this.modalService.open(content);
   }
 
-  closeModal(): void {
+  public closeModal(): void {
     this.modalService.dismissAll();
     this.ambitForm.reset();
     this.idAmbit = null;
   }
 
-  clear(): void {
+  public clear(): void {
     this.filter = '';
   }
 }

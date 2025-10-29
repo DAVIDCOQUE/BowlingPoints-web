@@ -30,27 +30,12 @@ export class LoginComponent {
     if (this.form.valid) {
       const { username, password } = this.form.value;
 
-      this.http.post<{ token: string }>(
-        `${environment.apiUrl}/auth/login`,
-        { userName: username, password }
-      ).subscribe({
-        next: res => {
-          // Llama a /users/me con el token obtenido
-          this.http.get<{ data: any }>(`${environment.apiUrl}/users/me`, {
-            headers: { 'Authorization': `Bearer ${res.token}` }
-          }).subscribe({
-            next: meRes => {
-              // Usa el AuthService para guardar usuario y token
-              this.auth.setAuthData(res.token, meRes.data);
-              this.router.navigate(['/dashboard']);
-            },
-            error: err => {
-              this.auth.logout();
-              this.error = 'No se pudo obtener la información del usuario';
-            }
-          });
+      this.auth.login(username, password).subscribe({
+        next: (token) => {
+          this.auth.setAuthData(token);
+          this.router.navigate(['/dashboard']);
         },
-        error: err => {
+        error: () => {
           this.error = 'Usuario o contraseña incorrectos';
         }
       });

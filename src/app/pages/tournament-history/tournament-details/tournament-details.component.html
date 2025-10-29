@@ -1,0 +1,161 @@
+<div class="container py-4">
+  <!-- Botón de regreso -->
+  <div class="mb-3">
+    <button class="btn btn-outline-primary rounded-3 px-4" (click)="goBack()">
+      <i class="bi bi-arrow-left me-2"></i>Atrás
+    </button>
+  </div>
+
+  <!-- INFORMACIÓN GENERAL DEL TORNEO -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="row g-0 align-items-center">
+      <!-- Logo -->
+      <div class="col-md-3 text-center p-4">
+        <img [src]="resumenTorneo?.imageUrl || 'assets/img/clubDefault.png'"
+          (error)="onImgError($event, 'assets/img/clubDefault.png')" alt="Logo torneo"
+          class="img-fluid rounded-circle border shadow-sm" width="120" height="120" />
+      </div>
+
+      <!-- Información del torneo -->
+      <div class="col-md-9 p-4">
+        <h2 class="fw-bold mb-1">
+          <i class="bi bi-trophy-fill text-warning me-2"></i>
+          {{ resumenTorneo?.tournamentName || 'Nombre del Torneo' }}
+        </h2>
+
+        <div class="row text-muted">
+          <div class="col-md-6">
+            <b>Fecha:</b>
+            {{ resumenTorneo?.startDate | date: 'mediumDate' }} - {{ resumenTorneo?.endDate | date: 'mediumDate' }}
+          </div>
+          <div class="col-md-6"><b>Ubicación:</b> {{ resumenTorneo?.location || 'No especificada' }}</div>
+          <div class="col-md-6">
+            <b>Estado:</b>
+            {{ resumenTorneo?.status ? 'Activo' : 'Finalizado' }}
+          </div>
+          <div class="col-md-6"><b>Organizador:</b> Liga de Bolos del Valle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESÚMENES: Promedios por línea, promedio de ronda y mayor línea -->
+  <div class="row mb-4 text-center">
+    <div class="col-12">
+      <h5 class="fw-bold fs-5">Promedios por línea</h5> <!-- Aumenta tamaño del título -->
+      <div class="d-flex flex-wrap justify-content-center gap-3">
+        <div *ngFor="let key of promediosPorLinea | keyvalue">
+          <span class="badge text-bg-light px-3 py-2 fs-6">
+            <strong>{{ key.key }}</strong>: {{ key.value | number: '1.2-2' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mt-3">
+      <p class="mb-1">
+        <b>🎯 Promedio de ronda:</b> {{ promedioRonda | number: '1.2-2' }}
+      </p>
+    </div>
+    <div class="col-md-4 mt-3" *ngIf="mayorLinea">
+      <p class="mb-1">
+        <b>🔥 Mayor línea:</b> {{ mayorLinea.score }} - {{ mayorLinea.playerName }} (L{{ mayorLinea.lineNumber }})
+      </p>
+    </div>
+  </div>
+
+  <!-- Selector de ronda con radio buttons estilizados -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between flex-wrap align-items-center">
+        <!-- IZQUIERDA: Texto + Radio buttons -->
+        <div class="d-flex align-items-center flex-wrap gap-3">
+          <strong class="fs-6 mb-0">Selecciona la ronda:</strong>
+
+          <div class="radio-button-container mb-0">
+            <div class="radio-button" *ngFor="let r of rounds">
+              <input type="radio" class="radio-button__input" name="round-selection" [id]="'round-' + r" [value]="r"
+                [(ngModel)]="roundNumber" (change)="loadResultsTable()" />
+              <label class="radio-button__label" [for]="'round-' + r">
+                <span class="radio-button__custom"></span>
+                RONDA {{ r }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- DERECHA: Modalidad -->
+        <span class="fs-5 mb-0">
+          <span class="text-dark">Modalidad: </span>
+          <span class="fw-semibold text-primary">{{ nombreModalidad }}</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- TABLA DE RESULTADOS -->
+  <div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-primary text-white rounded-top-4 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">
+        <i class="bi bi-list-ol me-2"></i> Resultados del Torneo
+      </h4>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle text-center">
+          <thead>
+            <!-- Fila de la ronda actual -->
+            <tr class="table-active">
+              <th [attr.colspan]="3 + maxJuegos + 2" class="text-start ps-4 py-3 fs-6 text-center">
+                🏁 Resultados de la <strong>Ronda {{ roundNumber }}</strong>
+              </th>
+            </tr>
+
+            <!-- Fila de títulos de columnas -->
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Club</th>
+              <th *ngFor="let idx of [].constructor(maxJuegos); let i = index">L{{ i + 1 }}</th>
+              <th class="bg-light-secondary">Total</th>
+              <th class="bg-light-secondary">Promedio</th>
+            </tr>
+          </thead>
+          <tbody *ngIf="players && players.length; else noPlayers">
+            <tr *ngFor="let player of players; let pos = index" [class.table-warning]="pos === 0"
+              [class.table-light]="pos === 1" [class.table-secondary]="pos === 2">
+              <td class="fw-bold">{{ pos + 1 }}</td>
+              <td class="text-start">
+                <a [routerLink]="['/detalle-jugador', player.personId]"
+                  class="text-decoration-none text-dark fw-semibold player-zoom">
+                  <i class="bi bi-person-circle me-1"></i>
+                  {{ player.playerName }}
+                </a>
+              </td>
+              <td>{{ player.clubName }}</td>
+              <td *ngFor="let idx of [].constructor(maxJuegos); let i = index">
+                {{ player.scores && player.scores[i] !== undefined ? player.scores[i] : '-' }}
+              </td>
+              <td class="fw-bold text-primary">{{ player.total }}</td>
+              <td class="fw-bold text-success">{{ player.promedio | number: '1.2-2' }}</td>
+            </tr>
+          </tbody>
+
+          <!-- Sin jugadores -->
+          <ng-template #noPlayers>
+            <tbody>
+              <tr>
+                <td [attr.colspan]="3 + maxJuegos + 2" class="text-center text-muted py-4">
+                  <i class="bi bi-inbox"></i> No hay resultados disponibles.
+                </td>
+              </tr>
+            </tbody>
+          </ng-template>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

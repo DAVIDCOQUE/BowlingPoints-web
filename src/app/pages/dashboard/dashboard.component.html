@@ -5,35 +5,38 @@
     <div class="col-md-6">
       <h3 class="mb-3">🏆 Próximos Torneos</h3>
 
-      <!-- Card de Torneo -->
-      <div *ngFor="let tournament of tournaments">
-        <div class="card mb-3 border-0 shadow-sm rounded-4 card_h" routerLink="/torneo-inscrito/{{tournament.tournamentId}}">
-          <!-- Header torneo -->
-          <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
-            <strong>{{tournament.name}}</strong><span class="badge bg-warning text-dark fw-semibold">Edición:
-              {{tournament.startDate | date:'yyyy'}}</span>
-          </div>
-          <div class="card-body py-3">
-            <div class="row">
-              <!-- Columna Izquierda (Icono grande) -->
-              <div class="col-2 d-flex align-items-center justify-content-center">
-                <img [src]="apiUrl + tournament.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
-                  width="50" alt="Organizador">
-              </div>
-              <!-- Columna Derecha (Información) -->
-              <div class="col-10">
-                <div class="row small gy-1">
-                  <div class="col-6">
-                    <span>📅 <strong>Fecha: </strong>{{tournament.startDate | date:'dd MMMM yyyy'}}</span>
-                  </div>
-                  <div class="col-6">
-                    <span>📍 <strong>Lugar:</strong> {{tournament.location}}</span>
-                  </div>
-                  <div class="col-6">
-                    <span>🎳 <strong>Modalidad:</strong>{{ tournament.modalityNames?.join(', ') || '-' }}</span>
-                  </div>
-                  <div class="col-6">
-                    <span>🏷️ <strong>Categoría:</strong> {{ tournament.categoryNames?.join(', ') || '-' }}</span>
+      <!-- Card de Torneo programado o pospuesto -->
+      <div *ngIf="scheduledOrPostponedTournaments && scheduledOrPostponedTournaments.length > 0; else noTournaments">
+        <div *ngFor="let tournament of scheduledOrPostponedTournaments">
+          <div class="card mb-3 border-0 shadow-sm rounded-4 card_h"
+            routerLink="/tournament-participants/{{tournament.tournamentId}}">
+            <!-- Header torneo -->
+            <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
+              <strong>{{tournament.name}}</strong><span class="badge bg-warning text-dark fw-semibold">Edición:
+                {{tournament.startDate | date:'yyyy'}}</span>
+            </div>
+            <div class="card-body py-3">
+              <div class="row">
+                <!-- Columna Izquierda (Icono grande) -->
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                  <img [src]="apiUrl + tournament.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
+                    width="50" alt="Organizador">
+                </div>
+                <!-- Columna Derecha (Información) -->
+                <div class="col-10">
+                  <div class="row small gy-1">
+                    <div class="col-6">
+                      <span>📅 <strong>Fecha: </strong>{{tournament.startDate | date:'dd MMMM yyyy'}}</span>
+                    </div>
+                    <div class="col-6">
+                      <span>📍 <strong>Lugar:</strong> {{tournament.location}}</span>
+                    </div>
+                    <div class="col-6">
+                      <span>🎳 <strong>Modalidad:</strong> {{ getModalitiesString(tournament) }}</span>
+                    </div>
+                    <div class="col-6">
+                      <span>🏷️ <strong>Categoría:</strong> {{ getCategoriesString(tournament) }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -42,39 +45,56 @@
         </div>
       </div>
 
+      <ng-template #noTournaments>
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
+            <h5 class="fw-semibold text-muted mb-2">No hay torneos próximos</h5>
+            <p class="text-muted small mb-0">
+              Mantente atento a próximas actualizaciones para nuevas competencias.
+            </p>
+          </div>
+        </div>
+      </ng-template>
+
     </div>
 
-    <!-- Torneos Derecha -->
+    <!-- Torneos Activos en Progreso -->
     <div class="col-md-6">
       <h3 class="mb-3">🏆 Torneos Activos</h3>
-      <div *ngFor="let tournament of tournaments">
 
-        <div class="card mb-3 border-0 shadow-sm rounded-4 card_h" routerLink="/resumen-torneo/{{tournament.tournamentId}}">
-          <!-- Header torneo -->
-          <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
-            <strong>Copa valle 2025</strong><span class="badge bg-warning text-dark fw-semibold">Edición 2025</span>
-          </div>
-          <div class="card-body py-3">
-            <div class="row">
-              <!-- Columna Izquierda (Icono grande) -->
-              <div class="col-2 d-flex align-items-center justify-content-center">
-                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/T1_logo.svg/800px-T1_logo.svg.png" width="50"
-                  alt="Organizador">
-              </div>
-              <!-- Columna Derecha (Información) -->
-              <div class="col-10">
-                <div class="row small gy-1">
-                  <div class="col-6">
-                    <span>📅 <strong>Fecha: </strong>20 marzo 2025</span>
-                  </div>
-                  <div class="col-6">
-                    <span>📍 <strong>Lugar:</strong> Bolera XYZ, Cali, Valle</span>
-                  </div>
-                  <div class="col-6">
-                    <span>🎳 <strong>Modalidad:</strong> Individual / Equipos</span>
-                  </div>
-                  <div class="col-6">
-                    <span>🏷️ <strong>Categoría:</strong> Sub-21, Mayores, Mixto</span>
+      <div *ngIf="inProgressTournaments && inProgressTournaments.length > 0; else noActiveTournaments">
+        <div *ngFor="let tournament of inProgressTournaments">
+          <div class="card mb-3 border-0 shadow-sm rounded-4 card_h"
+            routerLink="/tournament-summary/{{tournament.tournamentId}}">
+            <!-- Header torneo -->
+            <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
+              <strong>{{tournament.name}}</strong>
+              <span class="badge bg-warning text-dark fw-semibold">Edición: {{tournament.startDate |
+                date:'yyyy'}}</span>
+            </div>
+            <div class="card-body py-3">
+              <div class="row">
+                <!-- Columna Izquierda (Icono grande) -->
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                  <img [src]="apiUrl + tournament.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
+                    width="50" alt="Organizador">
+                </div>
+                <!-- Columna Derecha (Información) -->
+                <div class="col-10">
+                  <div class="row small gy-1">
+                    <div class="col-6">
+                      <span>📅 <strong>Fecha: </strong>{{tournament.startDate | date:'dd MMMM yyyy'}}</span>
+                    </div>
+                    <div class="col-6">
+                      <span>📍 <strong>Lugar:</strong> {{tournament.location}}</span>
+                    </div>
+                    <div class="col-6">
+                      <span>🎳 <strong>Modalidad:</strong> {{ getModalitiesString(tournament) }}</span>
+                    </div>
+                    <div class="col-6">
+                      <span>🏷️ <strong>Categoría:</strong> {{ getCategoriesString(tournament) }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -82,7 +102,20 @@
           </div>
         </div>
       </div>
+
+      <ng-template #noActiveTournaments>
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-activity fs-1 text-muted mb-3"></i>
+            <h5 class="fw-semibold text-muted mb-2">No hay torneos activos en este momento</h5>
+            <p class="text-muted small mb-0">
+              Pronto verás aquí los torneos en progreso. ¡Sigue practicando y mantente atento!
+            </p>
+          </div>
+        </div>
+      </ng-template>
     </div>
+
   </div>
 
   <hr>
@@ -97,7 +130,7 @@
           <button *ngFor="let ambit of ambits" type="button"
             class="btn btn-outline-primary d-flex justify-content-between align-items-center w-100 flex-grow-1 rounded-3 shadow-sm"
             style="font-size:1.1rem; min-height: 56px; max-width: 100%;"
-            [routerLink]="['/lista-torneos', ambit.ambitId]">
+            [routerLink]="['/tournament-list', ambit.ambitId]">
             <span class="badge bg-warning text-dark fw-semibold px-3 py-2 text-center mx-auto"
               style="min-width:140px; max-width:200px; width:100%;">
               Torneos {{ ambit.name }}
@@ -110,7 +143,6 @@
     </div>
 
     <!-- Top 10 Puntajes -->
-    <!-- Top 10 Puntajes -->
     <div class="col-md-3">
       <h3>🥇 Top Mejores Puntajes</h3>
       <div class="card shadow-sm h-100">
@@ -120,14 +152,14 @@
             <div class="col-4 text-end">Puntaje</div>
           </div>
           <!-- ALERTA SI NO HAY JUGADORES -->
-          <div *ngIf="!players || players.length === 0"
+          <div *ngIf="!topPlayers || topPlayers.length === 0"
             class="alert alert-warning text-center my-4 py-2 rounded-3 fw-semibold">
             <i class="bi bi-emoji-frown"></i> No hay jugadores.
           </div>
-          <ul class="list-group list-group-flush" *ngIf="players && players.length > 0">
+          <ul class="list-group list-group-flush" *ngIf="topPlayers && topPlayers.length > 0">
             <!-- Ejemplo de jugador individual -->
             <li class="list-group-item d-flex align-items-center justify-content-between px-0 py-2"
-              *ngFor="let player of players">
+              *ngFor="let player of topPlayers">
               <!-- Avatar + Nombre -->
               <div class="d-flex align-items-center gap-3">
                 <img [src]="apiUrl + player.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')"
@@ -141,8 +173,8 @@
             </li>
           </ul>
           <hr>
-          <div class="text-center" *ngIf="players && players.length > 0">
-            <button class="btn btn-outline-primary mt-4" routerLink="/jugadores">Ver todos</button>
+          <div class="text-center" *ngIf="topPlayers && topPlayers.length > 0">
+            <button class="btn btn-outline-primary mt-4" routerLink="/players">Ver todos</button>
           </div>
         </div>
       </div>
@@ -153,37 +185,12 @@
     <div class="col-md-3">
       <h3>🏅 Top Clubs</h3>
       <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <div class="row fw-semibold text-muted border-bottom pb-1 mt-2 mb-2">
-            <div class="col-8">Club</div>
-            <div class="col-4 text-end">Puntaje</div>
-          </div>
-
-          <div *ngIf="!clubs || clubs.length === 0"
-            class="alert alert-warning text-center my-4 py-2 rounded-3 fw-semibold">
-            <i class="bi bi-emoji-frown"></i> No hay Clubes.
-          </div>
-
-          <ul class="list-group list-group-flush">
-            <!-- Ejemplo de club individual -->
-            <li class="list-group-item d-flex align-items-center justify-content-between px-0 py-2"
-              *ngFor="let club of clubs">
-              <!-- Avatar + Nombre -->
-              <div class="d-flex align-items-center gap-3">
-                <img [src]="apiUrl + club.imageUrl" (error)="onImgError($event, 'assets/img/clubDefault.png')"
-                  alt="Foto" class="rounded-circle" width="40" height="40">
-                <span>{{ club.name }}</span>
-              </div>
-              <!-- Puntaje -->
-              <span class="badge bg-success bg-opacity-10 text-success fw-semibold px-3 py-1">
-                {{ club.score || 0 | number:'1.2-2' }}
-              </span>
-            </li>
-          </ul>
-          <hr>
-          <div class="text-center" *ngIf="clubs && clubs.length > 0">
-            <button class="btn btn-outline-primary mt-4" routerLink="/clubes">Ver todos</button>
-          </div>
+        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+          <i class="bi bi-trophy fs-1 text-muted mb-3"></i>
+          <h5 class="fw-semibold text-muted mb-2">Próximamente</h5>
+          <p class="text-muted small mb-0">
+            El ranking de clubs estará disponible en una próxima actualización.
+          </p>
         </div>
       </div>
     </div>

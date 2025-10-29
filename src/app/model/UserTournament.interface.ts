@@ -1,4 +1,3 @@
-
 export interface IUserTournament {
   categoria: string;
   date: string;

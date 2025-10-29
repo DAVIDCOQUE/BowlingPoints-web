@@ -28,13 +28,13 @@
       <mat-menu #accountMenu="matMenu" class="px-3 py-2" style="width: 250px;">
         <div *ngIf="!isGuest" class="mb-2 text-start">
           <span class="badge bg-primary text-white text-uppercase small mb-2">{{ userRole }}</span>
-          <div class="text-muted small">CC: {{ userId }}</div>
+          <div class="text-muted small">CC: {{ userDocument }}</div>
           <div class="text-muted small">{{ userEmail }}</div>
         </div>
 
         <mat-divider></mat-divider>
 
-        <button mat-menu-item routerLink="/perfil">
+        <button mat-menu-item routerLink="/profile">
           <mat-icon>person</mat-icon>
           <span>Editar Perfil</span>
         </button>
