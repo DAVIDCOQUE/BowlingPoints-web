@@ -6,8 +6,6 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { of } from 'rxjs';
 import Swal from 'sweetalert2';
-import { TournamentsService } from 'src/app/services/tournaments.service';
-import { ITournament } from 'src/app/model/tournament.interface';
 
 describe('TournamentsComponent', () => {
   let component: TournamentsComponent;

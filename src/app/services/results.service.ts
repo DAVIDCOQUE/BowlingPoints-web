@@ -54,25 +54,6 @@ export class ResultsService {
     );
   }
 
-  getResultsFiltered(
-    tournamentId: number,
-    branchId?: number,
-    roundNumber?: number
-  ): Observable<IResults[]> {
-    let params = new HttpParams().set('tournamentId', tournamentId.toString());
-
-    if (branchId !== undefined && branchId !== null) {
-      params = params.set('branchId', branchId.toString());
-    }
-
-    if (roundNumber !== undefined && roundNumber !== null) {
-      params = params.set('roundNumber', roundNumber.toString());
-    }
-
-    return this.http.get<IResults[]>(`${this.apiUrl}/results/filter`, { params });
-  }
-
-
   createResult(payload: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/results`, payload);
   }

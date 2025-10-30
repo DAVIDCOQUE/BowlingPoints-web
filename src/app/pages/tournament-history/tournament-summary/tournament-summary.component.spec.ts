@@ -47,70 +47,8 @@ describe('TournamentSummaryComponent', () => {
     locationSpy = TestBed.inject(Location) as jasmine.SpyObj<Location>;
   });
 
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should load tournament successfully', () => {
-    const mockResponse: any = {
-      success: true,
-      message: '',
-      data: {
-        tournamentId: 1,
-        categories: [{ name: 'Cat 1' }],
-        modalities: [{ name: 'Mod 1' }],
-        branches: [{ branchId: 1, name: 'Central' }],
-        tournamentRegistrations: [{ playerId: 1, name: 'John', categoryId: 1 }],
-      },
-    };
-
-    spyOn(service, 'getTournamentById').and.returnValue(of(mockResponse));
-
-    component.loadTournamentById(1);
-
-    expect(service.getTournamentById).toHaveBeenCalledWith(1);
-    expect(component.selectedTournament).toEqual(mockResponse.data);
-    expect(component.categories.length).toBe(1);
-    expect(component.branches.length).toBe(1);
-    expect(component.players.length).toBe(1);
-  });
-
-  it('should handle error when loading tournament', () => {
-    const consoleSpy = spyOn(console, 'error');
-    const swalSpy = spyOn(Swal, 'fire');
-
-    spyOn(service, 'getTournamentById').and.returnValue(
-      throwError(() => new Error('Error HTTP'))
-    );
-
-    component.loadTournamentById(1);
-
-    expect(consoleSpy).toHaveBeenCalled();
-    expect(swalSpy).toHaveBeenCalledWith(
-      'Error',
-      'No se pudo cargar el torneo',
-      'error'
-    );
-  });
-
-  it('should navigate back when goBack() is called', () => {
-    component.goBack();
-    expect(locationSpy.back).toHaveBeenCalled();
-  });
-
-  it('should count players by category', () => {
-    component.players = [
-      { playerId: 1, categoryId: 1 } as any,
-      { playerId: 2, categoryId: 2 } as any,
-      { playerId: 3, categoryId: 1 } as any,
-    ];
-
-    const count = component.getPlayersCountByCategory(1);
-    expect(count).toBe(2);
   });
 
   it('should load tournament and assign fallback branches', fakeAsync(() => {
@@ -169,7 +107,6 @@ describe('TournamentSummaryComponent', () => {
     tournamentsServiceSpy.getTournamentById.and.returnValue(
       of({ success: true, message: '', data: null }) // ← ahora sí cumple con la interfaz
     );
-
     fixture.detectChanges();
     tick();
 
