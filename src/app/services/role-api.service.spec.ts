@@ -11,10 +11,7 @@ describe('RoleApiService', () => {
 
   const mockRole: IRole = {
     roleId: 1,
-    description: 'ADMIN',
-    permissions: [
-      { permissionId: 1, name: 'CREATE_USERS' }
-    ]
+    name: 'ADMIN'
   };
 
   beforeEach(() => {
@@ -59,7 +56,7 @@ describe('RoleApiService', () => {
 
   it('should create a new role', () => {
     const payload: Partial<IRole> = {
-      description: 'NEW_ROLE'
+      name: 'NEW_ROLE'
     };
 
     service.create(payload).subscribe((role) => {
@@ -74,7 +71,7 @@ describe('RoleApiService', () => {
 
   it('should update a role', () => {
     const id = 1;
-    const payload: Partial<IRole> = { description: 'UPDATED_ROLE' };
+    const payload: Partial<IRole> = { name: 'UPDATED_ROLE' };
 
     service.update(id, payload).subscribe((role) => {
       expect(role).toEqual(mockRole);

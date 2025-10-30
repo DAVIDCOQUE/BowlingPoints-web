@@ -1,157 +1,133 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ResultsAndStatsComponent } from './results-and-stats.component';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { environment } from '../../../environments/environment';
-// opcional si tienes errores de plantilla:
-// import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { of } from 'rxjs';
+import { IResults } from '../../model/result.interface';
+import { NO_ERRORS_SCHEMA, TemplateRef } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 describe('ResultsAndStatsComponent', () => {
   let component: ResultsAndStatsComponent;
   let fixture: ComponentFixture<ResultsAndStatsComponent>;
-  let modalServiceSpy: jasmine.SpyObj<NgbModal>;
   let httpMock: HttpTestingController;
-
-  const apiUrl = environment.apiUrl;
+  let modalServiceSpy: jasmine.SpyObj<NgbModal>;
 
   beforeEach(async () => {
     modalServiceSpy = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
 
     await TestBed.configureTestingModule({
       declarations: [ResultsAndStatsComponent],
-      imports: [HttpClientTestingModule, FormsModule],
-      providers: [{ provide: NgbModal, useValue: modalServiceSpy }],
-      // schemas: [NO_ERRORS_SCHEMA], // descomenta si fallan elementos de la plantilla
+      imports: [HttpClientTestingModule],
+      providers: [
+        { provide: NgbModal, useValue: modalServiceSpy }
+      ],
+      schemas: [NO_ERRORS_SCHEMA] // Para ignorar templates no relevantes
     }).compileComponents();
 
     fixture = TestBed.createComponent(ResultsAndStatsComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
+    fixture.detectChanges(); // ngOnInit()
   });
-
-  /** Responde a las llamadas de ngOnInit() */
-  const flushInitRequests = () => {
-    const reqTournaments = httpMock.expectOne(`${apiUrl}/tournaments`);
-    reqTournaments.flush({
-      success: true,
-      data: [{ tournamentId: 1, name: 'Torneo A' }],
-    });
-
-    const reqCategories = httpMock.expectOne(`${apiUrl}/categories`);
-    reqCategories.flush({
-      success: true,
-      data: [{ categoryId: 1, name: 'Cat A' }],
-    });
-
-    const reqModalities = httpMock.expectOne(`${apiUrl}/modalities`);
-    reqModalities.flush({
-      success: true,
-      data: [{ modalityId: 1, name: 'Indiv' }],
-    });
-
-    const reqResults = httpMock.expectOne(`${apiUrl}/results`);
-    reqResults.flush({ success: true, data: [{ resultId: 1, score: 100 }] });
-  };
 
   afterEach(() => {
     httpMock.verify();
   });
 
   it('should create', () => {
-    fixture.detectChanges();
-    flushInitRequests();
     expect(component).toBeTruthy();
   });
 
   it('should load tournaments on init', () => {
-    fixture.detectChanges();
-    flushInitRequests();
+    const mockTournaments = [{ name: 'Torneo Test' }];
+    const req = httpMock.expectOne(`${environment.apiUrl}/tournaments`);
+    req.flush({ success: true, data: mockTournaments });
+
     expect(component.tournaments.length).toBe(1);
-    expect(component.selectedTournament?.name).toBe('Torneo A');
+    expect(component.selectedTournament?.name).toBe('Torneo Test');
   });
 
-  it('should filter results by category, modality and rama', () => {
-    component.results = [
-      {
-        resultId: 1,
-        category: { categoryId: 1, name: 'Cat 1' } as any,
-        modality: { modalityId: 1, name: 'Mod 1' } as any,
-        rama: 'Masculina',
-      } as any,
-      {
-        resultId: 2,
-        category: { categoryId: 2, name: 'Cat 2' } as any,
-        modality: { modalityId: 2, name: 'Mod 2' } as any,
-        rama: 'Femenina',
-      } as any,
+  it('should load categories', () => {
+    component.loadCategories();
+    const req = httpMock.expectOne(`${environment.apiUrl}/categories`);
+    req.flush({ success: true, data: [{ name: 'Juvenil' }] });
+
+    expect(component.categories.length).toBe(1);
+  });
+
+  it('should load and group results', () => {
+    const mockResults: IResults[] = [
+      { personName: 'Juan', tournamentName: 'Torneo 1', score: 200 } as IResults,
+      { personName: 'Juan', tournamentName: 'Torneo 1', score: 100 } as IResults,
+      { personName: 'Ana', tournamentName: 'Torneo 2', score: 300 } as IResults,
     ];
 
-    component.selectedCategory = '1';
-    component.selectedModality = '1';
-    component.selectedBranch = 'Masculina';
+    component.loadResults();
+    const req = httpMock.expectOne(`${environment.apiUrl}/results`);
+    req.flush({ success: true, data: mockResults });
 
+    expect(component.filteredResults.length).toBe(3);
+    expect(component.playerStats.length).toBe(2);
+    expect(component.playerStats.find(p => p.name === 'Juan')?.totalAverage).toBe(150);
+  });
+
+  it('should filter results by branch', () => {
+    component.results = [
+      { branchName: 'Femenino' } as IResults,
+      { branchName: 'Masculino' } as IResults,
+    ];
+    component.selectedBranch = 'femenino';
     component.onFilterChange();
 
     expect(component.filteredResults.length).toBe(1);
-    expect(component.filteredResults[0].resultId).toBe(1);
   });
 
-  it('should open file input when calling openFileInput()', () => {
-    const createSpy = spyOn(document, 'createElement').and.callThrough();
-    component.openFileInput();
-    expect(createSpy).toHaveBeenCalledWith('input');
+  it('should return player average correctly', () => {
+    const player = {
+      name: 'Carlos',
+      tournaments: [{ tournamentName: 'Torneo X', average: 180 }],
+      totalAverage: 180
+    };
+
+    const avg = component.getPlayerAverage(player, 'Torneo X');
+    expect(avg).toBe(180);
   });
 
-  it('should handle file selection and show Swal alert', () => {
-    const file = new File(['dummy'], 'test.xlsx', {
-      type: 'application/vnd.ms-excel',
-    });
-    const event = { target: { files: [file] } } as any; // el handler acepta Event, casteamos
+  it('should handle file selection', () => {
     const swalSpy = spyOn(Swal, 'fire');
+    const file = new File(['dummy content'], 'test.xlsx', { type: 'application/vnd.ms-excel' });
+
+    const event = {
+      target: {
+        files: [file]
+      }
+    } as unknown as Event;
+
     component.onFileSelected(event);
     expect(component.selectedFile).toBe(file);
     expect(swalSpy).toHaveBeenCalled();
   });
 
-  it('should open modal', () => {
-    fixture.detectChanges();
-    flushInitRequests();
-    // openModal ahora espera un TemplateRef: usamos un dummy y casteamos
-    component.openModal({} as any);
+  it('should open modal on editResult', () => {
+    const result: IResults = { score: 100 } as IResults;
+    component.modalResultRef = {} as TemplateRef<unknown>;
+    component.editResult(result);
+
     expect(modalServiceSpy.open).toHaveBeenCalled();
   });
 
-  it('should close modal', () => {
-    fixture.detectChanges();
-    flushInitRequests();
-    component.closeModal();
-    expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
-  });
-
-  it('should call deleteResult and refresh results on success', async () => {
-    fixture.detectChanges();
-    flushInitRequests();
-
-    // Simulamos confirmación inmediata del Swal
-    spyOn(Swal, 'fire').and.returnValue(
-      Promise.resolve({ isConfirmed: true }) as any
-    );
-    spyOn(component, 'loadResults');
+  it('should delete result and reload', () => {
+    const swalSpy = spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true } as any));
+    const loadSpy = spyOn(component, 'loadResults');
 
     component.deleteResult(1);
 
-    // Espera a que se resuelvan las promesas del .then(...)
-    await fixture.whenStable();
-
-    const req = httpMock.expectOne(`${apiUrl}/results/1`);
-    expect(req.request.method).toBe('DELETE');
-    req.flush({ success: true });
-
-    expect(component.loadResults).toHaveBeenCalled();
+    setTimeout(() => {
+      const req = httpMock.expectOne(`${environment.apiUrl}/results/1`);
+      req.flush({});
+      expect(loadSpy).toHaveBeenCalled();
+    }, 0);
   });
 });

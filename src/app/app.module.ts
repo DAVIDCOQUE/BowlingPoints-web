@@ -41,7 +41,6 @@ import { UnauthorizedComponent } from './auth/unauthorized/unauthorized.componen
 
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AmbitComponent } from './pages/ambit/ambit.component';
-import { ResultsComponent } from './pages/results/results.component';
 import { LoadingComponent } from './components/loading/loading.component';
 import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
 import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
@@ -72,7 +71,6 @@ import { TournamentDetailsSummaryComponent } from './pages/tournament-history/to
     CategoriesComponent,
     ModalityComponent,
     AmbitComponent,
-    ResultsComponent,
     LoadingComponent,
     ResultsAndStatsComponent,
     TournamentResultComponent,

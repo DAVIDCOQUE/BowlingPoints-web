@@ -84,4 +84,4 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatTableModule,
   ],
 })
-export class MaterialModule {}
+export class MaterialModule { }

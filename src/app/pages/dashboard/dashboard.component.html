@@ -125,8 +125,9 @@
     <!-- Históricos -->
     <div class="col-md-3">
       <h3>📚 Históricos de Torneos</h3>
-      <div class="card shadow-sm h-100 d-flex flex-column" style="padding: 20px 20px 20px 15px; border-radius: 18px;">
-        <div class="d-grid gap-3 flex-grow-1">
+      <div class="card shadow-sm h-100 d-flex flex-column justify-content-center align-items-center"
+        style="padding: 20px 20px 20px 15px; border-radius: 18px;">
+        <div class="d-grid gap-3 ">
           <button *ngFor="let ambit of ambits" type="button"
             class="btn btn-outline-primary d-flex justify-content-between align-items-center w-100 flex-grow-1 rounded-3 shadow-sm"
             style="font-size:1.1rem; min-height: 56px; max-width: 100%;"
@@ -197,37 +198,37 @@
 
     <!-- Información de la Bolera -->
     <div class="col-md-3">
-      <h3 class="mb-3">📍 Información de la Bolera</h3>
+      <h3 class="mb-3 text-center">📍 Información de la Bolera</h3>
 
       <div class="card shadow-sm h-100 d-flex flex-column justify-content-between">
-        <div class="card-body pb-">
-          <div class="card-title fw-semibold text-center mb-4">Bolera Valle</div>
-          <ul class="list-unstyled small mb-0">
-            <li class="mb-2">
-              <strong>📍 Dirección:</strong>Calle 5 #48-2, Cali, Valle
-            </li>
-            <li class="mb-2">
-              <strong>🕒 Días de atención:</strong> Miércoles a Domingos
-            </li>
-            <li class="mb-2">
-              <strong>⏰ Horario:</strong>1:00 PM – 10:00 PM
-            </li>
-            <li class="mb-2">
-              <strong>🔗 Redes:</strong><br>
-              <a href="https://instagram.com/LiguadeBolosValle" target="_blank"
-                class="text-primary fw-semibold text-decoration-none">
-                LiguadeBolosValle
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Espacio reservado para Google Maps -->
-        <div class="p-2 border-top text-center">
-          <small class="text-muted">🗺️ Mapa de ubicación próximamente</small>
-          <!-- Aquí puedes incrustar Google Maps más adelante -->
+        <div class="h-100 d-flex flex-column justify-content-center align-items-center p-3">
+          <div class="w-100">
+            <div class="card-title fw-semibold text-center mb-4">Bolera Valle</div>
+            <ul class="list-unstyled small mb-4 text-center">
+              <li class="mb-2">
+                <strong>📍 Dirección:</strong> Calle 5 #48-2, Cali, Valle
+              </li>
+              <li class="mb-2">
+                <strong>🕒 Días de atención:</strong> Miércoles a Domingos
+              </li>
+              <li class="mb-2">
+                <strong>⏰ Horario:</strong> 1:00 PM – 10:00 PM
+              </li>
+              <li class="mb-2">
+                <strong>🔗 Redes:</strong><br>
+                <a href="https://instagram.com/LiguadeBolosValle" target="_blank"
+                  class="text-primary fw-semibold text-decoration-none">
+                  LiguadeBolosValle
+                </a>
+              </li>
+            </ul>
+            <div class="text-center border-top pt-2">
+              <small class="text-muted">🗺️ Mapa de ubicación próximamente</small>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
 </div>
