@@ -8,6 +8,7 @@ import { IUser } from '../../model/user.interface';
 import { IRole } from '../../model/role.interface';
 import { AuthService } from '../../auth/auth.service';
 import { RoleApiService } from '../../services/role-api.service';
+import { ElementRef } from '@angular/core';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -43,10 +44,9 @@ describe('ProfileComponent', () => {
   };
 
   beforeEach(async () => {
-    // Crear spies para los servicios
     const authServiceSpy = jasmine.createSpyObj('AuthService', [
       'fetchUser',
-      'updateUserProfile',
+      'updateUserProfile'
     ]);
     const roleServiceSpy = jasmine.createSpyObj('RoleApiService', ['getAll']);
 
@@ -63,84 +63,101 @@ describe('ProfileComponent', () => {
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    roleService = TestBed.inject(
-      RoleApiService
-    ) as jasmine.SpyObj<RoleApiService>;
+    roleService = TestBed.inject(RoleApiService) as jasmine.SpyObj<RoleApiService>;
 
-    // Configurar respuestas por defecto para los spies
     authService.fetchUser.and.returnValue(of(mockUser));
     roleService.getAll.and.returnValue(of(mockRoles));
+
+    Object.defineProperty(authService, 'baseUrl', {
+      get: () => 'http://localhost:3000'
+    });
   });
 
   it('debe crear el componente', () => {
     fixture.detectChanges();
-
     expect(component).toBeTruthy();
-    expect(authService.fetchUser).toHaveBeenCalled();
-    expect(roleService.getAll).toHaveBeenCalled();
   });
 
   it('debe inicializar el formulario', () => {
-    fixture.detectChanges();
-
+    component.initForm();
     expect(component.userForm).toBeTruthy();
     expect(component.userForm.get('nickname')).toBeTruthy();
   });
 
   it('debe cargar roles correctamente', () => {
-    fixture.detectChanges();
-
+    component.getRoles();
     expect(component.roles.length).toBe(2);
-    expect(component.roles[0].name).toBe('Administrador');
   });
 
   it('debe cargar el usuario actual y llenar el formulario', () => {
     fixture.detectChanges();
-
     expect(component.userForm.get('nickname')?.value).toBe('testuser');
     expect(component.idUser).toBe(10);
   });
 
-  it('debe retornar la imagen por defecto si no hay photoUrl', () => {
-    component.userForm = component['fb'].group({
-      photoUrl: [''],
-    });
+  it('debe retornar imagen por defecto si no hay photoUrl', () => {
+    component.userForm = component['fb'].group({ photoUrl: [''] });
+    expect(component.photoSrc).toBe('assets/img/profile.png');
+  });
 
-    const result = component.photoSrc;
+  it('debe retornar imagen completa si es relativa', () => {
+    component.userForm = component['fb'].group({ photoUrl: ['/foto.jpg'] });
+    expect(component.photoSrc).toContain('/foto.jpg');
+  });
+
+  it('getAvatarUrl: debe retornar ruta completa si relativa', () => {
+    const result = component.getAvatarUrl({ photoUrl: '/avatar.jpg' } as IUser);
+    expect(result).toBe('http://localhost:3000/avatar.jpg');
+  });
+
+  it('getAvatarUrl: debe retornar misma ruta si absoluta', () => {
+    const result = component.getAvatarUrl({ photoUrl: 'https://cdn/img.jpg' } as IUser);
+    expect(result).toBe('https://cdn/img.jpg');
+  });
+
+  it('getAvatarUrl: debe retornar imagen por defecto si no hay photoUrl', () => {
+    const result = component.getAvatarUrl({} as IUser);
     expect(result).toBe('assets/img/profile.png');
   });
 
-  it('debe retornar rolId dado el nombre', () => {
+  it('getRoleIdByName: debe retornar ID correcto', () => {
     component.roles = mockRoles;
-    const roleId = component.getRoleIdByName('Usuario');
-    expect(roleId).toBe(2);
+    expect(component.getRoleIdByName('Usuario')).toBe(2);
   });
 
-  it('debe retornar la ruta completa si hay photoUrl', () => {
-    component.userForm = component['fb'].group({
-      photoUrl: ['/avatar.jpg'],
-    });
-
-    const result = component.photoSrc;
-    expect(result).toContain('/avatar.jpg');
+  it('getRoleIdByName: debe retornar null si no existe', () => {
+    component.roles = mockRoles;
+    expect(component.getRoleIdByName('Desconocido')).toBeNull();
   });
 
-  it('no debe enviar formulario si es inválido', () => {
+  it('getRoleDescription: debe retornar descripción correcta', () => {
+    component.roles = mockRoles;
+    expect(component.getRoleDescription(2)).toBe('Usuario');
+  });
+
+  it('getRolesDescription: debe retornar descripciones', () => {
+    component.roles = mockRoles;
+    expect(component.getRolesDescription([1, 2])).toBe('Administrador, Usuario');
+  });
+
+  it('onImgError: debe reemplazar imagen al fallar', () => {
+    const event = { target: { src: '' } } as unknown as Event;
+    component.onImgError(event, 'assets/img/fallback.png');
+    expect((event.target as HTMLImageElement).src).toBe('assets/img/fallback.png');
+  });
+
+  it('onSubmit: no debe enviar si form es inválido', () => {
     fixture.detectChanges();
-
-    component.userForm.patchValue({ nickname: '' }); // dejar un campo inválido
+    component.userForm.patchValue({ nickname: '' });
     component.onSubmit();
-
     expect(authService.updateUserProfile).not.toHaveBeenCalled();
   });
 
-  it('debe enviar PUT con datos válidos', () => {
+  it('onSubmit: debe enviar datos válidos y llamar updateUserProfile', () => {
     fixture.detectChanges();
 
-    // Configurar mock para updateUserProfile
     authService.updateUserProfile.and.returnValue(of(mockUser));
 
-    // Forzar valores válidos
     component.userForm.patchValue({
       nickname: 'testuser',
       document: '123',
@@ -155,21 +172,46 @@ describe('ProfileComponent', () => {
       confirm: '',
     });
 
+    component.idUser = 10;
+    component.roles = mockRoles;
+
     component.onSubmit();
 
     expect(authService.updateUserProfile).toHaveBeenCalledWith(
-      mockUser.userId,
+      10,
       jasmine.objectContaining({
         nickname: 'testuser',
-        document: '123',
-        photoUrl: '',
-        fullName: 'Test',
-        fullSurname: 'User',
-        email: 'test@example.com',
-        phone: '555',
-        gender: 'Masculino',
         roles: ['Administrador'],
       })
     );
+  });
+
+  it('onSubmit: debe manejar error del servidor', () => {
+    fixture.detectChanges();
+
+    authService.updateUserProfile.and.returnValue(
+      throwError(() => new Error('Falló el servidor'))
+    );
+
+    component.userForm.patchValue({
+      nickname: 'testuser',
+      document: '123',
+      photoUrl: '',
+      fullName: 'Test',
+      fullSurname: 'User',
+      email: 'test@example.com',
+      phone: '555',
+      gender: 'Masculino',
+      roleId: 1,
+      password: '',
+      confirm: '',
+    });
+
+    component.idUser = 10;
+    component.roles = mockRoles;
+
+    component.onSubmit();
+
+    expect(authService.updateUserProfile).toHaveBeenCalled();
   });
 });

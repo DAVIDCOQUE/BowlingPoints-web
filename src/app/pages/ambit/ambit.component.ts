@@ -104,11 +104,11 @@ export class AmbitComponent implements OnInit {
       if (result.isConfirmed) {
         this.ambitApi.deleteAmbit(id).subscribe({
           next: () => {
-            Swal.fire('Eliminado', 'Ambito eliminada correctamente', 'success');
+            Swal.fire('Eliminado', 'Ámbito eliminada correctamente', 'success');
             this.getAmbits()
           },
           error: () => {
-            Swal.fire('Error', 'No se pudo eliminar la Ambito', 'error');
+            Swal.fire('Error', 'No se pudo eliminar la Ámbito', 'error');
           }
         });
       }

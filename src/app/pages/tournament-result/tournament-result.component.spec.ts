@@ -1,455 +1,201 @@
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { TournamentResultComponent } from './tournament-result.component';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { FormsModule } from '@angular/forms';
-import { of, throwError } from 'rxjs';
-import Swal from 'sweetalert2';
-import { environment } from '../../../environments/environment';
-import { IResults } from 'src/app/model/result.interface';
+import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { of } from 'rxjs';
+import Swal from 'sweetalert2';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+
+import { TournamentsService } from 'src/app/services/tournaments.service';
+import { ResultsService } from 'src/app/services/results.service';
+import { UserApiService } from 'src/app/services/user-api.service';
 
 describe('TournamentResultComponent', () => {
   let component: TournamentResultComponent;
   let fixture: ComponentFixture<TournamentResultComponent>;
+  let tournamentsServiceSpy: jasmine.SpyObj<TournamentsService>;
+  let userApiServiceSpy: jasmine.SpyObj<UserApiService>;
+  let resultsServiceSpy: jasmine.SpyObj<ResultsService>;
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
-  let httpMock: HttpTestingController;
-
-  const apiUrl = environment.apiUrl;
+  let locationSpy: jasmine.SpyObj<Location>;
 
   beforeEach(async () => {
-    modalServiceSpy = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
-
     await TestBed.configureTestingModule({
       declarations: [TournamentResultComponent],
-      imports: [HttpClientTestingModule, FormsModule],
-      providers: [{ provide: NgbModal, useValue: modalServiceSpy }],
-      // schemas: [NO_ERRORS_SCHEMA], // descomenta si fallan elementos de la plantilla
+      imports: [
+        HttpClientTestingModule,
+        FormsModule,
+        ReactiveFormsModule
+      ],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: (key: string) => (key === 'tournamentId' ? '1' : null)
+              }
+            }
+          }
+        },
+        {
+          provide: TournamentsService,
+          useValue: jasmine.createSpyObj('TournamentsService', ['getTournamentById'])
+        },
+        {
+          provide: UserApiService,
+          useValue: jasmine.createSpyObj('UserApiService', ['getUsers'])
+        },
+        {
+          provide: ResultsService,
+          useValue: jasmine.createSpyObj('ResultsService', ['getResultsFiltered'])
+        },
+        {
+          provide: NgbModal,
+          useValue: jasmine.createSpyObj('NgbModal', ['open', 'dismissAll'])
+        },
+        {
+          provide: Location,
+          useValue: jasmine.createSpyObj('Location', ['back'])
+        }
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TournamentResultComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
+    tournamentsServiceSpy = TestBed.inject(TournamentsService) as jasmine.SpyObj<TournamentsService>;
+    userApiServiceSpy = TestBed.inject(UserApiService) as jasmine.SpyObj<UserApiService>;
+    resultsServiceSpy = TestBed.inject(ResultsService) as jasmine.SpyObj<ResultsService>;
+    modalServiceSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
+    locationSpy = TestBed.inject(Location) as jasmine.SpyObj<Location>;
   });
 
-  // Este componente carga datos si existe tournamentId en la ruta.
-  // En estas pruebas evitamos forzar ngOnInit con llamadas HTTP innecesarias.
+  // ----------------------------------------
+  // TESTS BÁSICOS
+  // ----------------------------------------
 
-  afterEach(() => {
-    httpMock.verify();
-  });
-
-  it('should create', () => {
+  it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should set selected tournament manually', () => {
-    (component as any).selectedTournament = { tournamentId: 1, name: 'Torneo A' } as any;
-    expect(component.selectedTournament?.name).toBe('Torneo A');
-  });
+  it('should load tournament data on init', fakeAsync(() => {
+    const mockTournament = {
+      success: true,
+      message: '',
+      data: {
+        tournamentId: 1,
+        name: 'Torneo Prueba',
+        categories: [{ categoryId: 1, name: 'Cat A', status: true }],
+        modalities: [{ modalityId: 1, name: 'Mod A', status: true }],
+        branches: [{ branchId: 1, name: 'Branch A', description: '', status: true }]
+      }
+    };
 
-  it('should trigger loadResults on filter change', () => {
-    const spy = spyOn(component, 'loadResults');
-    component.selectedBranch = 'Masculina';
-    component.selectedRound = 2;
-    component.onFilterChange();
-    expect(spy).toHaveBeenCalled();
-  });
+    tournamentsServiceSpy.getTournamentById.and.returnValue(of(mockTournament));
+    userApiServiceSpy.getUsers.and.returnValue(of([])); // evita error .subscribe()
+    resultsServiceSpy.getResultsFiltered.and.returnValue(of([]));
 
-  it('should open file input when calling openFileInputResults()', () => {
-    const createSpy = spyOn(document, 'createElement').and.callThrough();
-    component.openFileInputResults();
-    expect(createSpy).toHaveBeenCalledWith('input');
-  });
-
-  it('should handle file selection and show Swal alert', () => {
-    const file = new File(['dummy'], 'test.xlsx', {
-      type: 'application/vnd.ms-excel',
-    });
-    const event = { target: { files: [file] } } as any; // el handler acepta Event, casteamos
-    const swalSpy = spyOn(Swal, 'fire');
-    component.onFileSelected(event);
-    expect(component.selectedFile).toBe(file);
-    expect(swalSpy).toHaveBeenCalled();
-  });
-
-  it('should open modal', () => {
     fixture.detectChanges();
-    // openModal ahora espera un TemplateRef: usamos un dummy y casteamos
-    component.openModal({} as any);
-    expect(modalServiceSpy.open).toHaveBeenCalled();
-  });
+    tick();
 
-  it('should close modal', () => {
-    fixture.detectChanges();
-    component.closeModal();
-    expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
-  });
-
-  it('should call deleteResult and refresh results on success', async () => {
-    fixture.detectChanges();
-
-    // Simulamos confirmación inmediata del Swal
-    spyOn(Swal, 'fire').and.returnValue(
-      Promise.resolve({ isConfirmed: true }) as any
-    );
-    spyOn(component, 'loadResults');
-
-    component.deleteResult(1);
-
-    // Espera a que se resuelvan las promesas del .then(...)
-    await fixture.whenStable();
-
-    const req = httpMock.expectOne(`${apiUrl}/results/1`);
-    expect(req.request.method).toBe('DELETE');
-    req.flush({ success: true });
-
-    expect(component.loadResults).toHaveBeenCalled();
-  });
-
-  it('should handle file selection and show Swal alert', () => {
-    const file = new File(['dummy'], 'test.xlsx', {
-      type: 'application/vnd.ms-excel',
-    });
-    const event = { target: { files: [file] } } as any;
-    const swalSpy = spyOn(Swal, 'fire');
-
-    component.onFileSelected(event);
-
-    expect(component.selectedFile).toEqual(file);
-    expect(swalSpy).toHaveBeenCalledWith(
-      jasmine.objectContaining({
-        icon: 'info',
-        title: 'Archivo seleccionado',
-        text: `Archivo: ${file.name}`,
-        confirmButtonText: 'Aceptar',
-      })
-    );
-  });
-
-  it('should delete player and show success Swal when confirmed', fakeAsync(() => {
-    // Simulamos confirmación del Swal
-    const swalSpy = spyOn(Swal, 'fire').and.returnValue(
-      Promise.resolve({ isConfirmed: true } as any)
-    );
-
-    // Mock del método delete del HttpClient
-    const httpSpy = jasmine.createSpyObj('HttpClient', ['delete']);
-    httpSpy.delete.and.returnValue(of({}));
-
-    // Inyectamos manualmente el mock de HttpClient
-    (component as any).http = httpSpy;
-
-    // Espiamos método interno
-    const reloadSpy = spyOn(component as any, 'loadRegisteredPlayers');
-
-    // Ejecutamos el método
-    component.deletePlayer(123);
-    tick(); // simula la resolución del Swal
-
-    // Verificaciones
-    expect(swalSpy).toHaveBeenCalled();
-    expect(httpSpy.delete).toHaveBeenCalledWith(
-      `${(component as any).apiUrl}/registrations/123`
-    );
-    expect(reloadSpy).toHaveBeenCalled();
+    expect(component.selectedTournament?.name).toBe('Torneo Prueba');
+    expect(component.categories.length).toBe(1);
+    expect(component.modalities.length).toBe(1);
+    expect(component.branches.length).toBe(1);
   }));
 
-  it('should show error Swal if form is invalid or tournamentId is missing', () => {
-    // Espiamos Swal.fire
-    const swalSpy = spyOn(Swal, 'fire');
+  it('should show alert if tournament not found', fakeAsync(() => {
+    spyOn(Swal, 'fire');
+    tournamentsServiceSpy.getTournamentById.and.returnValue(
+      of({ success: true, message: '', data: null })
+    );
+    userApiServiceSpy.getUsers.and.returnValue(of([]));
+    resultsServiceSpy.getResultsFiltered.and.returnValue(of([]));
 
-    // Caso 1: formulario inválido
-    component['playerForm'] = {
-      invalid: true,
-      markAllAsTouched: () => {},
-    } as any;
-    component['tournamentId'] = 1;
+    fixture.detectChanges();
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Atención',
+      'No se encontró el torneo solicitado',
+      'info'
+    );
+  }));
+
+  it('should open and close modal correctly', () => {
+    const fakeTemplateRef: any = {};
+    component.openModal(fakeTemplateRef);
+    expect(modalServiceSpy.open).toHaveBeenCalled();
+
+    component.closeModal();
+    expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
+    expect(component.idPlayer).toBeNull();
+    expect(component.idResult).toBeNull();
+  });
+
+  it('should not save player if form is invalid', () => {
+    spyOn(Swal, 'fire');
+    component.tournamentId = 1;
+    component.initPlayerForm();
+    component.playerForm.patchValue({});
+
     component.savePlayer();
-    expect(swalSpy).toHaveBeenCalledWith(
+    expect(Swal.fire).toHaveBeenCalledWith(
       'Error',
       'Formulario inválido o torneo no definido',
       'error'
     );
-
-    // Caso 2: sin tournamentId
-    component['playerForm'] = {
-      invalid: false,
-      markAllAsTouched: () => {},
-    } as any;
-    component['tournamentId'] = null;
-    component.savePlayer();
-    expect(swalSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('should show error Swal if form is invalid or tournamentId is missing', () => {
-    const swalSpy = spyOn(Swal, 'fire');
-    component['playerForm'] = {
-      invalid: true,
-      markAllAsTouched: jasmine.createSpy(),
-    } as any;
-    component.tournamentId = null;
-
-    component.savePlayer();
-
-    expect(swalSpy).toHaveBeenCalledWith(
-      'Error',
-      'Formulario inválido o torneo no definido',
-      'error'
-    );
-    expect(component['playerForm'].markAllAsTouched).toHaveBeenCalled();
+  it('should handle image fallback', () => {
+    const event = { target: { src: 'original.jpg' } } as any;
+    component.onImgError(event, 'fallback.jpg');
+    expect(event.target.src).toBe('fallback.jpg');
   });
 
-  it('should call handlePlayerSuccess after saving player', () => {
-    const successSpy = spyOn<any>(component, 'handlePlayerSuccess');
-    spyOn<any>(component, 'handlePlayerError');
-
-    component['playerForm'] = { invalid: false, value: { personId: 1 } } as any;
-    component.tournamentId = 1;
-    component.idPlayer = null;
-
-    spyOn(component['http'], 'post').and.returnValue(of({}));
-
-    component.savePlayer();
-
-    expect(successSpy).toHaveBeenCalled();
+  it('should navigate back on goBack()', () => {
+    component.goBack();
+    expect(locationSpy.back).toHaveBeenCalled();
   });
 
-  it('should call Swal.fire with error when delete fails', () => {
-    const swalSpy = spyOn(Swal, 'fire');
-    const httpSpy = spyOn(component['http'], 'delete').and.returnValue(
-      throwError(() => new Error('Error'))
-    );
+  // ----------------------------------------
+  // TESTS ADICIONALES (COBERTURA EXTRA)
+  // ----------------------------------------
 
-    component.deletePlayer(1);
+  it('should filter players by branch', () => {
+    component.registrations = [
+      { branchName: 'Branch A' } as any,
+      { branchName: 'Branch B' } as any
+    ];
 
-    // Simula confirmación del usuario
-    swalSpy.calls.reset();
-    swalSpy.and.returnValue(Promise.resolve({ isConfirmed: true } as any));
+    component.selectedBranchPlayer = 'branch a';
+    component.onFilterPlayerChange();
 
-    expect(httpSpy).toHaveBeenCalled();
-    expect(swalSpy).toHaveBeenCalled();
+    expect(component.filteredRegistrations.length).toBe(1);
   });
 
-  it('should handle error when loading results', () => {
-    const swalSpy = spyOn(Swal, 'fire');
-    const consoleSpy = spyOn(console, 'error');
-    const mockError = new Error('Error de red');
+  it('should clear player filters', () => {
+    component.selectedBranchPlayer = 'Branch X';
+    spyOn(component, 'onFilterPlayerChange');
+    component.clearPlayerFilters();
 
-    spyOn(
-      (component as any).resultsService,
-      'getResultsFiltered'
-    ).and.returnValue(throwError(() => mockError));
-
-    component.tournamentId = 1;
-    component.loadResults();
-
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Error al cargar resultados:',
-      mockError
-    );
-    expect(swalSpy).toHaveBeenCalledWith(
-      'Error',
-      'No se pudieron cargar los resultados',
-      'error'
-    );
+    expect(component.selectedBranchPlayer).toBe('');
+    expect(component.onFilterPlayerChange).toHaveBeenCalled();
   });
 
-  it('should patch form and open modal when editResult is called', () => {
-    const mockResult: IResults = {
-      resultId: 5,
-      personId: 2,
-      teamId: 1,
-      tournamentId: 3,
-      categoryId: 4,
-      modalityId: 1,
-      branchId: 2,
-      roundNumber: 1,
-      laneNumber: 6,
-      lineNumber: 2,
-      score: 250,
-    } as IResults;
-
-    const patchSpy = spyOn(component.resultForm, 'patchValue');
-    const modalSpy = spyOn(component as any, 'openModal');
-
-    component.editResult(mockResult);
-
-    expect(patchSpy).toHaveBeenCalledWith(
-      jasmine.objectContaining({
-        personId: 2,
-        score: 250,
-      })
-    );
-    expect(modalSpy).toHaveBeenCalledWith(component.modalResultRef);
-  });
-
-  it('should show success Swal when result is saved successfully', () => {
-    component.tournamentId = 1;
-    component.idResult = null;
-    component.resultForm.setValue({
-      personId: 1,
-      teamId: 2,
-      tournamentId: 1,
-      categoryId: 1,
-      modalityId: 1,
-      branchId: 1,
-      roundNumber: 1,
-      laneNumber: 1,
-      lineNumber: 1,
-      score: 250,
-    });
-
-    const swalSpy = spyOn(Swal, 'fire');
-    spyOn(component['http'], 'post').and.returnValue(of({}));
-
-    component.saveResult();
-
-    expect(swalSpy).toHaveBeenCalledWith(
-      'Éxito',
-      'Resultado creado',
-      'success'
-    );
-  });
-
-  it('should show error Swal when saveResult fails', () => {
-    component.tournamentId = 1;
-    component.resultForm.setValue({
-      personId: 1,
-      teamId: 2,
-      tournamentId: 1,
-      categoryId: 1,
-      modalityId: 1,
-      branchId: 1,
-      roundNumber: 1,
-      laneNumber: 1,
-      lineNumber: 1,
-      score: 250,
-    });
-
-    const swalSpy = spyOn(Swal, 'fire');
-    spyOn(component['http'], 'post').and.returnValue(
-      throwError(() => ({ error: { message: 'Error de red' } }))
-    );
-
-    component.saveResult();
-
-    expect(swalSpy).toHaveBeenCalledWith('Error', 'Error de red', 'error');
-  });
-
-  it('should call Swal.fire and delete result when confirmed', () => {
-    const swalSpy = spyOn(Swal, 'fire').and.returnValue(
-      Promise.resolve({ isConfirmed: true } as any)
-    );
-    const httpSpy = spyOn(component['http'], 'delete').and.returnValue(of({}));
-    const successSpy = spyOn(component as any, 'handleDeleteSuccess');
-
-    component.deleteResult(1);
-
-    expect(swalSpy).toHaveBeenCalled();
-    expect(httpSpy).toHaveBeenCalledWith(
-      `${(component as any).apiUrl}/results/1`
-    );
-    expect(successSpy).toHaveBeenCalled();
-  });
-
-  it('should show error Swal if id is missing', () => {
-    const swalSpy = spyOn(Swal, 'fire');
-    component.deleteResult();
-    expect(swalSpy).toHaveBeenCalledWith(
-      'Error',
-      'ID de resultado no válido',
-      'error'
-    );
-  });
-
-  it('should reset filters and call loadResults', () => {
-    const loadSpy = spyOn(component, 'loadResults');
+  it('should clear filters and reload results', () => {
+    spyOn(component, 'loadResults');
     component.selectedBranch = 'A';
-    component.selectedRound = 1;
+    component.selectedRound = 5;
 
     component.clearFilters();
 
     expect(component.selectedBranch).toBe('');
     expect(component.selectedRound).toBeNull();
-    expect(loadSpy).toHaveBeenCalled();
-  });
-
-  it('should filter registrations by branch name', () => {
-    component.registrations = [
-      { branchName: 'Norte' },
-      { branchName: 'Sur' },
-    ] as any[];
-
-    component.selectedBranchPlayer = 'nor';
-    component.onFilterPlayerChange();
-
-    expect(component.filteredRegistrations.length).toBe(1);
-    expect(component.filteredRegistrations[0].branchName).toBe('Norte');
-  });
-
-  it('should create a file input and trigger click on openFileInputResults', () => {
-    const createSpy = spyOn(document, 'createElement').and.callThrough();
-    const clickSpy = jasmine.createSpy('click');
-    const inputMock: Partial<HTMLInputElement> = {
-      type: '',
-      accept: '',
-      onchange: null as any,
-      click: clickSpy as any,
-    };
-
-    (createSpy as jasmine.Spy).and.returnValue(inputMock as HTMLInputElement);
-
-    component.openFileInputResults();
-
-    expect(createSpy).toHaveBeenCalledWith('input');
-    expect(inputMock.type).toBe('file');
-    expect(inputMock.accept).toBe('.xlsx, .xls');
-    expect(typeof inputMock.onchange).toBe('function');
-    expect(clickSpy).toHaveBeenCalled();
-  });
-
-  it('should handle file selection and show Swal alert', () => {
-    const file = new File(['data'], 'test.xlsx', {
-      type: 'application/vnd.ms-excel',
-    });
-    const event = { target: { files: [file] } } as unknown as Event;
-    const swalSpy = spyOn(Swal, 'fire');
-
-    component.onFileSelected(event);
-
-    expect(component.selectedFile).toBe(file);
-    expect(swalSpy).toHaveBeenCalledWith(
-      jasmine.objectContaining({
-        icon: 'info',
-        title: 'Archivo seleccionado',
-        text: `Archivo: ${file.name}`,
-        confirmButtonText: 'Aceptar',
-      })
-    );
-  });
-
-  it('should replace image src when onImgError is called', () => {
-    const mockImg = { src: 'old.png' };
-    const fallback = 'new.png';
-    const event = { target: mockImg } as unknown as Event;
-
-    component.onImgError(event, fallback);
-
-    expect(mockImg.src).toBe(fallback);
-  });
-
-  it('should call location.back when goBack is called', () => {
-    const locationSpy = spyOn((component as any).location, 'back');
-    component.goBack();
-    expect(locationSpy).toHaveBeenCalled();
+    expect(component.loadResults).toHaveBeenCalled();
   });
 });

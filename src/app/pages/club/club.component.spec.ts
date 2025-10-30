@@ -1,19 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
-import Swal from 'sweetalert2';
-import { of, Subject, Subscription } from 'rxjs';
-import { AuthService } from 'src/app/auth/auth.service';
-import { environment } from 'src/environments/environment';
 import { ClubComponent } from './club.component';
+import Swal from 'sweetalert2';
 import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
-import { IRole } from 'src/app/model/role.interface';
+import { AuthService } from 'src/app/auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
+import { of, Subject, throwError, Subscription } from 'rxjs';
+import { ClubApiService } from 'src/app/services/club-api.service';
 
-/** Helper para crear clubes válidos */
 const createMockClub = (members: IUser[] = []): IClubs => ({
   clubId: 1,
   name: 'Mock Club',
@@ -28,48 +22,20 @@ const createMockClub = (members: IUser[] = []): IClubs => ({
 describe('ClubComponent', () => {
   let component: ClubComponent;
   let fixture: ComponentFixture<ClubComponent>;
-  let httpMock: HttpTestingController;
   let authServiceMock: jasmine.SpyObj<AuthService>;
+  let clubApiServiceMock: jasmine.SpyObj<ClubApiService>;
   let userSubject: Subject<any>;
 
-  const apiUrl = environment.apiUrl;
-
-  const mockUsers: IUser[] = [
-    {
-      userId: 1,
-      personId: 1,
-      nickname: 'Player1',
-      password: 'dummy',
-      roles: [] as IRole[],
-      categories: [],
-      document: '123',
-      fullName: 'Jugador Uno',
-      fullSurname: 'Apellido',
-      email: 'uno@test.com',
-      phone: '9999999',
-      gender: 'M',
-      clubId: 1,
-      sub: '1',
+  const fakeApiUrl = 'http://localhost:9999';
+  const routeSnapshotWithId = {
+    snapshot: {
+      paramMap: {
+        get: (key: string) => '1',
+      },
     },
-    {
-      userId: 2,
-      personId: 2,
-      nickname: 'Player2',
-      password: 'dummy',
-      roles: [] as IRole[],
-      categories: [],
-      document: '456',
-      fullName: 'Jugador Dos',
-      fullSurname: 'Apellido',
-      email: 'dos@test.com',
-      phone: '8888888',
-      gender: 'F',
-      clubId: 1,
-      sub: '2',
-    },
-  ];
+  };
 
-  const mockActivatedRoute: any = {
+  const routeSnapshotWithoutId = {
     snapshot: {
       paramMap: {
         get: (key: string) => null,
@@ -79,118 +45,161 @@ describe('ClubComponent', () => {
 
   beforeEach(async () => {
     userSubject = new Subject();
+
     authServiceMock = jasmine.createSpyObj('AuthService', [], {
       user$: userSubject.asObservable(),
     });
 
+    clubApiServiceMock = jasmine.createSpyObj('ClubApiService', ['getClubById'], {
+      apiUrl: fakeApiUrl,
+    });
+
     await TestBed.configureTestingModule({
       declarations: [ClubComponent],
-      imports: [HttpClientTestingModule],
       providers: [
         { provide: AuthService, useValue: authServiceMock },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: ClubApiService, useValue: clubApiServiceMock },
+        { provide: ActivatedRoute, useValue: routeSnapshotWithoutId }, // Default: no param in route
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ClubComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    httpMock.verify();
+    userSubject.complete();
   });
 
-  it('should create the component', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load club data when user has clubId', () => {
-    fixture.detectChanges();
-    userSubject.next({ clubId: 1 });
+  describe('ngOnInit()', () => {
+    it('should load club by route param (Caso B)', () => {
+      const clubData = createMockClub();
 
-    const reqClub = httpMock.expectOne(`${apiUrl}/clubs/1/details`);
-    expect(reqClub.request.method).toBe('GET');
-    reqClub.flush(createMockClub(mockUsers));
+      // Re-configurar el test con ActivatedRoute que sí tiene ID
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        declarations: [ClubComponent],
+        providers: [
+          { provide: AuthService, useValue: authServiceMock },
+          { provide: ClubApiService, useValue: clubApiServiceMock },
+          { provide: ActivatedRoute, useValue: routeSnapshotWithId },
+        ],
+      }).compileComponents();
 
-    expect(component.miClub).toBeTruthy();
-    expect(component.miClub?.name).toBe('Mock Club');
-    expect(component.miClub?.members?.length).toBe(2);
+      const fixtureWithId = TestBed.createComponent(ClubComponent);
+      const componentWithId = fixtureWithId.componentInstance;
+
+      clubApiServiceMock.getClubById.and.returnValue(of(clubData));
+
+      fixtureWithId.detectChanges();
+
+      expect(clubApiServiceMock.getClubById).toHaveBeenCalledWith(1);
+      expect(componentWithId.miClub).toEqual(clubData);
+    });
+
+    it('should load club from authenticated user (Caso A)', () => {
+      const clubData = createMockClub();
+      clubApiServiceMock.getClubById.and.returnValue(of(clubData));
+
+      fixture.detectChanges();
+      userSubject.next({ clubId: 1 });
+
+      expect(clubApiServiceMock.getClubById).toHaveBeenCalledWith(1);
+      expect(component.miClub).toEqual(clubData);
+    });
+
+    it('should show Swal when user has no clubId', () => {
+      spyOn(Swal, 'fire');
+
+      fixture.detectChanges();
+      userSubject.next({ clubId: null });
+
+      expect(component.miClub).toBeNull();
+      expect(Swal.fire).toHaveBeenCalledWith(
+        'Sin Club',
+        'No tienes un club asociado',
+        'info'
+      );
+    });
   });
 
-  it('should show alert if user has no club', () => {
-    spyOn(Swal, 'fire');
-    fixture.detectChanges();
-    userSubject.next({ clubId: null });
+  describe('getMiClub()', () => {
+    it('should set miClub to null if no clubId', () => {
+      component.clubId = null;
+      component.getMiClub();
+      expect(component.miClub).toBeNull();
+    });
 
-    // Cierra cualquier llamada HTTP inesperada
-    const pending = httpMock.match(() => true);
-    pending.forEach((req) => req.flush({}));
+    it('should load miClub successfully', () => {
+      const clubData = createMockClub();
+      component.clubId = 1;
 
-    expect(component.miClub).toBeNull();
-    expect(Swal.fire).toHaveBeenCalledWith(
-      'Sin Club',
-      'No tienes un club asociado',
-      'info'
-    );
+      clubApiServiceMock.getClubById.and.returnValue(of(clubData));
+      component.getMiClub();
+
+      expect(clubApiServiceMock.getClubById).toHaveBeenCalledWith(1);
+      expect(component.miClub).toEqual(clubData);
+    });
+
+    it('should handle error and show Swal', () => {
+      spyOn(Swal, 'fire');
+      component.clubId = 1;
+
+      clubApiServiceMock.getClubById.and.returnValue(
+        throwError(() => new Error('API Error'))
+      );
+
+      component.getMiClub();
+
+      expect(component.miClub).toBeNull();
+      expect(Swal.fire).toHaveBeenCalledWith(
+        'Error',
+        'No se pudieron cargar los datos de tu club',
+        'error'
+      );
+    });
   });
 
-  it('should unsubscribe on destroy', () => {
-    component['userSub'] = new Subscription();
-    const unsubscribeSpy = spyOn(component['userSub'], 'unsubscribe');
-    component.ngOnDestroy();
-    expect(unsubscribeSpy).toHaveBeenCalled();
+  describe('Helpers', () => {
+    it('should replace image src on error', () => {
+      const mockEvent = {
+        target: { src: '' },
+      } as unknown as Event;
+
+      component.onImgError(mockEvent, 'fallback.png');
+      expect((mockEvent.target as HTMLImageElement).src).toContain('fallback.png');
+    });
+
+    it('should return true from hasMembers when club has members', () => {
+      component.miClub = createMockClub([{ userId: 1 } as IUser]);
+      expect(component.hasMembers()).toBeTrue();
+    });
+
+    it('should return false from hasMembers when no members', () => {
+      component.miClub = createMockClub([]);
+      expect(component.hasMembers()).toBeFalse();
+    });
+
+    it('should return false from hasMembers when miClub is null', () => {
+      component.miClub = null;
+      expect(component.hasMembers()).toBeFalse();
+    });
+
+    it('should return the correct apiUrl', () => {
+      expect(component.apiUrl).toBe(fakeApiUrl);
+    });
   });
 
-  it('should set miClub to null if no clubId in getMiClub', () => {
-    component.clubId = null;
-    component.getMiClub();
-    expect(component.miClub).toBeNull();
-  });
-
-  it('should load miClub successfully', () => {
-    component.clubId = 1;
-    component.getMiClub();
-
-    const req = httpMock.expectOne(`${apiUrl}/clubs/1/details`);
-    req.flush(createMockClub());
-    expect(component.miClub?.name).toBe('Mock Club');
-  });
-
-  it('should handle error in getMiClub', () => {
-    spyOn(Swal, 'fire');
-    component.clubId = 1;
-    component.getMiClub();
-
-    const req = httpMock.expectOne(`${apiUrl}/clubs/1/details`);
-    req.flush({}, { status: 500, statusText: 'Server Error' });
-
-    expect(component.miClub).toBeNull();
-    expect(Swal.fire).toHaveBeenCalledWith(
-      'Error',
-      'No se pudieron cargar los datos de tu club',
-      'error'
-    );
-  });
-
-  it('should replace image src on error', () => {
-    const event = { target: { src: '' } } as unknown as Event;
-    component.onImgError(event, 'fallback.png');
-    expect((event.target as HTMLImageElement).src).toContain('fallback.png');
-  });
-
-  it('should return true from hasMembers when club has members', () => {
-    component.miClub = createMockClub([{ userId: 1 } as IUser]);
-    expect(component.hasMembers()).toBeTrue();
-  });
-
-  it('should return false from hasMembers when no members', () => {
-    component.miClub = createMockClub([]);
-    expect(component.hasMembers()).toBeFalse();
-  });
-
-  it('should return false from hasMembers when miClub is null', () => {
-    component.miClub = null;
-    expect(component.hasMembers()).toBeFalse();
+  describe('ngOnDestroy()', () => {
+    it('should unsubscribe from user$', () => {
+      component['userSub'] = new Subscription();
+      const unsubSpy = spyOn(component['userSub'], 'unsubscribe');
+      component.ngOnDestroy();
+      expect(unsubSpy).toHaveBeenCalled();
+    });
   });
 });

@@ -1,17 +1,5 @@
-import {
-  Component,
-  OnInit,
-  ViewChild,
-  TemplateRef,
-  inject,
-} from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  ValidatorFn,
-  Validators,
-} from '@angular/forms';
+import { Component, OnInit, ViewChild, TemplateRef, inject, } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators, } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 

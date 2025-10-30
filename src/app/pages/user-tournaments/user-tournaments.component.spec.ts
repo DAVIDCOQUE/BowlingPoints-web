@@ -51,6 +51,10 @@ describe('UserTournamentsComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('debe exponer la propiedad apiUrl desde el AuthService', () => {
+    expect(component.apiUrl).toBe('http://localhost:9999');
+  });
+
   it('debe obtener el userId desde localStorage', () => {
     expect(component.userId).toBe(10);
   });
@@ -79,7 +83,7 @@ describe('UserTournamentsComponent', () => {
     expect(component.torneosJugados[0].name).toBe('Torneo 1');
   });
 
-  it('debe mostrar alerta de error al fallar carga de torneos', () => {
+  it('debe mostrar alerta de error al fallar carga de torneos jugados', () => {
     spyOn(Swal, 'fire');
     fixture.detectChanges();
 
@@ -99,13 +103,12 @@ describe('UserTournamentsComponent', () => {
   it('no debe cargar torneos si userId es 0', () => {
     spyOn<any>(component, 'getUserFromStorage').and.returnValue(null);
     component.userId = 0;
-
     component.ngOnInit();
-
     httpMock.expectNone(`${component.apiUrl}/user-tournaments/0/played`);
+    expect().nothing(); // evita warning "no expectations"
   });
 
-  it('debe cargar torneos inscritos usando el mismo endpoint', () => {
+  it('debe cargar torneos inscritos correctamente (usa mismo endpoint)', () => {
     const mockTorneos: IUserTournament[] = [
       { tournamentId: 2, name: 'Torneo 2' } as IUserTournament,
     ];
@@ -122,23 +125,39 @@ describe('UserTournamentsComponent', () => {
     expect(component.torneosJugados[0].tournamentId).toBe(2);
   });
 
-  it('debe manejar error en imagen', () => {
-    const mockEvent = {
-      target: { src: '' },
-    } as unknown as Event;
+  it('debe mostrar alerta de error al fallar carga de torneos inscritos', () => {
+    spyOn(Swal, 'fire');
 
-    component.onImgError(mockEvent, 'ruta/por/defecto.png');
+    component.cargarTorneosInscriptos();
 
-    expect((mockEvent.target as HTMLImageElement).src).toBe(
-      'ruta/por/defecto.png'
+    const req = httpMock.expectOne(
+      `${component.apiUrl}/user-tournaments/10/played`
+    );
+    req.error(new ErrorEvent('Network error'));
+
+    expect(Swal.fire).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        icon: 'error',
+        title: 'Error',
+      })
     );
   });
 
-  it('debe retornar null si localStorage está vacío o malformado', () => {
+  it('debe manejar error en imagen y colocar ruta por defecto', () => {
+    const mockImg = document.createElement('img');
+    mockImg.src = '';
+    const mockEvent = { target: mockImg } as unknown as Event;
+
+    component.onImgError(mockEvent, 'ruta/por/defecto.png');
+
+    expect(mockImg.src).toContain('ruta/por/defecto.png');
+  });
+
+  it('debe retornar null si localStorage contiene JSON malformado', () => {
+    spyOn(console, 'warn');
     (localStorage.getItem as jasmine.Spy).and.returnValue('mal json');
 
     const result = (component as any).getUserFromStorage();
-
     expect(result).toBeNull();
   });
 
@@ -162,7 +181,6 @@ describe('UserTournamentsComponent', () => {
     );
 
     const result = (component as any).getUserFromStorage();
-
     expect(result).toEqual(jasmine.objectContaining({ userId: 7 }));
   });
 });

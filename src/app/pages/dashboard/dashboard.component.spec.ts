@@ -1,109 +1,148 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { AuthService } from 'src/app/auth/auth.service';
-import { environment } from 'src/environments/environment';
 import Swal from 'sweetalert2';
+import { environment } from 'src/environments/environment';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
   let httpMock: HttpTestingController;
 
+  const mockDashboardData = {
+    inProgressTournaments: [
+      { id: 1, name: 'Torneo A', modalities: [{ name: 'Individual' }], categories: [{ name: 'Juvenil' }] }
+    ],
+    scheduledOrPostponedTournaments: [
+      { id: 2, name: 'Torneo B', modalities: [{ name: 'Parejas' }], categories: [{ name: 'Senior' }] }
+    ],
+    topPlayers: [
+      { userId: 1, name: 'Jugador 1', average: 220 }
+    ],
+    ambits: [
+      { ambitId: 1, name: 'Nacional', status: true }
+    ]
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [DashboardComponent],
       imports: [HttpClientTestingModule],
       providers: [
-        {
-          provide: AuthService,
-          useValue: {
-            // Mock básico del servicio de autenticación
-            isAuthenticated: () => true
-          }
-        }
+        { provide: AuthService, useValue: { baseUrl: 'http://localhost:3000' } }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
-    fixture.detectChanges();
+
+    spyOn(Swal, 'fire'); // para evitar que realmente abra el modal
   });
 
   afterEach(() => {
-    httpMock.verify(); // Verifica que no haya llamadas pendientes
+    httpMock.verify();
   });
+
+  // ------------------------------
+  // BASICS
+  // ------------------------------
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call getDashboard and populate data', () => {
-    const mockResponse = {
-      success: true,
-      message: 'OK',
-      data: {
-        inProgressTournaments: [{ name: 'Torneo 1' }],
-        scheduledOrPostponedTournaments: [{ name: 'Torneo 2' }],
-        topPlayers: [{ nickname: 'Player 1' }],
-        ambits: [{ name: 'Nacional' }]
-      }
-    };
+  it('should call getDashboard on init', fakeAsync(() => {
+    spyOn(component, 'getDashboard');
+    component.ngOnInit();
+    expect(component.getDashboard).toHaveBeenCalled();
+  }));
 
+  // ------------------------------
+  // API SUCCESS
+  // ------------------------------
+
+  it('should load dashboard data on success', fakeAsync(() => {
     component.getDashboard();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/api/dashboard`);
     expect(req.request.method).toBe('GET');
 
-    req.flush(mockResponse);
+    req.flush({ success: true, message: 'OK', data: mockDashboardData });
+    tick();
 
     expect(component.inProgressTournaments.length).toBe(1);
     expect(component.scheduledOrPostponedTournaments.length).toBe(1);
     expect(component.topPlayers.length).toBe(1);
     expect(component.ambits.length).toBe(1);
-  });
+  }));
 
-  it('should handle error and show Swal on failed request', () => {
-    const swalSpy = spyOn(Swal, 'fire');
+  // ------------------------------
+  // API ERROR
+  // ------------------------------
 
+  it('should handle dashboard API error', fakeAsync(() => {
     component.getDashboard();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/api/dashboard`);
-    req.flush({ message: 'Server error' }, { status: 500, statusText: 'Error' });
+    req.error(new ProgressEvent('Network error'));
 
-    expect(swalSpy).toHaveBeenCalledWith(
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith(
       'Error',
       'No se pudieron cargar los datos del dashboard',
       'error'
     );
+  }));
+
+  // ------------------------------
+  // UTILS
+  // ------------------------------
+
+  it('getModalitiesString returns modalities list as string', () => {
+    const mockTournament = {
+      modalities: [{ name: 'A' }, { name: 'B' }]
+    } as any;
+
+    const result = component.getModalitiesString(mockTournament);
+    expect(result).toBe('A, B');
   });
 
-  it('should return modalities string correctly', () => {
-    const result = component.getModalitiesString({
-      modalities: [{ name: 'Modalidad A' }, { name: 'Modalidad B' }]
-    } as any);
-
-    expect(result).toBe('Modalidad A, Modalidad B');
+  it('getModalitiesString returns "-" when no modalities', () => {
+    const mockTournament = { modalities: null } as any;
+    const result = component.getModalitiesString(mockTournament);
+    expect(result).toBe('-');
   });
 
-  it('should return categories string correctly', () => {
-    const result = component.getCategoriesString({
-      categories: [{ name: 'Juvenil' }, { name: 'Senior' }]
-    } as any);
+  it('getCategoriesString returns categories list as string', () => {
+    const mockTournament = {
+      categories: [{ name: 'X' }, { name: 'Y' }]
+    } as any;
 
-    expect(result).toBe('Juvenil, Senior');
+    const result = component.getCategoriesString(mockTournament);
+    expect(result).toBe('X, Y');
   });
 
-  it('should handle image error and set default path', () => {
-    const fakeEvent = {
-      target: {
-        src: '',
-      } as HTMLImageElement
-    };
+  it('getCategoriesString returns "-" when no categories', () => {
+    const mockTournament = { categories: null } as any;
+    const result = component.getCategoriesString(mockTournament);
+    expect(result).toBe('-');
+  });
 
-    component.onImgError(fakeEvent as any, 'default.jpg');
+  // ------------------------------
+  // onImgError
+  // ------------------------------
 
-    expect((fakeEvent.target as HTMLImageElement).src).toBe('default.jpg');
+  it('onImgError replaces broken image with default path', () => {
+    const event = {
+      target: { src: '' }
+    } as any as Event;
+
+    const defaultPath = 'assets/default.png';
+
+    component.onImgError(event, defaultPath);
+    expect((event.target as HTMLImageElement).src).toBe(defaultPath);
   });
 });

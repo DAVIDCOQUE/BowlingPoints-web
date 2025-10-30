@@ -7,6 +7,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import Swal from 'sweetalert2';
 import { Location } from '@angular/common';
 import { TournamentsService } from 'src/app/services/tournaments.service';
+import { RouterTestingModule } from '@angular/router/testing'; // ✅ Importado para routerLink
 
 describe('TournamentSummaryComponent', () => {
   let component: TournamentSummaryComponent;
@@ -17,7 +18,10 @@ describe('TournamentSummaryComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TournamentSummaryComponent],
-      imports: [HttpClientTestingModule],
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule // ✅ Requerido para usar routerLink en el template
+      ],
       providers: [
         {
           provide: ActivatedRoute,
@@ -38,7 +42,7 @@ describe('TournamentSummaryComponent', () => {
           useValue: jasmine.createSpyObj('Location', ['back'])
         }
       ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA] // Ignora <app-header> y otros componentes no declarados
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TournamentSummaryComponent);
@@ -66,7 +70,7 @@ describe('TournamentSummaryComponent', () => {
           description: 'Desc',
           status: true
         }],
-        branchPlayerCounts: [], // <-- vacío para probar el fallback a "branches"
+        branchPlayerCounts: [], // <-- vacío para fallback
         tournamentRegistrations: [{
           registrationId: 1,
           tournamentId: 1,
@@ -93,20 +97,21 @@ describe('TournamentSummaryComponent', () => {
     tournamentsServiceSpy.getTournamentById.and.returnValue(of(mockResponse));
 
     fixture.detectChanges();
-    tick(); // Finalizar observable
+    tick(); // Finaliza el observable
 
     expect(component.selectedTournament?.name).toBe('Torneo Test');
     expect(component.categories.length).toBe(1);
     expect(component.modalities.length).toBe(1);
-    expect(component.branches.length).toBe(1); // <-- fallback correcto
+    expect(component.branches.length).toBe(1); // <- fallback aplicado
     expect(component.players.length).toBe(1);
   }));
 
   it('should show info alert if tournament not found', fakeAsync(() => {
     spyOn(Swal, 'fire');
     tournamentsServiceSpy.getTournamentById.and.returnValue(
-      of({ success: true, message: '', data: null }) // ← ahora sí cumple con la interfaz
+      of({ success: true, message: '', data: null })
     );
+
     fixture.detectChanges();
     tick();
 

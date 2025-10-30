@@ -12,6 +12,27 @@ describe('TournamentDetailsComponent', () => {
   let httpMock: HttpTestingController;
   let locationSpy: jasmine.SpyObj<Location>;
 
+  const mockResponse: IResultsResponse = {
+    tournament: { tournamentName: 'Torneo Test' } as any,
+    results: [
+      { playerId: 1, scores: [100, 200] }
+    ] as any,
+    modalities: [
+      { modalityId: 2, name: 'Individual' }
+    ],
+    rounds: [1, 2],
+    avgByRound: 150,
+    avgByLine: { line1: 180 },
+    highestLine: { playerName: 'Test', score: 200, lineNumber: 1 }
+  };
+
+  const flushInitialRequest = () => {
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/results/tournament-table?tournamentId=1&modalityId=2&roundNumber=1`
+    );
+    req.flush(mockResponse);
+  };
+
   beforeEach(async () => {
     locationSpy = jasmine.createSpyObj('Location', ['back']);
 
@@ -48,7 +69,7 @@ describe('TournamentDetailsComponent', () => {
     fixture = TestBed.createComponent(TournamentDetailsComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
-    fixture.detectChanges(); // ngOnInit()
+    fixture.detectChanges(); // ngOnInit se ejecuta aquí
   });
 
   afterEach(() => {
@@ -56,30 +77,14 @@ describe('TournamentDetailsComponent', () => {
   });
 
   it('should create', () => {
+    flushInitialRequest();
     expect(component).toBeTruthy();
   });
 
   it('should call loadResultsTable on init and populate data', () => {
-    const mockResponse: IResultsResponse = {
-      tournament: { tournamentName: 'Torneo Test' } as any,
-      results: [
-        { playerId: 1, scores: [100, 200] }
-      ] as any,
-      modalities: [
-        { modalityId: 2, name: 'Individual' }
-      ],
-      rounds: [1, 2],
-      avgByRound: 150,
-      avgByLine: { line1: 180 },
-      highestLine: { playerName: 'Test', score: 200, lineNumber: 1 }
-    };
-
-
-    const req = httpMock.expectOne(`${environment.apiUrl}/results/tournament-table?tournamentId=1&modalityId=2&roundNumber=1`);
-    req.flush(mockResponse);
+    flushInitialRequest();
 
     expect(component.resumenTorneo?.tournamentName).toBe('Torneo Test');
-
     expect(component.players.length).toBe(1);
     expect(component.modalities.length).toBe(1);
     expect(component.rounds).toEqual([1, 2]);
@@ -91,6 +96,7 @@ describe('TournamentDetailsComponent', () => {
   });
 
   it('should calculate max games played by any player', () => {
+    flushInitialRequest();
     const mockPlayers = [
       { scores: [100, 150, 180] },
       { scores: [90] },
@@ -102,6 +108,7 @@ describe('TournamentDetailsComponent', () => {
   });
 
   it('should fallback image on error', () => {
+    flushInitialRequest();
     const event = {
       target: {
         src: '',
@@ -113,6 +120,7 @@ describe('TournamentDetailsComponent', () => {
   });
 
   it('should go back when goBack is called', () => {
+    flushInitialRequest();
     component.goBack();
     expect(locationSpy.back).toHaveBeenCalled();
   });

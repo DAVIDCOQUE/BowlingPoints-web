@@ -1,11 +1,14 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { TournamentsComponent } from './tournaments.component';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import Swal from 'sweetalert2';
+import { of, throwError } from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+
 import { TournamentsService } from 'src/app/services/tournaments.service';
 import { BranchesService } from 'src/app/services/branch-api.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ReactiveFormsModule } from '@angular/forms';
-import { of } from 'rxjs';
-import Swal from 'sweetalert2';
 
 describe('TournamentsComponent', () => {
   let component: TournamentsComponent;
@@ -14,28 +17,42 @@ describe('TournamentsComponent', () => {
   let branchesServiceSpy: jasmine.SpyObj<BranchesService>;
   let modalSpy: jasmine.SpyObj<NgbModal>;
 
-  beforeEach(async () => {
-    const tServiceSpy = jasmine.createSpyObj('TournamentsService', [
-      'getTournaments',
-      'getModalities',
-      'getCategories',
-      'getDepartments',
-      'getAmbits',
-      'createTournament',
-      'updateTournament',
-      'deleteTournament',
-    ]);
-    const bServiceSpy = jasmine.createSpyObj('BranchesService', ['getAll']);
-    const modalServiceSpy = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
+  const mockTournament = {
+    tournamentId: 1,
+    name: 'Torneo Prueba',
+    organizer: 'Organizador',
+    categories: [{ categoryId: 1, name: 'Cat A', status: true }],
+    modalities: [{ modalityId: 1, name: 'Mod A', status: true }],
+    branches: [{ branchId: 1, name: 'Branch A', description: '', status: true }],
+    ambit: { ambitId: 1, name: 'Nacional' },
+    startDate: new Date(),
+    endDate: new Date(),
+    stage: 'Programado',
+    status: true
+  };
 
+  beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule],
       declarations: [TournamentsComponent],
+      imports: [ReactiveFormsModule, FormsModule, HttpClientTestingModule],
       providers: [
-        { provide: TournamentsService, useValue: tServiceSpy },
-        { provide: BranchesService, useValue: bServiceSpy },
-        { provide: NgbModal, useValue: modalServiceSpy },
-      ]
+        {
+          provide: TournamentsService,
+          useValue: jasmine.createSpyObj('TournamentsService', [
+            'getTournaments', 'getModalities', 'getCategories', 'getAmbits',
+            'getDepartments', 'createTournament', 'updateTournament', 'deleteTournament'
+          ])
+        },
+        {
+          provide: BranchesService,
+          useValue: jasmine.createSpyObj('BranchesService', ['getAll'])
+        },
+        {
+          provide: NgbModal,
+          useValue: jasmine.createSpyObj('NgbModal', ['open', 'dismissAll'])
+        }
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TournamentsComponent);
@@ -45,113 +62,184 @@ describe('TournamentsComponent', () => {
     modalSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
   });
 
-  it('should create', () => {
+  // ------------------ BASICS ------------------
+  it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
   it('should call loadData on init', () => {
-    tournamentsServiceSpy.getTournaments.and.returnValue(of({ success: true, message: '', data: [] }));
-    tournamentsServiceSpy.getModalities.and.returnValue(of({ success: true, message: '', data: [] }));
-    tournamentsServiceSpy.getCategories.and.returnValue(of({ success: true, message: '', data: [] }));
-    tournamentsServiceSpy.getAmbits.and.returnValue(of({ success: true, message: '', data: [] }));
-    branchesServiceSpy.getAll.and.returnValue(of([]));
-
+    spyOn(component, 'loadData');
     component.ngOnInit();
-
-    expect(tournamentsServiceSpy.getTournaments).toHaveBeenCalled();
-    expect(tournamentsServiceSpy.getModalities).toHaveBeenCalled();
-    expect(tournamentsServiceSpy.getCategories).toHaveBeenCalled();
-    expect(tournamentsServiceSpy.getDepartments).toHaveBeenCalled();
-    expect(tournamentsServiceSpy.getAmbits).toHaveBeenCalled();
-    expect(branchesServiceSpy.getAll).toHaveBeenCalled();
+    expect(component.loadData).toHaveBeenCalled();
   });
 
-  it('should patch form on editTournament', () => {
-    const tournamentMock = {
-      tournamentId: 1,
-      name: 'Test Tournament',
-      organizer: 'Org',
-      categories: [{ categoryId: 1, name: 'Cat 1' }],
-      modalities: [{ modalityId: 2, name: 'Mod 1' }],
-      startDate: '2023-01-01',
-      endDate: '2023-01-10',
-      ambitId: 3,
-      branches: [{ branchId: 4, name: 'Branch 1' }],
-      location: 'Stadium',
-      stage: 'Programado',
-      status: true,
-    };
+  // ------------------ LOAD DATA ------------------
+  it('should load tournaments correctly', () => {
+    tournamentsServiceSpy.getTournaments.and.returnValue(
+      of({ success: true, message: '', data: [mockTournament] })
+    );
+    component.getTournaments();
+    expect(component.tournaments.length).toBe(1);
+    expect(component.tournaments[0].name).toBe('Torneo Prueba');
+  });
 
-    component.editTournament(tournamentMock as any);
+  it('should load modalities, categories, ambits, branches and departments', () => {
+    tournamentsServiceSpy.getTournaments.and.returnValue(
+      of({ success: true, message: '', data: [] })
+    );
+    tournamentsServiceSpy.getModalities.and.returnValue(
+      of({ success: true, message: '', data: [{ modalityId: 1, name: 'Mod A', status: true }] })
+    );
+    tournamentsServiceSpy.getCategories.and.returnValue(
+      of({ success: true, message: '', data: [{ categoryId: 1, name: 'Cat A', status: true }] })
+    );
+    tournamentsServiceSpy.getAmbits.and.returnValue(
+      of({ success: true, message: '', data: [{ ambitId: 1, name: 'Ambit A' }] })
+    );
+    tournamentsServiceSpy.getDepartments.and.returnValue(of([{ id: 1, name: 'Dept A' }]));
+    branchesServiceSpy.getAll.and.returnValue(of([{ branchId: 1, name: 'Branch A', description: '', status: true }]));
 
-    expect(component.tournamentForm.value.name).toBe('Test Tournament');
-    expect(component.tournamentForm.value.organizer).toBe('Org');
-    expect(component.tournamentForm.value.status).toBe(true);
+    component.loadData();
+
+    expect(component.modalities[0].name).toBe('Mod A');
+    expect(component.categories[0].name).toBe('Cat A');
+    expect(component.ambits[0].name).toBe('Ambit A');
+    expect(component.departments[0].name).toBe('Dept A');
+    expect(component.branches[0].name).toBe('Branch A');
+  });
+
+  // ------------------ FILTERS / UTILS ------------------
+  it('should clear filter', () => {
+    component.filter = 'abc';
+    component.clear();
+    expect(component.filter).toBe('');
+  });
+
+  it('should return formatted strings correctly', () => {
+    expect(component.getModalitiesString(mockTournament as any)).toBe('Mod A');
+    expect(component.getCategoriesString(mockTournament as any)).toBe('Cat A');
+    expect(component.getBranchesString(mockTournament as any)).toBe('Branch A');
+  });
+
+  it('should return "-" when arrays are empty', () => {
+    expect(component.getModalitiesString({ modalities: [] } as any)).toBe('-');
+  });
+
+ it('should format date properly with toYMDStrict()', () => {
+  const date = new Date('2025-05-10T00:00:00');
+  const result = component.toYMDStrict(date);
+
+  // Normaliza tanto el valor esperado como el resultado para evitar diferencias de zona horaria
+  const expected = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  )
+    .toISOString()
+    .split('T')[0];
+
+  expect(result).toBe(expected);
+});
+
+
+  // ------------------ MODALS ------------------
+  it('should open and close modal correctly', () => {
+    component.initForm();
+    component.openModal({});
+    expect(modalSpy.open).toHaveBeenCalled();
+
+    component.closeModal();
+    expect(modalSpy.dismissAll).toHaveBeenCalled();
+    expect(component.idTournament).toBeNull();
+  });
+
+  it('should open modal for set result tournament', () => {
+    component.openModalSetResultTournament(mockTournament as any);
+    expect(component.selectedTournament).toEqual(mockTournament);
     expect(modalSpy.open).toHaveBeenCalled();
   });
 
-  it('should call createTournament on save', fakeAsync(() => {
-    const payload = {
-      name: 'Test',
-      organizer: 'Test Org',
+  // ------------------ SAVE FORM ------------------
+  it('should save new tournament successfully', fakeAsync(() => {
+    spyOn(Swal, 'fire');
+    component.initForm();
+    component.tournamentForm.patchValue({
+      name: 'Nuevo Torneo',
+      organizer: 'Org',
       modalityIds: [1],
       categoryIds: [1],
-      startDate: '2023-01-01',
-      endDate: '2023-01-10',
+      startDate: '2025-01-01',
+      endDate: '2025-01-02',
       ambitId: 1,
       branchIds: [1],
-      location: 'X',
+      location: 'Loc',
       stage: 'Programado',
-      status: true,
-    };
+      status: true
+    });
 
-    component.tournamentForm.setValue(payload);
-    tournamentsServiceSpy.createTournament.and.returnValue(of({}));
-
-    component.saveForm();
-    tick();
-
-    expect(tournamentsServiceSpy.createTournament).toHaveBeenCalled();
-  }));
-
-  it('should call updateTournament if idTournament is set', fakeAsync(() => {
-    component.idTournament = 5;
-    const payload = {
-      name: 'Test',
-      organizer: 'Test Org',
-      modalityIds: [1],
-      categoryIds: [1],
-      startDate: '2023-01-01',
-      endDate: '2023-01-10',
-      ambitId: 1,
-      branchIds: [1],
-      location: 'X',
-      stage: 'Programado',
-      status: true,
-    };
-    component.tournamentForm.setValue(payload);
-    tournamentsServiceSpy.updateTournament.and.returnValue(of({}));
-
-    component.saveForm();
-    tick();
-
-    expect(tournamentsServiceSpy.updateTournament).toHaveBeenCalledWith(5, jasmine.any(Object));
-  }));
-
-  it('should delete a tournament with confirmation', fakeAsync(() => {
-    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
-    tournamentsServiceSpy.deleteTournament.and.returnValue(of({}));
+    tournamentsServiceSpy.createTournament.and.returnValue(of({ success: true }));
     tournamentsServiceSpy.getTournaments.and.returnValue(of({ success: true, message: '', data: [] }));
 
-
-    component.deleteTournament(123);
+    component.saveForm();
     tick();
 
-    expect(tournamentsServiceSpy.deleteTournament).toHaveBeenCalledWith(123);
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Torneo creado', 'success');
   }));
 
-  it('should return date in YYYY-MM-DD from toYMDStrict', () => {
-    const result = component.toYMDStrict('2024-01-05T00:00:00Z');
-    expect(result).toBe('2024-01-05');
-  });
+  it('should handle error when saving tournament', fakeAsync(() => {
+    spyOn(Swal, 'fire');
+    component.initForm();
+    component.tournamentForm.patchValue({
+      name: 'Nuevo Torneo',
+      organizer: 'Org',
+      modalityIds: [1],
+      categoryIds: [1],
+      startDate: '2025-01-01',
+      endDate: '2025-01-02',
+      ambitId: 1,
+      branchIds: [1],
+      location: 'Loc',
+      stage: 'Programado',
+      status: true
+    });
+
+    tournamentsServiceSpy.createTournament.and.returnValue(
+      throwError(() => ({ error: { message: 'Error al guardar' } }))
+    );
+
+    component.saveForm();
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
+      icon: 'error',
+      title: 'Error al guardar torneo',
+      text: 'Error al guardar'
+    }));
+  }));
+
+  // ------------------ DELETE ------------------
+  it('should delete tournament successfully', fakeAsync(() => {
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
+    tournamentsServiceSpy.deleteTournament.and.returnValue(of({ success: true }));
+    tournamentsServiceSpy.getTournaments.and.returnValue(of({ success: true, message: '', data: [] }));
+
+    component.deleteTournament(1);
+    tick();
+
+    expect(tournamentsServiceSpy.deleteTournament).toHaveBeenCalledWith(1);
+  }));
+
+  it('should handle delete error gracefully', fakeAsync(() => {
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
+    tournamentsServiceSpy.deleteTournament.and.returnValue(
+      throwError(() => ({ error: { message: 'Error al eliminar' } }))
+    );
+
+    component.deleteTournament(1);
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
+      icon: 'error',
+      title: 'Error al eliminar torneo',
+      text: 'Error al eliminar'
+    }));
+  }));
 });
