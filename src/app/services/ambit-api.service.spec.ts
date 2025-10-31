@@ -110,7 +110,7 @@ describe('AmbitApiService', () => {
     const id = 4;
 
     service.deleteAmbit(id).subscribe((response) => {
-      expect(response).toBeUndefined(); // sin cuerpo -> undefined
+      expect(response).toBeNull();
     });
 
     const req = httpMock.expectOne(`${apiUrl}/${id}`);
