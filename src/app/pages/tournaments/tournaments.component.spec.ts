@@ -234,6 +234,91 @@ describe('TournamentsComponent', () => {
     expect(tournamentsServiceSpy.deleteTournament).toHaveBeenCalledWith(1);
   }));
 
+  it('should patch form and open modal on editTournament with full tournament object', () => {
+    const fullTournament = {
+      tournamentId: 123,
+      name: 'Edit Torneo',
+      organizer: 'Editor',
+      startDate: '2025-05-01',
+      endDate: '2025-05-10',
+      categories: [{ categoryId: 1 }],
+      modalities: [{ modalityId: 2 }],
+      ambit: { ambitId: 3 },
+      branches: [{ branchId: 4 }],
+      location: 'Ciudad',
+      stage: 'En curso',
+      status: true
+    };
+
+    spyOn(component, 'openModal');
+    component.initForm();
+    component.editTournament(fullTournament as any);
+
+    expect(component.tournamentForm.get('name')?.value).toBe('Edit Torneo');
+    expect(component.tournamentForm.get('ambitId')?.value).toBe(3);
+    expect(component.tournamentForm.get('modalityIds')?.value).toEqual([2]);
+    expect(component.openModal).toHaveBeenCalled();
+  });
+
+  it('should filter tournaments by name', () => {
+    component.tournaments = [
+      { name: 'Copa Nacional' } as any,
+      { tournamentName: 'Liga Regional' } as any,
+    ];
+    component.filter = 'nacional';
+
+    const filtered = component.filteredTournaments;
+    expect(filtered.length).toBe(1);
+    expect(filtered[0].name).toBe('Copa Nacional');
+  });
+
+
+
+
+  it('should handle error when opening modal', () => {
+    const brokenModalService = {
+      open: () => { throw new Error('Modal error'); }
+    } as any;
+
+    (component as any).modalService = brokenModalService;
+
+    spyOn(Swal, 'fire');
+
+    component.openModal({}); // Causa error
+
+    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
+      title: 'Error al abrir modal'
+    }));
+  });
+
+
+  it('should handle error when closing modal', () => {
+    const brokenModalService = {
+      dismissAll: () => { throw new Error('Close error'); }
+    } as any;
+
+    (component as any).modalService = brokenModalService;
+
+    spyOn(Swal, 'fire');
+
+    component.closeModal();
+
+    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
+      title: 'Error al cerrar modal'
+    }));
+  });
+
+  it('should return null in toYMDStrict for invalid inputs', () => {
+    expect(component.toYMDStrict(null)).toBeNull();
+    expect(component.toYMDStrict(undefined)).toBeNull();
+    expect(component.toYMDStrict('not a date')).toBeNull();
+    expect(component.toYMDStrict({})).toBeNull();
+  });
+
+  it('should return valid string directly in toYMDStrict', () => {
+    expect(component.toYMDStrict('2025-11-01')).toBe('2025-11-01');
+  });
+
   it('should handle delete error gracefully', fakeAsync(() => {
     spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
     tournamentsServiceSpy.deleteTournament.and.returnValue(
