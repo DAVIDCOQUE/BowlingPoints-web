@@ -16,6 +16,9 @@ import { TournamentsService } from 'src/app/services/tournaments.service';
 import { dateRangeValidator } from 'src/app/shared/validators/date-range.validator';
 import { BranchesService } from 'src/app/services/branch-api.service';
 import { IBranch } from 'src/app/model/branch.interface';
+import { AmbitApiService } from 'src/app/services/ambit-api.service';
+import { ModalityApiService } from 'src/app/services/modality-api.service';
+import { CategoryApiService } from 'src/app/services/category-api.service';
 
 @Component({
   selector: 'app-tournaments',
@@ -27,6 +30,9 @@ export class TournamentsComponent implements OnInit {
   @ViewChild('modalSetResultTournament') modalSetResultTournamentRef!: unknown;
 
   private readonly tournamentsService = inject(TournamentsService);
+  private readonly ambitApiService = inject(AmbitApiService);
+  private readonly modalityApiService = inject(ModalityApiService);
+  private readonly categoryApiService = inject(CategoryApiService);
   private readonly branchesService = inject(BranchesService);
   private readonly modalService = inject(NgbModal);
   public readonly fb = inject(FormBuilder);
@@ -64,7 +70,7 @@ export class TournamentsComponent implements OnInit {
 
   loadData(): void {
     this.getTournaments();
-    this.getModalitys();
+    this.getModalities();
     this.getBranches();
     this.getCategories();
     this.getDepartments();
@@ -105,22 +111,22 @@ export class TournamentsComponent implements OnInit {
     });
   }
 
-  getModalitys(): void {
-    this.tournamentsService.getModalities().subscribe({
+  getModalities(): void {
+    this.modalityApiService.getActiveModalities().subscribe({
       next: (res) => (this.modalities = res.data),
       error: (err) => console.error('Error al cargar modalidades:', err),
     });
   }
 
   getCategories(): void {
-    this.tournamentsService.getCategories().subscribe({
+    this.categoryApiService.getActiveCategories().subscribe({
       next: (res) => (this.categories = res.data),
       error: (err) => console.error('Error al cargar categorías:', err),
     });
   }
 
   getAmbits(): void {
-    this.tournamentsService.getAmbits().subscribe({
+    this.ambitApiService.getActiveAmbits().subscribe({
       next: (res) => (this.ambits = res.data),
       error: (err) => console.error('Error al cargar ámbitos:', err),
     });

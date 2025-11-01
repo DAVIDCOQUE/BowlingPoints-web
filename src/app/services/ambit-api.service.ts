@@ -11,11 +11,17 @@ import { IAmbit } from 'src/app/model/ambit.interface';
 export class AmbitApiService {
   private readonly apiUrl = `${environment.apiUrl}/ambits`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAmbits(): Observable<IAmbit[]> {
     return this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(this.apiUrl)
       .pipe(map(res => res.data));
+  }
+
+  getActiveAmbits(): Observable<{ success: boolean; message: string; data: IAmbit[] }> {
+    return this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(
+      `${this.apiUrl}/actives`
+    );
   }
 
   createAmbit(payload: Partial<IAmbit>): Observable<any> {
@@ -29,4 +35,5 @@ export class AmbitApiService {
   deleteAmbit(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
 }

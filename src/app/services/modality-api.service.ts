@@ -22,6 +22,16 @@ export class ModalityApiService {
   }
 
   /**
+   *
+   * Consulta todas las modalidades activas
+   */
+  getActiveModalities(): Observable<{ success: boolean; message: string; data: IModality[] }> {
+    return this.http.get<{ success: boolean; message: string; data: IModality[] }>(
+      `${this.apiUrl}/actives`
+    );
+  }
+
+  /**
    * Crea una nueva modalidad
    */
   createModality(payload: Partial<IModality>): Observable<any> {

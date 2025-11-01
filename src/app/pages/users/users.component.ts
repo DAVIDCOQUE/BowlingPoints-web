@@ -10,6 +10,7 @@ import { CategoryApiService } from 'src/app/services/category-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ICategory } from 'src/app/model/category.interface';
 import { finalize } from 'rxjs';
+import { RoleApiService } from 'src/app/services/role-api.service';
 
 @Component({
   selector: 'app-users',
@@ -51,8 +52,9 @@ export class UsersComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly modalService = inject(NgbModal);
   private readonly userApi = inject(UserApiService);
-  private readonly categoryApi = inject(CategoryApiService);
+  private readonly categoryApiService = inject(CategoryApiService);
   private readonly authService = inject(AuthService);
+  private readonly roleApiService = inject(RoleApiService);
 
   status = [
     { valor: true, etiqueta: 'Activo' },
@@ -112,7 +114,7 @@ export class UsersComponent implements OnInit {
    * Obtiene todos los roles desde la API
    */
   getRoles(): void {
-    this.userApi.getRoles().subscribe({
+    this.roleApiService.getAll().subscribe({
       next: (res) => {
         (this.roles = res), console.log('roles cargados:', this.roles);
       },
@@ -123,12 +125,10 @@ export class UsersComponent implements OnInit {
   /**
    * Obtiene todas las categorías desde la API
    */
+
   getCategories(): void {
-    this.categoryApi.getCategories().subscribe({
-      next: (res) => {
-        (this.categories = res),
-          console.log('categorías cargadas:', this.categories);
-      },
+    this.categoryApiService.getActiveCategories().subscribe({
+      next: (res) => (this.categories = res.data),
       error: (err) => console.error('Error al cargar categorías:', err),
     });
   }

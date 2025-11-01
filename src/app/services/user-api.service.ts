@@ -4,14 +4,12 @@ import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { IUser } from '../model/user.interface';
-import { IRole } from '../model/role.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserApiService {
   private readonly usersUrl = `${environment.apiUrl}/users`;
-  private readonly rolesUrl = `${environment.apiUrl}/roles`;
 
   constructor(private http: HttpClient) { }
 
@@ -21,6 +19,19 @@ export class UserApiService {
   getUsers(): Observable<IUser[]> {
     return this.http.get<{ success: boolean; message: string; data: IUser[] }>(this.usersUrl)
       .pipe(tap(res => console.log('Respuesta completa del backend:', res)), map(res => res.data));
+  }
+
+  /**
+ * Obtiene todos los usuarios activos (sin importar rol)
+ */
+  getActiveUsers(): Observable<IUser[]> {
+    const url = `${this.usersUrl}/actives`;
+    return this.http
+      .get<{ success: boolean; message: string; data: IUser[] }>(url)
+      .pipe(
+        tap(res => console.log('Usuarios activos obtenidos:', res)),
+        map(res => res.data)
+      );
   }
 
   /**
@@ -48,12 +59,5 @@ export class UserApiService {
     return this.http.delete(`${this.usersUrl}/${id}`);
   }
 
-  /**
-   * Obtiene todos los roles
-   */
-  getRoles(): Observable<IRole[]> {
-    return this.http.get<{ success: boolean; message: string; data: IRole[] }>(this.rolesUrl)
-      .pipe(map(res => res.data));
-  }
 
 }

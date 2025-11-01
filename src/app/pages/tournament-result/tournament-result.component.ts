@@ -1,10 +1,4 @@
-import {
-  Component,
-  ViewChild,
-  TemplateRef,
-  OnInit,
-  inject,
-} from '@angular/core';
+import { Component, ViewChild, TemplateRef, OnInit, inject, } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, finalize } from 'rxjs';
@@ -149,7 +143,7 @@ export class TournamentResultComponent implements OnInit {
   // ================== JUGADORES REGISTRADOS ==================
 
   loadPlayers(): void {
-    this.userApiService.getUsers().subscribe({
+    this.userApiService.getActiveUsers().subscribe({
       next: (res) => (this.players = res ?? []),
       error: (err) => console.error('Error al cargar jugadores:', err),
     });
@@ -191,15 +185,15 @@ export class TournamentResultComponent implements OnInit {
   }
 
   private fillPlayerForm(reg: ITournamentRegistration): void {
-  this.playerForm.patchValue({
-    personId: reg.personId ?? null,
-    categoryId: reg.categoryId ?? null,
-    modalityId: reg.modalityId ?? null,
-    branchId: reg.branchId ?? null,
-    teamId: reg.teamId ?? null,
-    status: reg.status ?? true,
-  });
-}
+    this.playerForm.patchValue({
+      personId: reg.personId ?? null,
+      categoryId: reg.categoryId ?? null,
+      modalityId: reg.modalityId ?? null,
+      branchId: reg.branchId ?? null,
+      teamId: reg.teamId ?? null,
+      status: reg.status ?? true,
+    });
+  }
 
 
   initResultForm(): void {

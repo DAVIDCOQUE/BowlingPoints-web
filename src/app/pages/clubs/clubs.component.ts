@@ -79,7 +79,7 @@ export class ClubsComponent implements OnInit {
 
   /** Obtiene los usuarios del sistema */
   getUsers(): void {
-    this.userApi.getUsers().subscribe({
+    this.userApi.getActiveUsers().subscribe({
       next: res => this.usuarios = res,
       error: err => {
         console.error('❌ Error al cargar usuarios:', err);
@@ -195,10 +195,6 @@ export class ClubsComponent implements OnInit {
     this.filter = '';
     this.getClubes();
   }
-
-  /** Ir al club */
-
-
 
   /** Maneja error al cargar imagen */
   onImgError(event: Event, defaultPath: string): void {

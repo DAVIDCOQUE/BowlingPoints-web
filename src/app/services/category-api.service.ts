@@ -11,11 +11,17 @@ import { ICategory } from '../model/category.interface';
 export class CategoryApiService {
   private readonly apiUrl = `${environment.apiUrl}/categories`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getCategories(): Observable<ICategory[]> {
     return this.http.get<{ success: boolean; message: string; data: ICategory[] }>(this.apiUrl)
       .pipe(map(res => res.data));
+  }
+
+  getActiveCategories(): Observable<{ success: boolean; message: string; data: ICategory[] }> {
+    return this.http.get<{ success: boolean; message: string; data: ICategory[] }>(
+      `${this.apiUrl}/actives`
+    );
   }
 
   createCategory(payload: Partial<ICategory>): Observable<any> {

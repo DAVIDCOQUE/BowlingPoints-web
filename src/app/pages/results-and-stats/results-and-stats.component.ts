@@ -8,6 +8,9 @@ import { environment } from '../../../environments/environment';
 import { ITournament } from '../../model/tournament.interface';
 import { IResults } from '../../model/result.interface';
 import { ICategory } from '../../model/category.interface';
+import { CategoryApiService } from 'src/app/services/category-api.service';
+import { TournamentsService } from 'src/app/services/tournaments.service';
+import { ResultsService } from 'src/app/services/results.service';
 
 interface PlayerTournamentStats {
   tournamentName: string;
@@ -51,7 +54,10 @@ export class ResultsAndStatsComponent implements OnInit {
 
   constructor(
     private readonly http: HttpClient,
-    private readonly modalService: NgbModal
+    private readonly modalService: NgbModal,
+    private readonly categoryApiService: CategoryApiService,
+    private readonly tournamentApiService: TournamentsService,
+    private readonly resultsService: ResultsService
   ) { }
 
   ngOnInit(): void {
@@ -119,39 +125,32 @@ export class ResultsAndStatsComponent implements OnInit {
   // ----------------------------------------------------------
 
   loadTournaments(): void {
-    this.http
-      .get<{ success: boolean; data: ITournament[] }>(`${this.apiUrl}/tournaments`)
-      .subscribe({
-        next: (res) => {
-          this.tournaments = res.data ?? [];
-          this.selectedTournament = this.tournaments.length ? this.tournaments[0] : null;
-        },
-        error: (err) => console.error('Error al cargar torneos:', err),
-      });
+    this.tournamentApiService.getTournaments().subscribe({
+      next: (res) => {
+        this.tournaments = res.data ?? [];
+        this.selectedTournament = this.tournaments.length ? this.tournaments[0] : null;
+      },
+      error: (err) => console.error('Error al cargar torneos:', err),
+    });
   }
 
   loadCategories(): void {
-    this.http
-      .get<{ success: boolean; data: ICategory[] }>(`${this.apiUrl}/categories`)
-      .subscribe({
-        next: (res) => (this.categories = res.data ?? []),
-        error: (err) => console.error('Error al cargar categorías:', err),
-      });
+    this.categoryApiService.getCategories().subscribe({
+      next: (res) => (this.categories = res),
+      error: (err) => console.error('Error al cargar categorías:', err),
+    });
   }
 
   loadResults(): void {
-    this.http
-      .get<{ success: boolean; data: IResults[] }>(`${this.apiUrl}/results`)
-      .subscribe({
-        next: (res) => {
-          this.results = res.data ?? [];
-          this.filteredResults = this.results;
-          this.groupResultsByPlayerAndTournament(this.filteredResults);
-        },
-        error: (err) => console.error('Error al cargar resultados:', err),
-      });
+    this.resultsService.getResults().subscribe({
+      next: (res) => {
+        this.results = res.data ?? [];
+        this.filteredResults = this.results;
+        this.groupResultsByPlayerAndTournament(this.filteredResults);
+      },
+      error: (err) => console.error('Error al cargar resultados:', err),
+    });
   }
-
   // ----------------------------------------------------------
   // Filtros
   // ----------------------------------------------------------

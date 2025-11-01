@@ -28,24 +28,6 @@ export class TournamentsService {
     );
   }
 
-  getModalities(): Observable<{ success: boolean; message: string; data: IModality[] }> {
-    return this.http.get<{ success: boolean; message: string; data: IModality[] }>(
-      `${this.apiUrl}/modalities`
-    );
-  }
-
-  getCategories(): Observable<{ success: boolean; message: string; data: ICategory[] }> {
-    return this.http.get<{ success: boolean; message: string; data: ICategory[] }>(
-      `${this.apiUrl}/categories`
-    );
-  }
-
-  getAmbits(): Observable<{ success: boolean; message: string; data: IAmbit[] }> {
-    return this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(
-      `${this.apiUrl}/ambits`
-    );
-  }
-
   getDepartments(): Observable<{ id: number; name: string }[]> {
     return this.http.get<{ id: number; name: string }[]>(
       `https://api-colombia.com/api/v1/Department`
