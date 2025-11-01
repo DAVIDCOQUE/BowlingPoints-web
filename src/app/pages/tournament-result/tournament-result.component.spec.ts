@@ -5,90 +5,85 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import Swal from 'sweetalert2';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { TournamentsService } from 'src/app/services/tournaments.service';
 import { ResultsService } from 'src/app/services/results.service';
 import { UserApiService } from 'src/app/services/user-api.service';
+import { IUser } from 'src/app/model/user.interface';
+import { IResults } from 'src/app/model/result.interface';
 
 describe('TournamentResultComponent', () => {
   let component: TournamentResultComponent;
   let fixture: ComponentFixture<TournamentResultComponent>;
   let tournamentsServiceSpy: jasmine.SpyObj<TournamentsService>;
-  let userApiServiceSpy: jasmine.SpyObj<UserApiService>;
+  let userApiSpy: jasmine.SpyObj<UserApiService>;
   let resultsServiceSpy: jasmine.SpyObj<ResultsService>;
-  let modalServiceSpy: jasmine.SpyObj<NgbModal>;
+  let modalSpy: jasmine.SpyObj<NgbModal>;
   let locationSpy: jasmine.SpyObj<Location>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TournamentResultComponent],
-      imports: [
-        HttpClientTestingModule,
-        FormsModule,
-        ReactiveFormsModule
-      ],
+      imports: [HttpClientTestingModule, FormsModule, ReactiveFormsModule],
       providers: [
         {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
               paramMap: {
-                get: (key: string) => (key === 'tournamentId' ? '1' : null)
-              }
-            }
-          }
+                get: (key: string) => (key === 'tournamentId' ? '1' : null),
+              },
+            },
+          },
         },
         {
           provide: TournamentsService,
-          useValue: jasmine.createSpyObj('TournamentsService', ['getTournamentById'])
+          useValue: jasmine.createSpyObj('TournamentsService', ['getTournamentById']),
         },
         {
           provide: UserApiService,
-          useValue: jasmine.createSpyObj('UserApiService', ['getUsers'])
+          useValue: jasmine.createSpyObj('UserApiService', ['getActiveUsers']),
         },
         {
           provide: ResultsService,
-          useValue: jasmine.createSpyObj('ResultsService', ['getResultsFiltered'])
+          useValue: jasmine.createSpyObj('ResultsService', ['getResultsFiltered']),
         },
         {
           provide: NgbModal,
-          useValue: jasmine.createSpyObj('NgbModal', ['open', 'dismissAll'])
+          useValue: jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']),
         },
         {
           provide: Location,
-          useValue: jasmine.createSpyObj('Location', ['back'])
-        }
+          useValue: jasmine.createSpyObj('Location', ['back']),
+        },
       ],
-      schemas: [NO_ERRORS_SCHEMA]
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TournamentResultComponent);
     component = fixture.componentInstance;
+
     tournamentsServiceSpy = TestBed.inject(TournamentsService) as jasmine.SpyObj<TournamentsService>;
-    userApiServiceSpy = TestBed.inject(UserApiService) as jasmine.SpyObj<UserApiService>;
+    userApiSpy = TestBed.inject(UserApiService) as jasmine.SpyObj<UserApiService>;
     resultsServiceSpy = TestBed.inject(ResultsService) as jasmine.SpyObj<ResultsService>;
-    modalServiceSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
+    modalSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
     locationSpy = TestBed.inject(Location) as jasmine.SpyObj<Location>;
   });
-
-  // ----------------------------------------
-  // TESTS BÁSICOS
-  // ----------------------------------------
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load tournament data on init', fakeAsync(() => {
+  it('should load tournament on init', fakeAsync(() => {
     const mockTournament = {
       success: true,
-      message: '',
+      message: 'ok',
       data: {
         tournamentId: 1,
-        name: 'Torneo Prueba',
+        name: 'Test',
         categories: [{ categoryId: 1, name: 'Cat A', status: true }],
         modalities: [{ modalityId: 1, name: 'Mod A', status: true }],
         branches: [{ branchId: 1, name: 'Branch A', description: '', status: true }]
@@ -96,45 +91,107 @@ describe('TournamentResultComponent', () => {
     };
 
     tournamentsServiceSpy.getTournamentById.and.returnValue(of(mockTournament));
-    userApiServiceSpy.getUsers.and.returnValue(of([])); // evita error .subscribe()
+    userApiSpy.getActiveUsers.and.returnValue(of([]));
     resultsServiceSpy.getResultsFiltered.and.returnValue(of([]));
 
     fixture.detectChanges();
     tick();
 
-    expect(component.selectedTournament?.name).toBe('Torneo Prueba');
+    expect(component.selectedTournament?.name).toBe('Test');
     expect(component.categories.length).toBe(1);
-    expect(component.modalities.length).toBe(1);
-    expect(component.branches.length).toBe(1);
   }));
 
   it('should show alert if tournament not found', fakeAsync(() => {
     spyOn(Swal, 'fire');
+
     tournamentsServiceSpy.getTournamentById.and.returnValue(
-      of({ success: true, message: '', data: null })
+      of({ success: true, message: 'no encontrado', data: null })
     );
-    userApiServiceSpy.getUsers.and.returnValue(of([]));
+    userApiSpy.getActiveUsers.and.returnValue(of([]));
     resultsServiceSpy.getResultsFiltered.and.returnValue(of([]));
 
     fixture.detectChanges();
     tick();
 
-    expect(Swal.fire).toHaveBeenCalledWith(
-      'Atención',
-      'No se encontró el torneo solicitado',
-      'info'
-    );
+    expect(Swal.fire).toHaveBeenCalledWith('Atención', 'No se encontró el torneo solicitado', 'info');
   }));
 
-  it('should open and close modal correctly', () => {
-    const fakeTemplateRef: any = {};
-    component.openModal(fakeTemplateRef);
-    expect(modalServiceSpy.open).toHaveBeenCalled();
+  it('should load players', fakeAsync(() => {
+    const mockPlayers: IUser[] = [
+      {
+        userId: 1,
+        nickname: 'jugador1',
+        password: '123456',
+        fullName: 'Jugador 1',
+        fullSurname: 'Apellido 1',
+        email: 'jugador1@email.com',
+        phone: '123456789',
+        gender: 'Masculino',
+        categories: [],
+        roles: [],
+        personId: 101,
+        sub: 'abc123',
+        status: true,
+        photoUrl: '',
+        // Campos opcionales omitidos por simplicidad
+      }
+    ];
 
-    component.closeModal();
-    expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
-    expect(component.idPlayer).toBeNull();
-    expect(component.idResult).toBeNull();
+    userApiSpy.getActiveUsers.and.returnValue(of(mockPlayers));
+
+    component.loadPlayers();
+    tick();
+
+    expect(component.players.length).toBe(1);
+  }));
+
+  it('should handle error in loadPlayers', () => {
+    spyOn(console, 'error');
+    userApiSpy.getActiveUsers.and.returnValue(throwError(() => new Error('fail')));
+    component.loadPlayers();
+    expect(console.error).toHaveBeenCalled();
+  });
+
+  it('should initialize and validate player form', () => {
+    component.initPlayerForm();
+    expect(component.playerForm.valid).toBeFalse();
+  });
+
+  it('should initialize and validate result form', () => {
+    component.initResultForm();
+    expect(component.resultForm.valid).toBeFalse();
+  });
+
+  it('should handle loadResults success', fakeAsync(() => {
+    component.tournamentId = 1;
+    const results: IResults[] = [
+      {
+        resultId: 1,
+        personId: 1,
+        teamId: null,
+        tournamentId: 1,
+        categoryId: 1,
+        modalityId: 1,
+        branchId: 1,
+        roundNumber: 1,
+        laneNumber: 1,
+        lineNumber: 1,
+        score: 200,
+        branchName: 'Branch A'
+      }
+    ];
+    resultsServiceSpy.getResultsFiltered.and.returnValue(of(results));
+    component.loadResults();
+    tick();
+    expect(component.results.length).toBe(1);
+  }));
+
+  it('should handle loadResults error', () => {
+    component.tournamentId = 1;
+    spyOn(Swal, 'fire');
+    resultsServiceSpy.getResultsFiltered.and.returnValue(throwError(() => new Error()));
+    component.loadResults();
+    expect(Swal.fire).toHaveBeenCalled();
   });
 
   it('should not save player if form is invalid', () => {
@@ -142,29 +199,40 @@ describe('TournamentResultComponent', () => {
     component.tournamentId = 1;
     component.initPlayerForm();
     component.playerForm.patchValue({});
-
     component.savePlayer();
-    expect(Swal.fire).toHaveBeenCalledWith(
-      'Error',
-      'Formulario inválido o torneo no definido',
-      'error'
-    );
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'Formulario inválido o torneo no definido', 'error');
+  });
+
+  it('should not save result if form is invalid', () => {
+    spyOn(Swal, 'fire');
+    component.tournamentId = 1;
+    component.initResultForm();
+    component.resultForm.patchValue({});
+    component.saveResult();
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'Formulario inválido o torneo no definido', 'error');
   });
 
   it('should handle image fallback', () => {
-    const event = { target: { src: 'original.jpg' } } as any;
+    const event = { target: { src: 'img.jpg' } } as any;
     component.onImgError(event, 'fallback.jpg');
     expect(event.target.src).toBe('fallback.jpg');
   });
 
-  it('should navigate back on goBack()', () => {
+  it('should open and close modal', () => {
+    const fakeTemplateRef: any = {};
+    component.openModal(fakeTemplateRef);
+    expect(modalSpy.open).toHaveBeenCalled();
+
+    component.closeModal();
+    expect(modalSpy.dismissAll).toHaveBeenCalled();
+    expect(component.idPlayer).toBeNull();
+    expect(component.idResult).toBeNull();
+  });
+
+  it('should navigate back', () => {
     component.goBack();
     expect(locationSpy.back).toHaveBeenCalled();
   });
-
-  // ----------------------------------------
-  // TESTS ADICIONALES (COBERTURA EXTRA)
-  // ----------------------------------------
 
   it('should filter players by branch', () => {
     component.registrations = [

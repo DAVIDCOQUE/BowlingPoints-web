@@ -10,21 +10,27 @@ import { UsersComponent } from './users.component';
 import { UserApiService } from 'src/app/services/user-api.service';
 import { CategoryApiService } from 'src/app/services/category-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { RoleApiService } from 'src/app/services/role-api.service';
+
+// ✅ Importa las interfaces necesarias
+import { IUser } from 'src/app/model/user.interface';
+import { ICategory } from 'src/app/model/category.interface';
+import { IRole } from 'src/app/model/role.interface';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
   let fixture: ComponentFixture<UsersComponent>;
+
   let userApiSpy: jasmine.SpyObj<UserApiService>;
   let categoryApiSpy: jasmine.SpyObj<CategoryApiService>;
+  let roleApiSpy: jasmine.SpyObj<RoleApiService>;
   let modalSpy: jasmine.SpyObj<NgbModal>;
   let authSpy: jasmine.SpyObj<AuthService>;
 
-  const mockUser = {
+  const mockUser: IUser = {
     userId: 1,
     nickname: 'tester',
     password: 'secret',
-    categories: [{ categoryId: 1, name: 'Cat A' }],
-    roles: [{ roleId: 1, name: 'Admin' }],
     personId: 1,
     document: '123',
     fullName: 'Test',
@@ -33,8 +39,11 @@ describe('UsersComponent', () => {
     phone: '555',
     gender: 'Masculino',
     status: true,
-    sub: 'subtoken',
-    birthDate: new Date('1990-01-01')
+    birthDate: new Date('1990-01-01'),
+    photoUrl: '',
+    categories: [],
+    roles: [],
+    sub: 'subtoken'
   };
 
 
@@ -46,12 +55,16 @@ describe('UsersComponent', () => {
         {
           provide: UserApiService,
           useValue: jasmine.createSpyObj('UserApiService', [
-            'getUsers', 'createUser', 'updateUser', 'deleteUser', 'getRoles'
+            'getUsers', 'createUser', 'updateUser', 'deleteUser'
           ])
         },
         {
           provide: CategoryApiService,
-          useValue: jasmine.createSpyObj('CategoryApiService', ['getCategories'])
+          useValue: jasmine.createSpyObj('CategoryApiService', ['getActiveCategories'])
+        },
+        {
+          provide: RoleApiService,
+          useValue: jasmine.createSpyObj('RoleApiService', ['getAll'])
         },
         {
           provide: NgbModal,
@@ -67,17 +80,22 @@ describe('UsersComponent', () => {
 
     fixture = TestBed.createComponent(UsersComponent);
     component = fixture.componentInstance;
+
     userApiSpy = TestBed.inject(UserApiService) as jasmine.SpyObj<UserApiService>;
     categoryApiSpy = TestBed.inject(CategoryApiService) as jasmine.SpyObj<CategoryApiService>;
+    roleApiSpy = TestBed.inject(RoleApiService) as jasmine.SpyObj<RoleApiService>;
     modalSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
     authSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
 
+    // ✅ Valores por defecto sin errores de tipado
     userApiSpy.getUsers.and.returnValue(of([]));
-    userApiSpy.getRoles.and.returnValue(of([]));
-    categoryApiSpy.getCategories.and.returnValue(of([]));
+    roleApiSpy.getAll.and.returnValue(of([{ roleId: 1, name: 'Admin' }]));
+    categoryApiSpy.getActiveCategories.and.returnValue(
+      of({ success: true, message: '', data: [] })
+    );
   });
 
-  // ---------- BASICS ----------
+  // ----------- BASICS -----------
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
@@ -86,13 +104,15 @@ describe('UsersComponent', () => {
     spyOn(component, 'getUsers');
     spyOn(component, 'getRoles');
     spyOn(component, 'getCategories');
+
     component.ngOnInit();
+
     expect(component.getUsers).toHaveBeenCalled();
     expect(component.getRoles).toHaveBeenCalled();
     expect(component.getCategories).toHaveBeenCalled();
   });
 
-  // ---------- LOADERS ----------
+  // ----------- LOADERS -----------
   it('should load users', () => {
     userApiSpy.getUsers.and.returnValue(of([mockUser]));
     component.getUsers();
@@ -100,15 +120,19 @@ describe('UsersComponent', () => {
   });
 
   it('should load roles and categories', () => {
-    userApiSpy.getRoles.and.returnValue(of([{ roleId: 1, name: 'Admin' }]));
-    categoryApiSpy.getCategories.and.returnValue(of([{ categoryId: 1, name: 'Cat A' }]));
+    roleApiSpy.getAll.and.returnValue(of([{ roleId: 1, name: 'Admin' }]));
+    categoryApiSpy.getActiveCategories.and.returnValue(
+      of({ success: true, message: '', data: [{ categoryId: 1, name: 'Cat A' }] })
+    );
+
     component.getRoles();
     component.getCategories();
+
     expect(component.roles[0].name).toBe('Admin');
     expect(component.categories[0].name).toBe('Cat A');
   });
 
-  // ---------- FORM ----------
+  // ----------- FORM -----------
   it('should init form correctly', () => {
     component.initForm();
     expect(component.userForm.get('email')).toBeTruthy();
@@ -116,13 +140,13 @@ describe('UsersComponent', () => {
 
   it('should patch values on editUser()', () => {
     component.initForm();
-    spyOn(component, 'openModal');
-    component.editUser(mockUser as any);
+    spyOn(component as any, 'openModal');
+    component.editUser(mockUser);
     expect(component.userForm.get('email')?.value).toBe('t@x.com');
-    expect(component.openModal).toHaveBeenCalled();
+    expect(component['openModal']).toHaveBeenCalled();
   });
 
-  // ---------- CREATE SUCCESS ----------
+  // ----------- CREATE USER SUCCESS -----------
   it('should create user successfully', fakeAsync(() => {
     spyOn(Swal, 'fire');
     component.initForm();
@@ -141,14 +165,17 @@ describe('UsersComponent', () => {
       password: '123',
       confirm: '123'
     });
+
     userApiSpy.createUser.and.returnValue(of({}));
     userApiSpy.getUsers.and.returnValue(of([]));
+
     component.saveForm();
     tick();
+
     expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Usuario creado exitosamente', 'success');
   }));
 
-  // ---------- CREATE ERROR ----------
+  // ----------- CREATE USER ERROR -----------
   it('should handle create user error', fakeAsync(() => {
     spyOn(Swal, 'fire');
     component.initForm();
@@ -179,7 +206,7 @@ describe('UsersComponent', () => {
     expect(Swal.fire).toHaveBeenCalledWith('Error', 'Error al crear usuario', 'error');
   }));
 
-  // ---------- UPDATE ERROR ----------
+  // ----------- UPDATE USER ERROR -----------
   it('should handle update user error', fakeAsync(() => {
     spyOn(Swal, 'fire');
     component.initForm();
@@ -209,7 +236,7 @@ describe('UsersComponent', () => {
     expect(Swal.fire).toHaveBeenCalledWith('Error', 'Error al actualizar usuario', 'error');
   }));
 
-  // ---------- DELETE ----------
+  // ----------- DELETE USER -----------
   it('should delete user successfully', fakeAsync(() => {
     spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
     userApiSpy.deleteUser.and.returnValue(of({}));
@@ -230,16 +257,16 @@ describe('UsersComponent', () => {
     expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo eliminar el usuario', 'error');
   }));
 
-  // ---------- MODAL ----------
+  // ----------- MODAL -----------
   it('should open and close modal', () => {
     component.initForm();
-    component.openModal('content');
+    component.openModal('modalContent');
     expect(modalSpy.open).toHaveBeenCalled();
     component.closeModal();
     expect(modalSpy.dismissAll).toHaveBeenCalled();
   });
 
-  // ---------- UTILS ----------
+  // ----------- UTILITIES -----------
   it('should clear filter', () => {
     component.filter = 'abc';
     component.clear();

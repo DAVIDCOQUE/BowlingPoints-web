@@ -124,22 +124,4 @@ describe('UserApiService', () => {
     });
   });
 
-  describe('#getRoles', () => {
-    it('debe realizar un GET al endpoint /roles y mapear la respuesta correctamente', (done) => {
-      const mockRoles = [
-        { roleId: 1, name: 'Admin' },
-        { roleId: 2, name: 'User' },
-      ];
-
-      service.getRoles().subscribe((roles) => {
-        expect(roles.length).toBe(2);
-        expect(roles[1].name).toBe('User');
-        done();
-      });
-
-      const req = httpMock.expectOne(`${environment.apiUrl}/roles`);
-      expect(req.request.method).toBe('GET');
-      req.flush({ success: true, message: 'ok', data: mockRoles });
-    });
-  });
 });

@@ -51,38 +51,6 @@ describe('TournamentsService', () => {
     req.flush(mockResponse);
   });
 
-  it('should fetch modalities', () => {
-    const mockResponse = { success: true, message: 'ok', data: [] };
-    service.getModalities().subscribe((res) => {
-      expect(res.success).toBeTrue();
-    });
-
-    const req = httpMock.expectOne(`${service['apiUrl']}/modalities`);
-    expect(req.request.method).toBe('GET');
-    req.flush(mockResponse);
-  });
-
-  it('should fetch categories', () => {
-    const mockResponse = { success: true, message: 'ok', data: [] };
-    service.getCategories().subscribe((res) => {
-      expect(res.message).toBe('ok');
-    });
-
-    const req = httpMock.expectOne(`${service['apiUrl']}/categories`);
-    expect(req.request.method).toBe('GET');
-    req.flush(mockResponse);
-  });
-
-  it('should fetch ambits', () => {
-    const mockResponse = { success: true, message: 'ok', data: [] };
-    service.getAmbits().subscribe((res) => {
-      expect(res.data).toEqual([]);
-    });
-
-    const req = httpMock.expectOne(`${service['apiUrl']}/ambits`);
-    expect(req.request.method).toBe('GET');
-    req.flush(mockResponse);
-  });
 
   it('should fetch departments', () => {
     const mockDepartments = [{ id: 1, name: 'Valle del Cauca' }];

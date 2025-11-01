@@ -99,7 +99,10 @@ export class ResultsAndStatsComponent implements OnInit {
       tournaments.get(tournamentName)!.push(result.score ?? 0);
     }
 
-    this.allTournaments = Array.from(tournamentSet).sort(); // Orden opcional
+    this.allTournaments = Array.from(tournamentSet)
+      .sort((a, b) =>
+        a.localeCompare(b, 'es', { sensitivity: 'base', numeric: true })
+      );
     this.playerStats = Array.from(grouped.entries()).map(([playerName, tournamentsMap]) => {
       const tournaments: PlayerTournamentStats[] = [];
 

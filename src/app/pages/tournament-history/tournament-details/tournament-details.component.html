@@ -109,25 +109,28 @@
           <thead>
             <!-- Fila de la ronda actual -->
             <tr class="table-active">
-              <th [attr.colspan]="3 + maxJuegos + 2" class="text-start ps-4 py-3 fs-6 text-center">
-                🏁 Resultados de la <strong>Ronda {{ roundNumber }}</strong>
+              <th [attr.colspan]="3 + maxJuegos + 2" scope="col" class="text-start ps-4 py-3 fs-6 text-center">
+                Resultados de la <strong>Ronda {{ roundNumber }}</strong>
               </th>
             </tr>
 
             <!-- Fila de títulos de columnas -->
             <tr>
-              <th>#</th>
-              <th>Nombre</th>
-              <th>Club</th>
-              <th *ngFor="let idx of [].constructor(maxJuegos); let i = index">L{{ i + 1 }}</th>
-              <th class="bg-light-secondary">Total</th>
-              <th class="bg-light-secondary">Promedio</th>
+              <th scope="col">#</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Club</th>
+              <th *ngFor="let idx of [].constructor(maxJuegos); let i = index" scope="col">
+                L{{ i + 1 }}
+              </th>
+              <th class="bg-light-secondary" scope="col">Total</th>
+              <th class="bg-light-secondary" scope="col">Promedio</th>
             </tr>
           </thead>
+
           <tbody *ngIf="players && players.length; else noPlayers">
             <tr *ngFor="let player of players; let pos = index" [class.table-warning]="pos === 0"
               [class.table-light]="pos === 1" [class.table-secondary]="pos === 2">
-              <td class="fw-bold">{{ pos + 1 }}</td>
+              <td class="fw-bold" scope="row">{{ pos + 1 }}</td>
               <td class="text-start">
                 <a [routerLink]="['/detalle-jugador', player.personId]"
                   class="text-decoration-none text-dark fw-semibold player-zoom">
@@ -140,7 +143,9 @@
                 {{ player.scores && player.scores[i] !== undefined ? player.scores[i] : '-' }}
               </td>
               <td class="fw-bold text-primary">{{ player.total }}</td>
-              <td class="fw-bold text-success">{{ player.promedio | number: '1.2-2' }}</td>
+              <td class="fw-bold text-success">
+                {{ player.promedio | number: '1.2-2' }}
+              </td>
             </tr>
           </tbody>
 
@@ -158,4 +163,5 @@
       </div>
     </div>
   </div>
+
 </div>

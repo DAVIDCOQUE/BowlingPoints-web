@@ -7,14 +7,22 @@ import Swal from 'sweetalert2';
 import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
+// Servicios
 import { TournamentsService } from 'src/app/services/tournaments.service';
 import { BranchesService } from 'src/app/services/branch-api.service';
+import { AmbitApiService } from 'src/app/services/ambit-api.service';
+import { ModalityApiService } from 'src/app/services/modality-api.service';
+import { CategoryApiService } from 'src/app/services/category-api.service';
 
 describe('TournamentsComponent', () => {
   let component: TournamentsComponent;
   let fixture: ComponentFixture<TournamentsComponent>;
+
   let tournamentsServiceSpy: jasmine.SpyObj<TournamentsService>;
   let branchesServiceSpy: jasmine.SpyObj<BranchesService>;
+  let ambitApiServiceSpy: jasmine.SpyObj<AmbitApiService>;
+  let modalityApiServiceSpy: jasmine.SpyObj<ModalityApiService>;
+  let categoryApiServiceSpy: jasmine.SpyObj<CategoryApiService>;
   let modalSpy: jasmine.SpyObj<NgbModal>;
 
   const mockTournament = {
@@ -37,28 +45,42 @@ describe('TournamentsComponent', () => {
       imports: [ReactiveFormsModule, FormsModule, HttpClientTestingModule],
       providers: [
         {
-          provide: TournamentsService,
-          useValue: jasmine.createSpyObj('TournamentsService', [
-            'getTournaments', 'getModalities', 'getCategories', 'getAmbits',
-            'getDepartments', 'createTournament', 'updateTournament', 'deleteTournament'
-          ])
-        },
-        {
-          provide: BranchesService,
-          useValue: jasmine.createSpyObj('BranchesService', ['getAll'])
-        },
-        {
           provide: NgbModal,
           useValue: jasmine.createSpyObj('NgbModal', ['open', 'dismissAll'])
         }
       ],
       schemas: [NO_ERRORS_SCHEMA]
-    }).compileComponents();
+    })
+      // Override de todos los servicios inyectados con inject()
+      .overrideProvider(TournamentsService, {
+        useValue: jasmine.createSpyObj('TournamentsService', [
+          'getTournaments', 'getDepartments', 'createTournament',
+          'updateTournament', 'deleteTournament'
+        ])
+      })
+      .overrideProvider(BranchesService, {
+        useValue: jasmine.createSpyObj('BranchesService', ['getAll'])
+      })
+      .overrideProvider(AmbitApiService, {
+        useValue: jasmine.createSpyObj('AmbitApiService', ['getActiveAmbits'])
+      })
+      .overrideProvider(ModalityApiService, {
+        useValue: jasmine.createSpyObj('ModalityApiService', ['getActiveModalities'])
+      })
+      .overrideProvider(CategoryApiService, {
+        useValue: jasmine.createSpyObj('CategoryApiService', ['getActiveCategories'])
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(TournamentsComponent);
     component = fixture.componentInstance;
+
+    // Inyección de los spies
     tournamentsServiceSpy = TestBed.inject(TournamentsService) as jasmine.SpyObj<TournamentsService>;
     branchesServiceSpy = TestBed.inject(BranchesService) as jasmine.SpyObj<BranchesService>;
+    ambitApiServiceSpy = TestBed.inject(AmbitApiService) as jasmine.SpyObj<AmbitApiService>;
+    modalityApiServiceSpy = TestBed.inject(ModalityApiService) as jasmine.SpyObj<ModalityApiService>;
+    categoryApiServiceSpy = TestBed.inject(CategoryApiService) as jasmine.SpyObj<CategoryApiService>;
     modalSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
   });
 
@@ -78,24 +100,18 @@ describe('TournamentsComponent', () => {
     tournamentsServiceSpy.getTournaments.and.returnValue(
       of({ success: true, message: '', data: [mockTournament] })
     );
+
     component.getTournaments();
+
     expect(component.tournaments.length).toBe(1);
     expect(component.tournaments[0].name).toBe('Torneo Prueba');
   });
 
-  it('should load modalities, categories, ambits, branches and departments', () => {
-    tournamentsServiceSpy.getTournaments.and.returnValue(
-      of({ success: true, message: '', data: [] })
-    );
-    tournamentsServiceSpy.getModalities.and.returnValue(
-      of({ success: true, message: '', data: [{ modalityId: 1, name: 'Mod A', status: true }] })
-    );
-    tournamentsServiceSpy.getCategories.and.returnValue(
-      of({ success: true, message: '', data: [{ categoryId: 1, name: 'Cat A', status: true }] })
-    );
-    tournamentsServiceSpy.getAmbits.and.returnValue(
-      of({ success: true, message: '', data: [{ ambitId: 1, name: 'Ambit A' }] })
-    );
+  it('should load all initial data', () => {
+    tournamentsServiceSpy.getTournaments.and.returnValue(of({ success: true, message: '', data: [] }));
+    modalityApiServiceSpy.getActiveModalities.and.returnValue(of({ success: true, message: '', data: [{ modalityId: 1, name: 'Mod A', status: true }] }));
+    categoryApiServiceSpy.getActiveCategories.and.returnValue(of({ success: true, message: '', data: [{ categoryId: 1, name: 'Cat A', status: true }] }));
+    ambitApiServiceSpy.getActiveAmbits.and.returnValue(of({ success: true, message: '', data: [{ ambitId: 1, name: 'Ambit A' }] }));
     tournamentsServiceSpy.getDepartments.and.returnValue(of([{ id: 1, name: 'Dept A' }]));
     branchesServiceSpy.getAll.and.returnValue(of([{ branchId: 1, name: 'Branch A', description: '', status: true }]));
 
@@ -125,20 +141,11 @@ describe('TournamentsComponent', () => {
     expect(component.getModalitiesString({ modalities: [] } as any)).toBe('-');
   });
 
- it('should format date properly with toYMDStrict()', () => {
-  const date = new Date('2025-05-10T00:00:00');
-  const result = component.toYMDStrict(date);
-
-  // Normaliza tanto el valor esperado como el resultado para evitar diferencias de zona horaria
-  const expected = new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-  )
-    .toISOString()
-    .split('T')[0];
-
-  expect(result).toBe(expected);
-});
-
+  it('should format date properly with toYMDStrict()', () => {
+    const date = new Date('2025-05-10T00:00:00');
+    const result = component.toYMDStrict(date);
+    expect(result).toBe('2025-05-10');
+  });
 
   // ------------------ MODALS ------------------
   it('should open and close modal correctly', () => {

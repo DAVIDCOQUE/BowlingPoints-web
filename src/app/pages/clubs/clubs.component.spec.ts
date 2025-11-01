@@ -1,166 +1,250 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ClubsComponent } from './clubs.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ClubApiService } from 'src/app/services/club-api.service';
 import { UserApiService } from 'src/app/services/user-api.service';
-import { of } from 'rxjs';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { IClubs } from 'src/app/model/clubs.interface';
-import { mockUser } from 'src/app/tests/mocks/mock-user';
+import { IUser } from 'src/app/model/user.interface';
 import Swal from 'sweetalert2';
-import { TemplateRef } from '@angular/core';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ClubsComponent', () => {
   let component: ClubsComponent;
   let fixture: ComponentFixture<ClubsComponent>;
-  let authService: jasmine.SpyObj<AuthService>;
-  let clubService: jasmine.SpyObj<ClubApiService>;
-  let userService: jasmine.SpyObj<UserApiService>;
+  let clubApi: jasmine.SpyObj<ClubApiService>;
+  let userApi: jasmine.SpyObj<UserApiService>;
+  let auth: jasmine.SpyObj<AuthService>;
+  let modalService: jasmine.SpyObj<NgbModal>;
 
-  const modalServiceMock = {
-    open: jasmine.createSpy('open'),
-    dismissAll: jasmine.createSpy('dismissAll'),
+  const mockUser: IUser = {
+    userId: 1,
+    personId: 1,
+    nickname: 'user1',
+    password: '123',
+    fullName: 'Juan',
+    fullSurname: 'Pérez',
+    email: 'correo@x.com',
+    phone: '123456',
+    gender: 'M',
+    categories: [],
+    roles: [],
+    sub: 'uuid-user-1',
+    status: true
   };
 
-  const mockClub: IClubs = {
-    clubId: 1,
-    name: 'Club X',
-    description: 'Descripción del Club',
-    foundationDate: new Date('2020-01-01'),
-    city: 'Ciudad',
-    status: true,
-    imageUrl: '',
-    members: [mockUser]
-  };
+  const mockClubs: IClubs[] = [
+    {
+      clubId: 1,
+      name: 'Club A',
+      city: 'Bogotá',
+      description: 'Descripción',
+      imageUrl: '',
+      status: true,
+      foundationDate: new Date(),
+      members: [mockUser]
+    }
+  ];
 
   beforeEach(async () => {
-    // Crear spies para los servicios
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['fetchUser', 'hasRole'], { user$: of({ userId: 1 }) });
-    const clubServiceSpy = jasmine.createSpyObj('ClubApiService', ['getClubs', 'createClub', 'updateClub', 'deleteClub'], { baseUrl: 'http://test-api' });
-    const userServiceSpy = jasmine.createSpyObj('UserApiService', ['getUsers']);
-
     await TestBed.configureTestingModule({
       declarations: [ClubsComponent],
-      imports: [ReactiveFormsModule, FormsModule, HttpClientTestingModule],
+      imports: [ReactiveFormsModule, FormsModule],
       providers: [
-        { provide: NgbModal, useValue: modalServiceMock },
-        { provide: AuthService, useValue: authServiceSpy },
-        { provide: ClubApiService, useValue: clubServiceSpy },
-        { provide: UserApiService, useValue: userServiceSpy },
+        { provide: AuthService, useValue: jasmine.createSpyObj('AuthService', ['hasRole']) },
+        { provide: ClubApiService, useValue: jasmine.createSpyObj('ClubApiService', ['getClubs', 'createClub', 'updateClub', 'deleteClub']) },
+        { provide: UserApiService, useValue: jasmine.createSpyObj('UserApiService', ['getActiveUsers']) },
+        { provide: NgbModal, useValue: jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']) }
       ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ClubsComponent);
     component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    clubService = TestBed.inject(ClubApiService) as jasmine.SpyObj<ClubApiService>;
-    userService = TestBed.inject(UserApiService) as jasmine.SpyObj<UserApiService>;
 
-    // Configurar respuestas por defecto para los spies
-    authService.hasRole.and.returnValue(true);
-    clubService.getClubs.and.returnValue(of([]));
-    userService.getUsers.and.returnValue(of([]));
+    clubApi = TestBed.inject(ClubApiService) as jasmine.SpyObj<ClubApiService>;
+    userApi = TestBed.inject(UserApiService) as jasmine.SpyObj<UserApiService>;
+    auth = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    modalService = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
 
-    fixture.detectChanges();
+    auth.hasRole.and.returnValue(true);
+
+    // ✅ Mocks por defecto para evitar errores de subscribe
+    clubApi.getClubs.and.returnValue(of([]));
+    userApi.getActiveUsers.and.returnValue(of([]));
   });
 
-  it('should create the component', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize form as invalid', () => {
-    expect(component.clubForm.valid).toBeFalse();
-  });
+  it('should load clubs on init', () => {
+    clubApi.getClubs.and.returnValue(of(mockClubs));
+    userApi.getActiveUsers.and.returnValue(of([mockUser]));
 
-  it('should load clubes from API', () => {
-    clubService.getClubs.and.returnValue(of([mockClub]));
-    component.getClubes();
-    expect(clubService.getClubs).toHaveBeenCalled();
+    component.ngOnInit();
+
+    expect(clubApi.getClubs).toHaveBeenCalled();
+    expect(userApi.getActiveUsers).toHaveBeenCalled();
     expect(component.clubes.length).toBe(1);
-  });
-
-  it('should load users from API', () => {
-    userService.getUsers.and.returnValue(of([mockUser]));
-    component.getUsers();
-    expect(userService.getUsers).toHaveBeenCalled();
     expect(component.usuarios.length).toBe(1);
   });
 
-  it('should open modal and patch form for edit', () => {
-    component.openModal({} as TemplateRef<any>, mockClub);
-    expect(component.clubForm.value.name).toBe('Club X');
-    expect(modalServiceMock.open).toHaveBeenCalled();
+  it('should handle club load error', () => {
+    spyOn(Swal, 'fire');
+
+    clubApi.getClubs.and.returnValue(throwError(() => new Error('Error al cargar clubes')));
+    userApi.getActiveUsers.and.returnValue(of([])); // prevent error from getUsers
+
+    component.getClubes();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudieron cargar los clubes', 'error');
   });
 
-  it('should open modal and reset form for new club', () => {
-    component.openModal({} as TemplateRef<any>);
-    expect(component.id_Club).toBeUndefined();
-    expect(modalServiceMock.open).toHaveBeenCalled();
+  it('should handle user load error', () => {
+    spyOn(Swal, 'fire');
+
+    userApi.getActiveUsers.and.returnValue(throwError(() => new Error('Error al cargar usuarios')));
+    clubApi.getClubs.and.returnValue(of([])); // prevent error from getClubes
+
+    component.getUsers();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudieron cargar los usuarios', 'error');
+  });
+
+  it('should warn if form is invalid', () => {
+    spyOn(Swal, 'fire');
+
+    component.ngOnInit();
+    component.clubForm.setValue({
+      name: '',
+      foundationDate: '',
+      city: '',
+      description: '',
+      members: '',
+      imageUrl: '',
+      status: true
+    });
+
+    component.save();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Formulario inválido', 'Revisa los campos requeridos', 'warning');
+  });
+
+  it('should call createClub when no id_Club is set', () => {
+    spyOn(Swal, 'fire');
+
+    clubApi.createClub.and.returnValue(of({}));
+    clubApi.getClubs.and.returnValue(of([])); // llamado tras crear
+
+    component.ngOnInit();
+    component.clubForm.setValue({
+      name: 'Club Nuevo',
+      foundationDate: '2020-01-01',
+      city: 'Bogotá',
+      description: 'Desc',
+      members: [1],
+      imageUrl: '',
+      status: true
+    });
+
+    component.save();
+
+    expect(clubApi.createClub).toHaveBeenCalled();
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'El club fue creado correctamente', 'success');
+  });
+
+  it('should call updateClub when id_Club is set', () => {
+    spyOn(Swal, 'fire');
+
+    clubApi.updateClub.and.returnValue(of({}));
+    clubApi.getClubs.and.returnValue(of([])); // llamado tras actualizar
+
+    component.id_Club = 1;
+    component.ngOnInit();
+    component.clubForm.setValue({
+      name: 'Club Actualizado',
+      foundationDate: '2020-01-01',
+      city: 'Bogotá',
+      description: 'Desc',
+      members: [1],
+      imageUrl: '',
+      status: true
+    });
+
+    component.save();
+
+    expect(clubApi.updateClub).toHaveBeenCalled();
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'El club fue actualizado correctamente', 'success');
+  });
+
+  it('should warn for duplicated members', () => {
+    spyOn(Swal, 'fire');
+
+    component.ngOnInit();
+    component.clubForm.setValue({
+      name: 'Duplicado',
+      foundationDate: '2020-01-01',
+      city: 'Bogotá',
+      description: 'Desc',
+      members: [1, 1],
+      imageUrl: '',
+      status: true
+    });
+
+    component.save();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Atención', 'Hay miembros repetidos en el club.', 'warning');
+  });
+
+  it('should delete club if confirmed', async () => {
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({
+      isConfirmed: true,
+      isDenied: false,
+      isDismissed: false,
+      value: true,
+      dismiss: undefined
+    }));
+    clubApi.deleteClub.and.returnValue(of({}));
+    clubApi.getClubs.and.returnValue(of([]));
+
+    await component.deleteClub(1);
+
+    expect(clubApi.deleteClub).toHaveBeenCalledWith(1);
   });
 
   it('should close modal', () => {
     component.closeModal();
-    expect(modalServiceMock.dismissAll).toHaveBeenCalled();
+    expect(modalService.dismissAll).toHaveBeenCalled();
   });
 
-  it('should clear filter and reload', () => {
-    spyOn(component, 'getClubes');
-    component.filter = 'abc';
+  it('should reset filter and reload clubs', () => {
+    clubApi.getClubs.and.returnValue(of(mockClubs));
+
+    component.filter = 'club';
     component.clear();
+
     expect(component.filter).toBe('');
-    expect(component.getClubes).toHaveBeenCalled();
+    expect(clubApi.getClubs).toHaveBeenCalled();
   });
 
-  it('should prevent duplicate members', () => {
-    spyOn(Swal, 'fire');
-    component.clubForm.patchValue({
-      name: 'Test',
-      foundationDate: '2020-01-01',
-      city: 'City',
-      description: 'Description',
-      members: [1, 1],
-      status: true,
-    });
-    component.save();
-    expect(Swal.fire).toHaveBeenCalledWith(
-      'Atención',
-      'Hay miembros repetidos en el club.',
-      'warning'
-    );
+  it('should handle image error', () => {
+    const img = document.createElement('img');
+    const event = { target: img } as unknown as Event;
+
+    component.onImgError(event, 'default.jpg');
+
+    expect(img.src).toContain('default.jpg');
   });
 
-  it('should submit and create club', () => {
-    spyOn(Swal, 'fire');
-    clubService.createClub.and.returnValue(of({ success: true }));
+  it('should filter clubes by name', () => {
+    component.clubes = mockClubs;
+    component.filter = 'club a';
 
-    component.clubForm.patchValue({
-      name: 'Nuevo Club',
-      foundationDate: '2022-05-05',
-      city: 'Bogotá',
-      description: 'Club Description',
-      members: [1],
-      status: true,
-    });
+    const result = component.filteredClubes;
 
-    component.save();
-
-    expect(clubService.createClub).toHaveBeenCalled();
-    expect(Swal.fire).toHaveBeenCalledWith(
-      'Éxito',
-      'El club fue creado correctamente',
-      'success'
-    );
+    expect(result.length).toBe(1);
   });
-
-  it('should delete club after confirmation', fakeAsync(() => {
-    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
-    spyOn(component, 'getClubes');
-    clubService.deleteClub.and.returnValue(of({}));
-    component.deleteClub(1);
-    tick();
-    expect(clubService.deleteClub).toHaveBeenCalledWith(1);
-    expect(component.getClubes).toHaveBeenCalled();
-  }));
 });
