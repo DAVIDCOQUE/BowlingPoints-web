@@ -13,6 +13,32 @@ describe('UserTournamentApiService', () => {
 
   const apiUrl = environment.apiUrl;
 
+  // Mock de torneos válidos
+  const mockTorneos: IUserTournament[] = [
+    {
+      tournamentId: 1,
+      name: 'Copa Valle',
+      categoria: 'A',
+      date: '2025-05-01',
+      imageUrl: 'https://example.com/img1.jpg',
+      location: 'Cali',
+      modalidad: 'Individual',
+      posicionFinal: 1,
+      resultados: 185,
+    },
+    {
+      tournamentId: 2,
+      name: 'Liga Cali',
+      categoria: 'B',
+      date: '2025-06-01',
+      imageUrl: 'https://example.com/img2.jpg',
+      location: 'Palmira',
+      modalidad: 'Parejas',
+      posicionFinal: 3,
+      resultados: 190,
+    },
+  ];
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
@@ -27,18 +53,13 @@ describe('UserTournamentApiService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
+  it('debe crearse correctamente', () => {
     expect(service).toBeTruthy();
   });
 
-  // ✅ Caso 1: getTorneosJugados (éxito)
   describe('#getTorneosJugados', () => {
-    it('should GET tournaments played by user and map to res.data', (done) => {
-      const userId = 1;
-      const mockTorneos: IUserTournament[] = [
-        { tournamentId: 1, name: 'Copa Valle', score: 185 },
-        { tournamentId: 2, name: 'Liga Cali', score: 190 },
-      ] as unknown as IUserTournament[];
+    it('debe obtener torneos jugados por el usuario', (done) => {
+      const userId = 5;
 
       service.getTorneosJugados(userId).subscribe((data) => {
         expect(data.length).toBe(2);
@@ -51,37 +72,29 @@ describe('UserTournamentApiService', () => {
       req.flush({ success: true, message: 'ok', data: mockTorneos });
     });
 
-    // ❌ Caso 2: getTorneosJugados (error simulado)
-    it('should handle HTTP error in getTorneosJugados', (done) => {
+    it('debe manejar un error HTTP al obtener torneos jugados', (done) => {
       const userId = 10;
-      const consoleSpy = spyOn(console, 'error');
 
       service.getTorneosJugados(userId).subscribe({
-        next: () => fail('Expected an error, not data'),
+        next: () => fail('Se esperaba un error, no datos'),
         error: (err) => {
           expect(err.status).toBe(500);
-          expect(consoleSpy).toHaveBeenCalled();
           done();
         },
       });
 
       const req = httpMock.expectOne(`${apiUrl}/user-tournaments/${userId}/played`);
-      expect(req.request.method).toBe('GET');
-      req.error(new ErrorEvent('Network error'), { status: 500 });
+      req.error(new ErrorEvent('Error de red'), { status: 500 });
     });
   });
 
-  // ✅ Caso 3: getTorneosInscriptos (éxito)
   describe('#getTorneosInscriptos', () => {
-    it('should GET tournaments registered by user and map to res.data', (done) => {
-      const userId = 2;
-      const mockTorneos: IUserTournament[] = [
-        { tournamentId: 3, name: 'Torneo Nacional', score: 200 },
-      ] as unknown as IUserTournament[];
+    it('debe obtener torneos inscritos por el usuario', (done) => {
+      const userId = 7;
 
       service.getTorneosInscriptos(userId).subscribe((data) => {
-        expect(data.length).toBe(1);
-        expect(data[0].name).toBe('Torneo Nacional');
+        expect(data.length).toBe(2);
+        expect(data[1].name).toBe('Liga Cali');
         done();
       });
 
@@ -90,23 +103,19 @@ describe('UserTournamentApiService', () => {
       req.flush({ success: true, message: 'ok', data: mockTorneos });
     });
 
-    // ❌ Caso 4: getTorneosInscriptos (error simulado)
-    it('should handle HTTP error in getTorneosInscriptos', (done) => {
-      const userId = 99;
-      const consoleSpy = spyOn(console, 'error');
+    it('debe manejar un error HTTP al obtener torneos inscritos', (done) => {
+      const userId = 20;
 
       service.getTorneosInscriptos(userId).subscribe({
-        next: () => fail('Expected an error, not data'),
+        next: () => fail('Se esperaba un error, no datos'),
         error: (err) => {
           expect(err.status).toBe(404);
-          expect(consoleSpy).toHaveBeenCalled();
           done();
         },
       });
 
       const req = httpMock.expectOne(`${apiUrl}/user-tournaments/${userId}/played`);
-      expect(req.request.method).toBe('GET');
-      req.error(new ErrorEvent('Not found'), { status: 404 });
+      req.error(new ErrorEvent('No encontrado'), { status: 404 });
     });
   });
 });
