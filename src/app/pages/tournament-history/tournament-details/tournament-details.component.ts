@@ -6,7 +6,6 @@ import { environment } from 'src/environments/environment';
 import {
   IPlayerScore,
   IModality,
-  IRound,
   ITournamentSummary,
   IHighestLine,
   IResultsResponse

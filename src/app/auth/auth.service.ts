@@ -8,9 +8,8 @@ import { IAuthToken } from '../model/auth-token.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
-
-  private userSubject = new BehaviorSubject<IUser | null>(this.loadUserFromStorage());
+  private readonly http = inject(HttpClient);
+  private readonly userSubject = new BehaviorSubject<IUser | null>(this.loadUserFromStorage());
 
   /** Cargar usuario de localStorage */
   private loadUserFromStorage(): IUser | null {
@@ -37,7 +36,7 @@ export class AuthService {
   setAuthData(token: string): void {
     localStorage.setItem('jwt_token', token);
 
-    // ✅ Se obtiene el usuario real desde el backend
+    // Se obtiene el usuario real desde el backend
     this.fetchUser().subscribe({
       next: (user) => {
         if (user) {
@@ -63,8 +62,6 @@ export class AuthService {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user');
     this.userSubject.next(null);
-    // Opcional: redirigir
-    // window.location.href = '/login';
   }
 
   /** Obtiene el token JWT almacenado */

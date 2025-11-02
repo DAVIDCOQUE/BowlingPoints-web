@@ -315,9 +315,7 @@
             <div class="invalid-feedback"
               *ngIf="playerForm.controls['branchId'].invalid && playerForm.controls['branchId'].touched"> Debe
               seleccionar una rama. </div>
-          </div> <!-- Equipo -->
-          <!-- <div class="col-md-6"> <label class="form-label">Equipo *</label> <select class="form-select form-select-sm" formControlName="teamId" [ngClass]="{ 'is-invalid': playerForm.controls['teamId'].invalid && playerForm.controls['teamId'].touched, 'is-valid': playerForm.controls['teamId'].valid }"> <option [ngValue]="null" disabled>Seleccione equipo</option> <option *ngFor="let team of teams" [ngValue]="team.teamId">{{ team.name }}</option> </select> <div class="invalid-feedback" *ngIf="playerForm.controls['teamId'].invalid && playerForm.controls['teamId'].touched"> Debe seleccionar un equipo. </div> </div> -->
-          <!-- Estado -->
+          </div>
           <div class="col-md-6"> <label class="form-label">Estado *</label> <select class="form-select form-select-sm"
               formControlName="status"
               [ngClass]="{ 'is-invalid': playerForm.controls['status'].invalid && playerForm.controls['status'].touched, 'is-valid': playerForm.controls['status'].valid }">

@@ -5,9 +5,6 @@ import { Observable } from 'rxjs';
 
 // Interfaces
 import { ITournament } from '../model/tournament.interface';
-import { IModality } from '../model/modality.interface';
-import { ICategory } from '../model/category.interface';
-import { IAmbit } from '../model/ambit.interface';
 
 @Injectable({
   providedIn: 'root',
