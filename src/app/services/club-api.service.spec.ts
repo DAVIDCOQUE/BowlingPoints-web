@@ -1,8 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController, } from '@angular/common/http/testing';
 import { ClubApiService } from './club-api.service';
 import { environment } from 'src/environments/environment';
 import { IClubs } from '../model/clubs.interface';
@@ -134,20 +131,67 @@ describe('ClubApiService', () => {
   });
 
   it('debe manejar errores HTTP en getClubs', () => {
-  let capturedError: any;
+    let capturedError: any;
 
-  service.getClubs().subscribe({
-    next: () => fail('La llamada debería fallar'),
-    error: (err) => (capturedError = err),
+    service.getClubs().subscribe({
+      next: () => fail('La llamada debería fallar'),
+      error: (err) => (capturedError = err),
+    });
+
+    const req = httpMock.expectOne(baseUrl);
+    expect(req.request.method).toBe('GET');
+
+    req.flush({ message: 'Error interno' }, { status: 500, statusText: 'Server Error' });
+
+    expect(capturedError).toBeTruthy();
+    expect(capturedError.status).toBe(500);
   });
 
-  const req = httpMock.expectOne(baseUrl);
-  expect(req.request.method).toBe('GET');
+  it('debe mapear correctamente un club con propiedades alternativas', () => {
+    const rawClubData = {
+      clubId: 1,
+      name: 'Club Alternativo',
+      FoundationDate: '2022-01-01',
+      city: 'Ciudad X',
+      description: 'Prueba de mapeo',
+      image: 'imagen.jpg',
+      status: true,
+      members: [
+        {
+          userId: 1,
+          fullName: 'Usuario 1',
+          photoURL: 'foto1.jpg'
+        },
+        {
+          userId: 2,
+          fullName: 'Usuario 2',
+          photourl: 'foto2.jpg'
+        }
+      ]
+    };
 
-  req.flush({ message: 'Error interno' }, { status: 500, statusText: 'Server Error' });
+    service['mapClub'] = (service as any)['mapClub']; // acceso directo para prueba unitaria
 
-  expect(capturedError).toBeTruthy();
-  expect(capturedError.status).toBe(500);
-});
+    const club = (service as any).mapClub(rawClubData);
+
+    expect(club.foundationDate).toBe('2022-01-01');
+    expect(club.imageUrl).toBe('imagen.jpg');
+    expect(club.members[0].photoUrl).toBe('foto1.jpg');
+    expect(club.members[1].photoUrl).toBe('foto2.jpg');
+  });
+
+  it('debe mapear un club sin miembros correctamente', () => {
+    const rawClub = {
+      clubId: 99,
+      name: 'Club sin miembros',
+      city: 'Ciudad Y',
+      description: '',
+      status: false,
+      members: null,
+    };
+
+    const club = (service as any).mapClub(rawClub);
+    expect(club.members).toEqual([]);
+  });
 
 });

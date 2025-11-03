@@ -14,8 +14,6 @@ import { RoleApiService } from 'src/app/services/role-api.service';
 
 // ✅ Importa las interfaces necesarias
 import { IUser } from 'src/app/model/user.interface';
-import { ICategory } from 'src/app/model/category.interface';
-import { IRole } from 'src/app/model/role.interface';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
@@ -272,4 +270,88 @@ describe('UsersComponent', () => {
     component.clear();
     expect(component.filter).toBe('');
   });
+
+  it('should return comma-separated role names from user', () => {
+    const userWithRoles = {
+      ...mockUser,
+      roles: [
+        { roleId: 1, name: 'Admin' },
+        { roleId: 2, name: 'User' }
+      ]
+    };
+    expect(component.getRoleNames(userWithRoles)).toBe('Admin, User');
+  });
+
+  it('should replace broken image with default path', () => {
+    const img = document.createElement('img');
+    const event = new Event('error');
+    Object.defineProperty(event, 'target', { value: img });
+
+    component.onImgError(event, 'assets/default.jpg');
+    expect(img.src).toContain('assets/default.jpg');
+  });
+
+
+  it('should return role name by ID', () => {
+    component.roles = [{ roleId: 5, name: 'Editor' }];
+    expect(component.getRoleNameById(5)).toBe('Editor');
+    expect(component.getRoleNameById(99)).toBe(''); // rol inexistente
+  });
+
+  it('should filter users by full name, email, and status', () => {
+    component.usuarios = [
+      {
+        ...mockUser,
+        fullName: 'Carlos',
+        fullSurname: 'Lopez',
+        email: 'carlos@test.com',
+        phone: '1234',
+        status: true,
+        roles: [{ roleId: 1, name: 'Admin' }],
+        categories: [{ categoryId: 1, name: 'Cat A' }]
+      }
+    ];
+
+    component.filter = 'Carlos';
+    expect(component.usuariosFiltrados.length).toBe(1);
+
+    component.filter = 'admin';
+    expect(component.usuariosFiltrados.length).toBe(1);
+
+    component.filter = 'inexistente';
+    expect(component.usuariosFiltrados.length).toBe(0);
+  });
+
+  it('should not save form if it is invalid', () => {
+    component.initForm();
+    component.userForm.patchValue({ email: '' }); // obligatorio pero vacío
+    spyOn(component.userForm, 'markAllAsTouched');
+    component.saveForm();
+    expect(component.userForm.markAllAsTouched).toHaveBeenCalled();
+  });
+
+  it('should reset form when opening modal for new user', () => {
+    component.initForm();
+    component.idUser = null;
+    component.userForm.patchValue({ fullName: 'Prueba' });
+
+    component.openModal('modalContent');
+    expect(component.userForm.get('fullName')?.value).toBe('');
+  });
+
+  it('should return correct status label', () => {
+    expect(component.getStatusLabel(true)).toBe('Activo');
+    expect(component.getStatusLabel(false)).toBe('Inactivo');
+  });
+
+
+  it('should show password mismatch error when touched and values differ', () => {
+    component.initForm();
+    const form = component.userForm;
+    form.get('password')?.setValue('123');
+    form.get('confirm')?.setValue('456');
+    form.get('password')?.markAsTouched();
+    expect(component.passwordMismatchVisible).toBeTrue();
+  });
+
 });

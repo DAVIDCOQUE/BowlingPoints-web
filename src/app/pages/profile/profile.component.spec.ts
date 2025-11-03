@@ -9,6 +9,7 @@ import { IRole } from '../../model/role.interface';
 import { AuthService } from '../../auth/auth.service';
 import { RoleApiService } from '../../services/role-api.service';
 import { ElementRef } from '@angular/core';
+import { fakeAsync, tick } from '@angular/core/testing';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -186,6 +187,82 @@ describe('ProfileComponent', () => {
     );
   });
 
+
+  it('getRoleDescription: debe retornar vacío si no encuentra rol', () => {
+    component.roles = mockRoles;
+    expect(component.getRoleDescription(999)).toBe('');
+  });
+
+  it('getRolesDescription: debe retornar vacío si no hay roles', () => {
+    component.roles = mockRoles;
+    expect(component.getRolesDescription([])).toBe('');
+  });
+
+
+  it('photoSrc: debe retornar la ruta completa si photoUrl es absoluta', () => {
+    component.userForm = component['fb'].group({ photoUrl: ['https://cdn.com/avatar.jpg'] });
+    expect(component.photoSrc).toBe('https://cdn.com/avatar.jpg');
+  });
+
+  it('loadCurrentUser: no hace nada si res.data es null', () => {
+    const warnSpy = spyOn(console, 'warn');
+    authService.fetchUser.and.returnValue(of(null));
+    component.loadCurrentUser();
+
+    expect(warnSpy).toHaveBeenCalledWith('No se recibió usuario desde fetchUser');
+  });
+
+  it('ngOnInit: debe inicializar formulario, roles y usuario', () => {
+    const initSpy = spyOn(component, 'initForm');
+    const roleSpy = spyOn(component, 'getRoles');
+    const loadSpy = spyOn(component, 'loadCurrentUser');
+
+    component.ngOnInit();
+
+    expect(initSpy).toHaveBeenCalled();
+    expect(roleSpy).toHaveBeenCalled();
+    expect(loadSpy).toHaveBeenCalled();
+  });
+
+  it('getAvatarUrl: debe retornar imagen por defecto si el usuario es null', () => {
+    expect(component.getAvatarUrl(null as any)).toBe('assets/img/profile.png');
+  });
+
+  it('onSubmit: incluye password si está presente', () => {
+    fixture.detectChanges();
+
+    component.userForm.patchValue({
+      nickname: 'testuser',
+      document: '123',
+      photoUrl: '',
+      fullName: 'Test',
+      fullSurname: 'User',
+      email: 'test@example.com',
+      phone: '555',
+      gender: 'Masculino',
+      roleId: 1,
+      password: '123456',
+      confirm: '123456',
+    });
+
+    component.idUser = 10;
+    component.roles = mockRoles;
+
+    authService.updateUserProfile.and.returnValue(of(mockUser));
+
+    component.onSubmit();
+
+    expect(authService.updateUserProfile).toHaveBeenCalledWith(
+      10,
+      jasmine.objectContaining({
+        password: '123456',
+        roles: ['Administrador'],
+      })
+    );
+  });
+
+
+
   it('onSubmit: debe manejar error del servidor', () => {
     fixture.detectChanges();
 
@@ -214,4 +291,6 @@ describe('ProfileComponent', () => {
 
     expect(authService.updateUserProfile).toHaveBeenCalled();
   });
+
+
 });

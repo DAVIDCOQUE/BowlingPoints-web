@@ -124,4 +124,57 @@ describe('UserApiService', () => {
     });
   });
 
+  describe('#getActiveUsers', () => {
+    it('debe hacer GET a /users/actives y devolver usuarios activos', (done) => {
+      const mockActiveUsers: IUser[] = [
+        {
+          userId: 2,
+          fullName: 'Carlos Ramirez',
+          fullSurname: 'R.',
+          email: 'carlos@example.com',
+          nickname: 'carlosR',
+          password: '123',
+          roles: [],
+          document: '54321',
+          phone: '5555678',
+          gender: 'M',
+          personId: 2,
+          clubId: 2,
+          sub: '',
+          categories: [],
+        },
+      ];
+
+      const consoleSpy = spyOn(console, 'log');
+
+      service.getActiveUsers().subscribe((users) => {
+        expect(users.length).toBe(1);
+        expect(users[0].fullName).toBe('Carlos Ramirez');
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Usuarios activos obtenidos:',
+          jasmine.objectContaining({ data: jasmine.any(Array) })
+        );
+        done();
+      });
+
+      const req = httpMock.expectOne(`${usersUrl}/actives`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ success: true, message: 'ok', data: mockActiveUsers });
+    });
+  });
+
+  it('debe manejar error HTTP en getActiveUsers', (done) => {
+    service.getActiveUsers().subscribe({
+      next: () => fail('La llamada debería fallar'),
+      error: (err) => {
+        expect(err.status).toBe(500);
+        done();
+      },
+    });
+
+    const req = httpMock.expectOne(`${usersUrl}/actives`);
+    req.flush({ message: 'Error interno' }, { status: 500, statusText: 'Server Error' });
+  });
+
+
 });

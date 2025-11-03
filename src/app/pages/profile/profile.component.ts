@@ -68,7 +68,7 @@ export class ProfileComponent implements OnInit {
   loadCurrentUser(): void {
     this.authService.fetchUser().subscribe({
       next: (res: any) => {
-        const user = res.data || res;
+        const user = res;
         if (!user) return console.warn('No se recibió usuario desde fetchUser');
 
         this.idUser = user.userId;
@@ -87,7 +87,7 @@ export class ProfileComponent implements OnInit {
           confirm: ''
         });
 
-         this.roleDisplay = user.roles?.map((r: any) => r.name).join(', ') || '';
+        this.roleDisplay = user.roles?.map((r: any) => r.name).join(', ') || '';
         console.log('Usuario cargado en perfil:', user);
 
         // Previsualiza avatar (foto del backend o imagen por defecto)
