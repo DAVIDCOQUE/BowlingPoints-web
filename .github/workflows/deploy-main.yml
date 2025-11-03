@@ -24,8 +24,8 @@ jobs:
       - name: Build Angular App
         run: npm run build --if-present
 
-      - name: Show built files (debug)
-        run: ls -la dist/
+      - name: Show built files
+        run: ls -la dist/bowling-points
 
       - name: Deploy to AWS S3
         uses: jakejarvis/s3-sync-action@v0.5.1
@@ -36,4 +36,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: us-east-2
-          SOURCE_DIR: dist/
+          SOURCE_DIR: dist/bowling-points
