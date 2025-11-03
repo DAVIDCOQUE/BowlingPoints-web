@@ -1,19 +1,31 @@
-import { IRole } from "./role.interface";
-
+import { ICategory } from "./category.interface";
+import { IClubs } from "./clubs.interface";
+import { IRole } from './role.interface';
 
 export interface IUser {
   userId: number;
-  document: string;
-  photoUrl?: string | null;
   nickname: string;
-  firstname: string;
-  secondname?: string | null;
-  lastname: string;
-  secondlastname?: string | null;
+  password: string;
+  attemptsLogin?: number;
+  lastLoginAt?: Date;
+  categories: ICategory[];
+  roles: IRole[];
+  personId: number;
+  document?: string;
+  fullName: string;
+  fullSurname: string;
   email: string;
-  roleDescription: string;
-  roleId: number;
   phone: string;
   gender: string;
-}
+  birthDate?: Date;
+  photoUrl?: string;
+  clubId?: number
+  club?: IClubs;
+  roleInClub?: string;
+  status?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date;
 
+  sub: string;
+}

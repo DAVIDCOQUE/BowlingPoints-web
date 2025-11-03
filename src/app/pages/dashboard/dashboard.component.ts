@@ -1,4 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import Swal from 'sweetalert2';
+import { environment } from 'src/environments/environment';
+
+import { ITournament } from 'src/app/model/tournament.interface';
+import { IAmbit } from 'src/app/model/ambit.interface';
+import { AuthService } from 'src/app/auth/auth.service';
+import { IUserResult } from 'src/app/model/userResult.inteface';
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -6,23 +15,75 @@ import { Component } from '@angular/core';
 })
 export class DashboardComponent {
 
-  topJugadores = [
-    { nombre: 'Juan Pérez', puntaje: 248, avatar: 'assets/img/avatar.png' },
-    { nombre: 'María Gómez', puntaje: 236, avatar: 'assets/img/avatar.png' },
-    { nombre: 'Luis Rojas', puntaje: 230, avatar: 'assets/img/avatar.png' },
-    { nombre: 'Juan Pérez', puntaje: 248, avatar: 'assets/img/avatar.png' },
-    { nombre: 'María Gómez', puntaje: 236, avatar: 'assets/img/avatar.png' },
+  /** URL base de la API */
+  public readonly apiUrl = environment.apiUrl;
 
-    // ... hasta 10
-  ];
-  topClubes = [
-    { nombre: 'liga cali', puntaje: 248, avatar: 'assets/img/club-logo.png' },
-    { nombre: 'liga palmira', puntaje: 236, avatar: 'assets/img/club-logo.png' },
-    { nombre: 'liga jumbo', puntaje: 230, avatar: 'assets/img/club-logo.png' },
-    { nombre: 'liga jamundi', puntaje: 248, avatar: 'assets/img/club-logo.png' },
-    { nombre: 'liga armenia', puntaje: 236, avatar: 'assets/img/club-logo.png' },
+  /** Listado de torneos activos */
+  inProgressTournaments: ITournament[] = [];
+  scheduledOrPostponedTournaments: ITournament[] = [];
 
-    // ... hasta 10
-  ];
+  /** Listado de jugadores destacados */
+  topPlayers: IUserResult[] = [];
 
+  /** Listado de ámbitos disponibles */
+  ambits: IAmbit[] = [];
+
+  /** Inyecciones */
+  private readonly http = inject(HttpClient);
+  public readonly auth = inject(AuthService);
+
+  /**
+   * Hook de inicialización del componente
+   */
+  ngOnInit(): void {
+    this.getDashboard();
+  }
+
+  /**
+   * Consulta la información del dashboard desde la API
+   */
+  getDashboard(): void {
+    this.http.get<{ success: boolean; message: string; data: any }>(`${this.apiUrl}/api/dashboard`)
+      .subscribe({
+        next: res => {
+          const data = res.data;
+          this.inProgressTournaments = data.inProgressTournaments ?? [];
+          this.scheduledOrPostponedTournaments = data.scheduledOrPostponedTournaments ?? [];
+          this.topPlayers = data.topPlayers ?? [];
+          this.ambits = data.ambits ?? [];
+          console.log('Dashboard data:', data);
+
+        },
+        error: err => {
+          console.error('Error al cargar datos del dashboard:', err);
+          Swal.fire('Error', 'No se pudieron cargar los datos del dashboard', 'error');
+        }
+      });
+  }
+
+  /**
+   * Maneja errores al cargar imágenes (reemplaza por una imagen por defecto)
+   * @param event Evento del error
+   * @param defaultPath Ruta de la imagen por defecto
+   */
+  onImgError(event: Event, defaultPath: string): void {
+    const target = event.target as HTMLImageElement;
+    target.src = defaultPath;
+  }
+
+  /**
+   * Retorna las modalidades de un torneo como cadena
+   * @param tournament Torneo con modalidades
+   */
+  getModalitiesString(tournament: ITournament): string {
+    return tournament?.modalities?.map(m => m.name).join(', ') || '-';
+  }
+
+  /**
+   * Retorna las categorías de un torneo como cadena
+   * @param tournament Torneo con categorías
+   */
+  getCategoriesString(tournament: ITournament): string {
+    return tournament?.categories?.map(c => c.name).join(', ') || '-';
+  }
 }

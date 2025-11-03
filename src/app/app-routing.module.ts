@@ -1,32 +1,36 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
-import { RegistroComponent } from './pages/registro/registro.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 import { BodyComponent } from './layouts/body/body.component';
-import { JugadoresComponent } from './pages/jugadores/jugadores.component';
-import { PerfilComponent } from './pages/perfil/perfil.component';
-import { ClubesComponent } from './pages/clubes/clubes.component';
-import { MisTorneosComponent } from './pages/mis-torneos/mis-torneos.component';
-import { MisResultadosComponent } from './pages/mis-resultados/mis-resultados.component';
+import { PlayersComponent } from './pages/players/players.component';
+import { ProfileComponent } from './pages/profile/profile.component';
+import { ClubsComponent } from './pages/clubs/clubs.component';
+import { UserTournamentsComponent } from './pages/user-tournaments/user-tournaments.component';
+import { UserStatsComponent } from './pages/user-stats/user-stats.component';
 import { ClubComponent } from './pages/club/club.component';
-import { TorneosComponent } from './pages/torneos/torneos.component';
+import { TournamentsComponent } from './pages/tournaments/tournaments.component';
 import { UsersComponent } from './pages/users/users.component';
-import { JugadorComponent } from './pages/jugador/jugador.component';
-import { ListaTorneosComponent } from './pages/resultadosTorneos/lista-torneos/lista-torneos.component';
-import { DatallesTorneoComponent } from './pages/resultadosTorneos/datalles-torneo/datalles-torneo.component';
-import { ResumenTorneoComponent } from './pages/resultadosTorneos/resumen-torneo/resumen-torneo.component';
-import { DatallesJugadorComponent } from './pages/resultadosTorneos/datalles-jugador/datalles-jugador.component';
+import { TournamentlistComponent } from './pages/tournament-history/tournament-list/tournament-list.component';
+import { TournamentDetailsComponent } from './pages/tournament-history/tournament-details/tournament-details.component';
+import { TournamentSummaryComponent } from './pages/tournament-history/tournament-summary/tournament-summary.component';
+import { PlayerDetailsComponent } from './pages/tournament-history/player-details/player-details.component';
 
 import { AuthGuard } from './auth/auth.guard';
 import { RoleGuard } from './auth/role.guard';
-import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
+import { UnauthorizedComponent } from './auth/unauthorized/unauthorized.component';
+import { ModalityComponent } from './pages/modality/modality.component';
+import { CategoriesComponent } from './pages/categories/categories.component';
+import { AmbitComponent } from './pages/ambit/ambit.component';
+import { TournamentParticipantsComponent } from './pages/tournament-history/tournament-participants/tournament-participants.component';
+import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
+import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
+import { TournamentDetailsSummaryComponent } from './pages/tournament-history/tournament-details-summary/tournament-details-summary.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  { path: 'registro', component: RegistroComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   {
     path: '',
@@ -34,27 +38,34 @@ const routes: Routes = [
     children: [
       // VISITANTES (sin login, sin protección)
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'lista-torneos', component: ListaTorneosComponent },
-      { path: 'detalle-torneo/:id', component: DatallesTorneoComponent },
-      { path: 'resumen-torneo/:id', component: ResumenTorneoComponent },
-      { path: 'detalle-jugador/:id', component: DatallesJugadorComponent },
+      { path: 'tournament-list/:ambitId', component: TournamentlistComponent },
+      { path: 'tournament-summary/:tournamentId', component: TournamentSummaryComponent },
+      { path: 'tournament-details/:tournamentId/:modalityId', component: TournamentDetailsComponent },
+      { path: 'tournament-details-summary/:tournamentId/:branchId', component: TournamentDetailsSummaryComponent },
+      { path: 'tournament-participants/:tournamentId', component: TournamentParticipantsComponent },
+      { path: 'player-details/:userId', component: PlayerDetailsComponent },
 
       // JUGADORES (rol: JUGADOR, ENTRENADOR, ADMIN)
-      { path: 'perfil', component: PerfilComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
-      { path: 'mis-torneos', component: MisTorneosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
-      { path: 'mis-resultados', component: MisResultadosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
+      { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
+      { path: 'user-tournaments', component: UserTournamentsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
+      { path: 'user-stats', component: UserStatsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
 
       // ENTRENADORES Y ADMINISTRADORES
-      { path: 'club', component: ClubComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ENTRENADOR', 'ADMIN','JUGADOR'] } },
+      { path: 'club', component: ClubComponent },
+      { path: 'club/:id', component: ClubComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ENTRENADOR', 'ADMIN', 'JUGADOR'] } },
 
       // ACCESO GENERAL (requiere login pero sin restricción por rol)
-      { path: 'jugadores', component: JugadoresComponent, canActivate: [AuthGuard] },
-      { path: 'jugador/:id', component: JugadorComponent, canActivate: [AuthGuard] },
+      { path: 'players', component: PlayersComponent, canActivate: [AuthGuard] },
 
       // ADMINISTRADORES
-      { path: 'clubes', component: ClubesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR','ADMIN'] } },
-      { path: 'Usuarios', component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
-      { path: 'torneos', component: TorneosComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } }
+      { path: 'clubs', component: ClubsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ADMIN'] } },
+      { path: 'users', component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'tournaments', component: TournamentsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
+      { path: 'tournament-results/:tournamentId', component: TournamentResultComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
+      { path: 'results-stats', component: ResultsAndStatsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'ENTRENADOR'] } },
+      { path: 'modalitys', component: ModalityComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'categories', component: CategoriesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'ambits', component: AmbitComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
     ]
   },
 

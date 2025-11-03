@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -12,43 +12,45 @@ import { environment } from 'src/environments/environment';
 export class LoginComponent {
 
   form: FormGroup = new FormGroup({
-    username: new FormControl('', [Validators.required]),
+    username: new FormControl('', [Validators.required, Validators.pattern('^[0-9]+$')]),
     password: new FormControl('', [Validators.required])
   });
 
   error: string | null = null;
+  showPassword = false;
 
-  constructor(private router: Router, private http: HttpClient) { }
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private auth: AuthService
+  ) { }
 
   submit(): void {
     if (this.form.valid) {
       const { username, password } = this.form.value;
-      console.log(' Enviando credenciales:', { userName: username, password });
 
-      this.http.post<{ token: string }>(
-        `${environment.apiUrl}/auth/login`,
-        { userName: username, password }
-      ).subscribe({
-        next: res => {
-          console.log('Token recibido:', res.token);
-          localStorage.setItem('jwt_token', res.token);
+      this.auth.login(username, password).subscribe({
+        next: (token) => {
+          this.auth.setAuthData(token);
           this.router.navigate(['/dashboard']);
         },
-        error: err => {
-          console.error(' Error en login:', err);
+        error: () => {
           this.error = 'Usuario o contraseña incorrectos';
         }
       });
 
     } else {
-      console.warn('Formulario inválido');
       this.form.markAllAsTouched();
     }
   }
 
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
   loginAsGuest(): void {
-    localStorage.removeItem('jwt_token');
-    localStorage.setItem('roles', JSON.stringify([]));
+    this.auth.logout();
+    // Si quieres, puedes poner roles de invitado, depende de tu lógica
     this.router.navigate(['/dashboard']);
   }
 
