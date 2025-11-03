@@ -1,0 +1,50 @@
+name: CI - Code Analysis & Tests
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarqube:
+    name: SonarCloud + Test Coverage
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install system dependencies for Chrome Headless (karma)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2 libxss1 libgconf-2-4 libnss3 libx11-xcb1 \
+            libxcomposite1 libxcursor1 libxdamage1 libxi6 libxtst6 \
+            libxrandr2 libgbm1 libgtk-3-0
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage || true
+
+      - name: Adjust lcov path for SonarCloud
+        if: hashFiles('coverage/bowling-points/lcov.info') != ''
+        run: |
+          echo "Fixing coverage path for SonarCloud..."
+          sed -i 's|SF:.*/src|SF:src|' coverage/bowling-points/lcov.info
+
+      - name: Run SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
