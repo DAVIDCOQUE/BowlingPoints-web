@@ -37,11 +37,26 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:coverage || true
 
+      - name: List coverage directory (debug)
+        run: ls -la coverage || echo "No coverage directory"
+
+      - name: Find lcov file (debug)
+        run: find . -name "lcov.info"
+
+      - name: Check if lcov contains data
+        run: |
+          echo "Lines covered:"
+          grep -c "^DA:" coverage/bowling-points/lcov.info || echo "No lines covered"
+
       - name: Adjust lcov path for SonarCloud
         if: hashFiles('coverage/bowling-points/lcov.info') != ''
         run: |
           echo "Fixing coverage path for SonarCloud..."
           sed -i 's|SF:.*/src|SF:src|' coverage/bowling-points/lcov.info
+          head -n 10 coverage/bowling-points/lcov.info
+
+      - name: Build Angular app
+        run: npm run build --if-present
 
       - name: Run SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
