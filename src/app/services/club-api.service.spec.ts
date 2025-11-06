@@ -118,7 +118,7 @@ describe('ClubApiService', () => {
     const id = 3;
 
     service.deleteClub(id).subscribe((res) => {
-      expect(res).toBeNull(); // Angular devuelve null si no hay body
+      expect(res).toBeNull();
     });
 
     const req = httpMock.expectOne(`${baseUrl}/${id}`);
@@ -170,7 +170,7 @@ describe('ClubApiService', () => {
       ]
     };
 
-    service['mapClub'] = (service as any)['mapClub']; // acceso directo para prueba unitaria
+    service['mapClub'] = (service as any)['mapClub'];
 
     const club = (service as any).mapClub(rawClubData);
 

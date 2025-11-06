@@ -1,8 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { UserTournamentApiService } from './user-tournament-api.service';
 import { environment } from 'src/environments/environment';
 import { IUserTournament } from '../model/UserTournament.interface';

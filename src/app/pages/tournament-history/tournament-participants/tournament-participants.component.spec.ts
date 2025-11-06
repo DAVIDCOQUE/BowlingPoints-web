@@ -5,13 +5,8 @@ import { of } from 'rxjs';
 import { TournamentsService } from 'src/app/services/tournaments.service';
 import Swal from 'sweetalert2';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ICategory } from 'src/app/model/category.interface';
-import { IModality } from 'src/app/model/modality.interface';
-import { IBranch } from 'src/app/model/branch.interface';
 import { ITournament } from 'src/app/model/tournament.interface';
-import { IUser } from 'src/app/model/user.interface';
 
-// ✅ Puedes quitar esta interfaz si ya tienes una global llamada IGenerico<T>
 interface IGenerico<T> {
   success: boolean;
   message: string;
@@ -27,7 +22,7 @@ describe('TournamentParticipantsComponent', () => {
     const mockRoute = {
       snapshot: {
         paramMap: {
-          get: () => '1' // tournamentId = 1
+          get: () => '1'
         }
       }
     };
@@ -64,7 +59,7 @@ describe('TournamentParticipantsComponent', () => {
         modalities: [{
           modalityId: 1,
           name: 'Mod A',
-          status: true // necesario según tu interfaz IModality
+          status: true
         }],
         branches: [{
           branchId: 1,
@@ -97,8 +92,8 @@ describe('TournamentParticipantsComponent', () => {
 
     tournamentsServiceSpy.getTournamentById.and.returnValue(of(mockResponse));
 
-    fixture.detectChanges(); // ngOnInit
-    tick(); // Esperar finalización del observable
+    fixture.detectChanges();
+    tick();
 
     expect(component.selectedTournament).toEqual(mockResponse.data);
     expect(component.categories.length).toBe(1);

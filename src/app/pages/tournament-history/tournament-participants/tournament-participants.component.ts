@@ -1,7 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import Swal from 'sweetalert2';
-
-// Interfaces
 import { ITournament } from 'src/app/model/tournament.interface';
 import { ICategory } from 'src/app/model/category.interface';
 import { IModality } from 'src/app/model/modality.interface';
@@ -42,10 +40,7 @@ export class TournamentParticipantsComponent implements OnInit {
       this.loadTournamentById(this.tournamentId);
     }
   }
-
-  /** =====================
-   *  CARGA DE INFORMACIÓN
-   *  ===================== */
+  //CARGA DE INFORMACIÓN
   loadTournamentById(id: number): void {
     this.isLoading$.next(true);
     this.tournamentsService

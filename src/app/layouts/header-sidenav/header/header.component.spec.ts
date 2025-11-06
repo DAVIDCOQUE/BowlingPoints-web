@@ -27,7 +27,7 @@ describe('HeaderComponent', () => {
         MatToolbarModule,
         MatIconModule,
         MatButtonModule,
-        MatDividerModule // ← ESTE era el que faltaba
+        MatDividerModule
       ],
       providers: [
         { provide: Router, useValue: mockRouter },

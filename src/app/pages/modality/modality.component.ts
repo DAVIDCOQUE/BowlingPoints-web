@@ -37,7 +37,7 @@ export class ModalityComponent implements OnInit {
   /** Inyecciones con inject() */
   private readonly fb = inject(FormBuilder);
   private readonly modalService = inject(NgbModal);
-  private readonly api = inject(ModalityApiService); // ✅ usamos el servicio refactorizado
+  private readonly api = inject(ModalityApiService);
 
   /**
    * Hook de inicialización

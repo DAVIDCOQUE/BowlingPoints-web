@@ -94,7 +94,7 @@ describe('CategoriesComponent', () => {
     });
 
     component.openModal({} as TemplateRef<unknown>);
-    expect(component.categoryForm.value.name).toBeNull(); // 🔹 Se usa null porque el form se resetea así
+    expect(component.categoryForm.value.name).toBeNull();
   });
 
   it('should close modal and reset form', () => {
@@ -104,7 +104,7 @@ describe('CategoriesComponent', () => {
     component.closeModal();
 
     expect(modalMock.dismissAll).toHaveBeenCalled();
-    expect(component.categoryForm.value.name).toBeNull(); // 🔹 Se usa null
+    expect(component.categoryForm.value.name).toBeNull();
     expect(component.idCategory).toBeNull();
   });
 
@@ -170,7 +170,7 @@ describe('CategoriesComponent', () => {
     categoryService.deleteCategory.and.returnValue(of({}));
 
     component.deleteCategory(3);
-    tick(); // simula la respuesta async
+    tick();
 
     expect(categoryService.deleteCategory).toHaveBeenCalledWith(3);
     expect(component.getCategories).toHaveBeenCalled();

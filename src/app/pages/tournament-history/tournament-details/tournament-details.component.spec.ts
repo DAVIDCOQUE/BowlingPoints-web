@@ -69,7 +69,7 @@ describe('TournamentDetailsComponent', () => {
     fixture = TestBed.createComponent(TournamentDetailsComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
-    fixture.detectChanges(); // ngOnInit se ejecuta aquí
+    fixture.detectChanges();
   });
 
   afterEach(() => {

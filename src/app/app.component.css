@@ -6,7 +6,6 @@
   border-radius: 8px;
   background: #fff;
   padding: 0 32px 0 10px !important;
-  /* Espacio sólo para la flecha */
   font-size: 15px;
   box-shadow: none;
   transition: border-color 0.22s, box-shadow 0.22s;
@@ -117,7 +116,6 @@
   display: none !important;
 }
 
-/* Flecha tipo select bien alineada y visible */
 ::ng-deep ng-select .ng-arrow-wrapper {
   position: absolute;
   right: -22px;
@@ -133,5 +131,3 @@
   background-size: 18px 18px;
   opacity: 0.75;
 }
-
-/**                        **/

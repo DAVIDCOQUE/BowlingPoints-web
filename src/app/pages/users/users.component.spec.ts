@@ -11,8 +11,6 @@ import { UserApiService } from 'src/app/services/user-api.service';
 import { CategoryApiService } from 'src/app/services/category-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { RoleApiService } from 'src/app/services/role-api.service';
-
-// ✅ Importa las interfaces necesarias
 import { IUser } from 'src/app/model/user.interface';
 
 describe('UsersComponent', () => {
@@ -43,7 +41,6 @@ describe('UsersComponent', () => {
     roles: [],
     sub: 'subtoken'
   };
-
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -85,7 +82,7 @@ describe('UsersComponent', () => {
     modalSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
     authSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
 
-    // ✅ Valores por defecto sin errores de tipado
+    //  Valores por defecto sin errores de tipado
     userApiSpy.getUsers.and.returnValue(of([]));
     roleApiSpy.getAll.and.returnValue(of([{ roleId: 1, name: 'Admin' }]));
     categoryApiSpy.getActiveCategories.and.returnValue(
@@ -295,7 +292,7 @@ describe('UsersComponent', () => {
   it('should return role name by ID', () => {
     component.roles = [{ roleId: 5, name: 'Editor' }];
     expect(component.getRoleNameById(5)).toBe('Editor');
-    expect(component.getRoleNameById(99)).toBe(''); // rol inexistente
+    expect(component.getRoleNameById(99)).toBe('');
   });
 
   it('should filter users by full name, email, and status', () => {
@@ -324,7 +321,7 @@ describe('UsersComponent', () => {
 
   it('should not save form if it is invalid', () => {
     component.initForm();
-    component.userForm.patchValue({ email: '' }); // obligatorio pero vacío
+    component.userForm.patchValue({ email: '' });
     spyOn(component.userForm, 'markAllAsTouched');
     component.saveForm();
     expect(component.userForm.markAllAsTouched).toHaveBeenCalled();

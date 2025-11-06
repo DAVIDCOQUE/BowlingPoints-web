@@ -7,7 +7,6 @@ import Swal from 'sweetalert2';
 import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
-// Servicios
 import { TournamentsService } from 'src/app/services/tournaments.service';
 import { BranchesService } from 'src/app/services/branch-api.service';
 import { AmbitApiService } from 'src/app/services/ambit-api.service';

@@ -485,8 +485,6 @@ export class TournamentResultComponent implements OnInit {
 
   // ================== UTILIDADES ==================
 
-  // ================== UTILIDADES ==================
-
   openFileInputResults(): void {
     const input: HTMLInputElement = document.createElement('input');
     input.type = 'file';

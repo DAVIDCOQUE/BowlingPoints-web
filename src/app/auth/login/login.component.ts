@@ -50,7 +50,6 @@ export class LoginComponent {
 
   loginAsGuest(): void {
     this.auth.logout();
-    // Si quieres, puedes poner roles de invitado, depende de tu lógica
     this.router.navigate(['/dashboard']);
   }
 

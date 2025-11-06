@@ -52,7 +52,7 @@ describe('TournamentlistComponent', () => {
   });
 
   it('should call getAmbitNameById and getListaTorneos on ngOnInit', () => {
-    fixture.detectChanges(); // <-- ejecuta ngOnInit
+    fixture.detectChanges();
 
     // Verifica llamada a getAmbitNameById
     const reqAmbit = httpMock.expectOne(`${environment.apiUrl}/ambits/1`);

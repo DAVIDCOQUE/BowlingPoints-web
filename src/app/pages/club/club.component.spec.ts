@@ -59,7 +59,7 @@ describe('ClubComponent', () => {
       providers: [
         { provide: AuthService, useValue: authServiceMock },
         { provide: ClubApiService, useValue: clubApiServiceMock },
-        { provide: ActivatedRoute, useValue: routeSnapshotWithoutId }, // Default: no param in route
+        { provide: ActivatedRoute, useValue: routeSnapshotWithoutId },
       ],
     }).compileComponents();
 

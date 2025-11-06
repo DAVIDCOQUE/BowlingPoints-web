@@ -20,11 +20,10 @@ export class UserTournamentApiService {
   }
 
   /**
-   * Obtiene los torneos inscritos por un usuario (revisar si es diferente al anterior)
+   * Obtiene los torneos inscritos por un usuario
    */
   getTorneosInscriptos(userId: number): Observable<IUserTournament[]> {
     return this.http.get<{ success: boolean; message: string; data: IUserTournament[] }>(
-      `${this.apiUrl}/user-tournaments/${userId}/played` // <-- cambiar si el endpoint es diferente
-    ).pipe(map(res => res.data));
+      `${this.apiUrl}/user-tournaments/${userId}/played`).pipe(map(res => res.data));
   }
 }

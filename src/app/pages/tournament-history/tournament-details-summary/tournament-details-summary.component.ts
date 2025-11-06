@@ -45,7 +45,7 @@ export class TournamentDetailsSummaryComponent implements OnInit {
 
     this.http.get<any>(url).subscribe({
       next: res => {
-        console.log('✅ Datos del resumen general cargados correctamente:', res);
+        console.log(' Datos del resumen general cargados correctamente:', res);
         this.resumenTorneo = res.tournament || null;
         this.modalities = res.modalities || [];
 
@@ -54,11 +54,10 @@ export class TournamentDetailsSummaryComponent implements OnInit {
         this.filterVisibleModalities();
       },
       error: err => {
-        console.error('❌ Error cargando resumen general:', err);
+        console.error(' Error cargando resumen general:', err);
       }
     });
   }
-
 
   /**
  * Filtra las modalidades que tienen datos para mostrar solo las necesarias
@@ -89,14 +88,12 @@ export class TournamentDetailsSummaryComponent implements OnInit {
     this.loadGeneralResults();
   }
 
-
   /**
    * Imagen fallback
    */
   onImgError(event: any, fallbackUrl: string): void {
     event.target.src = fallbackUrl;
   }
-
 
   /**
    * Volver atrás

@@ -5,7 +5,7 @@
     <i class="fas fa-arrow-left me-2"></i> Volver
   </button>
 
-  <!-- 🏆 INFORMACIÓN GENERAL DEL TORNEO COMPLETA -->
+  <!--INFORMACIÓN GENERAL DEL TORNEO COMPLETA -->
   <div class="card shadow-sm border-0 rounded-4 mb-4">
     <div class="row g-0 align-items-center">
 
@@ -93,9 +93,7 @@
     </div>
   </div>
 
-
-
-  <!-- 👥 JUGADORES INSCRITOS -->
+  <!-- JUGADORES INSCRITOS -->
   <div class="card shadow-sm mb-4 border-0">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -270,7 +268,8 @@
     </div>
     <form [formGroup]="playerForm" (ngSubmit)="savePlayer()">
       <div class="modal-body">
-        <div class="row g-3"> <!-- Persona -->
+        <div class="row g-3">
+          <!-- Persona -->
           <div class="col-md-6"> <label class="form-label">Persona *</label> <select class="form-select form-select-sm"
               formControlName="personId"
               [ngClass]="{ 'is-invalid': playerForm.controls['personId'].invalid && playerForm.controls['personId'].touched, 'is-valid': playerForm.controls['personId'].valid }">
@@ -281,7 +280,8 @@
             <div class="invalid-feedback"
               *ngIf="playerForm.controls['personId'].invalid && playerForm.controls['personId'].touched"> Debe
               seleccionar una persona. </div>
-          </div> <!-- Categoría -->
+          </div>
+          <!-- Categoría -->
           <div class="col-md-6"> <label class="form-label">Categoría *</label> <select
               class="form-select form-select-sm" formControlName="categoryId"
               [ngClass]="{ 'is-invalid': playerForm.controls['categoryId'].invalid && playerForm.controls['categoryId'].touched, 'is-valid': playerForm.controls['categoryId'].valid }">
@@ -292,7 +292,8 @@
             <div class="invalid-feedback"
               *ngIf="playerForm.controls['categoryId'].invalid && playerForm.controls['categoryId'].touched"> Debe
               seleccionar una categoría. </div>
-          </div> <!-- Modalidad -->
+          </div>
+          <!-- Modalidad -->
           <div class="col-md-6"> <label class="form-label">Modalidad *</label> <select
               class="form-select form-select-sm" formControlName="modalityId"
               [ngClass]="{ 'is-invalid': playerForm.controls['modalityId'].invalid && playerForm.controls['modalityId'].touched, 'is-valid': playerForm.controls['modalityId'].valid }">
@@ -303,7 +304,8 @@
             <div class="invalid-feedback"
               *ngIf="playerForm.controls['modalityId'].invalid && playerForm.controls['modalityId'].touched"> Debe
               seleccionar una modalidad. </div>
-          </div> <!-- Rama -->
+          </div>
+          <!-- Rama -->
           <div class="col-md-6"> <label class="form-label">Rama *</label> <select class="form-select form-select-sm"
               formControlName="branchId"
               [ngClass]="{ 'is-invalid': playerForm.controls['branchId'].invalid && playerForm.controls['branchId'].touched, 'is-valid': playerForm.controls['branchId'].valid }">

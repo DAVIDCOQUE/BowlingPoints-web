@@ -18,7 +18,7 @@ export interface IResults {
   modalityId?: number | null;
   roundId?: number | null;
 
-  /** Nombres descriptivos (para mostrar sin hacer joins) */
+  /** Nombres descriptivos */
   personName?: string | null;
   teamName?: string | null;
   tournamentName?: string | null;
@@ -26,7 +26,7 @@ export interface IResults {
   modalityName?: string | null;
   roundNumber?: number | null;
 
-  /** Fechas opcionales (si el backend las envía) */
+  /** Fechas opcionales*/
   createdAt?: Date | string;
   updatedAt?: Date | string;
   deletedAt?: Date | string;

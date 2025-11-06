@@ -12,7 +12,6 @@ export class BranchesService {
 
   constructor(private http: HttpClient) { }
 
-  //  Obtener todas las ramas
   getAll(): Observable<IBranch[]> {
     return this.http.get<IBranch[]>(this.apiUrl);
   }

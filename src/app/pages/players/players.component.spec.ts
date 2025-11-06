@@ -28,7 +28,7 @@ describe('PlayersComponent', () => {
       providers: [
         {
           provide: AuthService,
-          useValue: {} // puedes simular el AuthService más adelante si se requiere
+          useValue: {}
         }
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
@@ -48,7 +48,7 @@ describe('PlayersComponent', () => {
   });
 
   it('debe cargar jugadores correctamente desde la API', () => {
-    fixture.detectChanges(); // ejecuta ngOnInit()
+    fixture.detectChanges();
 
     const req = httpMock.expectOne(`${component.apiUrl}/results/all-player-ranking`);
     expect(req.request.method).toBe('GET');
@@ -62,7 +62,7 @@ describe('PlayersComponent', () => {
   it('debe manejar error si falla la API al cargar jugadores', () => {
     spyOn(Swal, 'fire');
 
-    fixture.detectChanges(); // ejecuta ngOnInit()
+    fixture.detectChanges();
 
     const req = httpMock.expectOne(`${component.apiUrl}/results/all-player-ranking`);
     req.error(new ErrorEvent('Error de red'));

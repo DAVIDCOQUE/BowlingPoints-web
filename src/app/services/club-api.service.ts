@@ -15,9 +15,6 @@ export class ClubApiService {
   /**
    * Obtiene todos los clubes con sus miembros
    */
-  /**
-    * Obtiene todos los clubes con sus miembros
-    */
   getClubs(): Observable<IClubs[]> {
     return this.http
       .get<{ success: boolean; message: string; data: any[] }>(`${this.baseUrl}/clubs`)

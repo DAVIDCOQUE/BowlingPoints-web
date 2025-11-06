@@ -17,7 +17,6 @@ export class RoleApiService {
 
   /**
    * Obtiene todos los roles desde la API
-   * @returns Observable con un arreglo de roles
    */
   getAll(): Observable<IRole[]> {
     return this.http.get<{ success: boolean; message: string; data: IRole[] }>(`${this.apiUrl}/roles`)
@@ -26,8 +25,6 @@ export class RoleApiService {
 
   /**
    * Obtiene un rol por su ID
-   * @param id Identificador del rol
-   * @returns Observable con un rol
    */
   getById(id: number): Observable<IRole> {
     return this.http.get<{ success: boolean; message: string; data: IRole }>(`${this.apiUrl}/roles/${id}`)
@@ -36,8 +33,6 @@ export class RoleApiService {
 
   /**
    * Crea un nuevo rol
-   * @param payload Datos del nuevo rol
-   * @returns Observable con el rol creado
    */
   create(payload: Partial<IRole>): Observable<IRole> {
     return this.http.post<{ success: boolean; message: string; data: IRole }>(`${this.apiUrl}/roles`, payload)
@@ -46,9 +41,6 @@ export class RoleApiService {
 
   /**
    * Actualiza un rol existente
-   * @param id ID del rol a actualizar
-   * @param payload Datos actualizados
-   * @returns Observable con el rol actualizado
    */
   update(id: number, payload: Partial<IRole>): Observable<IRole> {
     return this.http.put<{ success: boolean; message: string; data: IRole }>(`${this.apiUrl}/roles/${id}`, payload)
@@ -57,8 +49,6 @@ export class RoleApiService {
 
   /**
    * Elimina un rol
-   * @param id ID del rol a eliminar
-   * @returns Observable vacío
    */
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/roles/${id}`);

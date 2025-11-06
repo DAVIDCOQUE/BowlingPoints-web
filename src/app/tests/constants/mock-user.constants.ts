@@ -1,5 +1,5 @@
 function generateSecureMockPassword(): string {
-  const array = new Uint8Array(8); // 8 bytes = 64 bits
+  const array = new Uint8Array(8);
   crypto.getRandomValues(array);
   return 'mock-' + Array.from(array, byte => byte.toString(36)).join('');
 }

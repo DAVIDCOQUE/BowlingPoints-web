@@ -71,7 +71,6 @@ describe('ClubsComponent', () => {
 
     auth.hasRole.and.returnValue(true);
 
-    // ✅ Mocks por defecto para evitar errores de subscribe
     clubApi.getClubs.and.returnValue(of([]));
     userApi.getActiveUsers.and.returnValue(of([]));
   });
@@ -96,7 +95,7 @@ describe('ClubsComponent', () => {
     spyOn(Swal, 'fire');
 
     clubApi.getClubs.and.returnValue(throwError(() => new Error('Error al cargar clubes')));
-    userApi.getActiveUsers.and.returnValue(of([])); // prevent error from getUsers
+    userApi.getActiveUsers.and.returnValue(of([]));
 
     component.getClubes();
 
@@ -107,7 +106,7 @@ describe('ClubsComponent', () => {
     spyOn(Swal, 'fire');
 
     userApi.getActiveUsers.and.returnValue(throwError(() => new Error('Error al cargar usuarios')));
-    clubApi.getClubs.and.returnValue(of([])); // prevent error from getClubes
+    clubApi.getClubs.and.returnValue(of([]));
 
     component.getUsers();
 
@@ -137,7 +136,7 @@ describe('ClubsComponent', () => {
     spyOn(Swal, 'fire');
 
     clubApi.createClub.and.returnValue(of({}));
-    clubApi.getClubs.and.returnValue(of([])); // llamado tras crear
+    clubApi.getClubs.and.returnValue(of([]));
 
     component.ngOnInit();
     component.clubForm.setValue({
@@ -160,7 +159,7 @@ describe('ClubsComponent', () => {
     spyOn(Swal, 'fire');
 
     clubApi.updateClub.and.returnValue(of({}));
-    clubApi.getClubs.and.returnValue(of([])); // llamado tras actualizar
+    clubApi.getClubs.and.returnValue(of([]));
 
     component.id_Club = 1;
     component.ngOnInit();

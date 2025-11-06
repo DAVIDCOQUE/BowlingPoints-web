@@ -1,5 +1,3 @@
-// src/app/interfaces/result-details.interface.ts
-
 export interface IPlayerScore {
   personId: number;
   playerName: string;

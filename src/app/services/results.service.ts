@@ -3,7 +3,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-// Interfaces
 import { IResults } from '../model/result.interface';
 import { ITournament } from '../model/tournament.interface';
 import { IModality } from '../model/modality.interface';
@@ -54,7 +53,6 @@ export class ResultsService {
     );
   }
 
-
   createResult(payload: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/results`, payload);
   }
@@ -67,7 +65,7 @@ export class ResultsService {
     return this.http.delete(`${this.apiUrl}/results/${id}`);
   }
 
-  /** --- Catálogos auxiliares --- */
+  /** --- Catálogos --- */
   getTournaments(): Observable<{
     success: boolean;
     message: string;

@@ -8,17 +8,17 @@ import { ITournament } from '../../model/tournament.interface';
 import { IModality } from '../../model/modality.interface';
 import { IAmbit } from 'src/app/model/ambit.interface';
 import { ICategory } from 'src/app/model/category.interface';
+import { IBranch } from 'src/app/model/branch.interface';
 
 // Servicios
 import { TournamentsService } from 'src/app/services/tournaments.service';
-
-// Validator
-import { dateRangeValidator } from 'src/app/shared/validators/date-range.validator';
 import { BranchesService } from 'src/app/services/branch-api.service';
-import { IBranch } from 'src/app/model/branch.interface';
 import { AmbitApiService } from 'src/app/services/ambit-api.service';
 import { ModalityApiService } from 'src/app/services/modality-api.service';
 import { CategoryApiService } from 'src/app/services/category-api.service';
+
+// Validator
+import { dateRangeValidator } from 'src/app/shared/validators/date-range.validator';
 
 @Component({
   selector: 'app-tournaments',
@@ -164,7 +164,7 @@ export class TournamentsComponent implements OnInit {
   editTournament(tournament: ITournament): void {
     this.idTournament = tournament?.tournamentId ?? null;
 
-    // Normalizar ids (si vienen como objetos, extraerlos; si ya son ids, dejarlos)
+    // Normalizar ids
     const categoryIds = (tournament as any)?.categories
       ? (tournament as any).categories.map((c: any) => c?.categoryId ?? c)
       : (tournament as any)?.categoryIds ?? [];
@@ -249,10 +249,8 @@ export class TournamentsComponent implements OnInit {
             ? err.message
             : 'Error desconocido al guardar torneo');
 
-        // Usa console.warn en lugar de console.error para reducir severidad y cumplir Sonar
         console.warn('Error al guardar torneo:', errorMessage);
 
-        // Muestra el mensaje al usuario con contexto más claro
         Swal.fire({
           icon: 'error',
           title: 'Error al guardar torneo',
@@ -292,10 +290,8 @@ export class TournamentsComponent implements OnInit {
                 ? err.message
                 : 'Error desconocido al eliminar el torneo');
 
-            // Registrar en consola de forma controlada
             console.warn('Error al eliminar torneo:', errorMessage);
 
-            // Mostrar alerta clara al usuario
             Swal.fire({
               icon: 'error',
               title: 'Error al eliminar torneo',
@@ -321,7 +317,6 @@ export class TournamentsComponent implements OnInit {
         this.tournamentForm.reset();
       }
 
-      // Validar tipo de contenido antes de abrir el modal
       if (content) {
         this.modalService.open(content);
       } else {
@@ -353,7 +348,6 @@ export class TournamentsComponent implements OnInit {
     }
   }
 
-  /** Limpia el término del filtro */
   clear(): void {
     this.filter = '';
   }

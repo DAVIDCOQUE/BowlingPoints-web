@@ -3,10 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-/** -----------------------------
- * NUEVO MODELO: coincide con el backend
- * ----------------------------- */
 export interface UserDashboardStats {
   avgScoreGeneral: number;
   bestLine: number;
@@ -17,7 +13,6 @@ export interface UserDashboardStats {
   avgPerModality: ModalityAvg[];
   scoreDistribution: ScoreRange[];
 }
-
 export interface TournamentAvg {
   tournamentId: number;
   tournamentName: string;
@@ -25,23 +20,20 @@ export interface TournamentAvg {
   average: number;
   startDate: string;
 }
-
 export interface ModalityAvg {
   modalityName: string;
   average: number;
 }
-
 export interface ScoreRange {
   label: string; // Ejemplo: "130–160"
   count: number;
 }
-
 @Injectable({ providedIn: 'root' })
 export class UserStatsApiService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
-  /** 🔹 Obtiene todas las estadísticas del dashboard del usuario */
+  /**  Obtiene todas las estadísticas del dashboard del usuario */
   getDashboardStats(userId: number): Observable<UserDashboardStats> {
     return this.http
       .get<{ success: boolean; data: UserDashboardStats }>(

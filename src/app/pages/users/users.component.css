@@ -3,6 +3,6 @@
 }
 .player-zoom:hover {
   transform: scale(1.07);
-  color: #0d6efd; /* Cambia el color si quieres */
+  color: #0d6efd;
   z-index: 1;
 }

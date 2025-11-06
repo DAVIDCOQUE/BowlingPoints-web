@@ -103,9 +103,9 @@ describe('TournamentResultComponent', () => {
     fixture.detectChanges();
     tick();
 
-    // 💡 Interceptar y responder la petición que hace loadRegisteredPlayers()
+    // Interceptar y responder la petición que hace loadRegisteredPlayers()
     const req = httpMock.expectOne(`${component['apiUrl']}/registrations/tournament/1`);
-    req.flush([]); // responde con lista vacía
+    req.flush([]);
 
     expect(component.selectedTournament?.name).toBe('Test');
     expect(component.categories.length).toBe(1);
@@ -198,7 +198,7 @@ describe('TournamentResultComponent', () => {
     expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudieron cargar los resultados', 'error');
   });
 
-  // ✅ loadRegisteredPlayers tests
+  //  loadRegisteredPlayers tests
   it('should skip loading registered players if tournamentId is null', () => {
     component.tournamentId = null;
     component.loadRegisteredPlayers();
@@ -264,7 +264,7 @@ describe('TournamentResultComponent', () => {
     expect(req.request.method).toBe('POST');
     req.flush({});
 
-    // 💡 interceptar el GET que dispara loadRegisteredPlayers()
+    //interceptar el GET que dispara loadRegisteredPlayers()
     const getReq = httpMock.expectOne(`${component['apiUrl']}/registrations/tournament/1`);
     getReq.flush([]); // responde lista vacía
 
@@ -292,7 +292,7 @@ describe('TournamentResultComponent', () => {
     expect(req.request.method).toBe('PUT');
     req.flush({});
 
-    // 💡 interceptar el GET de loadRegisteredPlayers()
+    //  interceptar el GET de loadRegisteredPlayers()
     const getReq = httpMock.expectOne(`${component['apiUrl']}/registrations/tournament/1`);
     getReq.flush([]);
 
@@ -332,21 +332,19 @@ describe('TournamentResultComponent', () => {
     spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
 
     component.deletePlayer(registrationId);
-    tick(); // Avanza el tiempo para que se resuelva el Swal.fire().then()
+    tick();
 
     // Interceptar DELETE
     const deleteReq = httpMock.expectOne(`${component['apiUrl']}/registrations/${registrationId}`);
     expect(deleteReq.request.method).toBe('DELETE');
-    deleteReq.flush({}); // respuesta simulada
-
-    // 💡 Interceptar el GET que hace loadRegisteredPlayers()
+    deleteReq.flush({});
+    //  Interceptar el GET que hace loadRegisteredPlayers()
     const getReq = httpMock.expectOne(`${component['apiUrl']}/registrations/tournament/1`);
     expect(getReq.request.method).toBe('GET');
-    getReq.flush([]); // respuesta simulada
+    getReq.flush([]);
 
-    tick(); // Por si hay código en el subscribe
+    tick();
 
-    // (Opcional) puedes verificar si Swal.fire fue llamado una vez
     expect(Swal.fire).toHaveBeenCalled();
   }));
 
@@ -367,7 +365,7 @@ describe('TournamentResultComponent', () => {
     spyOn(Swal, 'fire');
     component.tournamentId = 1;
     component.initPlayerForm();
-    component.playerForm.patchValue({}); // datos incompletos
+    component.playerForm.patchValue({});
     component.savePlayer();
 
     expect(Swal.fire).toHaveBeenCalledWith('Error', 'Formulario inválido o torneo no definido', 'error');
