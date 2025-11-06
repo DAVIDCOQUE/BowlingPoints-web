@@ -38,21 +38,22 @@ export class ResultsService {
     branchId?: number,
     roundNumber?: number
   ): Observable<IResults[]> {
-    let params = new HttpParams();
+    let params = new HttpParams().set('tournamentId', tournamentId.toString());
 
-    if (branchId) {
+    if (branchId !== undefined) {
       params = params.set('branchId', branchId.toString());
     }
 
-    if (roundNumber) {
+    if (roundNumber !== undefined) {
       params = params.set('roundNumber', roundNumber.toString());
     }
 
     return this.http.get<IResults[]>(
-      `${this.apiUrl}/results/tournament/${tournamentId}`,
+      `${this.apiUrl}/results/filter`,
       { params }
     );
   }
+
 
   createResult(payload: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/results`, payload);

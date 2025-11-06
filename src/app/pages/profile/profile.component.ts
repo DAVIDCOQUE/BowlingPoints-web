@@ -23,7 +23,12 @@ export class ProfileComponent implements OnInit {
   /** Lista de roles y géneros */
   roles: IRole[] = [];
   roleDisplay: string = '';
-  genders: string[] = ['Masculino', 'Femenino', 'No binario', 'Prefiero no decirlo'];
+  genderDisplay: string = '';
+  nicknameDisplay: string = '';
+  documentDisplay: string = '';
+  fullNameDisplay: string = '';
+  fullSurnameDisplay: string = '';
+
 
   /** Control de visibilidad de contraseñas */
   showPassword = false;
@@ -88,6 +93,11 @@ export class ProfileComponent implements OnInit {
         });
 
         this.roleDisplay = user.roles?.map((r: any) => r.name).join(', ') || '';
+        this.genderDisplay = user.gender || '';
+        this.nicknameDisplay = user.nickname || '';
+        this.documentDisplay = user.document || '';
+        this.fullNameDisplay = user.fullName || '';
+        this.fullSurnameDisplay = user.fullSurname || '';
         console.log('Usuario cargado en perfil:', user);
 
         // Previsualiza avatar (foto del backend o imagen por defecto)
@@ -139,7 +149,15 @@ export class ProfileComponent implements OnInit {
   /** Manejador para error de carga de imagen */
   onImgError(event: Event, fallbackUrl: string): void {
     const img = event.target as HTMLImageElement;
-    img.src = fallbackUrl;
+
+    // Evita bucle infinito si ya se está usando la imagen fallback
+    if (!img.src.endsWith(fallbackUrl)) {
+      img.src = fallbackUrl;
+    } else {
+      console.warn('Fallback también falló:', fallbackUrl);
+      // Opcional: puedes ocultar la imagen o poner una base64 vacía
+      img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAFklEQVR4nO3BMQEAAADCoPdPbQ43oAAAAAAAAAAAgOUDNwAAZnyqogAAAABJRU5ErkJggg==';
+    }
   }
 
   /** Previsualiza la imagen seleccionada (sin guardar aún) */

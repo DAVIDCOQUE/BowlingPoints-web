@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-center mb-4 position-relative">
       <div class="position-relative">
         <img #avatarPreview [src]="apiUrl + (userForm.controls['photoUrl'].value || '/uploads/users/default.png')"
-          (error)="onImgError($event, 'assets/img/profile.png')" alt="Avatar"
+          (error)="onImgError($event, 'assets/img/perfilDefault.png')" alt="Avatar"
           class="rounded-circle border border-primary shadow" style="width: 100px; height: 100px; object-fit: cover;" />
 
         <!-- Botón flotante para cambiar avatar -->
@@ -29,20 +29,15 @@
     <div class="row mb-4">
       <div class="col">
         <div class="form-group">
-          <label for="firstName">username</label>
-          <input formControlName="nickname" type="text" class="form-control" placeholder="nickname" [ngClass]="{
-                'is-invalid': userForm.controls['nickname'].invalid && userForm.controls['nickname'].touched,
-                'is-valid': userForm.controls['nickname'].valid
-              }"  readonly />
+          <label for="nickname">Username</label>
+          <input class="form-control" [value]="nicknameDisplay" readonly />
         </div>
       </div>
+
       <div class="col">
         <div class="form-group">
           <label for="document"># Documento</label>
-          <input formControlName="document" type="document" class="form-control" placeholder="document" [ngClass]="{
-                'is-invalid': userForm.controls['document'].invalid && userForm.controls['document'].touched,
-                'is-valid': userForm.controls['document'].valid
-              }" readonly />
+          <input class="form-control" [value]="documentDisplay" readonly />
         </div>
       </div>
     </div>
@@ -51,23 +46,18 @@
       <div class="col">
         <div class="form-group">
           <label for="fullName">Nombres</label>
-          <input formControlName="fullName" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
-                'is-invalid': userForm.controls['fullName'].invalid && userForm.controls['fullName'].touched,
-                'is-valid': userForm.controls['fullName'].valid
-              }" />
+          <input class="form-control " [value]="fullNameDisplay" readonly />
         </div>
       </div>
 
       <div class="col">
         <div class="form-group">
           <label for="fullSurname">Apellidos</label>
-          <input formControlName="fullSurname" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
-                'is-invalid': userForm.controls['fullSurname'].invalid && userForm.controls['fullSurname'].touched,
-                'is-valid': userForm.controls['fullSurname'].valid
-              }" />
+          <input class="form-control " [value]="fullSurnameDisplay" readonly />
         </div>
       </div>
     </div>
+
 
     <div class="row mb-4">
       <div class="col">
@@ -93,14 +83,8 @@
 
       <div class="col">
         <div class="form-group">
-          <label for="gender">Genero</label>
-          <select class="form-select" formControlName="gender" [ngClass]="{
-                    'is-invalid': userForm.controls['gender'].invalid && userForm.controls['gender'].touched,
-                    'is-valid': userForm.controls['gender'].valid
-                  }">
-            <option [ngValue]="null" disabled>Seleccione un género</option>
-            <option *ngFor="let g of genders" [ngValue]="g">{{ g }}</option>
-          </select>
+          <label for="gender">Género</label>
+          <input class="form-control" [value]="genderDisplay" readonly />
         </div>
       </div>
 
