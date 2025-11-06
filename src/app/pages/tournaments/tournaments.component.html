@@ -75,7 +75,7 @@
 
               <td>
                 <div class="d-flex justify-content-center gap-2">
-                  <!-- Botón Cargar resultados - Rojo suave -->
+                  <!-- Botón Cargar resultados -->
                   <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
                     [routerLink]="['/tournament-results', tournament.tournamentId]" style="
                       background-color: rgba(13, 180, 75, 0.1);
@@ -87,7 +87,7 @@
                     <i class="fas fa-file-excel"></i>
                   </button>
 
-                  <!-- Botón Editar - Azul suave -->
+                  <!-- Botón Editar -->
                   <button class="btn btn-sm d-flex align-items-center justify-content-center px-2" style="
                       background-color: rgba(0, 123, 255, 0.1);
                       color: #007bff;
@@ -98,7 +98,7 @@
                     <i class="fas fa-edit"></i>
                   </button>
 
-                  <!-- Botón Eliminar - Rojo suave -->
+                  <!-- Botón Eliminar  -->
                   <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
                     (click)="deleteTournament(tournament.tournamentId)" style="
                       background-color: rgba(220, 53, 69, 0.1);
@@ -205,6 +205,7 @@
                       tournamentForm.controls['endDate'].touched,
                     'is-valid': tournamentForm.controls['endDate'].valid
                   }" />
+
                 <!-- Mensajes -->
                 <div class="invalid-feedback"
                   *ngIf="tournamentForm.controls['endDate'].touched && tournamentForm.controls['endDate'].errors?.['required']">

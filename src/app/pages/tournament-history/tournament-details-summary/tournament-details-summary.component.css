@@ -5,10 +5,8 @@
 .player-zoom:hover {
   transform: scale(1.07);
   color: #0d6efd;
-  /* Cambia el color si quieres */
   z-index: 1;
 }
-
 
 .radio-button-container {
   display: flex;
@@ -54,7 +52,6 @@
 
 .radio-button__input:checked+.radio-button__label .radio-button__custom {
   background-color: #0d6efd;
-  /* Bootstrap primary */
   border-color: transparent;
   transform: scale(0.8);
   box-shadow: 0 0 10px #0d6efd80;

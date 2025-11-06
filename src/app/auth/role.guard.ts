@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 @Injectable({ providedIn: 'root' })
 export class RoleGuard implements CanActivate {
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router) { }
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
     const expectedRoles: string[] = route.data['roles'];
@@ -20,7 +20,7 @@ export class RoleGuard implements CanActivate {
 
     if (!hasRole) {
       console.warn('Usuario sin rol suficiente. Redirigiendo a /unauthorized');
-      this.router.navigate(['/unauthorized']); // ← AQUI LA CORRECCIÓN
+      this.router.navigate(['/unauthorized']);
       return false;
     }
 

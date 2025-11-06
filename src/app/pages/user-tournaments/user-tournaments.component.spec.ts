@@ -1,9 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserTournamentsComponent } from './user-tournaments.component';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { IUserTournament } from 'src/app/model/UserTournament.interface';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -67,7 +64,7 @@ describe('UserTournamentsComponent', () => {
   });
 
   it('debe cargar torneos jugados desde la API', () => {
-    fixture.detectChanges(); // activa ngOnInit
+    fixture.detectChanges();
 
     const mockTorneos: IUserTournament[] = [
       { tournamentId: 1, name: 'Torneo 1' } as IUserTournament,
@@ -105,7 +102,7 @@ describe('UserTournamentsComponent', () => {
     component.userId = 0;
     component.ngOnInit();
     httpMock.expectNone(`${component.apiUrl}/user-tournaments/0/played`);
-    expect().nothing(); // evita warning "no expectations"
+    expect().nothing();
   });
 
   it('debe cargar torneos inscritos correctamente (usa mismo endpoint)', () => {

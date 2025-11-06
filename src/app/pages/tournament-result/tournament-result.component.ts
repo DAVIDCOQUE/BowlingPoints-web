@@ -125,6 +125,11 @@ export class TournamentResultComponent implements OnInit {
           this.modalities = tournament.data?.modalities || [];
           this.branches = tournament.data?.branches || [];
 
+          console.log('Torneo cargado:', this.selectedTournament);
+          console.log('Categorías:', this.categories);
+          console.log('Modalidades:', this.modalities);
+          console.log('Ramas:', this.branches);
+
           if (!this.selectedTournament) {
             Swal.fire(
               'Atención',
@@ -321,6 +326,12 @@ export class TournamentResultComponent implements OnInit {
 
     const selectedRoundNumber = this.selectedRound ?? undefined;
 
+
+    console.log('Cargando resultados con filtros:', {
+      tournamentId: this.tournamentId,
+      branchId: selectedBranchId,
+      roundNumber: selectedRoundNumber
+    });
     this.resultsService.getResultsFiltered(this.tournamentId, selectedBranchId, selectedRoundNumber)
       .subscribe({
         next: (res) => {
@@ -471,8 +482,6 @@ export class TournamentResultComponent implements OnInit {
       return !branch || branchName.includes(branch);
     };
   }
-
-  // ================== UTILIDADES ==================
 
   // ================== UTILIDADES ==================
 

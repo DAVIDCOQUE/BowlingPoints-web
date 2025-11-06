@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { AppRoutingModule } from './app-routing.module';
-import { routes } from './app-routing.module'; // necesitas exportarlos del archivo para usarlos aquí
+import { routes } from './app-routing.module';
 
 describe('AppRoutingModule', () => {
   let router: Router;

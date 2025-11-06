@@ -17,9 +17,9 @@ module.exports = function (config) {
       require('@angular-devkit/build-angular/plugins/karma')
     ],
 
-    // Configuración del cliente Karma (en este caso, Jasmine)
+    // Configuración del cliente Karma
     client: {
-      clearContext: false // Muestra los resultados en la UI de Jasmine
+      clearContext: false
     },
 
     // Reporte de cobertura para SonarQube

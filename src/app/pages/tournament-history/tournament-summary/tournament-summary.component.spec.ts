@@ -7,7 +7,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import Swal from 'sweetalert2';
 import { Location } from '@angular/common';
 import { TournamentsService } from 'src/app/services/tournaments.service';
-import { RouterTestingModule } from '@angular/router/testing'; // ✅ Importado para routerLink
+import { RouterTestingModule } from '@angular/router/testing'; //  Importado para routerLink
 
 describe('TournamentSummaryComponent', () => {
   let component: TournamentSummaryComponent;
@@ -20,7 +20,7 @@ describe('TournamentSummaryComponent', () => {
       declarations: [TournamentSummaryComponent],
       imports: [
         HttpClientTestingModule,
-        RouterTestingModule // ✅ Requerido para usar routerLink en el template
+        RouterTestingModule
       ],
       providers: [
         {
@@ -28,7 +28,7 @@ describe('TournamentSummaryComponent', () => {
           useValue: {
             snapshot: {
               paramMap: {
-                get: () => '1' // Simula el ID desde la ruta
+                get: () => '1'
               }
             }
           }
@@ -70,7 +70,7 @@ describe('TournamentSummaryComponent', () => {
           description: 'Desc',
           status: true
         }],
-        branchPlayerCounts: [], // <-- vacío para fallback
+        branchPlayerCounts: [],
         tournamentRegistrations: [{
           registrationId: 1,
           tournamentId: 1,
@@ -97,12 +97,12 @@ describe('TournamentSummaryComponent', () => {
     tournamentsServiceSpy.getTournamentById.and.returnValue(of(mockResponse));
 
     fixture.detectChanges();
-    tick(); // Finaliza el observable
+    tick();
 
     expect(component.selectedTournament?.name).toBe('Torneo Test');
     expect(component.categories.length).toBe(1);
     expect(component.modalities.length).toBe(1);
-    expect(component.branches.length).toBe(1); // <- fallback aplicado
+    expect(component.branches.length).toBe(1);
     expect(component.players.length).toBe(1);
   }));
 

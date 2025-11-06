@@ -22,7 +22,7 @@ export class ClubsComponent implements OnInit {
   private readonly clubApi = inject(ClubApiService);
   private readonly userApi = inject(UserApiService);
 
-  /** URL base (para imágenes, etc.) */
+  /** URL base */
   public apiUrl = this.clubApi.apiUrl;
 
   /** UI State */
@@ -63,7 +63,7 @@ export class ClubsComponent implements OnInit {
     this.clubApi.getClubs().subscribe({
       next: clubs => this.clubes = clubs,
       error: err => {
-        console.error('❌ Error al cargar clubes:', err);
+        console.error('Error al cargar clubes:', err);
         Swal.fire('Error', 'No se pudieron cargar los clubes', 'error');
       }
     });
@@ -82,7 +82,7 @@ export class ClubsComponent implements OnInit {
     this.userApi.getActiveUsers().subscribe({
       next: res => this.usuarios = res,
       error: err => {
-        console.error('❌ Error al cargar usuarios:', err);
+        console.error('Error al cargar usuarios:', err);
         Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error');
       }
     });
@@ -135,7 +135,7 @@ export class ClubsComponent implements OnInit {
           : 'No se pudo guardar el club';
 
         Swal.fire('Error', msg, 'error');
-        console.error('❌ Error al guardar club:', err);
+        console.error(' Error al guardar club:', err);
       }
     });
   }
@@ -159,7 +159,7 @@ export class ClubsComponent implements OnInit {
             Swal.fire('Eliminado', 'El club ha sido eliminado', 'success');
           },
           error: err => {
-            console.error('❌ Error al eliminar club:', err);
+            console.error(' Error al eliminar club:', err);
             Swal.fire('Error', 'No se pudo eliminar el club', 'error');
           }
         });

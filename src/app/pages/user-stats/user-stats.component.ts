@@ -1,11 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  ViewChild,
-  inject,
-  OnInit,
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, inject, OnInit, } from '@angular/core';
 import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -59,7 +52,6 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
   private readonly userStatsApi = inject(UserStatsApiService);
   private readonly authService = inject(AuthService);
 
-
   public readonly apiUrl = environment.apiUrl;
   public userId: number = 0;
   public dashboardStats!: UserDashboardStats;
@@ -80,7 +72,7 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.renderAllCharts(); // Intenta renderizar una vez montado el DOM
+    this.renderAllCharts();
   }
 
   private initializeUser(): void {
@@ -93,7 +85,7 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
     this.userStatsApi.getDashboardStats(this.userId).subscribe({
       next: (data) => {
         this.dashboardStats = data;
-        console.log('📊 Estadísticas dashboard cargadas:', this.dashboardStats);
+        console.log('Estadísticas dashboard cargadas:', this.dashboardStats);
         this.renderAllCharts();
       },
       error: () => this.handleError('estadísticas del dashboard'),
@@ -230,7 +222,7 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
     const labels = this.dashboardStats.scoreDistribution.map(s => s.label);
     const data = this.dashboardStats.scoreDistribution.map(s => s.count);
 
-    // 🎨 Paleta dinámica (una para cada rango)
+    // Paleta dinámica
     const colors = [
       'rgba(255, 99, 132, 0.6)',   // rojo
       'rgba(255, 159, 64, 0.6)',   // naranja
@@ -304,7 +296,7 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
       const parsed = JSON.parse(raw);
       return parsed && typeof parsed.userId === 'number' ? parsed : null;
     } catch (error) {
-      console.error('❌ Error al parsear usuario del almacenamiento:', error);
+      console.error(' Error al parsear usuario del almacenamiento:', error);
       return null;
     }
   }
@@ -314,7 +306,7 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
     Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: `❌ No se pudieron cargar las ${context}.`,
+      text: ` No se pudieron cargar las ${context}.`,
       confirmButtonColor: '#dc3545',
     });
   }

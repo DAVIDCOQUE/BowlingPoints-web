@@ -90,7 +90,6 @@ describe('UserStatsComponent', () => {
 
   it('debe inicializar userId correctamente', () => {
     (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify({ userId: 7 }));
-    // forzamos llamada al método privado dentro del mismo componente
     (component as any).initializeUser();
     expect(component.userId).toBe(7);
   });

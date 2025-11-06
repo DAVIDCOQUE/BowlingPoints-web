@@ -4,6 +4,7 @@ import { ICategory } from './category.interface';
 import { IModality } from './modality.interface';
 import { ITeam } from './team.interface';
 import { ITournamentRegistration } from './tournament-registration.interface';
+
 export interface ITournament {
   tournamentId: number;
   name: string;

@@ -15,7 +15,7 @@ export class AmbitComponent implements OnInit {
 
   private readonly fb = inject(FormBuilder);
   private readonly modalService = inject(NgbModal);
-  private readonly ambitApi = inject(AmbitApiService); // ✅ inyectar nuevo servicio
+  private readonly ambitApi = inject(AmbitApiService);
 
   public filter = '';
   public ambits: IAmbit[] = [];

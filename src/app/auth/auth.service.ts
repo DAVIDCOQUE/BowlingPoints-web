@@ -111,7 +111,6 @@ export class AuthService {
     const decoded = this.decodeToken();
     const roles = decoded?.roles ?? [];
     const result = roles.includes(role);
-    console.log(`Checking role: ${role}`, '→', result ? '✅ permitido' : '❌ no permitido');
     return result;
   }
 

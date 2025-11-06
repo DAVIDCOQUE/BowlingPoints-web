@@ -17,7 +17,7 @@ export class JwtInterceptor implements HttpInterceptor {
         const now = Math.floor(Date.now() / 1000);
 
         if (decoded.exp && decoded.exp < now) {
-          console.warn('⚠️ Token expirado');
+          console.warn('Token expirado');
           localStorage.removeItem('jwt_token');
           window.location.assign('/login');
           return throwError(() => new Error('Token expirado'));
@@ -29,7 +29,7 @@ export class JwtInterceptor implements HttpInterceptor {
 
         return next.handle(cloned);
       } catch (e) {
-        console.error('⚠️ Token inválido', e);
+        console.error('Token inválido', e);
         localStorage.removeItem('jwt_token');
         window.location.assign('/login');
         return throwError(() => new Error('Token inválido'));

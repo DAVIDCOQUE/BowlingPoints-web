@@ -4,7 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { of, throwError } from 'rxjs';
-import { HttpClientTestingModule } from '@angular/common/http/testing'; // ✅ Importante
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('LoginComponent (refactor)', () => {
   let component: LoginComponent;
@@ -20,7 +20,7 @@ describe('LoginComponent (refactor)', () => {
       declarations: [LoginComponent],
       imports: [
         ReactiveFormsModule,
-        HttpClientTestingModule // ✅ Esto resuelve el error
+        HttpClientTestingModule
       ],
       providers: [
         { provide: Router, useValue: mockRouter },

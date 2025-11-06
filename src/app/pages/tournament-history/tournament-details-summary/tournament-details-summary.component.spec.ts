@@ -52,7 +52,7 @@ describe('TournamentDetailsSummaryComponent', () => {
     fixture = TestBed.createComponent(TournamentDetailsSummaryComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
-    fixture.detectChanges(); // ngOnInit ejecuta la llamada HTTP
+    fixture.detectChanges();
   });
 
   afterEach(() => {
@@ -90,18 +90,18 @@ describe('TournamentDetailsSummaryComponent', () => {
       `${environment.apiUrl}/results/by-modality?tournamentId=1&roundNumber=1&branchId=2`
     );
     req.flush('Error', { status: 500, statusText: 'Internal Server Error' });
-    expect(consoleSpy).toHaveBeenCalledWith('❌ Error cargando resumen general:', jasmine.anything());
+    expect(consoleSpy).toHaveBeenCalledWith(' Error cargando resumen general:', jasmine.anything());
   });
 
   it('should return plus/minus from 200 correctly', () => {
-    flushInitRequest(); // ✅ Añadido
+    flushInitRequest(); //  Añadido
     expect(component.getPlusMinus200(220)).toBe('+20');
     expect(component.getPlusMinus200(180)).toBe('-20');
     expect(component.getPlusMinus200(200)).toBe('+0');
   });
 
   it('should load data again on round change', () => {
-    flushInitRequest(); // ✅ Añadido para limpiar la inicial
+    flushInitRequest();
     component.roundNumber = 2;
     component.onRoundChange();
 

@@ -14,7 +14,7 @@ describe('RoleGuard', () => {
 
     guard = new RoleGuard(authServiceSpy, routerSpy);
 
-    // 👇 Creamos el snapshot y le seteamos la propiedad `data` manualmente
+    // Creamos el snapshot y le seteamos la propiedad `data` manualmente
     routeSnapshot = jasmine.createSpyObj<ActivatedRouteSnapshot>('ActivatedRouteSnapshot', [], {
       data: { roles: ['ADMIN', 'ENTRENADOR'] }
     });

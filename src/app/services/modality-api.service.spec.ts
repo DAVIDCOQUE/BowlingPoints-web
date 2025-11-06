@@ -21,7 +21,7 @@ describe('ModalityApiService', () => {
   });
 
   afterEach(() => {
-    httpMock.verify(); // Verifica que no haya peticiones pendientes
+    httpMock.verify();
   });
 
   it('debe obtener todas las modalidades (getModalities)', () => {

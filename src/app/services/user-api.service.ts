@@ -8,6 +8,7 @@ import { IUser } from '../model/user.interface';
 @Injectable({
   providedIn: 'root'
 })
+
 export class UserApiService {
   private readonly usersUrl = `${environment.apiUrl}/users`;
 
@@ -36,7 +37,6 @@ export class UserApiService {
 
   /**
    * Crea un nuevo usuario
-   * @param payload Datos del usuario
    */
   createUser(payload: Partial<IUser>): Observable<any> {
     return this.http.post(this.usersUrl, payload);
@@ -44,8 +44,6 @@ export class UserApiService {
 
   /**
    * Actualiza un usuario existente
-   * @param id ID del usuario
-   * @param payload Datos modificados
    */
   updateUser(id: number, payload: Partial<IUser>): Observable<any> {
     return this.http.put(`${this.usersUrl}/${id}`, payload);
@@ -53,7 +51,6 @@ export class UserApiService {
 
   /**
    * Elimina un usuario
-   * @param id ID del usuario a eliminar
    */
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.usersUrl}/${id}`);

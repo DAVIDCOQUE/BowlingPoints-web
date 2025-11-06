@@ -87,11 +87,11 @@ describe('RoleApiService', () => {
     const id = 1;
 
     service.delete(id).subscribe((res) => {
-      expect(res).toBeFalsy();// delete returns void
+      expect(res).toBeFalsy();
     });
 
     const req = httpMock.expectOne(`${apiUrl}/${id}`);
     expect(req.request.method).toBe('DELETE');
-    req.flush(null); // DELETE responses are usually empty
+    req.flush(null);
   });
 });

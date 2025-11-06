@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SidebarComponent } from './sidebar.component';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'; // ✅ Importante para Angular Material
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 describe('SidebarComponent', () => {
   let component: SidebarComponent;
@@ -20,7 +20,7 @@ describe('SidebarComponent', () => {
         { provide: Router, useValue: mockRouter },
         { provide: AuthService, useValue: mockAuthService }
       ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA] // ✅ Esto evita errores con mat-nav-list, mat-icon, etc.
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SidebarComponent);

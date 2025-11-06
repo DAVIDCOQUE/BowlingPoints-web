@@ -44,7 +44,7 @@ export class PlayersComponent {
             'Error',
             'No se pudo cargar el ranking de jugadores',
             'error'
-          ); 
+          );
         },
       });
   }
@@ -58,8 +58,6 @@ export class PlayersComponent {
 
   /**
    * Reemplaza la imagen si falla la carga.
-   * @param event Evento de error de imagen.
-   * @param defaultPath Ruta de la imagen por defecto.
    */
   onImgError(event: Event, defaultPath: string): void {
     const target = event.target as HTMLImageElement;

@@ -19,11 +19,8 @@ body {
 
 .card_h:hover {
   transform: scale(1.03);
-  /* Zoom suave */
   background-color: #f8f9fa;
-  /* Un fondo gris clarito (Bootstrap color) */
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  /* Sombra más profunda */
   cursor: pointer;
 }
 
@@ -58,7 +55,6 @@ body {
   color: white;
   background-color: var(--primary)
 }
-
 
 html,
 body {

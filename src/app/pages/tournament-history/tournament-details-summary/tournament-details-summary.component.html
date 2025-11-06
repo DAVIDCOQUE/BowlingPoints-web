@@ -81,7 +81,7 @@
               <th>#</th>
               <th>Jugador</th>
               <th>Club</th>
-              <th *ngFor="let mod of modalities">{{ mod.name }}</th>
+              <th *ngFor="let mod of visibleModalities">{{ mod.name }}</th>
               <th>Total</th>
               <th>Promedio</th>
             </tr>
@@ -91,14 +91,22 @@
               <td>{{ i + 1 }}</td>
               <td class="text-start fw-semibold">{{ player.playerName }}</td>
               <td>{{ player.clubName }}</td>
-              <td *ngFor="let mod of modalities">
+              <td *ngFor="let mod of visibleModalities">
                 {{ player.modalityScores[mod.name] || '-' }}
               </td>
               <td><strong>{{ player.total }}</strong></td>
               <td class="text-success">{{ player.promedio | number: '1.2-2' }}</td>
             </tr>
+
+            <!-- Mensaje si no hay jugadores -->
+            <tr *ngIf="resultsByModality.length === 0">
+              <td colspan="100%" class="text-center text-muted py-4">
+                No hay resultados disponibles para esta ronda.
+              </td>
+            </tr>
           </tbody>
         </table>
+
       </div>
     </div>
   </div>

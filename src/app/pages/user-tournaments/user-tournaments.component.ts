@@ -59,7 +59,6 @@ export class UserTournamentsComponent implements OnInit {
 
   /**
    * Carga los torneos en los que el usuario está inscrito.
-   * Este método complementa la consulta de torneos jugados.
    */
   cargarTorneosInscriptos(): void {
     this.userTournamentApi.getTorneosInscriptos(this.userId).subscribe({
@@ -77,8 +76,6 @@ export class UserTournamentsComponent implements OnInit {
 
   /**
    * Maneja el error de carga de una imagen reemplazándola por una por defecto.
-   * @param event Evento del error de imagen
-   * @param defaultPath Ruta a la imagen por defecto
    */
   onImgError(event: Event, defaultPath: string): void {
     const target = event?.target;
@@ -100,7 +97,6 @@ export class UserTournamentsComponent implements OnInit {
     try {
       const parsed = JSON.parse(userRaw);
 
-      // Validación explícita de estructura
       if (parsed && typeof parsed.userId === 'number') {
         return parsed as IUser;
       } else {

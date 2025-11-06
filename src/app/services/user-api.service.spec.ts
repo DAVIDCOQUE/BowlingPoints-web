@@ -1,12 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { UserApiService } from './user-api.service';
 import { environment } from 'src/environments/environment';
 import { IUser } from '../model/user.interface';
-import { IRole } from '../model/role.interface';
 
 describe('UserApiService', () => {
   let service: UserApiService;
@@ -175,6 +171,5 @@ describe('UserApiService', () => {
     const req = httpMock.expectOne(`${usersUrl}/actives`);
     req.flush({ message: 'Error interno' }, { status: 500, statusText: 'Server Error' });
   });
-
 
 });

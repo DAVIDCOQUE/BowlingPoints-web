@@ -11,18 +11,15 @@ import { ICategory } from '../../model/category.interface';
 import { CategoryApiService } from 'src/app/services/category-api.service';
 import { TournamentsService } from 'src/app/services/tournaments.service';
 import { ResultsService } from 'src/app/services/results.service';
-
 interface PlayerTournamentStats {
   tournamentName: string;
   average: number;
 }
-
 interface PlayerStats {
   name: string;
   tournaments: PlayerTournamentStats[];
   totalAverage: number;
 }
-
 @Component({
   selector: 'app-results-and-stats',
   templateUrl: './results-and-stats.component.html',
@@ -66,10 +63,7 @@ export class ResultsAndStatsComponent implements OnInit {
     this.loadResults();
   }
 
-  // ----------------------------------------------------------
   // Interfaces internas para estadísticas
-  // ----------------------------------------------------------
-
   private calculateAverage(values: number[]): number {
     if (!values.length) return 0;
     const sum = values.reduce((acc, val) => acc + val, 0);
@@ -122,11 +116,7 @@ export class ResultsAndStatsComponent implements OnInit {
     });
   }
 
-
-  // ----------------------------------------------------------
   // Carga de datos desde el backend
-  // ----------------------------------------------------------
-
   loadTournaments(): void {
     this.tournamentApiService.getTournaments().subscribe({
       next: (res) => {
@@ -154,9 +144,8 @@ export class ResultsAndStatsComponent implements OnInit {
       error: (err) => console.error('Error al cargar resultados:', err),
     });
   }
-  // ----------------------------------------------------------
+
   // Filtros
-  // ----------------------------------------------------------
 
   onFilterChange(): void {
     const filtered = this.results.filter((r) =>
@@ -167,10 +156,7 @@ export class ResultsAndStatsComponent implements OnInit {
     this.groupResultsByPlayerAndTournament(filtered);
   }
 
-  // ----------------------------------------------------------
   // Carga de archivo Excel
-  // ----------------------------------------------------------
-
   openFileInput(): void {
     const input = document.createElement('input');
     input.type = 'file';
@@ -196,10 +182,7 @@ export class ResultsAndStatsComponent implements OnInit {
     // this.importExcel(file);
   }
 
-  // ----------------------------------------------------------
   // Acciones sobre resultados
-  // ----------------------------------------------------------
-
   editResult(result: IResults): void {
     this.modalService.open(this.modalResultRef);
     // console.log('Editar resultado', result);
@@ -230,12 +213,6 @@ export class ResultsAndStatsComponent implements OnInit {
     });
   }
 
-
-
-  // ----------------------------------------------------------
-  // Modales
-  // ----------------------------------------------------------
-
   openModal(content: TemplateRef<unknown>): void {
     this.modalService.open(content, { size: 'lg' });
   }
@@ -248,8 +225,5 @@ export class ResultsAndStatsComponent implements OnInit {
     const match = player.tournaments.find(t => t.tournamentName === torneo);
     return match ? match.average : null;
   }
-
-
-
 }
 

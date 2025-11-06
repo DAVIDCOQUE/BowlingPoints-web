@@ -85,7 +85,7 @@ describe('PlayerDetailsComponent', () => {
   });
 
   it('should not call API if userId is 0', () => {
-    // ⚙️ Reconfiguramos el TestBed con un ActivatedRoute sin userId
+    //  Reconfiguramos el TestBed con un ActivatedRoute sin userId
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       declarations: [PlayerDetailsComponent],
@@ -107,9 +107,8 @@ describe('PlayerDetailsComponent', () => {
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
 
-    fixture.detectChanges(); // Ejecuta ngOnInit()
+    fixture.detectChanges();
 
-    // ✅ Ahora no debería haber ninguna llamada HTTP
     httpMock.expectNone(`${environment.apiUrl}/api/user-stats/summary?userId=0`);
   });
 

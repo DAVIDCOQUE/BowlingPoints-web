@@ -301,8 +301,6 @@ export class UsersComponent implements OnInit {
 
   /**
    * Abre el modal para crear o editar usuario.
-   * Si no hay idUser, inicializa el formulario en blanco.
-   * @param content - Referencia del contenido del modal.
    */
   openModal(content: unknown): void {
     // Si el usuario ya existe, solo abrimos el modal
@@ -311,7 +309,7 @@ export class UsersComponent implements OnInit {
       return;
     }
 
-    // Si es creación, limpiamos el formulario y configuramos validadores
+    // Si es creación, limpiamos el formulario
     this.userForm.reset(this.EMPTY_USER);
     this.setPasswordValidatorsForMode(false);
 
@@ -327,23 +325,19 @@ export class UsersComponent implements OnInit {
     this.idUser = null;
   }
 
-  /**
-   * Limpia el filtro de búsqueda
-   */
   clear(): void {
     this.filter = '';
   }
 
   /**
    * Configura los validadores de contraseña según el modo (edición o creación).
-   * @param isEdit - true si el formulario está en modo edición.
    */
   private setPasswordValidatorsForMode(isEdit: boolean): void {
     const passwordCtrl = this.userForm.get('password');
     const confirmCtrl = this.userForm.get('confirm');
 
     if (!passwordCtrl || !confirmCtrl) {
-      return; // Salida temprana → mejora legibilidad
+      return;
     }
 
     const passwordValidators = [Validators.minLength(3)];
@@ -364,7 +358,6 @@ export class UsersComponent implements OnInit {
 
   /**
    * Valida que las contraseñas coincidan.
-   * Permite campos vacíos en modo edición.
    */
   private readonly passwordsMatchValidator: ValidatorFn = (
     group: AbstractControl
@@ -373,15 +366,14 @@ export class UsersComponent implements OnInit {
     const confirmCtrl = group.get('confirm');
 
     if (!passwordCtrl || !confirmCtrl) {
-      return null; // seguridad nula → evita acceso a propiedades de null
+      return null;
     }
 
     const pass = passwordCtrl.value;
     const confirm = confirmCtrl.value;
 
-    // Early return → mejora legibilidad
     if (!pass && !confirm) {
-      return null; // En edición se permiten vacías
+      return null;
     }
 
     const mismatch = pass !== confirm;

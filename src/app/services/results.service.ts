@@ -3,7 +3,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-// Interfaces
 import { IResults } from '../model/result.interface';
 import { ITournament } from '../model/tournament.interface';
 import { IModality } from '../model/modality.interface';
@@ -38,18 +37,18 @@ export class ResultsService {
     branchId?: number,
     roundNumber?: number
   ): Observable<IResults[]> {
-    let params = new HttpParams();
+    let params = new HttpParams().set('tournamentId', tournamentId.toString());
 
-    if (branchId) {
+    if (branchId !== undefined) {
       params = params.set('branchId', branchId.toString());
     }
 
-    if (roundNumber) {
+    if (roundNumber !== undefined) {
       params = params.set('roundNumber', roundNumber.toString());
     }
 
     return this.http.get<IResults[]>(
-      `${this.apiUrl}/results/tournament/${tournamentId}`,
+      `${this.apiUrl}/results/filter`,
       { params }
     );
   }
@@ -66,7 +65,7 @@ export class ResultsService {
     return this.http.delete(`${this.apiUrl}/results/${id}`);
   }
 
-  /** --- Catálogos auxiliares --- */
+  /** --- Catálogos --- */
   getTournaments(): Observable<{
     success: boolean;
     message: string;
