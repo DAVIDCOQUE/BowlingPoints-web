@@ -1,81 +1,127 @@
-<mat-nav-list class="d-flex flex-column gap-2">
+<ng-container *ngIf="!isGuest">
+  <mat-nav-list class="d-flex flex-column gap-2">
+    <!-- Dashboard -->
+    <mat-list-item
+      routerLink="/dashboard"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/dashboard.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Dashboard</span>
+    </mat-list-item>
 
-  <!-- Dashboard -->
-  <mat-list-item routerLink="/dashboard" routerLinkActive="active" class="d-flex align-items-center gap-3">
-    <img src="assets/img/dashboard.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Dashboard</span>
-  </mat-list-item>
+    <!-- Mis Torneos -->
+    <mat-list-item
+      *ngIf="isJugador || isAdmin"
+      routerLink="/user-tournaments"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/torneo.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Mis Torneos</span>
+    </mat-list-item>
 
-  <!-- Mis Torneos -->
-  <mat-list-item *ngIf="isJugador || isAdmin" routerLink="/user-tournaments" routerLinkActive="active"
-    class="d-flex align-items-center gap-3">
-    <img src="assets/img/torneo.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Mis Torneos</span>
-  </mat-list-item>
+    <!-- Mis Resultados -->
+    <mat-list-item
+      *ngIf="isJugador || isAdmin"
+      routerLink="/user-stats"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/grafico.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Mis Resultados</span>
+    </mat-list-item>
 
-  <!-- Mis Resultados -->
-  <mat-list-item *ngIf="isJugador || isAdmin" routerLink="/user-stats" routerLinkActive="active"
-    class="d-flex align-items-center gap-3">
-    <img src="assets/img/grafico.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Mis Resultados</span>
-  </mat-list-item>
+    <!-- Club -->
+    <mat-list-item
+      *ngIf="isJugador || isEntrenador || isAdmin"
+      routerLink="/club"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/clubes.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Mi Club</span>
+    </mat-list-item>
 
-  <!-- Club -->
-  <mat-list-item *ngIf="isJugador || isEntrenador || isAdmin" routerLink="/club" routerLinkActive="active"
-    class="d-flex align-items-center gap-3">
-    <img src="assets/img/clubes.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Mi Club</span>
-  </mat-list-item>
+    <hr />
 
-  <hr>
+    <!-- Resultados y estadísticas -->
+    <mat-list-item
+      *ngIf="isJugador || isAdmin"
+      routerLink="/results-stats"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/grafico.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Resultados y estadísticas</span>
+    </mat-list-item>
 
-  <!-- Resultados y estadísticas -->
-  <mat-list-item *ngIf="isJugador || isAdmin" routerLink="/results-stats" routerLinkActive="active"
-    class="d-flex align-items-center gap-3">
-    <img src="assets/img/grafico.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Resultados y estadísticas</span>
-  </mat-list-item>
+    <hr />
 
-  <hr>
+    <!-- Torneos -->
+    <mat-list-item
+      *ngIf="isAdmin"
+      routerLink="/tournaments"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/torneo.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Torneos</span>
+    </mat-list-item>
 
-  <!-- Torneos -->
-  <mat-list-item *ngIf="isAdmin" routerLink="/tournaments" routerLinkActive="active"
-    class="d-flex align-items-center gap-3">
-    <img src="assets/img/torneo.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Torneos</span>
-  </mat-list-item>
+    <!-- Usuarios -->
+    <mat-list-item
+      *ngIf="isAdmin"
+      routerLink="/users"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/bola-boliche.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Usuarios</span>
+    </mat-list-item>
 
-  <!-- Usuarios -->
-  <mat-list-item *ngIf="isAdmin" routerLink="/users" routerLinkActive="active"
-    class="d-flex align-items-center gap-3">
-    <img src="assets/img/bola-boliche.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Usuarios</span>
-  </mat-list-item>
+    <!-- Clubes -->
+    <mat-list-item
+      *ngIf="isAdmin"
+      routerLink="/clubs"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/clubes.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Clubes</span>
+    </mat-list-item>
 
-  <!-- Clubes -->
-  <mat-list-item *ngIf="isAdmin" routerLink="/clubs" routerLinkActive="active" class="d-flex align-items-center gap-3">
-    <img src="assets/img/clubes.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Clubes</span>
-  </mat-list-item>
+    <!-- Categorías -->
+    <mat-list-item
+      *ngIf="isAdmin"
+      routerLink="/categories"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/category.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Categorías</span>
+    </mat-list-item>
 
-  <!-- Categorías -->
-  <mat-list-item *ngIf="isAdmin" routerLink="/categories" routerLinkActive="active"
-    class="d-flex align-items-center gap-3">
-    <img src="assets/img/category.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Categorías</span>
-  </mat-list-item>
+    <!-- Modalidades -->
+    <mat-list-item
+      *ngIf="isAdmin"
+      routerLink="/modalitys"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/modality.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Modalidades</span>
+    </mat-list-item>
 
-  <!-- Modalidades -->
-  <mat-list-item *ngIf="isAdmin" routerLink="/modalitys" routerLinkActive="active"
-    class="d-flex align-items-center gap-3">
-    <img src="assets/img/modality.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Modalidades</span>
-  </mat-list-item>
-
-  <!-- Ámbitos -->
-  <mat-list-item *ngIf="isAdmin" routerLink="/ambits" routerLinkActive="active" class="d-flex align-items-center gap-3">
-    <img src="assets/img/ambit.png" height="22" class="me-2" />
-    <span *ngIf="isExpanded || isShowing">Ámbitos</span>
-  </mat-list-item>
-
-</mat-nav-list>
+    <!-- Ámbitos -->
+    <mat-list-item
+      *ngIf="isAdmin"
+      routerLink="/ambits"
+      routerLinkActive="active"
+      class="d-flex align-items-center gap-3"
+    >
+      <img src="assets/img/ambit.png" height="22" class="me-2" />
+      <span *ngIf="isExpanded || isShowing">Ámbitos</span>
+    </mat-list-item>
+  </mat-nav-list>
+</ng-container>
