@@ -15,6 +15,7 @@ export class SidebarComponent {
   isAdmin = false;
   isJugador = false;
   isEntrenador = false;
+  isGuest = false; 
 
   constructor(private router: Router, public auth: AuthService) { }
 
@@ -23,6 +24,7 @@ export class SidebarComponent {
     this.isAdmin = this.auth.hasRole('ADMIN');
     this.isJugador = this.auth.hasRole('JUGADOR');
     this.isEntrenador = this.auth.hasRole('ENTRENADOR');
+    this.isGuest = this.auth.isGuest();
 
     console.log(this.isAdmin, this.isJugador, this.isEntrenador)
   }

@@ -1,4 +1,7 @@
-<mat-toolbar class="bg-primary text-white px-3" style="height: 64px; display: flex; align-items: center;">
+<mat-toolbar
+  class="bg-primary text-white px-3"
+  style="height: 64px; display: flex; align-items: center"
+>
   <!-- Botón menú -->
   <button mat-icon-button (click)="toggleSidebar()">
     <mat-icon>menu</mat-icon>
@@ -9,41 +12,46 @@
 
   <!-- Íconos alineados a la derecha -->
   <div class="ms-auto d-flex align-items-center gap-2">
-
     <!-- Mensaje: Modo invitado -->
     <span class="ms-4 text-warning fw-normal text-center" *ngIf="isGuest">
       <strong>invitado</strong>
     </span>
 
+    <!-- Ícono de notificaciones -->
     <button mat-icon-button aria-label="Notificaciones">
       <mat-icon>notifications</mat-icon>
     </button>
 
-    <!-- Solo mostrar perfil si NO es invitado -->
-    <ng-container>
-      <button mat-icon-button [matMenuTriggerFor]="accountMenu" aria-label="Perfil">
-        <mat-icon>account_circle</mat-icon>
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="accountMenu"
+      aria-label="Perfil"
+    >
+      <mat-icon>account_circle</mat-icon>
+    </button>
+
+    <!-- Menú del perfil -->
+    <mat-menu #accountMenu="matMenu" class="px-3 py-2" style="width: 250px">
+      <!-- Información del usuario -->
+      <div class="mb-2 text-start">
+        <span class="badge bg-primary text-white text-uppercase small mb-2">{{
+          userRole
+        }}</span>
+        <div class="text-muted small">CC: {{ userDocument }}</div>
+        <div class="text-muted small">{{ userEmail }}</div>
+      </div>
+
+      <mat-divider></mat-divider>
+      <button mat-menu-item routerLink="/profile" *ngIf="!isGuest">
+        <mat-icon>person</mat-icon>
+        <span>Editar Perfil</span>
       </button>
 
-      <mat-menu #accountMenu="matMenu" class="px-3 py-2" style="width: 250px;">
-        <div *ngIf="!isGuest" class="mb-2 text-start">
-          <span class="badge bg-primary text-white text-uppercase small mb-2">{{ userRole }}</span>
-          <div class="text-muted small">CC: {{ userDocument }}</div>
-          <div class="text-muted small">{{ userEmail }}</div>
-        </div>
-
-        <mat-divider></mat-divider>
-
-        <button mat-menu-item routerLink="/profile">
-          <mat-icon>person</mat-icon>
-          <span>Editar Perfil</span>
-        </button>
-
-        <button mat-menu-item (click)="logout()" class="text-danger">
-          <mat-icon color="warn">logout</mat-icon>
-          <span>Cerrar Sesión</span>
-        </button>
-      </mat-menu>
-    </ng-container>
+      <button mat-menu-item (click)="logout()" class="text-danger">
+        <mat-icon color="warn">logout</mat-icon>
+        <span *ngIf="!isGuest">Cerrar Sesión</span>
+        <span *ngIf="isGuest">Salir del modo invitado</span>
+      </button>
+    </mat-menu>
   </div>
 </mat-toolbar>
