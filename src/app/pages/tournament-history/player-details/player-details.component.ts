@@ -31,15 +31,11 @@ export class PlayerDetailsComponent implements OnInit {
     }
   }
 
-  /**
-   * Carga las estadísticas del jugador desde la API.
-   */
   loadStatistics(): void {
     this.userStatsApi.getPlayerStats(this.personId).subscribe({
       next: (data) => {
         this.statisticsUser = data;
         console.log('Estadísticas del jugador cargadas:', this.statisticsUser);
-
       },
       error: () => this.handleError('estadísticas del jugador'),
     });
@@ -54,16 +50,10 @@ export class PlayerDetailsComponent implements OnInit {
     });
   }
 
-  /**
-   * Navega a la página anterior.
-   */
   goBack(): void {
     this.location.back();
   }
 
-  /**
-   * Reemplaza la imagen por una por defecto si hay error.
-   */
   onImgError(event: Event, defaultPath: string): void {
     const target = event.target as HTMLImageElement;
     target.src = defaultPath;
