@@ -44,6 +44,7 @@ export const routes: Routes = [
       { path: 'tournament-details-summary/:tournamentId/:branchId', component: TournamentDetailsSummaryComponent },
       { path: 'tournament-participants/:tournamentId', component: TournamentParticipantsComponent },
       { path: 'player-details/:userId', component: PlayerDetailsComponent },
+      { path: 'players', component: PlayersComponent },
 
       // JUGADORES (rol: JUGADOR, ENTRENADOR, ADMIN)
       { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ENTRENADOR', 'ADMIN'] } },
@@ -55,7 +56,6 @@ export const routes: Routes = [
       { path: 'club/:id', component: ClubComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ENTRENADOR', 'ADMIN', 'JUGADOR'] } },
 
       // ACCESO GENERAL (requiere login pero sin restricción por rol)
-      { path: 'players', component: PlayersComponent, canActivate: [AuthGuard] },
 
       // ADMINISTRADORES
       { path: 'clubs', component: ClubsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['JUGADOR', 'ADMIN'] } },

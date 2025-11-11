@@ -30,12 +30,20 @@ import { Location } from '@angular/common';
 export class TournamentResultComponent implements OnInit {
   @ViewChild('modalResult', { static: false })
   modalResultRef!: TemplateRef<unknown>;
+
   @ViewChild('modalPlayer', { static: false })
   modalPlayerRef!: TemplateRef<unknown>;
+
+  @ViewChild('modalTeam', { static: false })
+  modalTeamRef!: TemplateRef<unknown>;
 
   // Estado general
   isLoading$ = new BehaviorSubject<boolean>(false);
   loading = false;
+
+  // Subida de archivos
+  isUploadingPlayers = false;
+  isUploadingResults = false;
 
   // Torneo
   tournamentId: number | null = null;
@@ -46,11 +54,16 @@ export class TournamentResultComponent implements OnInit {
   teams: ITeam[] = [];
 
   // Jugadores registrados
-  players: IUser[] = [];
   registrations: ITournamentRegistration[] = [];
   filteredRegistrations: ITournamentRegistration[] = [];
+
+  players: IUser[] = [];
   idPlayer: number | null = null;
   playerForm: FormGroup = new FormGroup({});
+
+  // Equipo
+  idTeam: number | null = null;
+  teamForm: FormGroup = new FormGroup({});
 
   // Resultados
   results: IResults[] = [];
@@ -105,6 +118,7 @@ export class TournamentResultComponent implements OnInit {
     }
 
     this.initPlayerForm();
+    this.initTeamForm();
     this.initResultForm();
     this.loadRegisteredPlayers();
     this.loadPlayers();
@@ -178,6 +192,65 @@ export class TournamentResultComponent implements OnInit {
       });
   }
 
+  get groupedRegistrations() {
+    const groups: Record<string, ITournamentRegistration[]> = {};
+
+    for (const reg of this.filteredRegistrations) {
+      const key = reg.modalityName || 'Sin modalidad';
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(reg);
+    }
+
+    // Convertimos a arreglo ordenado
+    return Object.entries(groups).map(([modality, players]) => ({
+      modality,
+      players
+    }));
+  }
+
+  //  Jugadores únicos por personId
+  get uniquePlayers() {
+    const seen = new Set<number>();
+    const unique: { personId: number; personFullName: string }[] = [];
+
+    for (const reg of this.filteredRegistrations) {
+      if (reg.personId && !seen.has(reg.personId)) {
+        seen.add(reg.personId);
+        unique.push({
+          personId: reg.personId,
+          personFullName: reg.personFullName || 'N/A',
+        });
+      }
+    }
+
+    return unique;
+  }
+
+  //  Equipos únicos por teamId
+  get uniqueTeams() {
+    const seen = new Set<number>();
+    const unique: { teamId: number; nameTeam: string }[] = [];
+
+    for (const reg of this.filteredRegistrations) {
+      if (reg.teamId && reg.teamName && !seen.has(reg.teamId)) {
+        seen.add(reg.teamId);
+        unique.push({
+          teamId: reg.teamId,
+          nameTeam: reg.teamName,
+        });
+      }
+    }
+
+    return unique;
+  }
+
+
+  get hasRegistrations(): boolean {
+    return this.filteredRegistrations?.length > 0;
+  }
+
   initPlayerForm(): void {
     this.playerForm = this.fb.group({
       personId: [null, Validators.required],
@@ -186,6 +259,17 @@ export class TournamentResultComponent implements OnInit {
       branchId: [null, Validators.required],
       teamId: [null],
       status: [true, Validators.required],
+    });
+  }
+
+  initTeamForm(): void {
+    this.teamForm = this.fb.group({
+      nameTeam: ['', [Validators.required]],
+      phone: [''],
+      playerIds: [[], [Validators.required, Validators.minLength(2)]],
+      categoryId: [null, [Validators.required]],
+      modalityId: [null, [Validators.required]],
+      status: [true, [Validators.required]],
     });
   }
 
@@ -225,12 +309,16 @@ export class TournamentResultComponent implements OnInit {
       if (!this.idResult) this.initResultForm(); // Solo si es nuevo
     }
 
+    if (content === this.modalTeamRef) {
+      if (!this.idTeam) this.initTeamForm(); // Solo si es nuevo
+    }
+
     this.modalService.open(content, { size: 'lg' });
   }
 
   closeModal(): void {
     this.modalService.dismissAll();
-    this.idPlayer = this.idResult = null;
+    this.idPlayer = this.idResult = this.idTeam = null;
   }
 
   editPlayer(reg: ITournamentRegistration): void {
@@ -262,6 +350,60 @@ export class TournamentResultComponent implements OnInit {
     request.pipe(finalize(() => (this.loading = false))).subscribe({
       next: () => this.handlePlayerSuccess(isEdit),
       error: (err) => this.handlePlayerError(err),
+    });
+  }
+
+  editTeam(team: ITeam): void {
+    this.idTeam = team.teamId;
+
+    this.teamForm.patchValue({
+      nameTeam: team.nameTeam,
+      phone: team.phone,
+      playerIds: team.members?.map(p => p.personId) || [],
+      categoryId: team.categoryId || null,
+      modalityId: team.modalityId || null,
+      status: team.status,
+    });
+
+    this.openModal(this.modalTeamRef);
+  }
+
+
+  saveTeam(): void {
+    if (this.teamForm.invalid || !this.tournamentId) {
+      this.teamForm.markAllAsTouched();
+      Swal.fire('Error', 'Formulario inválido o torneo no definido', 'error');
+      return;
+    }
+
+    const payload = {
+      ...this.teamForm.value,
+      tournamentId: this.tournamentId,
+    };
+
+    console.log('Payload enviado al backend:', payload);
+
+    const isEdit = !!this.idTeam;
+    const request = isEdit
+      ? this.http.put(`${this.apiUrl}/teams/${this.idTeam}`, payload)
+      : this.http.post(`${this.apiUrl}/teams`, payload);
+
+    this.loading = true;
+
+    request.pipe(finalize(() => (this.loading = false))).subscribe({
+      next: () => {
+        Swal.fire(
+          'Éxito',
+          isEdit ? 'Equipo actualizado correctamente' : 'Equipo creado correctamente',
+          'success'
+        );
+        this.closeModal();
+        this.loadRegisteredPlayers();
+      },
+      error: (err) => {
+        console.error('Error al guardar equipo:', err);
+        Swal.fire('Error', err.error?.message || 'No se pudo guardar el equipo', 'error');
+      },
     });
   }
 
@@ -378,6 +520,18 @@ export class TournamentResultComponent implements OnInit {
       tournamentId: this.tournamentId,
     };
 
+    // VALIDACIÓN SEGÚN NUEVA LÓGICA DE NEGOCIO (igual que el backend)
+    if (!payload.personId && !payload.teamId) {
+      Swal.fire('Error', 'Debe seleccionar al menos un jugador o un equipo.', 'error');
+      return;
+    }
+
+    if (!payload.personId && payload.teamId) {
+      Swal.fire('Error', 'Debe seleccionar un jugador cuando se elige un equipo.', 'error');
+      return;
+    }
+
+    //  Si pasa las validaciones, se envía al backend
     const isEdit = !!this.idResult;
     const request$ = isEdit
       ? this.http.put(`${this.apiUrl}/results/${this.idResult}`, payload)
@@ -385,11 +539,14 @@ export class TournamentResultComponent implements OnInit {
 
     this.loading = true;
 
-    request$.pipe(finalize(() => (this.loading = false))).subscribe({
-      next: () => this.handleResultSuccess(isEdit),
-      error: (err) => this.handleResultError(err),
-    });
+    request$
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: () => this.handleResultSuccess(isEdit),
+        error: (err) => this.handleResultError(err),
+      });
   }
+
 
   /** Maneja la respuesta exitosa */
   private handleResultSuccess(isEdit: boolean): void {
@@ -489,21 +646,83 @@ export class TournamentResultComponent implements OnInit {
     const input: HTMLInputElement = document.createElement('input');
     input.type = 'file';
     input.accept = '.xlsx, .xls';
-    input.onchange = (event: Event) => this.onFileSelected(event);
+    input.onchange = (event: Event) => this.onPlayersFileSelected(event);
     input.click();
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input?.files?.[0];
+
+  onPlayersFileSelected(event: any): void {
+    const file: File = event.target.files[0];
     if (!file) return;
 
-    this.selectedFile = file;
-    Swal.fire({
-      icon: 'info',
-      title: 'Archivo seleccionado',
-      text: `Archivo: ${file.name}`,
-      confirmButtonText: 'Aceptar',
+    const validExtensions = ['xlsx', 'xls', 'csv'];
+    const extension = file.name.split('.').pop()?.toLowerCase();
+
+    if (!extension || !validExtensions.includes(extension)) {
+      Swal.fire('Error', 'Solo se permiten archivos Excel o CSV', 'error');
+      return;
+    }
+
+    if (!this.tournamentId) {
+      Swal.fire('Error', 'No hay torneo seleccionado para cargar jugadores', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('tournamentId', this.tournamentId.toString());
+
+    this.isUploadingPlayers = true;
+
+    this.http.post(`${this.apiUrl}/players/upload`, formData).subscribe({
+      next: (res) => {
+        this.isUploadingPlayers = false;
+        Swal.fire('Éxito', 'Jugadores cargados correctamente', 'success');
+        this.loadPlayers?.(); // refresca la tabla si tienes ese método
+      },
+      error: (err) => {
+        this.isUploadingPlayers = false;
+        Swal.fire('Error', 'No se pudo cargar el archivo', 'error');
+        console.error(err);
+      },
+    });
+  }
+
+
+  onResultFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (!file) return;
+
+    const validExtensions = ['xlsx', 'xls', 'csv'];
+    const extension = file.name.split('.').pop()?.toLowerCase();
+
+    if (!extension || !validExtensions.includes(extension)) {
+      Swal.fire('Error', 'Solo se permiten archivos Excel o CSV', 'error');
+      return;
+    }
+
+    if (!this.tournamentId) {
+      Swal.fire('Error', 'No hay torneo seleccionado para cargar resultados', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('tournamentId', this.tournamentId.toString());
+
+    this.isUploadingResults = true;
+
+    this.http.post(`${this.apiUrl}/results/upload`, formData).subscribe({
+      next: (res) => {
+        this.isUploadingResults = false;
+        Swal.fire('Éxito', 'Resultados cargados correctamente', 'success');
+        this.loadResults?.(); // método que refresca la tabla si lo tienes
+      },
+      error: (err) => {
+        this.isUploadingResults = false;
+        Swal.fire('Error', 'No se pudo cargar el archivo', 'error');
+        console.error(err);
+      },
     });
   }
 

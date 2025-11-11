@@ -130,7 +130,7 @@
               [class.table-light]="pos === 1" [class.table-secondary]="pos === 2">
               <td class="fw-bold" scope="row">{{ pos + 1 }}</td>
               <td class="text-start">
-                <a [routerLink]="['/detalle-jugador', player.personId]"
+                <a [routerLink]="['/player-details', player.personId]"
                   class="text-decoration-none text-dark fw-semibold player-zoom">
                   <i class="bi bi-person-circle me-1"></i>
                   {{ player.playerName }}

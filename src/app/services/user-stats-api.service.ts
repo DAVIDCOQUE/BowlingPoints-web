@@ -41,4 +41,13 @@ export class UserStatsApiService {
       )
       .pipe(map(res => res.data));
   }
+
+    /**  Obtiene todas las estadísticas del dashboard del usuario */
+  getPlayerStats(userId: number): Observable<UserDashboardStats> {
+    return this.http
+      .get<{ success: boolean; data: UserDashboardStats }>(
+        `${this.apiUrl}/api/user-stats/public-summary?userId=${userId}`
+      )
+      .pipe(map(res => res.data));
+  }
 }

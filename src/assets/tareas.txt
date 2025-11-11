@@ -1,0 +1,8 @@
+1 organizar como se ven los registros  de jugadores en el torneo
+2. acomodar bien el llanado manual de resultados equipos y jugadores deberaimos sacarlos de el registro del torneo
+3. valida en registro de resultados un maximo de puntos
+4. validar que solo salgan modalidades de equipos en el selec del ingreso de equipos
+
+
+
+hacer recuperar contraseña

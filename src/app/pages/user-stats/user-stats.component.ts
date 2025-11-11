@@ -1,7 +1,5 @@
 import { AfterViewInit, Component, ElementRef, ViewChild, inject, OnInit, } from '@angular/core';
-import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
-import { AuthService } from 'src/app/auth/auth.service';
 import { UserStatsApiService } from 'src/app/services/user-stats-api.service';
 import Swal from 'sweetalert2';
 
@@ -48,9 +46,7 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
   @ViewChild('pieChartDistribucion') scoreDistChartCanvas!: ElementRef<HTMLCanvasElement>;
 
 
-  private readonly router = inject(Router);
   private readonly userStatsApi = inject(UserStatsApiService);
-  private readonly authService = inject(AuthService);
 
   public readonly apiUrl = environment.apiUrl;
   public userId: number = 0;

@@ -1,18 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { environment } from 'src/environments/environment';
+import { UserStatsApiService } from 'src/app/services/user-stats-api.service';
+import Swal from 'sweetalert2';
 
-interface UserStatistics {
-  fullName: string;
-  photoUrl: string;
-  age: number;
-  club: string;
-  avgScore: number;
-  bestGame: number;
-  tournamentsWon: number;
-}
+
 
 @Component({
   selector: 'app-player-details',
@@ -21,12 +14,12 @@ interface UserStatistics {
 })
 export class PlayerDetailsComponent implements OnInit {
 
-  private readonly http = inject(HttpClient);
+  private readonly userStatsApi = inject(UserStatsApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
 
   public readonly apiUrl = environment.apiUrl;
-  public statisticsUser: UserStatistics | null = null;
+  public statisticsUser: any | null = null;
   public personId: number = 0;
 
   ngOnInit(): void {
@@ -42,16 +35,23 @@ export class PlayerDetailsComponent implements OnInit {
    * Carga las estadísticas del jugador desde la API.
    */
   loadStatistics(): void {
-    const url = `${this.apiUrl}/api/user-stats/summary?userId=${this.personId}`;
-    this.http.get<{ success: boolean; data: UserStatistics }>(url)
-      .subscribe({
-        next: res => {
-          this.statisticsUser = res.data;
-        },
-        error: err => {
-          console.error('Error al cargar estadísticas del jugador:', err);
-        }
-      });
+    this.userStatsApi.getPlayerStats(this.personId).subscribe({
+      next: (data) => {
+        this.statisticsUser = data;
+        console.log('Estadísticas del jugador cargadas:', this.statisticsUser);
+
+      },
+      error: () => this.handleError('estadísticas del jugador'),
+    });
+  }
+
+  private handleError(context: string): void {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: ` No se pudieron cargar las ${context}.`,
+      confirmButtonColor: '#dc3545',
+    });
   }
 
   /**
