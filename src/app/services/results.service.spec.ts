@@ -52,9 +52,8 @@ describe('ResultsService', () => {
       expect(res).toEqual(mockResults);
     });
 
-    const req = httpMock.expectOne(`${apiUrl}/results/tournament/10`);
+    const req = httpMock.expectOne(`${apiUrl}/results/filter?tournamentId=10`);
     expect(req.request.method).toBe('GET');
-    expect(req.request.params.keys().length).toBe(0);
     req.flush(mockResults);
   });
 
@@ -64,14 +63,13 @@ describe('ResultsService', () => {
       expect(res).toEqual(mockResults);
     });
 
-    const req = httpMock.expectOne(
-      (r) =>
-        r.url === `${apiUrl}/results/tournament/10` &&
-        r.params.has('branchId') &&
-        r.params.has('roundNumber')
+    const req = httpMock.expectOne((r) =>
+      r.url === `${apiUrl}/results/filter` &&
+      r.params.get('tournamentId') === '10' &&
+      r.params.get('branchId') === '5' &&
+      r.params.get('roundNumber') === '2'
     );
-    expect(req.request.params.get('branchId')).toBe('5');
-    expect(req.request.params.get('roundNumber')).toBe('2');
+    expect(req).toBeTruthy();
     req.flush(mockResults);
   });
 
@@ -82,7 +80,7 @@ describe('ResultsService', () => {
       error: (e) => (capturedError = e),
     });
 
-    const req = httpMock.expectOne(`${apiUrl}/results/tournament/10`);
+    const req = httpMock.expectOne(`${apiUrl}/results/filter?tournamentId=10`);
     req.flush(
       { message: 'Error interno' },
       { status: 500, statusText: 'Server Error' }
@@ -91,6 +89,7 @@ describe('ResultsService', () => {
     expect(capturedError).toBeTruthy();
     expect(capturedError.status).toBe(500);
   });
+
 
   it('debe crear un resultado (createResult)', () => {
     const payload = { personId: 2, score: 250 };

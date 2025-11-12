@@ -446,5 +446,101 @@ describe('TournamentResultComponent', () => {
     component.goBack();
     expect(locationSpy.back).toHaveBeenCalled();
   });
+
+  it('should skip loading registered players if tournamentId is null', () => {
+    component.tournamentId = null;
+    component.loadRegisteredPlayers();
+    expect(component.registrations.length).toBe(0);
+  });
+
+
+  it('should init player form when opening player modal', () => {
+    const spy = spyOn<any>(component, 'initPlayerForm');
+    component.idPlayer = null;
+    component.modalPlayerRef = {} as any;
+    component.openModal(component.modalPlayerRef);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should init result form when opening result modal', () => {
+    const spy = spyOn<any>(component, 'initResultForm');
+    component.idResult = null;
+    component.modalResultRef = {} as any;
+    component.openModal(component.modalResultRef);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should init team form when opening team modal', () => {
+    const spy = spyOn<any>(component, 'initTeamForm');
+    component.idTeam = null;
+    component.modalTeamRef = {} as any;
+    component.openModal(component.modalTeamRef);
+    expect(spy).toHaveBeenCalled();
+  });
+
+
+  it('should prevent saving result when neither personId nor teamId is set', () => {
+    spyOn(Swal, 'fire');
+    component.tournamentId = 1;
+    component.initResultForm();
+    component.resultForm.patchValue({
+      personId: null,
+      teamId: null,
+      categoryId: 1,
+      modalityId: 1,
+      branchId: 1,
+      roundNumber: 1,
+      laneNumber: 1,
+      lineNumber: 1,
+      score: 100,
+    });
+
+    component.saveResult();
+
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Error',
+      'Debe seleccionar al menos un jugador o un equipo.',
+      'error'
+    );
+  });
+
+  it('should prevent saving result when teamId is set but personId is not', () => {
+    spyOn(Swal, 'fire');
+    component.tournamentId = 1;
+    component.initResultForm();
+    component.resultForm.patchValue({
+      personId: null,
+      teamId: 99,
+      categoryId: 1,
+      modalityId: 1,
+      branchId: 1,
+      roundNumber: 1,
+      laneNumber: 1,
+      lineNumber: 1,
+      score: 100,
+    });
+
+    component.saveResult();
+
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Error',
+      'Debe seleccionar un jugador cuando se elige un equipo.',
+      'error'
+    );
+  });
+
+  it('should not save team if form is invalid', () => {
+    spyOn(Swal, 'fire');
+    component.tournamentId = 1;
+    component.initTeamForm(); // Inicializa vacío (inválido)
+    component.saveTeam();
+
+    expect(Swal.fire).toHaveBeenCalledWith(
+      'Error',
+      'Formulario inválido o torneo no definido',
+      'error'
+    );
+  });
+
 });
 

@@ -66,7 +66,7 @@ describe('DashboardComponent', () => {
   it('should load dashboard data on success', fakeAsync(() => {
     component.getDashboard();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/dashboard`);
+    const req = httpMock.expectOne(`${environment.apiUrl}/dashboard`);
     expect(req.request.method).toBe('GET');
 
     req.flush({ success: true, message: 'OK', data: mockDashboardData });
@@ -85,7 +85,7 @@ describe('DashboardComponent', () => {
   it('should handle dashboard API error', fakeAsync(() => {
     component.getDashboard();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/dashboard`);
+    const req = httpMock.expectOne(`${environment.apiUrl}/dashboard`);
     req.error(new ProgressEvent('Network error'));
 
     tick();

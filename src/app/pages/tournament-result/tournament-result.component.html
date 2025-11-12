@@ -97,15 +97,28 @@
   <div class="card shadow-sm mb-4 border-0">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="fw-bold text-secondary mb-0">Jugadores del Torneo</h5>
-        <div>
-          <button class="btn btn-outline-primary btn-sm me-2">
-            <i class="fas fa-file-excel me-1"></i> Cargar jugadores
+        <h4 class="fw-bold text-secondary mb-0">Jugadores del Torneo Inscritos Por Modalidad</h4>
+        <div class="d-flex justify-content-end mb-2">
+          <!-- Input de archivo oculto -->
+          <input type="file" #fileInput accept=".xlsx,.xls,.csv" (change)="onPlayersFileSelected($event)" hidden />
+
+          <!-- Botón de carga -->
+          <button class="btn btn-outline-primary btn-sm me-2" (click)="fileInput.click()" [disabled]="isUploadingPlayers">
+            <i class="fas fa-file-excel me-1"></i>
+            {{ isUploadingPlayers ? 'Subiendo...' : 'Cargar jugadores' }}
           </button>
-          <button class="btn btn-success btn-sm" (click)="openModal(modalPlayerRef)">
+
+          <!-- Nuevo jugador -->
+          <button class="btn btn-success btn-sm me-2" (click)="openModal(modalPlayerRef)">
             <i class="fas fa-plus-circle me-1"></i> Nuevo Jugador
           </button>
+
+          <!-- Nuevo equipo -->
+          <button class="btn btn-success btn-sm me-2" (click)="openModal(modalTeamRef)">
+            <i class="fas fa-plus-circle me-1"></i> Nuevo Equipo
+          </button>
         </div>
+
       </div>
 
       <!-- Filtros jugadores -->
@@ -139,29 +152,43 @@
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody>
-            <tr *ngFor="let p of filteredRegistrations; let i = index">
-              <td>{{ i + 1 }}</td>
-              <td>{{ p.personFullName || '-' }}</td>
-              <td>{{ p.categoryName || '-' }}</td>
-              <td>{{ p.modalityName || '-' }}</td>
-              <td>{{ p.branchName || '-' }}</td>
-              <td>{{ p.teamName || 'N/A' }}</td>
-              <td>
-                <div class="d-flex justify-content-center gap-2">
-                  <button class="btn btn-outline-primary btn-sm" (click)="editPlayer(p)">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn btn-outline-danger btn-sm" (click)="deletePlayer(p.registrationId)">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="!filteredRegistrations?.length">
-              <td colspan="7" class="text-muted py-3">No hay jugadores cargados.</td>
-            </tr>
+          <tbody *ngIf="groupedRegistrations.length > 0; else noPlayers">
+            <ng-container *ngFor="let group of groupedRegistrations">
+              <!-- Encabezado de modalidad -->
+              <tr class="table-secondary fw-bold text-start">
+                <td colspan="7">
+                  <i class="fas fa-bowling-ball me-2"></i> {{ group.modality }}
+                </td>
+              </tr>
+
+              <!-- Jugadores de esa modalidad -->
+              <tr *ngFor="let p of group.players; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ p.personFullName || '-' }}</td>
+                <td>{{ p.categoryName || '-' }}</td>
+                <td>{{ p.modalityName || '-' }}</td>
+                <td>{{ p.branchName || '-' }}</td>
+                <td>{{ p.teamName || 'N/A' }}</td>
+                <td>
+                  <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-outline-primary btn-sm" (click)="editPlayer(p)">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" (click)="deletePlayer(p.registrationId)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
           </tbody>
+
+          <ng-template #noPlayers>
+            <tr>
+              <td colspan="7" class="text-muted py-3 text-center">No hay jugadores cargados.</td>
+            </tr>
+          </ng-template>
+
         </table>
       </div>
     </div>
@@ -173,9 +200,16 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h5 class="fw-bold text-secondary mb-0">Resultados del Torneo</h5>
         <div>
-          <button class="btn btn-outline-primary btn-sm me-2">
-            <i class="fas fa-file-excel me-1"></i> Cargar Resultados
+          <!-- Input de archivo oculto -->
+          <input type="file" #fileResultInput accept=".xlsx,.xls,.csv" (change)="onResultFileSelected($event)" hidden />
+
+          <!-- Botón de carga -->
+          <button class="btn btn-outline-primary btn-sm me-2" (click)="fileResultInput.click()"
+            [disabled]="isUploadingResults">
+            <i class="fas fa-file-excel me-1"></i>
+            {{ isUploadingResults ? 'Subiendo...' : 'Cargar Resultados' }}
           </button>
+
           <button class="btn btn-success btn-sm" (click)="openModal(modalResultRef)">
             <i class="fas fa-plus-circle me-1"></i> Nuevo Resultado
           </button>
@@ -342,6 +376,100 @@
 </ng-template>
 
 
+<!-- Modal: Nuevo Equipo -->
+<ng-template #modalTeam>
+  <div class="modal-content">
+    <div class="modal-header bg-primary text-white">
+      <h5 class="modal-title">Nuevo Equipo</h5>
+      <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeModal()"></button>
+    </div>
+
+    <form [formGroup]="teamForm" (ngSubmit)="saveTeam()">
+      <div class="modal-body">
+        <div class="row g-3">
+
+          <!-- Nombre del equipo -->
+          <div class="col-md-6">
+            <label class="form-label">Nombre del Equipo *</label>
+            <input type="text" formControlName="nameTeam" class="form-control form-control-sm"
+              [ngClass]="{ 'is-invalid': teamForm.controls['nameTeam'].invalid && teamForm.controls['nameTeam'].touched }" />
+            <div class="invalid-feedback"
+              *ngIf="teamForm.controls['nameTeam'].invalid && teamForm.controls['nameTeam'].touched">
+              Nombre obligatorio.
+            </div>
+          </div>
+
+          <!-- Teléfono del equipo -->
+          <div class="col-md-6">
+            <label class="form-label">Teléfono (opcional)</label>
+            <input type="text" formControlName="phone" class="form-control form-control-sm" />
+          </div>
+
+          <!-- Seleccionar jugadores -->
+          <div class="col-md-12">
+            <label class="form-label">Seleccionar Jugadores *</label>
+            <ng-select [items]="players" bindLabel="fullName" bindValue="personId" [multiple]="true"
+              formControlName="playerIds" class="form-select form-select-sm" [ngClass]="{
+      'is-invalid': teamForm.controls['playerIds'].invalid && teamForm.controls['playerIds'].touched,
+      'is-valid': teamForm.controls['playerIds'].valid
+    }">
+              <ng-template ng-option-tmp let-player="item">
+                {{ player.fullName }} {{ player.fullSurname }}
+              </ng-template>
+            </ng-select>
+
+            <div class="invalid-feedback"
+              *ngIf="teamForm.controls['playerIds'].invalid && teamForm.controls['playerIds'].touched">
+              Seleccione al menos 2 jugadores.
+            </div>
+          </div>
+
+          <!-- Categoría -->
+          <div class="col-md-6">
+            <label class="form-label">Categoría *</label>
+            <select formControlName="categoryId" class="form-select form-select-sm">
+              <option [ngValue]="null" disabled>Seleccione categoría</option>
+              <option *ngFor="let cat of selectedTournament?.categories" [ngValue]="cat.categoryId">{{ cat.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Modalidad -->
+          <div class="col-md-6">
+            <label class="form-label">Modalidad *</label>
+            <select formControlName="modalityId" class="form-select form-select-sm">
+              <option [ngValue]="null" disabled>Seleccione modalidad</option>
+              <option *ngFor="let mod of selectedTournament?.modalities" [ngValue]="mod.modalityId">{{ mod.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Estado -->
+          <div class="col-md-6">
+            <label class="form-label">Estado *</label>
+            <select formControlName="status" class="form-select form-select-sm">
+              <option [ngValue]="true">Activo</option>
+              <option [ngValue]="false">Inactivo</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn-success" [disabled]="teamForm.invalid">
+            {{ idTeam ? 'Actualizar Equipo' : 'Guardar Equipo' }}
+          </button>
+
+        </div>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+
 <!-- Modal: Nuevo Resultado -->
 <ng-template #modalResult>
   <div class="modal-content">
@@ -354,129 +482,140 @@
       </button>
     </div>
 
-    <form [formGroup]="resultForm" (ngSubmit)="saveResult()">
-      <div class="modal-body">
-        <div class="row g-3">
-          <!-- Categoría -->
-          <div class="col-md-6">
-            <label class="form-label">Categoría *</label>
-            <select class="form-select" formControlName="categoryId"
-              [ngClass]="{ 'is-invalid': resultForm.controls['categoryId'].invalid && resultForm.controls['categoryId'].touched }">
-              <option [ngValue]="null" disabled>Categoría...</option>
-              <option *ngFor="let category of categories" [ngValue]="category.categoryId">
-                {{ category.name }}
-              </option>
-            </select>
-            <div class="invalid-feedback">Seleccione una categoría.</div>
-          </div>
+    <div *ngIf="hasRegistrations; else noRegs">
+      <form [formGroup]="resultForm" (ngSubmit)="saveResult()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- Categoría -->
+            <div class="col-md-6">
+              <label class="form-label">Categoría *</label>
+              <select class="form-select" formControlName="categoryId"
+                [ngClass]="{ 'is-invalid': resultForm.controls['categoryId'].invalid && resultForm.controls['categoryId'].touched }">
+                <option [ngValue]="null" disabled>Categoría...</option>
+                <option *ngFor="let category of categories" [ngValue]="category.categoryId">
+                  {{ category.name }}
+                </option>
+              </select>
+              <div class="invalid-feedback">Seleccione una categoría.</div>
+            </div>
 
-          <!-- Modalidad -->
-          <div class="col-md-6">
-            <label class="form-label">Modalidad *</label>
-            <select class="form-select" formControlName="modalityId"
-              [ngClass]="{ 'is-invalid': resultForm.controls['modalityId'].invalid && resultForm.controls['modalityId'].touched }">
-              <option [ngValue]="null" disabled>Modalidad...</option>
-              <option *ngFor="let modality of modalities" [ngValue]="modality.modalityId">
-                {{ modality.name }}
-              </option>
-            </select>
-            <div class="invalid-feedback">Seleccione una modalidad.</div>
-          </div>
+            <!-- Modalidad -->
+            <div class="col-md-6">
+              <label class="form-label">Modalidad *</label>
+              <select class="form-select" formControlName="modalityId"
+                [ngClass]="{ 'is-invalid': resultForm.controls['modalityId'].invalid && resultForm.controls['modalityId'].touched }">
+                <option [ngValue]="null" disabled>Modalidad...</option>
+                <option *ngFor="let modality of modalities" [ngValue]="modality.modalityId">
+                  {{ modality.name }}
+                </option>
+              </select>
+              <div class="invalid-feedback">Seleccione una modalidad.</div>
+            </div>
 
-          <!-- Rama -->
-          <div class="col-md-6">
-            <label class="form-label">Rama *</label>
-            <select class="form-select" formControlName="branchId"
-              [ngClass]="{ 'is-invalid': resultForm.controls['branchId'].invalid && resultForm.controls['branchId'].touched }">
-              <option [ngValue]="null" disabled>Seleccione rama...</option>
-              <option *ngFor="let branch of branches" [ngValue]="branch.branchId">
-                {{ branch.name }}
-              </option>
-            </select>
-            <div class="invalid-feedback">Seleccione una rama.</div>
-          </div>
+            <!-- Rama -->
+            <div class="col-md-6">
+              <label class="form-label">Rama *</label>
+              <select class="form-select" formControlName="branchId"
+                [ngClass]="{ 'is-invalid': resultForm.controls['branchId'].invalid && resultForm.controls['branchId'].touched }">
+                <option [ngValue]="null" disabled>Seleccione rama...</option>
+                <option *ngFor="let branch of branches" [ngValue]="branch.branchId">
+                  {{ branch.name }}
+                </option>
+              </select>
+              <div class="invalid-feedback">Seleccione una rama.</div>
+            </div>
 
-          <!-- Ronda -->
-          <div class="col-md-6">
-            <label class="form-label">Ronda *</label>
-            <select class="form-select" formControlName="roundNumber"
-              [ngClass]="{ 'is-invalid': resultForm.controls['roundNumber'].invalid && resultForm.controls['roundNumber'].touched }">
-              <option [ngValue]="null" disabled>Ronda...</option>
-              <option *ngFor="let round of roundNumbers" [ngValue]="round">
-                {{ round }}
-              </option>
-            </select>
-            <div class="invalid-feedback">Seleccione una ronda.</div>
-          </div>
+            <!-- Ronda -->
+            <div class="col-md-6">
+              <label class="form-label">Ronda *</label>
+              <select class="form-select" formControlName="roundNumber"
+                [ngClass]="{ 'is-invalid': resultForm.controls['roundNumber'].invalid && resultForm.controls['roundNumber'].touched }">
+                <option [ngValue]="null" disabled>Ronda...</option>
+                <option *ngFor="let round of roundNumbers" [ngValue]="round">
+                  {{ round }}
+                </option>
+              </select>
+              <div class="invalid-feedback">Seleccione una ronda.</div>
+            </div>
 
-          <!-- Jugador -->
-          <div class="col-md-6">
-            <label class="form-label">Jugador *</label>
-            <select class="form-select" formControlName="personId"
-              [ngClass]="{ 'is-invalid': resultForm.controls['personId'].invalid && resultForm.controls['personId'].touched }">
-              <option [ngValue]="null" disabled>Jugador...</option>
-              <option *ngFor="let person of players" [ngValue]="person.personId">
-                {{ person.fullName }}
-              </option>
-            </select>
-            <div class="invalid-feedback">Seleccione un jugador.</div>
-          </div>
+            <!-- Jugador -->
+            <div class="col-md-6">
+              <label class="form-label">Jugador *</label>
+              <select class="form-select" formControlName="personId"
+                [ngClass]="{ 'is-invalid': resultForm.controls['personId'].invalid && resultForm.controls['personId'].touched }">
+                <option [ngValue]="null" disabled>Jugador...</option>
+                <option *ngFor="let player of uniquePlayers" [ngValue]="player.personId">
+                  {{ player.personFullName }}
+                </option>
+              </select>
+              <div class="invalid-feedback">Seleccione un jugador.</div>
+            </div>
 
-          <!-- Equipo -->
-          <div class="col-md-6">
-            <label class="form-label">Equipo</label>
-            <select class="form-select" formControlName="teamId">
-              <option [ngValue]="null">Sin equipo</option>
-              <option *ngFor="let team of teams" [ngValue]="team.teamId">
-                {{ team.nameTeam }}
-              </option>
-            </select>
-          </div>
+            <!-- Equipo -->
+            <div class="col-md-6">
+              <label class="form-label">Equipo</label>
+              <select class="form-select" formControlName="teamId">
+                <option [ngValue]="null">Sin equipo</option>
+                <option *ngFor="let team of uniqueTeams" [ngValue]="team.teamId">
+                  {{ team.nameTeam }}
+                </option>
+              </select>
+            </div>
 
-          <!-- Pista -->
-          <div class="col-md-6">
-            <label class="form-label">Pista *</label>
-            <select class="form-select" formControlName="laneNumber"
-              [ngClass]="{ 'is-invalid': resultForm.controls['laneNumber'].invalid && resultForm.controls['laneNumber'].touched }">
-              <option [ngValue]="null" disabled>Pista...</option>
-              <option *ngFor="let lane of laneNumbers" [ngValue]="lane.laneNumber">
-                {{ lane.laneNumber }}
-              </option>
-            </select>
-            <div class="invalid-feedback">Seleccione una pista.</div>
-          </div>
+            <!-- Pista -->
+            <div class="col-md-6">
+              <label class="form-label">Pista *</label>
+              <select class="form-select" formControlName="laneNumber"
+                [ngClass]="{ 'is-invalid': resultForm.controls['laneNumber'].invalid && resultForm.controls['laneNumber'].touched }">
+                <option [ngValue]="null" disabled>Pista...</option>
+                <option *ngFor="let lane of laneNumbers" [ngValue]="lane.laneNumber">
+                  {{ lane.laneNumber }}
+                </option>
+              </select>
+              <div class="invalid-feedback">Seleccione una pista.</div>
+            </div>
 
-          <!-- Línea Jugada -->
-          <div class="col-md-6">
-            <label class="form-label">Línea Jugada *</label>
-            <select class="form-select" formControlName="lineNumber"
-              [ngClass]="{ 'is-invalid': resultForm.controls['lineNumber'].invalid && resultForm.controls['lineNumber'].touched }">
-              <option [ngValue]="null" disabled>Línea...</option>
-              <option *ngFor="let line of lineNumbers" [ngValue]="line.lineNumber">
-                {{ line.lineNumber }}
-              </option>
-            </select>
-            <div class="invalid-feedback">Seleccione una línea jugada.</div>
-          </div>
+            <!-- Línea Jugada -->
+            <div class="col-md-6">
+              <label class="form-label">Línea Jugada *</label>
+              <select class="form-select" formControlName="lineNumber"
+                [ngClass]="{ 'is-invalid': resultForm.controls['lineNumber'].invalid && resultForm.controls['lineNumber'].touched }">
+                <option [ngValue]="null" disabled>Línea...</option>
+                <option *ngFor="let line of lineNumbers" [ngValue]="line.lineNumber">
+                  {{ line.lineNumber }}
+                </option>
+              </select>
+              <div class="invalid-feedback">Seleccione una línea jugada.</div>
+            </div>
 
-          <!-- Puntaje -->
-          <div class="col-md-6">
-            <label class="form-label">Puntaje *</label>
-            <input formControlName="score" type="number" class="form-control" placeholder="Puntaje"
-              [ngClass]="{ 'is-invalid': resultForm.controls['score'].invalid && resultForm.controls['score'].touched }" />
-            <div class="invalid-feedback">Ingrese un puntaje válido.</div>
+            <!-- Puntaje -->
+            <div class="col-md-6">
+              <label class="form-label">Puntaje *</label>
+              <input formControlName="score" type="number" class="form-control" placeholder="Puntaje"
+                [ngClass]="{ 'is-invalid': resultForm.controls['score'].invalid && resultForm.controls['score'].touched }" />
+              <div class="invalid-feedback">Ingrese un puntaje válido.</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="modal-footer">
-        <div class="d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
-          <button type="submit" class="btn btn-success" [disabled]="resultForm.invalid">
-            Guardar
-          </button>
+        <div class="modal-footer">
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn btn-success" [disabled]="
+                    resultForm.invalid ||
+                    (!resultForm.value.personId && !resultForm.value.teamId) ||
+                    (!resultForm.value.personId && resultForm.value.teamId)
+                  ">
+              Guardar
+            </button>
+          </div>
         </div>
+      </form>
+    </div>
+    <ng-template #noRegs>
+      <div class="alert alert-warning text-center m-3">
+        No hay jugadores registrados en el torneo.
       </div>
-    </form>
+    </ng-template>
   </div>
 </ng-template>

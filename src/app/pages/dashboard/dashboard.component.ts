@@ -43,7 +43,7 @@ export class DashboardComponent {
    * Consulta la información del dashboard desde la API
    */
   getDashboard(): void {
-    this.http.get<{ success: boolean; message: string; data: any }>(`${this.apiUrl}/api/dashboard`)
+    this.http.get<{ success: boolean; message: string; data: any }>(`${this.apiUrl}/dashboard`)
       .subscribe({
         next: res => {
           const data = res.data;
