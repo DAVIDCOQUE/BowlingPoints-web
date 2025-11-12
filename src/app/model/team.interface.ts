@@ -10,5 +10,8 @@ export interface ITeam {
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
+
   members?: IUser[];
+  categoryId?: number;
+  modalityId?: number;
 }

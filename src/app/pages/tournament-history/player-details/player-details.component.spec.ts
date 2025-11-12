@@ -3,7 +3,9 @@ import { PlayerDetailsComponent } from './player-details.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { UserStatsApiService } from 'src/app/services/user-stats-api.service';
 import { environment } from 'src/environments/environment';
+import Swal from 'sweetalert2';
 
 describe('PlayerDetailsComponent', () => {
   let component: PlayerDetailsComponent;
@@ -12,10 +14,14 @@ describe('PlayerDetailsComponent', () => {
   let locationSpy: jasmine.SpyObj<Location>;
 
   beforeEach(async () => {
+    locationSpy = jasmine.createSpyObj('Location', ['back']);
+
     await TestBed.configureTestingModule({
       declarations: [PlayerDetailsComponent],
       imports: [HttpClientTestingModule],
       providers: [
+        UserStatsApiService,
+        { provide: Location, useValue: locationSpy },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -25,59 +31,48 @@ describe('PlayerDetailsComponent', () => {
               }
             }
           }
-        },
-        { provide: Location, useValue: jasmine.createSpyObj('Location', ['back']) }
+        }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PlayerDetailsComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
-    locationSpy = TestBed.inject(Location) as jasmine.SpyObj<Location>;
   });
 
   afterEach(() => {
     httpMock.verify();
   });
 
-  it('should create the component', () => {
-    fixture.detectChanges();
+it('should create the component and load statistics', () => {
+  const mockResponse = {
+    fullName: 'John Doe',
+    photoUrl: 'http://example.com/photo.jpg',
+    age: 30,
+    club: 'Club Central',
+    avgScore: 195,
+    bestGame: 280,
+    tournamentsWon: 3
+  };
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/user-stats/summary?userId=42`);
-    const mockResponse = {
-      success: true,
-      data: {
-        fullName: 'John Doe',
-        photoUrl: 'http://example.com/photo.jpg',
-        age: 30,
-        club: 'Club Central',
-        avgScore: 195,
-        bestGame: 280,
-        tournamentsWon: 3
-      }
-    };
-    req.flush(mockResponse);
+  fixture.detectChanges();
 
-    expect(component).toBeTruthy();
-    expect(component.statisticsUser).toEqual(mockResponse.data);
-  });
+  const req = httpMock.expectOne(`${environment.apiUrl}/api/user-stats/public-summary?userId=42`);
+  req.flush({ success: true, data: mockResponse }); // 👈 importante
+
+  fixture.detectChanges();
+
+  expect(component.statisticsUser).toEqual(mockResponse);
+});
+
+
 
   it('should call location.back when goBack() is called', () => {
-    fixture.detectChanges();
-
-    httpMock.expectOne(`${environment.apiUrl}/api/user-stats/summary?userId=42`)
-      .flush({ success: true, data: {} });
-
     component.goBack();
     expect(locationSpy.back).toHaveBeenCalled();
   });
 
   it('should fallback to default image on error', () => {
-    fixture.detectChanges();
-
-    httpMock.expectOne(`${environment.apiUrl}/api/user-stats/summary?userId=42`)
-      .flush({ success: true, data: {} });
-
     const mockEvent = { target: { src: 'old.jpg' } } as unknown as Event;
     component.onImgError(mockEvent, 'default.jpg');
 
@@ -85,21 +80,24 @@ describe('PlayerDetailsComponent', () => {
   });
 
   it('should not call API if userId is 0', () => {
-    //  Reconfiguramos el TestBed con un ActivatedRoute sin userId
+    // Override ActivatedRoute to return null
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       declarations: [PlayerDetailsComponent],
       imports: [HttpClientTestingModule],
       providers: [
+        UserStatsApiService,
+        { provide: Location, useValue: locationSpy },
         {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              paramMap: { get: () => null }
+              paramMap: {
+                get: () => null
+              }
             }
           }
-        },
-        { provide: Location, useValue: jasmine.createSpyObj('Location', ['back']) }
+        }
       ]
     }).compileComponents();
 
@@ -109,15 +107,24 @@ describe('PlayerDetailsComponent', () => {
 
     fixture.detectChanges();
 
-    httpMock.expectNone(`${environment.apiUrl}/api/user-stats/summary?userId=0`);
+    // No request should be made
+    httpMock.expectNone(`${environment.apiUrl}/api/user-stats/public-summary?userId=0`);
   });
 
-  it('should handle API error gracefully', () => {
+  it('should handle API error gracefully with Swal', () => {
+    spyOn(Swal, 'fire');
+
     fixture.detectChanges();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/user-stats/summary?userId=42`);
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/user-stats/public-summary?userId=42`);
     req.flush('error', { status: 500, statusText: 'Server Error' });
 
     expect(component.statisticsUser).toBeNull();
+    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
+      icon: 'error',
+      title: 'Error',
+      text: ' No se pudieron cargar las estadísticas del jugador.',
+      confirmButtonColor: '#dc3545',
+    }));
   });
 });

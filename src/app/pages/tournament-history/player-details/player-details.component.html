@@ -29,13 +29,13 @@
           <h5 class="card-title text-center">Detalles del Jugador</h5>
           <ul class="list-group list-group-flush">
             <li class="list-group-item">
-              <strong>Promedio:</strong> {{ statisticsUser?.avgScore }}
+              <strong>Promedio:</strong> {{ statisticsUser?.avgScore || 'N/A' }}
             </li>
             <li class="list-group-item">
-              <strong>Mejor Juego:</strong> {{ statisticsUser?.bestGame }}
+              <strong>Mejor Juego:</strong> {{ statisticsUser?.bestGame || 'N/A' }}
             </li>
             <li class="list-group-item">
-              <strong>Títulos Ganados:</strong> {{ statisticsUser?.tournamentsWon }}
+              <strong>Torneos Jugados:</strong> {{ statisticsUser?.totalTournaments || 'N/A' }}
             </li>
           </ul>
         </div>
