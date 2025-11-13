@@ -120,31 +120,64 @@
               <th *ngFor="let idx of [].constructor(maxJuegos); let i = index" scope="col">
                 L{{ i + 1 }}
               </th>
-              <th class="bg-light-secondary" scope="col">Total</th>
               <th class="bg-light-secondary" scope="col">Promedio</th>
+              <th class="bg-light-secondary" scope="col">Total</th>
             </tr>
           </thead>
 
-          <tbody *ngIf="players && players.length; else noPlayers">
-            <tr *ngFor="let player of players; let pos = index" [class.table-warning]="pos === 0"
-              [class.table-light]="pos === 1" [class.table-secondary]="pos === 2">
-              <td class="fw-bold" scope="row">{{ pos + 1 }}</td>
-              <td class="text-start">
-                <a [routerLink]="['/player-details', player.personId]"
-                  class="text-decoration-none text-dark fw-semibold player-zoom">
-                  <i class="bi bi-person-circle me-1"></i>
-                  {{ player.playerName }}
-                </a>
-              </td>
-              <td>{{ player.clubName }}</td>
-              <td *ngFor="let idx of [].constructor(maxJuegos); let i = index">
-                {{ player.scores && player.scores[i] !== undefined ? player.scores[i] : '-' }}
-              </td>
-              <td class="fw-bold text-primary">{{ player.total }}</td>
-              <td class="fw-bold text-success">
-                {{ player.promedio | number: '1.2-2' }}
-              </td>
-            </tr>
+          <tbody *ngIf="groupedResults && groupedResults.length; else noPlayers">
+            <ng-container *ngFor="let entry of groupedResults; let pos = index">
+
+              <!-- ===================== -->
+              <!-- FILA: JUGADOR INDIVIDUAL -->
+              <!-- ===================== -->
+              <tr *ngIf="!isTeamEntry(entry)" [ngClass]="{
+          'table-warning': !isTeamModality && pos === 0,
+          'table-light':    !isTeamModality && pos === 1,
+          'table-secondary':!isTeamModality && pos === 2
+        }">
+
+                <td class="fw-bold" scope="row">{{ pos + 1 }}</td>
+
+                <!-- Nombre del jugador -->
+                <td class="text-start">
+                  <a [routerLink]="['/player-details', entry.personId]"
+                    class="text-decoration-none text-dark fw-semibold player-zoom">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ entry.playerName }}
+                  </a>
+                </td>
+
+                <!-- Club -->
+                <td>{{ entry.clubName }}</td>
+
+                <!-- Puntajes -->
+                <td *ngFor="let idx of [].constructor(maxJuegos); let i = index">
+                  {{ entry.scores?.[i] !== undefined ? entry.scores[i] : '-' }}
+                </td>
+
+                <td class="fw-bold text-success">{{ entry.promedio | number:'1.2-2' }}</td>
+                <td class="fw-bold text-primary">{{ entry.total }}</td>
+              </tr>
+
+              <!-- ===================== -->
+              <!-- FILA: RESUMEN EQUIPO -->
+              <!-- ===================== -->
+              <tr *ngIf="isTeamEntry(entry)" class="table-success">
+                <td class="fw-bold"></td>
+
+                <!-- Nombre del equipo con ícono -->
+                <td colspan="2" class="text-start fw-bold">👥 {{ entry.teamName }}</td>
+
+                <!-- Columnas vacías para L1, L2, L3… -->
+                <td *ngFor="let idx of [].constructor(maxJuegos)"></td>
+
+                <!-- Total del equipo -->
+                <td class="fw-bold text-success">-</td>
+                <td class="fw-bold text-primary">{{ entry.total }}</td>
+              </tr>
+
+            </ng-container>
           </tbody>
 
           <!-- Sin jugadores -->

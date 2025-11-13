@@ -5,6 +5,9 @@ export interface IPlayerScore {
   scores: number[];
   total: number;
   promedio: number;
+
+  teamId?: number | null;
+  teamName?: string | null;
 }
 
 export interface IModality {

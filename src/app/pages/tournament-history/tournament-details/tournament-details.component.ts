@@ -28,6 +28,8 @@ export class TournamentDetailsComponent implements OnInit {
   public modalityId: number = Number(this.route.snapshot.paramMap.get('modalityId'));
   public roundNumber: number = 1;
 
+  public groupedResults: (IPlayerScore | { isTeam: true, teamName: string, total: number })[] = [];
+
   // Datos
   public players: IPlayerScore[] = [];
   public modalities: IModality[] = [];
@@ -41,6 +43,8 @@ export class TournamentDetailsComponent implements OnInit {
   public nombreModalidad: string = '';
 
   public maxJuegos: number = 0;
+
+  public isTeamModality = false;
 
   ngOnInit(): void {
     this.loadResultsTable();
@@ -58,10 +62,12 @@ export class TournamentDetailsComponent implements OnInit {
 
         this.resumenTorneo = data.tournament || null;
         this.players = data.results || [];
+        this.organizeResultsByTeam();
         this.modalities = data.modalities || [];
 
         const modalidadActual = this.modalities.find(m => m.modalityId === this.modalityId);
         this.nombreModalidad = modalidadActual?.name || 'Sin modalidad';
+        this.isTeamModality = this.nombreModalidad.toLowerCase().includes('equipo');
 
         this.rounds = data.rounds || [];
 
@@ -75,6 +81,49 @@ export class TournamentDetailsComponent implements OnInit {
         console.error(' Error cargando datos:', err);
       }
     });
+  }
+
+  organizeResultsByTeam(): void {
+    const teamMap = new Map<number, {
+      teamName: string;
+      members: IPlayerScore[];
+      total: number;
+    }>();
+
+    this.groupedResults = [];
+
+    for (let player of this.players) {
+      if (player.teamId) {
+        if (!teamMap.has(player.teamId)) {
+          teamMap.set(player.teamId, {
+            teamName: player.teamName || '',
+            members: [],
+            total: 0
+          });
+        }
+
+        const group = teamMap.get(player.teamId)!;
+        group.members.push(player);
+        group.total += player.total || 0;
+
+      } else {
+        // Jugadores sin equipo
+        this.groupedResults.push(player);
+      }
+    }
+
+    for (let group of teamMap.values()) {
+      this.groupedResults.push(...group.members);
+      this.groupedResults.push({
+        isTeam: true,
+        teamName: group.teamName,
+        total: group.total
+      });
+    }
+  }
+
+  isTeamEntry(entry: IPlayerScore | { isTeam: true; teamName: string; total: number }): entry is { isTeam: true; teamName: string; total: number } {
+    return 'isTeam' in entry;
   }
 
   /**
