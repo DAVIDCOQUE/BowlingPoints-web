@@ -5,12 +5,21 @@
     <!-- Filtro -->
     <div class="d-flex flex-column flex-md-row align-items-start gap-2">
       <div>
-        <input type="text" class="form-control form-control-sm" style="height: 36px; width: 250px;" placeholder="Buscar"
-          [(ngModel)]="filter" name="filter" />
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          style="height: 36px; width: 250px"
+          placeholder="Buscar"
+          [(ngModel)]="filter"
+          name="filter"
+        />
       </div>
       <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary btn-sm  align-items-center" style="height: 36px; width: 100px;"
-          (click)="clear()">
+        <button
+          class="btn btn-outline-secondary btn-sm align-items-center"
+          style="height: 36px; width: 100px"
+          (click)="clear()"
+        >
           <i class="fas fa-times me-1"></i> Limpiar
         </button>
       </div>
@@ -18,21 +27,28 @@
 
     <!-- Botón Crear -->
     <div>
-      <button class="btn btn-success btn-sm  align-items-center me-2" style="height: 36px; width: 150px;">
+      <button
+        class="btn btn-success btn-sm align-items-center me-2"
+        style="height: 36px; width: 150px"
+      >
         <i class="fas fa-file-excel"></i> Cargar Usuarios
       </button>
-      <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
-        (click)="openModal(modalUser)">
+      <button
+        class="btn btn-success btn-sm align-items-center"
+        style="height: 36px; width: 100px"
+        (click)="openModal(modalUser)"
+      >
         <i class="fas fa-plus-circle me-1"></i> Crear
       </button>
     </div>
   </div>
 
-  <hr>
+  <hr />
   <div class="card-body">
     <div class="table-responsive">
       <table
-        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
+        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle"
+      >
         <thead class="bg-light-secondary align-middle">
           <tr class="fw-bold">
             <th class="align-middle">N°</th>
@@ -52,38 +68,72 @@
             <td class="align-middle">{{ user.userId }}</td>
             <td class="align-middle">
               <div class="avatar-wrapper mx-auto">
-                <img [src]="apiUrl + user.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')"
-                  alt="Foto de perfil" width="40" height="40" class="rounded-circle avatar-img" />
+                <img
+                  [src]="apiUrl + user.photoUrl"
+                  (error)="onImgError($event, 'assets/img/perfilDefault.png')"
+                  alt="Foto de perfil"
+                  width="40"
+                  height="40"
+                  class="rounded-circle avatar-img"
+                />
               </div>
             </td>
             <td class="align-middle">
-              <a [routerLink]="['/player-details', user.userId]" class="player-zoom text-dark"
-                style="text-decoration: none; display: inline-block;">
+              <a
+                [routerLink]="['/detalle-jugador', user.userId]"
+                class="player-zoom text-dark"
+                style="text-decoration: none; display: inline-block"
+              >
                 {{ user.fullName }} {{ user.fullSurname }}
               </a>
             </td>
-            <td class="align-middle d-none d-md-table-cell">{{ user.document }}</td>
-            <td class="align-middle d-none d-md-table-cell">{{ user.email }}</td>
+            <td class="align-middle d-none d-md-table-cell">
+              {{ user.document }}
+            </td>
+            <td class="align-middle d-none d-md-table-cell">
+              {{ user.email }}
+            </td>
             <td class="align-middle">{{ user.gender }}</td>
             <td class="align-middle">{{ user.phone }}</td>
-            <td class="align-middle d-none d-sm-table-cell"> {{ getRoleNames(user) }}</td>
             <td class="align-middle d-none d-sm-table-cell">
-              <span class="badge" [ngClass]="(user.status ?? false) ? 'bg-success' : 'bg-danger'">
+              {{ getRoleNames(user) }}
+            </td>
+            <td class="align-middle d-none d-sm-table-cell">
+              <span
+                class="badge"
+                [ngClass]="user.status ?? false ? 'bg-success' : 'bg-danger'"
+              >
                 {{ getStatusLabel(user.status ?? false) }}
               </span>
             </td>
             <td class="align-middle">
               <div class="d-flex justify-content-center gap-2">
-                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
-                  style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
-                  (click)="editUser(user)">
+                <button
+                  class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                  style="
+                    background-color: rgba(0, 123, 255, 0.1);
+                    color: #007bff;
+                    border-radius: 0.5rem;
+                    min-width: 40px;
+                    height: 36px;
+                  "
+                  (click)="editUser(user)"
+                >
                   <i class="fas fa-edit"></i>
                 </button>
 
                 <!-- Botón Eliminar - Rojo suave -->
-                <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                <button
+                  class="btn btn-sm d-flex align-items-center justify-content-center px-2"
                   (click)="deleteUser(user.userId)"
-                  style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                  style="
+                    background-color: rgba(220, 53, 69, 0.1);
+                    color: #dc3545;
+                    border-radius: 0.5rem;
+                    min-width: 40px;
+                    height: 36px;
+                  "
+                >
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
@@ -96,12 +146,19 @@
 
   <ng-template #modalUser>
     <div class="modal-content">
-      <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+      <div
+        class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center"
+      >
         <h2 class="modal-title flex-grow-1 m-0">
-          {{ idUser ? 'Editar' : 'Crear' }} Usuario
+          {{ idUser ? "Editar" : "Crear" }} Usuario
         </h2>
-        <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
-          style="filter: brightness(0) invert(1);"></button>
+        <button
+          type="button"
+          class="btn-close btn-close-white ms-2"
+          aria-label="Close"
+          (click)="closeModal()"
+          style="filter: brightness(0) invert(1)"
+        ></button>
       </div>
 
       <div class="modal-body">
@@ -109,60 +166,112 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label"># Documento</label>
-              <input formControlName="document" type="text" class="form-control" placeholder="1.123.456.789" [ngClass]="{
-                'is-invalid': userForm.controls['document'].invalid && userForm.controls['document'].touched,
-                'is-valid': userForm.controls['document'].valid
-              }" />
+              <input
+                formControlName="document"
+                type="text"
+                class="form-control"
+                placeholder="1.123.456.789"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['document'].invalid &&
+                    userForm.controls['document'].touched,
+                  'is-valid': userForm.controls['document'].valid
+                }"
+              />
             </div>
             <div class="col-md-6">
-              <label class="form-label ">Fecha de nacimiento</label>
-              <input type="date" formControlName="birthDate" class="form-control" [ngClass]="{
-                'is-invalid':
-                  userForm.controls['birthDate'].invalid &&
-                  userForm.controls['birthDate'].touched,
-                'is-valid': userForm.controls['birthDate'].valid
-              }" />
+              <label class="form-label">Fecha de nacimiento</label>
+              <input
+                type="date"
+                formControlName="birthDate"
+                class="form-control"
+                [attr.max]="maxBirthDate | date : 'yyyy-MM-dd'"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['birthDate'].invalid &&
+                    userForm.controls['birthDate'].touched,
+                  'is-valid': userForm.controls['birthDate'].valid
+                }"
+              />
             </div>
 
             <div class="col-md-6">
               <label class="form-label">Nombres</label>
-              <input formControlName="fullName" type="text" class="form-control" placeholder="Nombre" [ngClass]="{
-                'is-invalid': userForm.controls['fullName'].invalid && userForm.controls['fullName'].touched,
-                'is-valid': userForm.controls['fullName'].valid
-              }" />
+              <input
+                formControlName="fullName"
+                type="text"
+                class="form-control"
+                placeholder="Nombre"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['fullName'].invalid &&
+                    userForm.controls['fullName'].touched,
+                  'is-valid': userForm.controls['fullName'].valid
+                }"
+              />
             </div>
 
             <div class="col-md-6">
               <label class="form-label">Apellidos</label>
-              <input formControlName="fullSurname" type="text" class="form-control" placeholder="Apellido" [ngClass]="{
-                'is-invalid': userForm.controls['fullSurname'].invalid && userForm.controls['fullSurname'].touched,
-                'is-valid': userForm.controls['fullSurname'].valid
-              }" />
+              <input
+                formControlName="fullSurname"
+                type="text"
+                class="form-control"
+                placeholder="Apellido"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['fullSurname'].invalid &&
+                    userForm.controls['fullSurname'].touched,
+                  'is-valid': userForm.controls['fullSurname'].valid
+                }"
+              />
             </div>
 
             <div class="col-md-6">
               <label class="form-label">Correo</label>
-              <input formControlName="email" type="email" class="form-control" placeholder="Correo" [ngClass]="{
-                'is-invalid': userForm.controls['email'].invalid && userForm.controls['email'].touched,
-                'is-valid': userForm.controls['email'].valid
-              }" />
+              <input
+                formControlName="email"
+                type="email"
+                class="form-control"
+                placeholder="Correo"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['email'].invalid &&
+                    userForm.controls['email'].touched,
+                  'is-valid': userForm.controls['email'].valid
+                }"
+              />
             </div>
 
             <div class="col-md-6">
               <label class="form-label">Teléfono</label>
-              <input formControlName="phone" type="number" class="form-control" placeholder="Teléfono" [ngClass]="{
-                              'is-invalid': userForm.controls['phone'].invalid && userForm.controls['phone'].touched,
-                              'is-valid': userForm.controls['phone'].valid
-                            }" />
+              <input
+                formControlName="phone"
+                type="number"
+                class="form-control"
+                placeholder="Teléfono"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['phone'].invalid &&
+                    userForm.controls['phone'].touched,
+                  'is-valid': userForm.controls['phone'].valid
+                }"
+              />
             </div>
 
             <!-- Select de Género -->
             <div class="col-md-6">
               <label class="form-label">Género</label>
-              <select class="form-select" formControlName="gender" [ngClass]="{
-                    'is-invalid': userForm.controls['gender'].invalid && userForm.controls['gender'].touched,
-                    'is-valid': userForm.controls['gender'].valid
-                  }">
+              <select
+                class="form-select"
+                formControlName="gender"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['gender'].invalid &&
+                    userForm.controls['gender'].touched,
+                  'is-valid': userForm.controls['gender'].valid
+                }"
+              >
                 <option [ngValue]="null" disabled>Seleccione un género</option>
                 <option *ngFor="let g of genders" [ngValue]="g">{{ g }}</option>
               </select>
@@ -170,10 +279,16 @@
 
             <div class="col-md-6">
               <label class="form-label">Estado</label>
-              <select class="form-select" formControlName="status" [ngClass]="{
-            'is-invalid': userForm.controls['status'].invalid && userForm.controls['status'].touched,
-            'is-valid': userForm.controls['status'].valid
-          }">
+              <select
+                class="form-select"
+                formControlName="status"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['status'].invalid &&
+                    userForm.controls['status'].touched,
+                  'is-valid': userForm.controls['status'].valid
+                }"
+              >
                 <option [ngValue]="null" disabled>Seleccione un estado</option>
                 <option *ngFor="let status of status" [ngValue]="status.valor">
                   {{ status.etiqueta }}
@@ -184,54 +299,112 @@
             <!-- Select múltiple de Roles con ng-select -->
             <div class="col-md-6">
               <label class="form-label">Roles</label>
-              <ng-select [items]="roles" bindLabel="name" bindValue="roleId" [multiple]="true" formControlName="roles"
+              <ng-select
+                [items]="roles"
+                bindLabel="name"
+                bindValue="roleId"
+                [multiple]="true"
+                formControlName="roles"
                 [ngClass]="{
-      'is-invalid': userForm.controls['roles'].invalid && userForm.controls['roles'].touched,
-      'is-valid': userForm.controls['roles'].valid
-    }">
+                  'is-invalid':
+                    userForm.controls['roles'].invalid &&
+                    userForm.controls['roles'].touched,
+                  'is-valid': userForm.controls['roles'].valid
+                }"
+              >
               </ng-select>
             </div>
 
             <!-- Select múltiple de Categorías con ng-select -->
             <div class="col-md-6">
               <label class="form-label">Categorías</label>
-              <ng-select [items]="categories" bindLabel="description" bindValue="categoryId" [multiple]="true"
-                formControlName="categories" [ngClass]="{
-      'is-invalid': userForm.controls['categories'].invalid && userForm.controls['categories'].touched,
-      'is-valid': userForm.controls['categories'].valid
-    }">
+              <ng-select
+                [items]="categories"
+                bindLabel="description"
+                bindValue="categoryId"
+                [multiple]="true"
+                formControlName="categories"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['categories'].invalid &&
+                    userForm.controls['categories'].touched,
+                  'is-valid': userForm.controls['categories'].valid
+                }"
+              >
               </ng-select>
             </div>
 
             <div class="col-md-6 position-relative">
               <label class="form-label">Contraseña</label>
-              <input [type]="showPassword ? 'text' : 'password'" formControlName="password" class="form-control pe-5"
-                placeholder="Contraseña" [ngClass]="{
-                'is-invalid': userForm.controls['password'].invalid && userForm.controls['password'].touched,
-                'is-valid': userForm.controls['password'].valid
-              }" />
-              <i class="fa-solid" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"
-                (click)="showPassword = !showPassword" (keydown.enter)="showPassword = !showPassword" tabindex="0"
-                role="button" aria-label="Mostrar u ocultar contraseña"
-                style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                class="form-control pe-5"
+                placeholder="Contraseña"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['password'].invalid &&
+                    userForm.controls['password'].touched,
+                  'is-valid': userForm.controls['password'].valid
+                }"
+              />
+              <i
+                class="fa-solid"
+                [class.fa-eye]="showPassword"
+                [class.fa-eye-slash]="!showPassword"
+                (click)="showPassword = !showPassword"
+                (keydown.enter)="showPassword = !showPassword"
+                tabindex="0"
+                role="button"
+                aria-label="Mostrar u ocultar contraseña"
+                style="
+                  position: absolute;
+                  top: 72%;
+                  right: 38px;
+                  transform: translateY(-50%);
+                  cursor: pointer;
+                "
+              >
               </i>
             </div>
 
             <div class="col-md-6 position-relative">
               <label class="form-label">Confirmar Contraseña</label>
-              <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirm"
-                class="form-control pe-5" placeholder="Confirmar Contraseña" [ngClass]="{
-                'is-invalid': userForm.controls['confirm'].invalid && userForm.controls['confirm'].touched,
-                'is-valid': userForm.controls['confirm'].valid
-              }" />
-              <i class="fa-solid" [class.fa-eye]="showConfirmPassword" [class.fa-eye-slash]="!showConfirmPassword"
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                formControlName="confirm"
+                class="form-control pe-5"
+                placeholder="Confirmar Contraseña"
+                [ngClass]="{
+                  'is-invalid':
+                    userForm.controls['confirm'].invalid &&
+                    userForm.controls['confirm'].touched,
+                  'is-valid': userForm.controls['confirm'].valid
+                }"
+              />
+              <i
+                class="fa-solid"
+                [class.fa-eye]="showConfirmPassword"
+                [class.fa-eye-slash]="!showConfirmPassword"
                 (click)="showConfirmPassword = !showConfirmPassword"
-                (keydown.enter)="showConfirmPassword = !showConfirmPassword" tabindex="0" role="button"
+                (keydown.enter)="showConfirmPassword = !showConfirmPassword"
+                tabindex="0"
+                role="button"
                 aria-label="Mostrar u ocultar confirmación de contraseña"
-                style="position: absolute; top: 72%; right: 38px; transform: translateY(-50%); cursor: pointer;">
+                style="
+                  position: absolute;
+                  top: 72%;
+                  right: 38px;
+                  transform: translateY(-50%);
+                  cursor: pointer;
+                "
+              >
               </i>
             </div>
-            <div class="invalid-feedback d-block" *ngIf="passwordMismatchVisible">
+            <div
+              class="invalid-feedback d-block"
+              *ngIf="passwordMismatchVisible"
+            >
               Las contraseñas no coinciden.
             </div>
           </div>
@@ -240,12 +413,29 @@
 
       <div class="modal-footer">
         <div class="d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
-          <button type="button" class="btn btn-success" [disabled]="userForm.invalid || loading" (click)="saveForm()">
-            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            {{ idUser ? 'Actualizar' : 'Guardar' }}
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="closeModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            [disabled]="userForm.invalid || loading"
+            (click)="saveForm()"
+          >
+            <span
+              *ngIf="loading"
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            {{ idUser ? "Actualizar" : "Guardar" }}
           </button>
         </div>
       </div>
     </div>
   </ng-template>
+</div>
