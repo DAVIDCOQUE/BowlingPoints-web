@@ -12,8 +12,8 @@
       <div class="card shadow-lg">
         <div class="card-body text-center">
           <!-- Foto del jugador -->
-          <img [src]="apiUrl + statisticsUser?.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')" class="rounded-circle img-fluid"
-            style="width: 150px; height: 150px; object-fit: cover" />
+          <img [src]="apiUrl + statisticsUser?.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')"
+            class="rounded-circle img-fluid" style="width: 150px; height: 150px; object-fit: cover" />
           <!-- Nombre del jugador -->
           <h3 class="my-3">{{ statisticsUser?.fullName }}</h3>
           <!-- Edad del jugador -->
@@ -29,10 +29,14 @@
           <h5 class="card-title text-center">Detalles del Jugador</h5>
           <ul class="list-group list-group-flush">
             <li class="list-group-item">
-              <strong>Promedio:</strong> {{ statisticsUser?.avgScore || 'N/A' }}
+              <strong>Promedio:</strong>
+              {{ statisticsUser?.avgScore != null ? (statisticsUser.avgScore | number:'1.0-2') : 'N/A' }}
             </li>
+
+            <!-- MEJOR JUEGO -->
             <li class="list-group-item">
-              <strong>Mejor Juego:</strong> {{ statisticsUser?.bestGame || 'N/A' }}
+              <strong>Mejor Juego:</strong>
+              {{ statisticsUser?.bestGame != null ? (statisticsUser.bestGame | number:'1.0-2') : 'N/A' }}
             </li>
             <li class="list-group-item">
               <strong>Torneos Jugados:</strong> {{ statisticsUser?.totalTournaments || 'N/A' }}
