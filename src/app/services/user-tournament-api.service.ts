@@ -13,17 +13,9 @@ export class UserTournamentApiService {
   /**
    * Obtiene los torneos jugados por un usuario
    */
-  getTorneosJugados(userId: number): Observable<IUserTournament[]> {
-    return this.http.get<{ success: boolean; message: string; data: IUserTournament[] }>(
-      `${this.apiUrl}/user-tournaments/${userId}/played`
+  getTorneosAgrupados(userId: number): Observable<{ active: IUserTournament[], finished: IUserTournament[] }> {
+    return this.http.get<{ success: boolean; message: string; data: { active: IUserTournament[], finished: IUserTournament[] } }>(
+      `${this.apiUrl}/user-tournaments/player/${userId}/grouped`
     ).pipe(map(res => res.data));
-  }
-
-  /**
-   * Obtiene los torneos inscritos por un usuario
-   */
-  getTorneosInscriptos(userId: number): Observable<IUserTournament[]> {
-    return this.http.get<{ success: boolean; message: string; data: IUserTournament[] }>(
-      `${this.apiUrl}/user-tournaments/${userId}/played`).pipe(map(res => res.data));
   }
 }

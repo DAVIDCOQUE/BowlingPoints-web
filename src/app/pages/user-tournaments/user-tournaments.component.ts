@@ -20,7 +20,9 @@ export class UserTournamentsComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   public userId: number = 0;
-  public torneosJugados: IUserTournament[] = [];
+  public torneosActivos: IUserTournament[] = [];
+  public torneosFinalizados: IUserTournament[] = [];
+
 
   public resultadosTorneo: Record<string, unknown> | null = null;
   public estadisticasGenerales: Record<string, unknown> | null = null;
@@ -44,30 +46,16 @@ export class UserTournamentsComponent implements OnInit {
    * Carga los torneos jugados por el usuario actual.
    */
   cargarTorneosJugados(): void {
-    this.userTournamentApi.getTorneosJugados(this.userId).subscribe({
-      next: (torneos) => (this.torneosJugados = torneos),
-      error: () => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudieron cargar los torneos jugados.',
-          confirmButtonColor: '#dc3545',
-        });
+    this.userTournamentApi.getTorneosAgrupados(this.userId).subscribe({
+      next: (torneos) => {
+        this.torneosActivos = torneos.active;
+        this.torneosFinalizados = torneos.finished;
       },
-    });
-  }
-
-  /**
-   * Carga los torneos en los que el usuario está inscrito.
-   */
-  cargarTorneosInscriptos(): void {
-    this.userTournamentApi.getTorneosInscriptos(this.userId).subscribe({
-      next: (torneos) => (this.torneosJugados = torneos),
       error: () => {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'No se pudieron cargar los torneos inscritos.',
+          text: 'No se pudieron cargar los torneos del usuario.',
           confirmButtonColor: '#dc3545',
         });
       },
@@ -108,4 +96,10 @@ export class UserTournamentsComponent implements OnInit {
       return null;
     }
   }
+
+  getNombres(items: { name: string }[] | null | undefined): string {
+    return items?.length ? items.map(i => i.name).join(' / ') : 'No especificada';
+  }
+
+
 }
