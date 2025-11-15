@@ -24,6 +24,15 @@ describe('TournamentsComponent', () => {
   let categoryApiServiceSpy: jasmine.SpyObj<CategoryApiService>;
   let modalSpy: jasmine.SpyObj<NgbModal>;
 
+  function mockLoadData() {
+    tournamentsServiceSpy.getTournaments.and.returnValue(of({ success: true, message: '', data: [] }));
+    modalityApiServiceSpy.getActiveModalities.and.returnValue(of({ success: true, message: '', data: [] }));
+    categoryApiServiceSpy.getActiveCategories.and.returnValue(of({ success: true, message: '', data: [] }));
+    ambitApiServiceSpy.getActiveAmbits.and.returnValue(of({ success: true, message: '', data: [] }));
+    tournamentsServiceSpy.getDepartments.and.returnValue(of([]));
+    branchesServiceSpy.getAll.and.returnValue(of([]));
+  }
+
   const mockTournament = {
     tournamentId: 1,
     name: 'Torneo Prueba',
@@ -165,15 +174,26 @@ describe('TournamentsComponent', () => {
 
   // ------------------ SAVE FORM ------------------
   it('should save new tournament successfully', fakeAsync(() => {
-    spyOn(Swal, 'fire');
-    component.initForm();
+    const fireSpy = spyOn(Swal, 'fire');
+
+    mockLoadData();
+    tournamentsServiceSpy.createTournament.and.returnValue(of({ success: true }));
+
+    component.ngOnInit();
+    fixture.detectChanges(); // 👈 IMPORTANTE para activar validaciones
+
+    component.modalities = [{ modalityId: 1, name: 'Mod A', status: true }];
+    component.categories = [{ categoryId: 1, name: 'Cat A', status: true }];
+    component.ambits = [{ ambitId: 1, name: 'Nacional' }];
+    component.branches = [{ branchId: 1, name: 'Branch A', description: '', status: true }];
+
     component.tournamentForm.patchValue({
       name: 'Nuevo Torneo',
       organizer: 'Org',
       modalityIds: [1],
       categoryIds: [1],
-      startDate: '2025-01-01',
-      endDate: '2025-01-02',
+      startDate: '2099-01-01',
+      endDate: '2099-01-02',
       ambitId: 1,
       branchIds: [1],
       location: 'Loc',
@@ -181,25 +201,39 @@ describe('TournamentsComponent', () => {
       status: true
     });
 
-    tournamentsServiceSpy.createTournament.and.returnValue(of({ success: true }));
-    tournamentsServiceSpy.getTournaments.and.returnValue(of({ success: true, message: '', data: [] }));
-
     component.saveForm();
     tick();
 
-    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Torneo creado', 'success');
+    expect(fireSpy).toHaveBeenCalledWith('Éxito', 'Torneo creado', 'success');
   }));
 
   it('should handle error when saving tournament', fakeAsync(() => {
-    spyOn(Swal, 'fire');
-    component.initForm();
+    const fireSpy = spyOn(Swal, 'fire');
+
+    // 🔥 Necesario para evitar undefined.subscribe()
+    mockLoadData();
+
+    tournamentsServiceSpy.createTournament.and.returnValue(
+      throwError(() => ({
+        error: { message: 'Error al guardar' }
+      }))
+    );
+
+    component.ngOnInit();
+    fixture.detectChanges();
+
+    component.modalities = [{ modalityId: 1, name: 'Mod A', status: true }];
+    component.categories = [{ categoryId: 1, name: 'Cat A', status: true }];
+    component.ambits = [{ ambitId: 1, name: 'Nacional' }];
+    component.branches = [{ branchId: 1, name: 'Branch A', description: '', status: true }];
+
     component.tournamentForm.patchValue({
       name: 'Nuevo Torneo',
       organizer: 'Org',
       modalityIds: [1],
       categoryIds: [1],
-      startDate: '2025-01-01',
-      endDate: '2025-01-02',
+      startDate: '2099-01-01',
+      endDate: '2099-01-02',
       ambitId: 1,
       branchIds: [1],
       location: 'Loc',
@@ -207,17 +241,14 @@ describe('TournamentsComponent', () => {
       status: true
     });
 
-    tournamentsServiceSpy.createTournament.and.returnValue(
-      throwError(() => ({ error: { message: 'Error al guardar' } }))
-    );
-
     component.saveForm();
     tick();
 
-    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
+    expect(fireSpy).toHaveBeenCalledWith(jasmine.objectContaining({
       icon: 'error',
       title: 'Error al guardar torneo',
-      text: 'Error al guardar'
+      text: 'Error al guardar',
+      confirmButtonText: 'Aceptar'
     }));
   }));
 
