@@ -59,7 +59,7 @@
     </div>
     <div class="col-md-4 mt-3" *ngIf="mayorLinea">
       <p class="mb-1">
-        <b>🔥 Mayor línea:</b> {{ mayorLinea?.score }} - {{ mayorLinea?.playerName }} (L{{ mayorLinea?.lineNumber }})
+        <b>🔥 Mayor línea:</b> {{ mayorLinea.score }} - {{ mayorLinea.playerName }} (L{{ mayorLinea.lineNumber }})
       </p>
     </div>
   </div>
@@ -153,7 +153,7 @@
 
                 <!-- Puntajes -->
                 <td *ngFor="let idx of [].constructor(maxJuegos); let i = index">
-                  {{ entry.scores?.[i] !== undefined ? entry.scores[i] : '-' }}
+                  {{ entry.scores && entry.scores[i] !== undefined ? entry.scores[i] : '-' }}
                 </td>
 
                 <td class="fw-bold text-success">{{ entry.promedio | number:'1.2-2' }}</td>
