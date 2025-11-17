@@ -59,7 +59,7 @@
           <div class="col-md-4">
             <i class="fas fa-layer-group text-primary me-2"></i>
             <strong>Categorías:</strong>
-            <span *ngIf="categories?.length; else noCat">
+            <span *ngIf="categories.length; else noCat">
               <span *ngFor="let cat of categories; let i = index">
                 {{ cat.name }}<span *ngIf="i < categories.length - 1">, </span>
               </span>
@@ -70,7 +70,7 @@
           <div class="col-md-4">
             <i class="fas fa-puzzle-piece text-success me-2"></i>
             <strong>Modalidades:</strong>
-            <span *ngIf="modalities?.length; else noMod">
+            <span *ngIf="modalities.length; else noMod">
               <span *ngFor="let mod of modalities; let i = index">
                 {{ mod.name }}<span *ngIf="i < modalities.length - 1">, </span>
               </span>
@@ -81,7 +81,7 @@
           <div class="col-md-4">
             <i class="fas fa-venus-mars text-danger me-2"></i>
             <strong>Ramas:</strong>
-            <span *ngIf="branches?.length; else noBranch">
+            <span *ngIf="branches.length; else noBranch">
               <span *ngFor="let branch of branches; let i = index">
                 {{ branch.name }}<span *ngIf="i < branches.length - 1">, </span>
               </span>
@@ -282,7 +282,7 @@
                 </div>
               </td>
             </tr>
-            <tr *ngIf="!filteredResults?.length">
+            <tr *ngIf="!filteredResults.length">
               <td colspan="12" class="text-muted py-3">No hay resultados disponibles.</td>
             </tr>
           </tbody>

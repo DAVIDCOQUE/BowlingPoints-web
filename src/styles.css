@@ -65,3 +65,18 @@ body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+.fa-mars {
+  color: #007bff !important; 
+}
+
+.fa-venus {
+  color: #e83e8c !important;
+}
+
+/* Asegura tamaño y alineación */
+.fa-solid {
+  font-size: 1.1rem;
+  vertical-align: middle;
+}
+

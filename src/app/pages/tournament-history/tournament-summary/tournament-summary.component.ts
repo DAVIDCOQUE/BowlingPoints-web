@@ -15,10 +15,9 @@ import { ITournament } from 'src/app/model/tournament.interface';
 @Component({
   selector: 'app-tournament-summary',
   templateUrl: './tournament-summary.component.html',
-  styleUrls: ['./tournament-summary.component.css']
+  styleUrls: ['./tournament-summary.component.css'],
 })
 export class TournamentSummaryComponent implements OnInit {
-
   // Estado de carga
   isLoading$ = new BehaviorSubject<boolean>(false);
 
@@ -32,7 +31,6 @@ export class TournamentSummaryComponent implements OnInit {
   branches: IBranch[] = [];
   // Jugadores registrados en el torneo
   players: ITournamentRegistration[] = [];
-
 
   // Inyección de dependencias
   private readonly http = inject(HttpClient);
@@ -54,29 +52,41 @@ export class TournamentSummaryComponent implements OnInit {
   loadTournamentById(id: number): void {
     this.isLoading$.next(true);
 
-    this.tournamentsService.getTournamentById(id)
+    this.tournamentsService
+      .getTournamentById(id)
       .pipe(finalize(() => this.isLoading$.next(false)))
       .subscribe({
         next: (response) => {
           this.selectedTournament = response.data ?? null;
           this.categories = response.data?.categories ?? [];
           this.modalities = response.data?.modalities ?? [];
-          this.branches =
-            (response.data?.branchPlayerCounts && response.data.branchPlayerCounts.length > 0)
+          const rawBranches =
+            response.data?.branchPlayerCounts &&
+            response.data.branchPlayerCounts.length > 0
               ? response.data.branchPlayerCounts
-              : (response.data?.branches && response.data.branches.length > 0)
-                ? response.data.branches
-                : [];
+              : response.data?.branches && response.data.branches.length > 0
+              ? response.data.branches
+              : [];
+
+          this.branches = rawBranches.map((b: any) => ({
+            ...b,
+            name: b.name ?? b.branchName ?? '', 
+          }));
+
           this.players = response.data?.tournamentRegistrations ?? [];
 
           if (!this.selectedTournament) {
-            Swal.fire('Atención', 'No se encontró el torneo solicitado', 'info');
+            Swal.fire(
+              'Atención',
+              'No se encontró el torneo solicitado',
+              'info'
+            );
           }
         },
         error: (err) => {
           console.error('Error al cargar torneo:', err);
           Swal.fire('Error', 'No se pudo cargar el torneo', 'error');
-        }
+        },
       });
   }
   /**
