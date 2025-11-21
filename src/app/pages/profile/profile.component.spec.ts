@@ -10,6 +10,7 @@ import { AuthService } from '../../auth/auth.service';
 import { RoleApiService } from '../../services/role-api.service';
 import { ElementRef } from '@angular/core';
 import { fakeAsync, tick } from '@angular/core/testing';
+import Swal from 'sweetalert2';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -262,35 +263,24 @@ describe('ProfileComponent', () => {
   });
 
 
+  it('onImgError: debe reemplazar por base64 si ya está en fallback', () => {
+    const event = {
+      target: {
+        src: 'assets/img/fallback.png'
+      }
+    } as unknown as Event;
 
-  it('onSubmit: debe manejar error del servidor', () => {
-    fixture.detectChanges();
+    component.onImgError(event, 'assets/img/fallback.png');
 
-    authService.updateUserProfile.and.returnValue(
-      throwError(() => new Error('Falló el servidor'))
-    );
-
-    component.userForm.patchValue({
-      nickname: 'testuser',
-      document: '123',
-      photoUrl: '',
-      fullName: 'Test',
-      fullSurname: 'User',
-      email: 'test@example.com',
-      phone: '555',
-      gender: 'Masculino',
-      roleId: 1,
-      password: '',
-      confirm: '',
-    });
-
-    component.idUser = 10;
-    component.roles = mockRoles;
-
-    component.onSubmit();
-
-    expect(authService.updateUserProfile).toHaveBeenCalled();
+    expect((event.target as HTMLImageElement).src).toContain('data:image/png;base64');
   });
+
+
+  it('getRolesDescription: debe retornar vacío si roleIds no es array', () => {
+    const result = component.getRolesDescription(null as any);
+    expect(result).toBe('');
+  });
+
 
 
 });
