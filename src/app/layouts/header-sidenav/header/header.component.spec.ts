@@ -89,4 +89,28 @@ describe('HeaderComponent', () => {
     expect(localStorage.clear).not.toHaveBeenCalled();
     expect(mockRouter.navigate).not.toHaveBeenCalled();
   });
+
+  it('should handle unexpected Swal response gracefully', async () => {
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({}) as any);
+    spyOn(localStorage, 'clear');
+
+    await component.logout();
+
+    expect(Swal.fire).toHaveBeenCalled();
+    expect(localStorage.clear).not.toHaveBeenCalled();
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+  });
+
+  it('should handle null decoded token gracefully in ngOnInit', () => {
+    mockAuthService.isGuest.and.returnValue(false);
+    mockAuthService.decodeToken.and.returnValue(null);
+
+    component.ngOnInit();
+
+    expect(component.isGuest).toBeFalse();
+    expect(component.userEmail).toBeNull();
+    expect(component.userDocument).toBeNull();
+    expect(component.userRole).toBe('INVITADO');
+  });
+
 });

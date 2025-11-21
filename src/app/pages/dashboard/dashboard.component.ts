@@ -63,8 +63,6 @@ export class DashboardComponent {
 
   /**
    * Maneja errores al cargar imágenes (reemplaza por una imagen por defecto)
-   * @param event Evento del error
-   * @param defaultPath Ruta de la imagen por defecto
    */
   onImgError(event: Event, defaultPath: string): void {
     const target = event.target as HTMLImageElement;
@@ -81,7 +79,6 @@ export class DashboardComponent {
 
   /**
    * Retorna las categorías de un torneo como cadena
-   * @param tournament Torneo con categorías
    */
   getCategoriesString(tournament: ITournament): string {
     return tournament?.categories?.map(c => c.name).join(', ') || '-';

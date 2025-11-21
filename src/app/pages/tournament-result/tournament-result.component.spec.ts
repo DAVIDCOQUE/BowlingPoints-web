@@ -542,5 +542,94 @@ describe('TournamentResultComponent', () => {
     );
   });
 
+  it('should handle error in saveResult()', fakeAsync(() => {
+    component.tournamentId = 1;
+    component.initResultForm();
+    component.resultForm.patchValue({
+      personId: 1,
+      teamId: 2,
+      categoryId: 1,
+      modalityId: 1,
+      branchId: 1,
+      roundNumber: 1,
+      laneNumber: 1,
+      lineNumber: 1,
+      score: 100,
+    });
+
+    spyOn(Swal, 'fire');
+    component.saveResult();
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/results`);
+    req.flush({ message: 'Error en backend' }, { status: 500, statusText: 'Server Error' });
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'Error en backend', 'error');
+  }));
+
+  it('should save a new team (POST)', fakeAsync(() => {
+    component.tournamentId = 1;
+    component.idTeam = null;
+    component.initTeamForm();
+
+    component.teamForm.patchValue({
+      nameTeam: 'Equipo A',
+      phone: '123456',
+      playerIds: [1, 2],
+      categoryId: 1,
+      modalityId: 1,
+      status: true
+    });
+
+    spyOn(Swal, 'fire');
+    spyOn(component, 'closeModal');
+    spyOn(component, 'loadRegisteredPlayers');
+
+    component.saveTeam();
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/teams`);
+    expect(req.request.method).toBe('POST');
+    req.flush({}); // Simulamos respuesta exitosa
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Equipo creado correctamente', 'success');
+    expect(component.closeModal).toHaveBeenCalled();
+    expect(component.loadRegisteredPlayers).toHaveBeenCalled();
+  }));
+
+  it('should update an existing team (PUT)', fakeAsync(() => {
+    component.tournamentId = 1;
+    component.idTeam = 123;
+    component.initTeamForm();
+
+    component.teamForm.patchValue({
+      nameTeam: 'Equipo Editado',
+      phone: '987654',
+      playerIds: [3, 4],
+      categoryId: 1,
+      modalityId: 1,
+      status: true
+    });
+
+    spyOn(Swal, 'fire');
+    spyOn(component, 'closeModal');
+    spyOn(component, 'loadRegisteredPlayers');
+
+    component.saveTeam();
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/teams/123`);
+    expect(req.request.method).toBe('PUT');
+    req.flush({});
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Equipo actualizado correctamente', 'success');
+    expect(component.closeModal).toHaveBeenCalled();
+    expect(component.loadRegisteredPlayers).toHaveBeenCalled();
+  }));
+
+
 });
 

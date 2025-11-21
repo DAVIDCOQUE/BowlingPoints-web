@@ -145,4 +145,33 @@ describe('DashboardComponent', () => {
     component.onImgError(event, defaultPath);
     expect((event.target as HTMLImageElement).src).toBe(defaultPath);
   });
+
+  it('getModalitiesString returns "-" when tournament is null', () => {
+    const result = component.getModalitiesString(null as any);
+    expect(result).toBe('-');
+  });
+
+  it('getCategoriesString returns "-" when tournament is null', () => {
+    const result = component.getCategoriesString(null as any);
+    expect(result).toBe('-');
+  });
+
+
+  it('should handle undefined properties in dashboard response gracefully', fakeAsync(() => {
+    component.getDashboard();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/dashboard`);
+    req.flush({ success: true, message: 'OK', data: {} });
+
+    tick();
+
+    expect(component.inProgressTournaments).toEqual([]);
+    expect(component.scheduledOrPostponedTournaments).toEqual([]);
+    expect(component.topPlayers).toEqual([]);
+    expect(component.ambits).toEqual([]);
+  }));
+
+
+
+
 });
