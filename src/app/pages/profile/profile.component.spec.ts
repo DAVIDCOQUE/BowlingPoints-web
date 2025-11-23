@@ -23,6 +23,22 @@ describe('ProfileComponent', () => {
     { roleId: 2, name: 'Usuario' },
   ];
 
+  const mockFile = new File(['dummy content'], 'avatar.png', { type: 'image/png' });
+
+  const event = {
+    target: {
+      files: [mockFile]
+    }
+  } as unknown as Event;
+
+
+
+  const mockReader = {
+    readAsDataURL: jasmine.createSpy('readAsDataURL'),
+    onload: null as ((this: FileReader, ev: Event) => any) | null,
+    result: 'data:image/png;base64,dummydata'
+  };
+
   const mockUser: IUser = {
     userId: 10,
     personId: 101,
@@ -281,6 +297,102 @@ describe('ProfileComponent', () => {
     expect(result).toBe('');
   });
 
+
+
+  it('previewAvatar: debe salir si no hay archivo', () => {
+    const event = {
+      target: {
+        files: []
+      }
+    } as unknown as Event;
+
+    // Evita errores por acceso a campos no inicializados
+    component.userForm = component['fb'].group({ photoUrl: [''] });
+    component.avatarPreviewRef = { nativeElement: {} } as any;
+
+    component.previewAvatar(event);
+
+    // No cambia nada si no hay archivo
+    expect(component.userForm.get('photoUrl')?.value).toBe('');
+  });
+
+  it('previewAvatar: debe cargar imagen y actualizar formulario', () => {
+    const mockFile = new File(['dummy content'], 'avatar.png', { type: 'image/png' });
+
+    const event = {
+      target: {
+        files: [mockFile]
+      }
+    } as unknown as Event;
+
+    const mockReader = {
+      readAsDataURL: jasmine.createSpy('readAsDataURL'),
+      onload: null as ((this: FileReader, ev: Event) => any) | null,
+      result: 'data:image/png;base64,dummydata'
+    };
+
+    // Spy correctamente colocado dentro del `it`
+    spyOn(window as any, 'FileReader').and.returnValue(mockReader);
+
+    const mockNativeElement = { src: '' };
+    component.avatarPreviewRef = { nativeElement: mockNativeElement } as ElementRef;
+
+    component.userForm = component['fb'].group({ photoUrl: [''] });
+
+    component.previewAvatar(event);
+
+    //  Simular onload correctamente
+    if (mockReader.onload) {
+      mockReader.onload.call(mockReader as any, new Event('load'));
+    }
+
+    expect(component.userForm.get('photoUrl')?.value).toContain('data:image/');
+    expect(component.avatarPreviewRef.nativeElement.src).toContain('data:image/');
+  });
+
+
+  it('onSubmit: debe manejar error al actualizar usuario', () => {
+    fixture.detectChanges();
+
+    component.userForm.patchValue({
+      nickname: 'testuser',
+      document: '123',
+      photoUrl: '',
+      fullName: 'Test',
+      fullSurname: 'User',
+      email: 'test@example.com',
+      phone: '555',
+      gender: 'Masculino',
+      roleId: 1,
+      password: '',
+      confirm: '',
+    });
+
+    component.idUser = 10;
+    component.roles = mockRoles;
+
+    const error = new Error('Error al actualizar');
+    authService.updateUserProfile.and.returnValue(throwError(() => error));
+    const consoleSpy = spyOn(console, 'error');
+    const swalSpy = spyOn(Swal, 'fire');
+
+    component.onSubmit();
+
+    expect(consoleSpy).toHaveBeenCalledWith('Error al actualizar usuario:', error);
+    expect(swalSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        title: 'Error',
+        icon: 'error',
+      })
+    );
+  });
+
+  it('getRoles: debe manejar error correctamente', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    roleService.getAll.and.returnValue(throwError(() => new Error('Error en getAll')));
+    component.getRoles();
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error al cargar roles:', jasmine.any(Error));
+  });
 
 
 });

@@ -364,4 +364,177 @@ describe('TournamentsComponent', () => {
       text: 'Error al eliminar'
     }));
   }));
+
+
+  it('should return "-" if tournament is null in getModalitiesString', () => {
+    expect(component.getModalitiesString(null as any)).toBe('-');
+  });
+
+  it('should return modalities string', () => {
+    const tournament = {
+      modalities: [{ name: 'Individual' }, { name: 'Dobles' }]
+    } as any;
+    expect(component.getModalitiesString(tournament)).toBe('Individual, Dobles');
+  });
+
+  it('should return "-" if modalities is not an array', () => {
+    expect(component.getModalitiesString({ modalities: null } as any)).toBe('-');
+  });
+
+  it('should return "-" if categories is not an array', () => {
+    expect(component.getCategoriesString({ categories: null } as any)).toBe('-');
+  });
+
+  it('should return "-" if branches is not an array', () => {
+    expect(component.getBranchesString({ branches: null } as any)).toBe('-');
+  });
+
+  it('should handle error on getTournaments', () => {
+    spyOn(console, 'error');
+    tournamentsServiceSpy.getTournaments.and.returnValue(
+      throwError(() => new Error('Error de prueba'))
+    );
+
+    component.getTournaments();
+
+    expect(console.error).toHaveBeenCalledWith('Error al cargar torneos:', jasmine.any(Error));
+  });
+
+  it('should handle error on getModalities', () => {
+    spyOn(console, 'error');
+    modalityApiServiceSpy.getActiveModalities.and.returnValue(
+      throwError(() => new Error('Error de prueba'))
+    );
+
+    component.getModalities();
+
+    expect(console.error).toHaveBeenCalledWith('Error al cargar modalidades:', jasmine.any(Error));
+  });
+
+  it('should handle error on getCategories', () => {
+    spyOn(console, 'error');
+    categoryApiServiceSpy.getActiveCategories.and.returnValue(
+      throwError(() => new Error('Error de prueba'))
+    );
+
+    component.getCategories();
+
+    expect(console.error).toHaveBeenCalledWith('Error al cargar categorías:', jasmine.any(Error));
+  });
+
+  it('should handle error on getAmbits', () => {
+    spyOn(console, 'error');
+    ambitApiServiceSpy.getActiveAmbits.and.returnValue(
+      throwError(() => new Error('Error de prueba'))
+    );
+
+    component.getAmbits();
+
+    expect(console.error).toHaveBeenCalledWith('Error al cargar ámbitos:', jasmine.any(Error));
+  });
+
+  it('should handle error on getBranches', () => {
+    spyOn(console, 'error');
+    branchesServiceSpy.getAll.and.returnValue(
+      throwError(() => new Error('Error de prueba'))
+    );
+
+    component.getBranches();
+
+    expect(console.error).toHaveBeenCalledWith('Error al cargar ramas:', jasmine.any(Error));
+  });
+
+  it('should not save if form is invalid', () => {
+    component.initForm();
+    component.tournamentForm.patchValue({ name: '' }); // Deja requerido vacío
+    spyOn(component.tournamentForm, 'markAllAsTouched');
+    component.saveForm();
+    expect(component.tournamentForm.markAllAsTouched).toHaveBeenCalled();
+  });
+
+  it('should warn if no content provided to openModal', () => {
+    spyOn(console, 'warn');
+    component.openModal(null);
+    expect(console.warn).toHaveBeenCalledWith('No se proporcionó contenido para abrir el modal.');
+  });
+
+  it('should return all tournaments if no filter is set', () => {
+    component.tournaments = [{ name: 'Torneo X' }] as any;
+    component.filter = '';
+    const result = component.filteredTournaments;
+    expect(result.length).toBe(1);
+  });
+
+  it('should format numeric date in toYMDStrict', () => {
+    // Fecha UTC segura (mediodía)
+    const date = new Date(Date.UTC(2025, 10, 10, 12, 0, 0));
+    const dateNum = date.getTime();
+
+    const result = component.toYMDStrict(dateNum);
+    expect(result).toBe('2025-11-10');
+  });
+
+  it('should return all tournaments if filter is empty', () => {
+    component.tournaments = [{ name: 'Torneo 1' } as any];
+    component.filter = '';
+    const result = component.filteredTournaments;
+    expect(result.length).toBe(1);
+  });
+
+  it('should set idTournament to null if tournamentId is missing', () => {
+    component.editTournament({} as any);
+    expect(component.idTournament).toBeNull();
+  });
+
+  it('should handle error in getDepartments()', () => {
+    const error = new Error('Error de prueba');
+    tournamentsServiceSpy.getDepartments.and.returnValue(throwError(() => error));
+
+    const consoleSpy = spyOn(console, 'error');
+
+    component.getDepartments();
+
+    expect(consoleSpy).toHaveBeenCalledWith('Error al cargar departamentos:', error);
+  });
+
+
+  it('should return empty if term is empty', () => {
+    component.filter = '';
+    component.tournaments = [{ name: 'Torneo 1' }] as any;
+    expect(component.filteredTournaments.length).toBe(1);
+  });
+
+ it('should handle editTournament with ids only', () => {
+  const tournament = {
+    tournamentId: 99,
+    name: 'Prueba',
+    categoryIds: [1, 2],
+    modalityIds: [3],
+    ambitId: 4,
+    branchIds: [5],
+    startDate: '2025-01-01',
+    endDate: '2025-01-02',
+    organizer: 'Org',
+    stage: 'Programado',
+    status: true
+  };
+
+  spyOn(component, 'openModal');
+  component.initForm();
+  component.editTournament(tournament as any);
+
+  expect(component.tournamentForm.value.categoryIds).toEqual([1, 2]);
+  expect(component.tournamentForm.value.modalityIds).toEqual([3]);
+  expect(component.tournamentForm.value.ambitId).toEqual(4);
+  expect(component.openModal).toHaveBeenCalled();
+});
+
+
+it('should return empty if term is empty', () => {
+  component.filter = '';
+  component.tournaments = [{ name: 'Torneo 1' }] as any;
+  expect(component.filteredTournaments.length).toBe(1);
+});
+
+
 });
