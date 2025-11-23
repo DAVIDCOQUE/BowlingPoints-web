@@ -3,6 +3,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { JwtInterceptor } from './jwt.interceptor';
 import { JwtUtilsService } from '../auth/jwt-utils.service';
+import { NavigationUtil } from '../utils/navigation.util';
 
 describe('JwtInterceptor (simplificado)', () => {
   let httpMock: HttpTestingController;
@@ -66,4 +67,53 @@ describe('JwtInterceptor (simplificado)', () => {
     expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
     req.flush({});
   });
+
+  it('debe redirigir si el token es inválido', (done) => {
+    const invalidToken = 'invalid-token';
+
+    // Simula token en localStorage
+    spyOn(localStorage, 'getItem').and.returnValue(invalidToken);
+
+    // Simula error al decodificar
+    jwtUtils.decode.and.throwError(new Error('Decoding error'));
+
+    const removeSpy = spyOn(localStorage, 'removeItem');
+    const redirectSpy = spyOn(NavigationUtil, 'redirectToLogin');
+
+    httpClient.get('/api/test').subscribe({
+      error: (err) => {
+        expect(err.message).toBe('Token inválido');
+        expect(removeSpy).toHaveBeenCalledWith('jwt_token');
+        expect(redirectSpy).toHaveBeenCalled();
+        done();
+      }
+    });
+
+    httpMock.expectNone('/api/test');
+  });
+
+  it('debe redirigir si el token está expirado', (done) => {
+    const expiredToken = 'expired-token';
+    const pastExp = Math.floor(Date.now() / 1000) - 1000; // expirado
+
+    spyOn(localStorage, 'getItem').and.returnValue(expiredToken);
+    jwtUtils.decode.and.returnValue({ exp: pastExp });
+
+    const removeSpy = spyOn(localStorage, 'removeItem');
+    const redirectSpy = spyOn(NavigationUtil, 'redirectToLogin');
+
+    httpClient.get('/api/test').subscribe({
+      error: (err) => {
+        expect(err.message).toBe('Token expirado');
+        expect(removeSpy).toHaveBeenCalledWith('jwt_token');
+        expect(redirectSpy).toHaveBeenCalled();
+        done();
+      }
+    });
+
+    httpMock.expectNone('/api/test');
+  });
+
+
+
 });

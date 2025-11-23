@@ -139,11 +139,6 @@ export class TournamentResultComponent implements OnInit {
           this.modalities = tournament.data?.modalities || [];
           this.branches = tournament.data?.branches || [];
 
-          console.log('Torneo cargado:', this.selectedTournament);
-          console.log('Categorías:', this.categories);
-          console.log('Modalidades:', this.modalities);
-          console.log('Ramas:', this.branches);
-
           if (!this.selectedTournament) {
             Swal.fire(
               'Atención',
@@ -381,8 +376,6 @@ export class TournamentResultComponent implements OnInit {
       tournamentId: this.tournamentId,
     };
 
-    console.log('Payload enviado al backend:', payload);
-
     const isEdit = !!this.idTeam;
     const request = isEdit
       ? this.http.put(`${this.apiUrl}/teams/${this.idTeam}`, payload)
@@ -468,12 +461,6 @@ export class TournamentResultComponent implements OnInit {
 
     const selectedRoundNumber = this.selectedRound ?? undefined;
 
-
-    console.log('Cargando resultados con filtros:', {
-      tournamentId: this.tournamentId,
-      branchId: selectedBranchId,
-      roundNumber: selectedRoundNumber
-    });
     this.resultsService.getResultsFiltered(this.tournamentId, selectedBranchId, selectedRoundNumber)
       .subscribe({
         next: (res) => {
@@ -489,8 +476,6 @@ export class TournamentResultComponent implements OnInit {
 
 
   editResult(result: IResults): void {
-
-    console.log('Result recibido:', result);
     this.idResult = result.resultId ?? null;
     this.resultForm.patchValue({
       personId: result.personId ?? null,

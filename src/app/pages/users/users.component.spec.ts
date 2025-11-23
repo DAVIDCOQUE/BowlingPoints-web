@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, AbstractControl } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { of, throwError, defer } from 'rxjs';
@@ -12,6 +12,7 @@ import { CategoryApiService } from 'src/app/services/category-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { RoleApiService } from 'src/app/services/role-api.service';
 import { IUser } from 'src/app/model/user.interface';
+import { FormControl } from '@angular/forms';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
@@ -41,6 +42,8 @@ describe('UsersComponent', () => {
     roles: [],
     sub: 'subtoken'
   };
+
+
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -350,5 +353,295 @@ describe('UsersComponent', () => {
     form.get('password')?.markAsTouched();
     expect(component.passwordMismatchVisible).toBeTrue();
   });
+
+  it('should handle error when loading users', () => {
+    const error = new Error('Falló la carga');
+    spyOn(console, 'error');
+    userApiSpy.getUsers.and.returnValue(throwError(() => error));
+    component.getUsers();
+    expect(console.error).toHaveBeenCalledWith('Error al cargar usuarios:', error);
+  });
+
+  it('should handle error when loading roles', () => {
+    const error = new Error('Error de roles');
+    spyOn(console, 'error');
+    roleApiSpy.getAll.and.returnValue(throwError(() => error));
+    component.getRoles();
+    expect(console.error).toHaveBeenCalledWith('Error al cargar roles:', error);
+  });
+
+  it('should handle error when loading categories', () => {
+    const error = new Error('Error de categorías');
+    spyOn(console, 'error');
+    categoryApiSpy.getActiveCategories.and.returnValue(throwError(() => error));
+    component.getCategories();
+    expect(console.error).toHaveBeenCalledWith('Error al cargar categorías:', error);
+  });
+
+  it('should reset form and idUser on closeModal', () => {
+    component.initForm();
+    component.idUser = 99;
+    component.userForm.patchValue({ fullName: 'Prueba' });
+
+    component.closeModal();
+
+    expect(component.idUser).toBeNull();
+    expect(component.userForm.get('fullName')?.value).toBe('');
+  });
+
+  it('should open modal without resetting form in edit mode', () => {
+    component.initForm();
+    component.idUser = 1;
+    component.userForm.patchValue({ fullName: 'Editado' });
+
+    component.openModal('contenido');
+    expect(modalSpy.open).toHaveBeenCalledWith('contenido');
+    expect(component.userForm.get('fullName')?.value).toBe('Editado');
+  });
+
+  it('debe retornar null si la fecha es pasada o igual a hoy', () => {
+    const today = new Date();
+    const pastDate = new Date();
+    pastDate.setDate(today.getDate() - 1);
+
+    const controlToday = new FormControl(today.toISOString().slice(0, 10));
+    const controlPast = new FormControl(pastDate.toISOString().slice(0, 10));
+
+    const resultToday = (component as any).futureDateValidator(controlToday);
+    const resultPast = (component as any).futureDateValidator(controlPast);
+
+    expect(resultToday).toBeNull();
+    expect(resultPast).toBeNull();
+  });
+
+  it('should handle error when loading users', () => {
+    const consoleSpy = spyOn(console, 'error');
+    userApiSpy.getUsers.and.returnValue(throwError(() => new Error('Error en getUsers')));
+    component.getUsers();
+    expect(consoleSpy).toHaveBeenCalledWith('Error al cargar usuarios:', jasmine.any(Error));
+  });
+
+  it('should handle error when loading roles', () => {
+    const consoleSpy = spyOn(console, 'error');
+    roleApiSpy.getAll.and.returnValue(throwError(() => new Error('Error en getAll')));
+    component.getRoles();
+    expect(consoleSpy).toHaveBeenCalledWith('Error al cargar roles:', jasmine.any(Error));
+  });
+
+  it('should handle error when loading categories', () => {
+    const consoleSpy = spyOn(console, 'error');
+    categoryApiSpy.getActiveCategories.and.returnValue(throwError(() => new Error('Error en categorías')));
+    component.getCategories();
+    expect(consoleSpy).toHaveBeenCalledWith('Error al cargar categorías:', jasmine.any(Error));
+  });
+
+
+  it('should invalidate future birthDate', () => {
+    const control = { value: new Date(Date.now() + 24 * 60 * 60 * 1000) } as AbstractControl;
+    const result = (component as any).futureDateValidator(control);
+    expect(result).toEqual({ futureDate: true });
+  });
+
+  it('should accept past birthDate', () => {
+    const control = { value: new Date('2000-01-01') } as AbstractControl;
+    const result = (component as any).futureDateValidator(control);
+    expect(result).toBeNull();
+  });
+
+  it('toDateInput should return null for invalid date', () => {
+    const result = (component as any).toDateInput('invalid');
+    expect(result).toBeNull();
+  });
+
+  it('futureDateValidator: should return error for future date', () => {
+    const control = { value: new Date(Date.now() + 86400000) } as AbstractControl;
+    const result = component['futureDateValidator'](control);
+    expect(result).toEqual({ futureDate: true });
+  });
+
+  it('futureDateValidator: should return null for valid date', () => {
+    const control = { value: new Date(Date.now() - 86400000) } as AbstractControl;
+    const result = component['futureDateValidator'](control);
+    expect(result).toBeNull();
+  });
+
+  it('should apply required validators in creation mode', () => {
+    component.initForm();
+
+    const passwordCtrl = component.userForm.get('password')!;
+    const confirmCtrl = component.userForm.get('confirm')!;
+
+    component['setPasswordValidatorsForMode'](false); // creación
+
+    const passwordErrors = passwordCtrl.validator?.({ value: '' } as AbstractControl);
+    const confirmErrors = confirmCtrl.validator?.({ value: '' } as AbstractControl);
+
+    expect(passwordErrors?.['required']).toBeTrue();
+    expect(confirmErrors?.['required']).toBeTrue();
+  });
+
+  it('should return null if password or confirm control is missing', () => {
+    const fakeGroup = {
+      get: (name: string) => null
+    } as unknown as AbstractControl;
+
+    const result = component['passwordsMatchValidator'](fakeGroup);
+    expect(result).toBeNull();
+  });
+
+  it('should return null if password and confirm are empty', () => {
+    component.initForm();
+    const group = component.userForm;
+
+    group.get('password')?.setValue('');
+    group.get('confirm')?.setValue('');
+
+    const result = component['passwordsMatchValidator'](group);
+    expect(result).toBeNull();
+  });
+
+  it('should return error if passwords do not match', () => {
+    component.initForm();
+    const group = component.userForm;
+
+    group.get('password')?.setValue('abc123');
+    group.get('confirm')?.setValue('xyz456');
+
+    const result = component['passwordsMatchValidator'](group);
+    expect(result).toEqual({ passwordsMismatch: true });
+  });
+
+
+  it('should return null if passwords match', () => {
+    component.initForm();
+    const group = component.userForm;
+
+    group.get('password')?.setValue('abc123');
+    group.get('confirm')?.setValue('abc123');
+
+    const result = component['passwordsMatchValidator'](group);
+    expect(result).toBeNull();
+  });
+
+  it('should update value and validity when validators are set', () => {
+    component.initForm();
+    const passwordCtrl = component.userForm.get('password')!;
+    const confirmCtrl = component.userForm.get('confirm')!;
+
+    spyOn(passwordCtrl, 'updateValueAndValidity');
+    spyOn(confirmCtrl, 'updateValueAndValidity');
+    spyOn(component.userForm, 'updateValueAndValidity');
+
+    component['setPasswordValidatorsForMode'](false);
+
+    expect(passwordCtrl.updateValueAndValidity).toHaveBeenCalled();
+    expect(confirmCtrl.updateValueAndValidity).toHaveBeenCalled();
+    expect(component.userForm.updateValueAndValidity).toHaveBeenCalled();
+  });
+
+  it('should apply only minLength validator in edit mode', () => {
+    component.initForm();
+
+    const passwordCtrl = component.userForm.get('password')!;
+    const confirmCtrl = component.userForm.get('confirm')!;
+
+    component['setPasswordValidatorsForMode'](true); // modo edición
+
+    // Valor que viola minlength pero NO activa 'required'
+    passwordCtrl.setValue('a');
+    confirmCtrl.setValue(''); // confirm no tiene validadores en modo edición
+
+    passwordCtrl.updateValueAndValidity();
+    confirmCtrl.updateValueAndValidity();
+
+    const passwordErrors = passwordCtrl.errors;
+    const confirmErrors = confirmCtrl.errors;
+
+    //  Validación esperada
+    expect(passwordErrors?.['required']).toBeUndefined(); // no requerido
+    expect(passwordErrors?.['minlength']).toBeTruthy();   // sí viola minlength
+    expect(confirmErrors).toBeNull();                     // sin validadores = null
+  });
+
+  it('futureDateValidator: should return null for today', () => {
+    const today = new Date();
+    const control = { value: today.toISOString().slice(0, 10) } as AbstractControl;
+
+    const result = component['futureDateValidator'](control);
+    expect(result).toBeNull();
+  });
+
+  it('futureDateValidator: should return null for past date', () => {
+    const past = new Date();
+    past.setDate(past.getDate() - 1); // ayer
+    const control = { value: past.toISOString().slice(0, 10) } as AbstractControl;
+
+    const result = component['futureDateValidator'](control);
+    expect(result).toBeNull();
+  });
+
+
+  it('futureDateValidator: should return null for empty or falsy values', () => {
+    const nullControl = { value: null } as AbstractControl;
+    const emptyControl = { value: '' } as AbstractControl;
+    const undefinedControl = { value: undefined } as AbstractControl;
+
+    expect(component['futureDateValidator'](nullControl)).toBeNull();
+    expect(component['futureDateValidator'](emptyControl)).toBeNull();
+    expect(component['futureDateValidator'](undefinedControl)).toBeNull();
+  });
+
+  it('should patch form and open modal in editUser()', () => {
+    component.initForm();
+    spyOn(component as any, 'setPasswordValidatorsForMode').and.callThrough();
+    spyOn(component, 'openModal');
+
+    const user = {
+      ...mockUser,
+      photoUrl: 'http://some.url/photo.jpg',
+      categories: [{ categoryId: 5, name: 'Cat A' }],
+      roles: [{ roleId: 3, name: 'Admin' }],
+      birthDate: new Date('2000-01-01')
+    };
+
+    component.editUser(user);
+
+    const form = component.userForm;
+    const expectedDate = component['toDateInput'](user.birthDate); // 🛠 ajuste de timezone
+
+    expect(form.get('document')?.value).toBe(user.document);
+    expect(form.get('photoUrl')?.value).toBe(user.photoUrl);
+    expect(form.get('email')?.value).toBe(user.email);
+    expect(form.get('fullName')?.value).toBe(user.fullName);
+    expect(form.get('fullSurname')?.value).toBe(user.fullSurname);
+    expect(form.get('phone')?.value).toBe(user.phone);
+    expect(form.get('gender')?.value).toBe(user.gender);
+    expect(form.get('birthDate')?.value).toBe(expectedDate); // 👈 aquí corregido
+    expect(form.get('categories')?.value).toEqual([5]);
+    expect(form.get('roles')?.value).toEqual([3]);
+    expect(form.get('status')?.value).toBe(user.status);
+    expect(form.get('password')?.value).toBe('');
+    expect(form.get('confirm')?.value).toBe('');
+
+    expect(component['setPasswordValidatorsForMode']).toHaveBeenCalledWith(true);
+    expect(component.openModal).toHaveBeenCalledWith(component.modalUserRef);
+  });
+
+
+  it('should reset form and apply validators when opening modal for new user', () => {
+    component.initForm();
+    spyOn(component as any, 'setPasswordValidatorsForMode').and.callThrough();
+
+    const form = component.userForm;
+    form.patchValue({ fullName: 'Antiguo' });
+    component.idUser = null;
+
+    component.openModal('mockContent');
+
+    expect(form.get('fullName')?.value).toBe('');
+    expect(component['setPasswordValidatorsForMode']).toHaveBeenCalledWith(false);
+    expect(modalSpy.open).toHaveBeenCalledWith('mockContent');
+  });
+
 
 });
