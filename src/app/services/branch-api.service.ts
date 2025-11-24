@@ -10,7 +10,7 @@ import { environment } from 'src/environments/environment';
 export class BranchesService {
   private readonly apiUrl = `${environment.apiUrl}/branches`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   getAll(): Observable<IBranch[]> {
     return this.http.get<IBranch[]>(this.apiUrl);

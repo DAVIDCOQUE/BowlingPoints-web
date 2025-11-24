@@ -12,7 +12,7 @@ import { IUser } from '../model/user.interface';
 export class UserApiService {
   private readonly usersUrl = `${environment.apiUrl}/users`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   /**
    * Obtiene todos los usuarios

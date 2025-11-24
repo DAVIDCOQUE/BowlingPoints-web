@@ -644,4 +644,102 @@ describe('UsersComponent', () => {
   });
 
 
+  it('should return true from passwordMismatchVisible when mismatch and touched', () => {
+    component.initForm();
+
+    const form = component.userForm;
+    form.get('password')?.setValue('abc123');
+    form.get('confirm')?.setValue('xyz456');
+
+    form.get('password')?.markAsTouched();
+    form.get('confirm')?.markAsTouched();
+
+    // Forzamos validación
+    form.updateValueAndValidity();
+
+    expect(component.passwordMismatchVisible).toBeTrue();
+  });
+
+  it('toDateInput should return null for null or undefined', () => {
+    expect((component as any).toDateInput(null)).toBeNull();
+    expect((component as any).toDateInput(undefined)).toBeNull();
+  });
+
+  it('should correctly parse status from string and handle null birthDate', () => {
+    component.initForm();
+
+    component.userForm.patchValue({
+      document: '456',
+      fullName: 'Ana',
+      fullSurname: 'Gómez',
+      email: 'ana@test.com',
+      birthDate: '', // ← esto debe provocar que birthDate sea null
+      gender: 'Femenino',
+      phone: '321321',
+      photoUrl: '',
+      status: 'true', // ← como string
+      roles: [1],
+      categories: [1],
+      password: 'clave123',
+      confirm: 'clave123'
+    });
+
+    const spyCreate = userApiSpy.createUser.and.returnValue(of({}));
+    userApiSpy.getUsers.and.returnValue(of([]));
+
+    component.saveForm();
+
+    expect(spyCreate).toHaveBeenCalledWith(jasmine.objectContaining({
+      status: true,             // ← statusValue convertido desde string
+      birthDate: null,          // ← nacimiento vacío tratado como null
+      roles: [{ roleId: 1 }],
+      categories: [{ categoryId: 1 }]
+    }));
+  });
+
+
+  it('should filter users based on search term', () => {
+    component.usuarios = [
+      {
+        ...mockUser,
+        fullName: 'Carlos',
+        fullSurname: 'Lopez',
+        email: 'carlos@test.com',
+        phone: '1234',
+        status: true,
+        roles: [{ roleId: 1, name: 'Admin' }],
+        categories: [{ categoryId: 1, name: 'Cat A' }]
+      },
+      {
+        ...mockUser,
+        fullName: 'Maria',
+        fullSurname: 'Garcia',
+        email: 'maria@test.com',
+        phone: '5678',
+        status: false,
+        roles: [{ roleId: 2, name: 'User' }],
+        categories: [{ categoryId: 2, name: 'Cat B' }]
+      }
+    ];
+
+    component.filter = 'Carlos';
+    let result = component.usuariosFiltrados;
+    expect(result.length).toBe(1);
+    expect(result[0].fullName).toBe('Carlos');
+
+    component.filter = 'Admin';
+    result = component.usuariosFiltrados;
+    expect(result.length).toBe(1);
+
+    component.filter = 'cat b';
+    result = component.usuariosFiltrados;
+    expect(result.length).toBe(1);
+    expect(result[0].fullName).toBe('Maria');
+
+    component.filter = 'inexistente';
+    result = component.usuariosFiltrados;
+    expect(result.length).toBe(0);
+  });
+
+
 });
