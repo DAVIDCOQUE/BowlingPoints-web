@@ -7,7 +7,7 @@ import { NavigationUtil } from '../utils/navigation.util';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
-  constructor(private jwtUtils: JwtUtilsService) { }
+  constructor(private readonly jwtUtils: JwtUtilsService) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = localStorage.getItem('jwt_token');

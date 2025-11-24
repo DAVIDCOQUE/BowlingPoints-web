@@ -116,4 +116,30 @@ describe('TournamentlistComponent', () => {
     component.goBack();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['dashboard']);
   });
+
+  it('should default listaTorneos to empty array if response has no data', () => {
+    fixture.detectChanges();
+
+    httpMock.expectOne(`${environment.apiUrl}/ambits/1`).flush({ success: true, data: { name: 'Test' } });
+
+    const reqTorneos = httpMock.expectOne(`${environment.apiUrl}/results/by-ambit?ambitId=1`);
+    reqTorneos.flush({ success: true }); // sin data
+
+    expect(component.listaTorneos).toEqual([]);
+  });
+
+  it('should set ambitName to empty string if response name is missing', () => {
+    fixture.detectChanges();
+
+    const reqAmbit = httpMock.expectOne(`${environment.apiUrl}/ambits/1`);
+    reqAmbit.flush({ success: true, data: {} }); // <-- sin 'name'
+
+    const reqTorneos = httpMock.expectOne(`${environment.apiUrl}/results/by-ambit?ambitId=1`);
+    reqTorneos.flush({ success: true, data: [] }); // <-- importante para cerrar la petición
+
+    expect(component.ambitName).toBe('');
+  });
+
+
+
 });

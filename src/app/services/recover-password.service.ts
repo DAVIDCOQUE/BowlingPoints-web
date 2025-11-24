@@ -10,7 +10,7 @@ import { tap } from 'rxjs/operators';
 export class RecoverPasswordService {
   private readonly authUrl = `${environment.apiUrl}/auth`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Envía el correo de recuperación

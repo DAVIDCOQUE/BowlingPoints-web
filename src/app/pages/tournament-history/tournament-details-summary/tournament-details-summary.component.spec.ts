@@ -11,6 +11,8 @@ describe('TournamentDetailsSummaryComponent', () => {
   let httpMock: HttpTestingController;
   let locationSpy: jasmine.SpyObj<Location>;
 
+
+
   const flushInitRequest = (responseOverride = {}) => {
     const req = httpMock.expectOne(
       `${environment.apiUrl}/results/by-modality?tournamentId=1&roundNumber=1&branchId=2`
@@ -23,6 +25,8 @@ describe('TournamentDetailsSummaryComponent', () => {
       ...responseOverride
     });
   };
+
+
 
   beforeEach(async () => {
     locationSpy = jasmine.createSpyObj('Location', ['back']);
@@ -53,6 +57,7 @@ describe('TournamentDetailsSummaryComponent', () => {
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+
   });
 
   afterEach(() => {
@@ -132,4 +137,54 @@ describe('TournamentDetailsSummaryComponent', () => {
     component.goBack();
     expect(locationSpy.back).toHaveBeenCalled();
   });
+
+
+  it('should filter visible modalities correctly when valid data is present', () => {
+    flushInitRequest(); // Esto ya es seguro aquí porque httpMock está definido
+
+    component.modalities = [
+      { name: 'Individual' },
+      { name: 'Parejas' }
+    ] as any;
+
+    component.resultsByModality = [
+      {
+        modalityScores: {
+          Individual: [100],
+          Parejas: null
+        }
+      }
+    ] as any;
+
+    component.filterVisibleModalities();
+
+    expect(component.visibleModalities.length).toBe(1);
+    expect(component.visibleModalities[0].name).toBe('Individual');
+  });
+
+  it('should result in empty visible modalities when all modalities have null scores', () => {
+    flushInitRequest();
+
+    component.modalities = [
+      { name: 'Individual' },
+      { name: 'Parejas' }
+    ] as any;
+
+    component.resultsByModality = [
+      {
+        modalityScores: {
+          Individual: null,
+          Parejas: null
+        }
+      }
+    ] as any;
+
+    component.filterVisibleModalities();
+
+    expect(component.visibleModalities.length).toBe(0);
+  });
+
+
+
+
 });

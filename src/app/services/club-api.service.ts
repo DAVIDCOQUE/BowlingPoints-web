@@ -10,7 +10,7 @@ import { IClubs } from '../model/clubs.interface';
 export class ClubApiService {
   private readonly baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+ constructor(private readonly http: HttpClient) { }
 
   /**
    * Obtiene todos los clubes con sus miembros

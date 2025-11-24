@@ -11,7 +11,7 @@ import { ICategory } from '../model/category.interface';
 export class CategoryApiService {
   private readonly apiUrl = `${environment.apiUrl}/categories`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   getCategories(): Observable<ICategory[]> {
     return this.http.get<{ success: boolean; message: string; data: ICategory[] }>(this.apiUrl)

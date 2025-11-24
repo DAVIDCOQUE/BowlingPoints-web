@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -7,7 +7,9 @@ import { AuthService } from 'src/app/auth/auth.service';
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })
-export class SidebarComponent {
+
+export class SidebarComponent implements OnInit {
+
   isExpanded = true;
   isShowing = false;
   showSubmenu = false;
@@ -15,7 +17,7 @@ export class SidebarComponent {
   isAdmin = false;
   isJugador = false;
   isEntrenador = false;
-  isGuest = false; 
+  isGuest = false;
 
   constructor(private router: Router, public auth: AuthService) { }
 
