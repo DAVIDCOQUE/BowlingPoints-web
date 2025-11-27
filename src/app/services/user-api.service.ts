@@ -19,7 +19,7 @@ export class UserApiService {
    */
   getUsers(): Observable<IUser[]> {
     return this.http.get<{ success: boolean; message: string; data: IUser[] }>(this.usersUrl)
-      .pipe(tap(res => console.log('Respuesta completa del backend:', res)), map(res => res.data));
+      .pipe(map(res => res.data));
   }
 
   /**
@@ -30,7 +30,6 @@ export class UserApiService {
     return this.http
       .get<{ success: boolean; message: string; data: IUser[] }>(url)
       .pipe(
-        tap(res => console.log('Usuarios activos obtenidos:', res)),
         map(res => res.data)
       );
   }

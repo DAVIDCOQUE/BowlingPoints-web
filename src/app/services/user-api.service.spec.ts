@@ -50,12 +50,9 @@ describe('UserApiService', () => {
         },
       ];
 
-      const consoleSpy = spyOn(console, 'log');
-
       service.getUsers().subscribe((users) => {
         expect(users.length).toBe(1);
         expect(users[0].email).toBe('sara@example.com');
-        expect(consoleSpy).toHaveBeenCalled();
         done();
       });
 
@@ -141,15 +138,9 @@ describe('UserApiService', () => {
         },
       ];
 
-      const consoleSpy = spyOn(console, 'log');
-
       service.getActiveUsers().subscribe((users) => {
         expect(users.length).toBe(1);
         expect(users[0].fullName).toBe('Carlos Ramirez');
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Usuarios activos obtenidos:',
-          jasmine.objectContaining({ data: jasmine.any(Array) })
-        );
         done();
       });
 

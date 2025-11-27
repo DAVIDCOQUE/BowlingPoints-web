@@ -1,5 +1,4 @@
 /* You can add global styles to this file, and also import other style files */
-
 html,
 body {
   height: 100%;
@@ -22,22 +21,6 @@ body {
   background-color: #f8f9fa;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   cursor: pointer;
-}
-
-.btn-primary {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-}
-
-.btn-primay:hover {
-  background-color: var(--primary-dark);
 }
 
 .btn-s {
@@ -67,7 +50,7 @@ body {
 }
 
 .fa-mars {
-  color: #007bff !important; 
+  color: #007bff !important;
 }
 
 .fa-venus {

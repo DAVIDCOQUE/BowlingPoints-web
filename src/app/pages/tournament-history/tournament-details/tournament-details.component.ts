@@ -58,8 +58,6 @@ export class TournamentDetailsComponent implements OnInit {
 
     this.http.get<IResultsResponse>(url).subscribe({
       next: data => {
-        console.log(' Datos cargados correctamente:', data);
-
         this.resumenTorneo = data.tournament || null;
         this.players = data.results || [];
         this.organizeResultsByTeam();

@@ -14,7 +14,7 @@
     <div class="card-body">
       <div class="row g-3 align-items-end">
         <div class="col-md-3">
-          <label class="form-label">Categoría</label>
+          <p class="form-label">Categoría</p>
           <select class="form-select form-select-sm" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
             <option value="">Todas</option>
             <option *ngFor="let c of categories" [value]="c.categoryId">{{ c.name }}</option>
@@ -22,11 +22,11 @@
         </div>
 
         <div class="col-md-3">
-          <label class="form-label">Rama</label>
+          <p class="form-label">Rama</p>
           <select class="form-select form-select-sm" [(ngModel)]="selectedBranch" (change)="onFilterChange()">
             <option value="">Todas</option>
-            <option value="Masculina">Masculina</option>
-            <option value="Femenina">Femenina</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Femenino">Femenino</option>
           </select>
         </div>
       </div>
