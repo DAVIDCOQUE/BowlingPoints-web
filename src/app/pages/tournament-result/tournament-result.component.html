@@ -103,7 +103,8 @@
           <input type="file" #fileInput accept=".xlsx,.xls,.csv" (change)="onPlayersFileSelected($event)" hidden />
 
           <!-- Botón de carga -->
-          <button class="btn btn-outline-primary btn-sm me-2" (click)="fileInput.click()" [disabled]="isUploadingPlayers">
+          <button class="btn btn-outline-primary btn-sm me-2" (click)="fileInput.click()"
+            [disabled]="isUploadingPlayers">
             <i class="fas fa-file-excel me-1"></i>
             {{ isUploadingPlayers ? 'Subiendo...' : 'Cargar jugadores' }}
           </button>
@@ -124,7 +125,7 @@
       <!-- Filtros jugadores -->
       <div class="row g-3 mb-3">
         <div class="col-md-10">
-          <label class="form-label">Rama</label>
+          <p class="form-p">Rama</p>
           <select class="form-select form-select-sm" [(ngModel)]="selectedBranchPlayer"
             (change)="onFilterPlayerChange()">
             <option value="">Todas</option>
@@ -219,14 +220,14 @@
       <!-- Filtros -->
       <div class="row g-3 mb-3">
         <div class="col-md-5">
-          <label class="form-label">Rama</label>
+          <p class="form-p">Rama</p>
           <select class="form-select form-select-sm" [(ngModel)]="selectedBranch" (change)="onFilterChange()">
             <option value="">Todas</option>
             <option *ngFor="let b of branches" [value]="b.name">{{ b.name }}</option>
           </select>
         </div>
         <div class="col-md-5">
-          <label class="form-label">Ronda</label>
+          <p class="form-p">Ronda</p>
           <select class="form-select form-select-sm" [(ngModel)]="selectedRound" (change)="onFilterChange()">
             <option [ngValue]="null">Todas</option>
             <option *ngFor="let r of roundNumbers" [ngValue]="r">{{ r }}</option>
@@ -298,14 +299,14 @@
   <div class="modal-content">
     <div class="modal-header bg-primary text-white">
       <h5 class="modal-title">{{ idPlayer ? 'Editar' : 'Nuevo' }} Jugador</h5> <button type="button"
-        class="btn-close btn-close-white" aria-label="Close" (click)="closeModal()"></button>
+        class="btn-close btn-close-white" aria-p="Close" (click)="closeModal()"></button>
     </div>
     <form [formGroup]="playerForm" (ngSubmit)="savePlayer()">
       <div class="modal-body">
         <div class="row g-3">
           <!-- Persona -->
-          <div class="col-md-6"> <label class="form-label">Persona *</label> <select class="form-select form-select-sm"
-              formControlName="personId"
+          <div class="col-md-6">
+            <p class="form-p">Persona *</p> <select class="form-select form-select-sm" formControlName="personId"
               [ngClass]="{ 'is-invalid': playerForm.controls['personId'].invalid && playerForm.controls['personId'].touched, 'is-valid': playerForm.controls['personId'].valid }">
               <option [ngValue]="null" disabled>Seleccione persona</option>
               <option *ngFor="let player of players" [ngValue]="player.personId"> {{ player.fullName }} {{
@@ -316,8 +317,8 @@
               seleccionar una persona. </div>
           </div>
           <!-- Categoría -->
-          <div class="col-md-6"> <label class="form-label">Categoría *</label> <select
-              class="form-select form-select-sm" formControlName="categoryId"
+          <div class="col-md-6">
+            <p class="form-p">Categoría *</p> <select class="form-select form-select-sm" formControlName="categoryId"
               [ngClass]="{ 'is-invalid': playerForm.controls['categoryId'].invalid && playerForm.controls['categoryId'].touched, 'is-valid': playerForm.controls['categoryId'].valid }">
               <option [ngValue]="null" disabled>Seleccione categoría</option>
               <option *ngFor="let cat of selectedTournament?.categories" [ngValue]="cat.categoryId"> {{ cat.name }}
@@ -328,8 +329,8 @@
               seleccionar una categoría. </div>
           </div>
           <!-- Modalidad -->
-          <div class="col-md-6"> <label class="form-label">Modalidad *</label> <select
-              class="form-select form-select-sm" formControlName="modalityId"
+          <div class="col-md-6">
+            <p class="form-p">Modalidad *</p> <select class="form-select form-select-sm" formControlName="modalityId"
               [ngClass]="{ 'is-invalid': playerForm.controls['modalityId'].invalid && playerForm.controls['modalityId'].touched, 'is-valid': playerForm.controls['modalityId'].valid }">
               <option [ngValue]="null" disabled>Seleccione modalidad</option>
               <option *ngFor="let mod of selectedTournament?.modalities" [ngValue]="mod.modalityId"> {{ mod.name }}
@@ -340,8 +341,8 @@
               seleccionar una modalidad. </div>
           </div>
           <!-- Rama -->
-          <div class="col-md-6"> <label class="form-label">Rama *</label> <select class="form-select form-select-sm"
-              formControlName="branchId"
+          <div class="col-md-6">
+            <p class="form-p">Rama *</p> <select class="form-select form-select-sm" formControlName="branchId"
               [ngClass]="{ 'is-invalid': playerForm.controls['branchId'].invalid && playerForm.controls['branchId'].touched, 'is-valid': playerForm.controls['branchId'].valid }">
               <option [ngValue]="null" disabled>Seleccione rama</option>
               <option *ngFor="let branch of selectedTournament?.branches" [ngValue]="branch.branchId"> {{ branch.name
@@ -352,8 +353,8 @@
               *ngIf="playerForm.controls['branchId'].invalid && playerForm.controls['branchId'].touched"> Debe
               seleccionar una rama. </div>
           </div>
-          <div class="col-md-6"> <label class="form-label">Estado *</label> <select class="form-select form-select-sm"
-              formControlName="status"
+          <div class="col-md-6">
+            <p class="form-p">Estado *</p> <select class="form-select form-select-sm" formControlName="status"
               [ngClass]="{ 'is-invalid': playerForm.controls['status'].invalid && playerForm.controls['status'].touched, 'is-valid': playerForm.controls['status'].valid }">
               <option [ngValue]="null" disabled>Seleccione...</option>
               <option *ngFor="let st of estados" [ngValue]="st.valor">{{ st.etiqueta }}</option>
@@ -381,7 +382,7 @@
   <div class="modal-content">
     <div class="modal-header bg-primary text-white">
       <h5 class="modal-title">Nuevo Equipo</h5>
-      <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeModal()"></button>
+      <button type="button" class="btn-close btn-close-white" aria-p="Close" (click)="closeModal()"></button>
     </div>
 
     <form [formGroup]="teamForm" (ngSubmit)="saveTeam()">
@@ -390,7 +391,7 @@
 
           <!-- Nombre del equipo -->
           <div class="col-md-6">
-            <label class="form-label">Nombre del Equipo *</label>
+            <p class="form-p">Nombre del Equipo *</p>
             <input type="text" formControlName="nameTeam" class="form-control form-control-sm"
               [ngClass]="{ 'is-invalid': teamForm.controls['nameTeam'].invalid && teamForm.controls['nameTeam'].touched }" />
             <div class="invalid-feedback"
@@ -401,13 +402,13 @@
 
           <!-- Teléfono del equipo -->
           <div class="col-md-6">
-            <label class="form-label">Teléfono (opcional)</label>
+            <p class="form-p">Teléfono (opcional)</p>
             <input type="text" formControlName="phone" class="form-control form-control-sm" />
           </div>
 
           <!-- Seleccionar jugadores -->
           <div class="col-md-12">
-            <label class="form-label">Seleccionar Jugadores *</label>
+            <p class="form-p">Seleccionar Jugadores *</p>
             <ng-select [items]="players" bindLabel="fullName" bindValue="personId" [multiple]="true"
               formControlName="playerIds" class="form-select form-select-sm" [ngClass]="{
       'is-invalid': teamForm.controls['playerIds'].invalid && teamForm.controls['playerIds'].touched,
@@ -426,7 +427,7 @@
 
           <!-- Categoría -->
           <div class="col-md-6">
-            <label class="form-label">Categoría *</label>
+            <p class="form-p">Categoría *</p>
             <select formControlName="categoryId" class="form-select form-select-sm">
               <option [ngValue]="null" disabled>Seleccione categoría</option>
               <option *ngFor="let cat of selectedTournament?.categories" [ngValue]="cat.categoryId">{{ cat.name }}
@@ -436,7 +437,7 @@
 
           <!-- Modalidad -->
           <div class="col-md-6">
-            <label class="form-label">Modalidad *</label>
+            <p class="form-p">Modalidad *</p>
             <select formControlName="modalityId" class="form-select form-select-sm">
               <option [ngValue]="null" disabled>Seleccione modalidad</option>
               <option *ngFor="let mod of selectedTournament?.modalities" [ngValue]="mod.modalityId">{{ mod.name }}
@@ -446,7 +447,7 @@
 
           <!-- Estado -->
           <div class="col-md-6">
-            <label class="form-label">Estado *</label>
+            <p class="form-p">Estado *</p>
             <select formControlName="status" class="form-select form-select-sm">
               <option [ngValue]="true">Activo</option>
               <option [ngValue]="false">Inactivo</option>
@@ -477,7 +478,7 @@
       <h5 class="modal-title flex-grow-1 m-0">
         {{ idResult ? 'Editar' : 'Registrar' }} Resultado
       </h5>
-      <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+      <button type="button" class="btn-close btn-close-white ms-2" aria-p="Close" (click)="closeModal()"
         style="filter: brightness(0) invert(1);">
       </button>
     </div>
@@ -488,7 +489,7 @@
           <div class="row g-3">
             <!-- Categoría -->
             <div class="col-md-6">
-              <label class="form-label">Categoría *</label>
+              <p class="form-p">Categoría *</p>
               <select class="form-select" formControlName="categoryId"
                 [ngClass]="{ 'is-invalid': resultForm.controls['categoryId'].invalid && resultForm.controls['categoryId'].touched }">
                 <option [ngValue]="null" disabled>Categoría...</option>
@@ -501,7 +502,7 @@
 
             <!-- Modalidad -->
             <div class="col-md-6">
-              <label class="form-label">Modalidad *</label>
+              <p class="form-p">Modalidad *</p>
               <select class="form-select" formControlName="modalityId"
                 [ngClass]="{ 'is-invalid': resultForm.controls['modalityId'].invalid && resultForm.controls['modalityId'].touched }">
                 <option [ngValue]="null" disabled>Modalidad...</option>
@@ -514,7 +515,7 @@
 
             <!-- Rama -->
             <div class="col-md-6">
-              <label class="form-label">Rama *</label>
+              <p class="form-p">Rama *</p>
               <select class="form-select" formControlName="branchId"
                 [ngClass]="{ 'is-invalid': resultForm.controls['branchId'].invalid && resultForm.controls['branchId'].touched }">
                 <option [ngValue]="null" disabled>Seleccione rama...</option>
@@ -527,7 +528,7 @@
 
             <!-- Ronda -->
             <div class="col-md-6">
-              <label class="form-label">Ronda *</label>
+              <p class="form-p">Ronda *</p>
               <select class="form-select" formControlName="roundNumber"
                 [ngClass]="{ 'is-invalid': resultForm.controls['roundNumber'].invalid && resultForm.controls['roundNumber'].touched }">
                 <option [ngValue]="null" disabled>Ronda...</option>
@@ -540,7 +541,7 @@
 
             <!-- Jugador -->
             <div class="col-md-6">
-              <label class="form-label">Jugador *</label>
+              <p class="form-p">Jugador *</p>
               <select class="form-select" formControlName="personId"
                 [ngClass]="{ 'is-invalid': resultForm.controls['personId'].invalid && resultForm.controls['personId'].touched }">
                 <option [ngValue]="null" disabled>Jugador...</option>
@@ -553,7 +554,7 @@
 
             <!-- Equipo -->
             <div class="col-md-6">
-              <label class="form-label">Equipo</label>
+              <p class="form-p">Equipo</p>
               <select class="form-select" formControlName="teamId">
                 <option [ngValue]="null">Sin equipo</option>
                 <option *ngFor="let team of uniqueTeams" [ngValue]="team.teamId">
@@ -564,7 +565,7 @@
 
             <!-- Pista -->
             <div class="col-md-6">
-              <label class="form-label">Pista *</label>
+              <p class="form-p">Pista *</p>
               <select class="form-select" formControlName="laneNumber"
                 [ngClass]="{ 'is-invalid': resultForm.controls['laneNumber'].invalid && resultForm.controls['laneNumber'].touched }">
                 <option [ngValue]="null" disabled>Pista...</option>
@@ -577,7 +578,7 @@
 
             <!-- Línea Jugada -->
             <div class="col-md-6">
-              <label class="form-label">Línea Jugada *</label>
+              <p class="form-p">Línea Jugada *</p>
               <select class="form-select" formControlName="lineNumber"
                 [ngClass]="{ 'is-invalid': resultForm.controls['lineNumber'].invalid && resultForm.controls['lineNumber'].touched }">
                 <option [ngValue]="null" disabled>Línea...</option>
@@ -590,7 +591,7 @@
 
             <!-- Puntaje -->
             <div class="col-md-6">
-              <label class="form-label">Puntaje *</label>
+              <p class="form-p">Puntaje *</p>
               <input formControlName="score" type="number" class="form-control" placeholder="Puntaje"
                 [ngClass]="{ 'is-invalid': resultForm.controls['score'].invalid && resultForm.controls['score'].touched }" />
               <div class="invalid-feedback">Ingrese un puntaje válido.</div>

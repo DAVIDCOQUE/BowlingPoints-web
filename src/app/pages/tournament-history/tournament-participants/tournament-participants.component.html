@@ -4,14 +4,9 @@
     <div class="row g-0 align-items-center">
       <!-- Logo -->
       <div class="col-md-3 text-center p-4">
-        <img
-          [src]="selectedTournament?.imageUrl || 'assets/img/clubDefault.png'"
-          (error)="onImgError($event, 'assets/img/clubDefault.png')"
-          alt="Logo torneo"
-          class="img-fluid rounded-circle border shadow-sm"
-          width="120"
-          height="120"
-        />
+        <img [src]="selectedTournament?.imageUrl || 'assets/img/clubDefault.png'"
+          (error)="onImgError($event, 'assets/img/clubDefault.png')" alt="Logo torneo"
+          class="img-fluid rounded-circle border shadow-sm" width="120" height="120" />
       </div>
 
       <!-- Información del torneo -->

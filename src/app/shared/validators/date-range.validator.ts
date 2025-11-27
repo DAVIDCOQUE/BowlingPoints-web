@@ -10,11 +10,11 @@ function parseDate(v: any): Date | null {
     if (m) {
       const [_, dd, mm, yyyy] = m;
       const d = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-      return isNaN(d.getTime()) ? null : d;
+      return Number.isNaN(d.getTime()) ? null : d;
     }
     // fallback: ISO o parse nativo
     const d = new Date(v);
-    return isNaN(d.getTime()) ? null : d;
+    return Number.isNaN(d.getTime()) ? null : d;
   }
   return null;
 }
