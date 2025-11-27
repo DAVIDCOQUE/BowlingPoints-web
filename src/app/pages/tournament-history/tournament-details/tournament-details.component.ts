@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { environment } from 'src/environments/environment';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
+
 import {
   IPlayerScore,
   IModality,
@@ -22,6 +24,7 @@ export class TournamentDetailsComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
+  private readonly excelExportService = inject(ExcelExportService);
 
   // Parámetros de ruta
   public readonly tournamentId: number = Number(this.route.snapshot.paramMap.get('tournamentId'));
@@ -133,6 +136,47 @@ export class TournamentDetailsComponent implements OnInit {
     );
   }
 
+  /**   * Exporta los resultados a Excel
+   */
+
+  exportToExcel(): void {
+    const fileName = `Resultados_Torneo_${this.resumenTorneo?.tournamentName}_${this.nombreModalidad}_Ronda${this.roundNumber}`;
+
+    const metaData = [
+      ['🏆 Torneo:', this.resumenTorneo?.tournamentName ?? ''],
+      ['📅 Ronda:', `Ronda ${this.roundNumber}`],
+      ['🎯 Modalidad:', this.nombreModalidad]
+    ];
+
+    //. Headers dinámicos
+    const lineHeaders = Array.from({ length: this.maxJuegos }, (_, i) => `L${i + 1}`);
+    const headers = ['#', 'Nombre', 'Club', ...lineHeaders, 'Promedio', 'Total'];
+
+    // Data dinámica
+    const exportData = this.groupedResults
+      .filter(e => !this.isTeamEntry(e))
+      .map((entry: any, index: number) => {
+        const row: any = {
+          '#': index + 1,
+          'Nombre': entry.playerName,
+          'Club': entry.clubName
+        };
+
+        // Insertar líneas L1, L2, ..., Ln
+        lineHeaders.forEach((_, i) => {
+          row[`L${i + 1}`] = entry.scores?.[i] ?? '-';
+        });
+
+        row['Promedio'] = entry.promedio;
+        row['Total'] = entry.total;
+
+        return row;
+      });
+
+    this.excelExportService.exportToExcel(exportData, fileName, headers, metaData);
+  }
+
+
   /**
    * Imagen fallback
    */
@@ -146,4 +190,7 @@ export class TournamentDetailsComponent implements OnInit {
   goBack(): void {
     this.location.back();
   }
+
+
+
 }
