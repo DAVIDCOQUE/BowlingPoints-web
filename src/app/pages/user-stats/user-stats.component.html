@@ -5,7 +5,7 @@
     <div class="col-md-3">
       <div class="card border-0 shadow-sm h-100 rounded-4 text-center">
         <div class="card-body">
-          <img [src]="imagenesEstadisticas['torneo']" width="50" class="mb-2" />
+          <img [src]="imagenesEstadisticas['torneo']" alt="Icono torneo" width="50" class="mb-2" />
           <h4>Total Torneos</h4>
           <h2 class="fw-bold text-primary">{{ dashboardStats?.totalTournaments ?? 0 }}</h2>
         </div>
@@ -16,7 +16,7 @@
     <div class="col-md-3">
       <div class="card border-0 shadow-sm h-100 rounded-4 text-center">
         <div class="card-body">
-          <img [src]="imagenesEstadisticas['chuzas']" width="50" class="mb-2" />
+          <img [src]="imagenesEstadisticas['chuzas']" alt="Icono chuzas" width="50" class="mb-2" />
           <h4>Líneas Jugadas</h4>
           <h2 class="fw-bold text-primary">{{ dashboardStats?.totalLines ?? 0 }}</h2>
         </div>
@@ -27,7 +27,7 @@
     <div class="col-md-3">
       <div class="card border-0 shadow-sm h-100 rounded-4 text-center">
         <div class="card-body">
-          <img [src]="imagenesEstadisticas['promedio']" width="50" class="mb-2" />
+          <img [src]="imagenesEstadisticas['promedio']"  alt="Icono promedio" width="50" class="mb-2" />
           <h4>Promedio General</h4>
           <h2 class="fw-bold text-success">{{ dashboardStats?.avgScoreGeneral | number: '1.2-2' }}</h2>
         </div>
@@ -38,7 +38,7 @@
     <div class="col-md-3">
       <div class="card border-0 shadow-sm h-100 rounded-4 text-center">
         <div class="card-body">
-          <img [src]="imagenesEstadisticas['mejorJuego']" width="50" class="mb-2" />
+          <img [src]="imagenesEstadisticas['mejorJuego']" alt="Icono mejor juego" width="50" class="mb-2" />
           <h4>Mejor Línea</h4>
           <h2 class="fw-bold text-danger">{{ dashboardStats?.bestLine ?? 0 }}</h2>
         </div>
@@ -112,7 +112,7 @@
               <td>{{ i + 1 }}</td>
               <td>
                 <img [src]="apiUrl + torneo.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
-                  alt="img" width="40" height="40" class="rounded-circle" />
+                  alt="Imagen del torneo" width="40" height="40" class="rounded-circle" />
               </td>
               <td>{{ torneo.tournamentName }}</td>
               <td>{{ torneo.average | number: '1.2-2' }}</td>

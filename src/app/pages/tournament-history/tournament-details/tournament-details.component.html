@@ -42,7 +42,7 @@
   <!-- RESÚMENES: Promedios por línea, promedio de ronda y mayor línea -->
   <div class="row mb-4 text-center">
     <div class="col-12">
-      <h5 class="fw-bold fs-5">Promedios por línea</h5> <!-- Aumenta tamaño del título -->
+      <h5 class="fw-bold fs-5">Promedios por línea</h5>
       <div class="d-flex flex-wrap justify-content-center gap-3">
         <div *ngFor="let key of promediosPorLinea | keyvalue">
           <span class="badge text-bg-light px-3 py-2 fs-6">
@@ -128,9 +128,7 @@
           <tbody *ngIf="groupedResults && groupedResults.length; else noPlayers">
             <ng-container *ngFor="let entry of groupedResults; let pos = index">
 
-              <!-- ===================== -->
               <!-- FILA: JUGADOR INDIVIDUAL -->
-              <!-- ===================== -->
               <tr *ngIf="!isTeamEntry(entry)" [ngClass]="{
           'table-warning': !isTeamModality && pos === 0,
           'table-light':    !isTeamModality && pos === 1,
@@ -160,9 +158,8 @@
                 <td class="fw-bold text-primary">{{ entry.total }}</td>
               </tr>
 
-              <!-- ===================== -->
               <!-- FILA: RESUMEN EQUIPO -->
-              <!-- ===================== -->
+
               <tr *ngIf="isTeamEntry(entry)" class="table-success">
                 <td class="fw-bold"></td>
 

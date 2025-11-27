@@ -13,7 +13,7 @@
         <div class="card-body text-center">
           <!-- Foto del jugador -->
           <img [src]="apiUrl + statisticsUser?.photoUrl" (error)="onImgError($event, 'assets/img/perfilDefault.png')"
-            class="rounded-circle img-fluid" style="width: 150px; height: 150px; object-fit: cover" />
+            class="rounded-circle img-fluid" alt="Foto del jugador" style="width: 150px; height: 150px; object-fit: cover" />
           <!-- Nombre del jugador -->
           <h3 class="my-3">{{ statisticsUser?.fullName }}</h3>
           <!-- Edad del jugador -->
