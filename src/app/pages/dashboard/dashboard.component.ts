@@ -51,8 +51,6 @@ export class DashboardComponent {
           this.scheduledOrPostponedTournaments = data.scheduledOrPostponedTournaments ?? [];
           this.topPlayers = data.topPlayers ?? [];
           this.ambits = data.ambits ?? [];
-          console.log('Dashboard data:', data);
-
         },
         error: err => {
           console.error('Error al cargar datos del dashboard:', err);

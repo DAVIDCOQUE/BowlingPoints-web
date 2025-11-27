@@ -124,7 +124,6 @@ export class UsersComponent implements OnInit {
     this.userApi.getUsers().subscribe({
       next: (res) => {
         this.usuarios = res;
-        console.log('Usuarios cargados:', this.usuarios);
       },
       error: (err) => console.error('Error al cargar usuarios:', err),
     });
@@ -136,7 +135,6 @@ export class UsersComponent implements OnInit {
     this.roleApiService.getAll().subscribe({
       next: (res) => {
         this.roles = res;
-        console.log('roles cargados:', this.roles);
       },
       error: (err) => console.error('Error al cargar roles:', err),
     });

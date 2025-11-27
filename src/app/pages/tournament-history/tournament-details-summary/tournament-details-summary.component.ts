@@ -45,7 +45,6 @@ export class TournamentDetailsSummaryComponent implements OnInit {
 
     this.http.get<any>(url).subscribe({
       next: res => {
-        console.log(' Datos del resumen general cargados correctamente:', res);
         this.resumenTorneo = res.tournament || null;
         this.modalities = res.modalities || [];
 

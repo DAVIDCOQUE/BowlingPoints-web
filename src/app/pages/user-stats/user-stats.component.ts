@@ -81,7 +81,6 @@ export class UserStatsComponent implements OnInit, AfterViewInit {
     this.userStatsApi.getDashboardStats(this.userId).subscribe({
       next: (data) => {
         this.dashboardStats = data;
-        console.log('Estadísticas dashboard cargadas:', this.dashboardStats);
         this.renderAllCharts();
       },
       error: () => this.handleError('estadísticas del dashboard'),

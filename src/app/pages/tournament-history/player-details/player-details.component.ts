@@ -35,7 +35,6 @@ export class PlayerDetailsComponent implements OnInit {
     this.userStatsApi.getPlayerStats(this.personId).subscribe({
       next: (data) => {
         this.statisticsUser = data;
-        console.log('Estadísticas del jugador cargadas:', this.statisticsUser);
       },
       error: () => this.handleError('estadísticas del jugador'),
     });

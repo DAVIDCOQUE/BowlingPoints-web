@@ -20,10 +20,10 @@ export class ResetPasswordComponent implements OnInit {
   showConfirmPassword: boolean = false;
 
   constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private recoverPasswordService: RecoverPasswordService
+    private readonly  fb: FormBuilder,
+    private readonly  route: ActivatedRoute,
+    private readonly  router: Router,
+    private readonly  recoverPasswordService: RecoverPasswordService
   ) {
     this.form = this.fb.group({
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
@@ -70,7 +70,6 @@ export class ResetPasswordComponent implements OnInit {
       .resetPassword(this.token, this.form.value.newPassword)
       .subscribe({
         next: (res) => {
-          console.log('✅ Backend response:', res);
 
           Swal.fire({
             icon: 'success',

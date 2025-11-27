@@ -98,7 +98,6 @@ export class ProfileComponent implements OnInit {
         this.documentDisplay = user.document || '';
         this.fullNameDisplay = user.fullName || '';
         this.fullSurnameDisplay = user.fullSurname || '';
-        console.log('Usuario cargado en perfil:', user);
 
         // Previsualiza avatar (foto del backend o imagen por defecto)
         const imgSrc = this.getAvatarUrl(user);
@@ -203,7 +202,7 @@ export class ProfileComponent implements OnInit {
           confirmButtonText: 'Aceptar',
           customClass: { confirmButton: 'btn btn-outline-primary btn-sm' },
           buttonsStyling: false
-        }).then(r => { if (r.isConfirmed) window.location.reload(); });
+        }).then(r => { if (r.isConfirmed) globalThis.location.reload(); });
       },
       error: err => {
         console.error('Error al actualizar usuario:', err);

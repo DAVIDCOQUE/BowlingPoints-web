@@ -31,6 +31,7 @@ export interface IUserResult {
   updatedAt?: Date;
   deletedAt?: Date;
   rama: string;
+  titlesWon?: number;
 
   sub: string;
 }

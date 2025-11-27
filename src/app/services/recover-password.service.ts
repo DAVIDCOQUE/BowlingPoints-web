@@ -10,7 +10,7 @@ import { tap } from 'rxjs/operators';
 export class RecoverPasswordService {
   private readonly authUrl = `${environment.apiUrl}/auth`;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   /**
    * Envía el correo de recuperación
@@ -20,7 +20,7 @@ export class RecoverPasswordService {
     const url = `${this.authUrl}/recover-password`;
 
     return this.http.post(url, payload)
-      .pipe(tap(() => console.log('[RecoverPasswordService] Enviando solicitud de recuperación...')));
+      .pipe();
   }
 
   /**
@@ -31,6 +31,6 @@ export class RecoverPasswordService {
     const url = `${this.authUrl}/reset-password`;
 
     return this.http.post(url, payload)
-      .pipe(tap(() => console.log('[RecoverPasswordService] Restableciendo contraseña...')));
+      .pipe();
   }
 }

@@ -110,9 +110,7 @@ export class TournamentsComponent implements OnInit {
   getTournaments(): void {
     this.tournamentsService.getTournaments().subscribe({
       next: (res) => {
-        console.log('Respuesta de getTournaments:', res);
         this.tournaments = res.data;
-        console.log('this.tournaments después de asignar:', this.tournaments);
       },
       error: (err) => console.error('Error al cargar torneos:', err),
     });
@@ -142,7 +140,6 @@ export class TournamentsComponent implements OnInit {
   getBranches(): void {
     this.branchesService.getAll().subscribe({
       next: (res) => {
-        console.log('Respuesta de getBranches - data:', res);
         this.branches = res;
       },
       error: (err) => console.error('Error al cargar ramas:', err),

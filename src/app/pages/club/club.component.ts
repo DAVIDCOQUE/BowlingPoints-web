@@ -39,10 +39,8 @@ export class ClubComponent implements OnInit, OnDestroy {
     } else {
       // Caso A: Ver mi club (desde el usuario autenticado)
       this.userSub = this.auth.user$.subscribe(user => {
-        console.log('Usuario autenticado recibido:', user);
         if (user?.clubId) {
           this.clubId = user.clubId;
-          console.log('ID del club del usuario:', this.clubId);
           this.getMiClub();
         } else {
           this.miClub = null;

@@ -14,8 +14,8 @@ export class RecoverPasswordComponent {
   loading = false;
 
   constructor(
-    private fb: FormBuilder,
-    private recoverPasswordService: RecoverPasswordService
+    private readonly  fb: FormBuilder,
+    private readonly  recoverPasswordService: RecoverPasswordService
   ) {
     this.form = this.fb.group({
       identifier: [
