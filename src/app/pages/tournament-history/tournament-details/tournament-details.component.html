@@ -93,6 +93,13 @@
     </div>
   </div>
 
+  <div class="mb-3 text-end">
+    <button class="btn btn-success px-4" (click)="exportToExcel()">
+      <i class="bi bi-file-earmark-excel-fill me-2"></i>
+      Exportar a Excel
+    </button>
+  </div>
+
   <!-- TABLA DE RESULTADOS -->
   <div class="card shadow-sm border-0 rounded-4">
     <div class="card-header bg-primary text-white rounded-top-4 d-flex justify-content-between align-items-center">
@@ -135,7 +142,7 @@
           'table-secondary':!isTeamModality && pos === 2
         }">
 
-                <td class="fw-bold" scope="row">{{ pos + 1 }}</td>
+                <td class="fw-bold">{{ pos + 1 }}</td>
 
                 <!-- Nombre del jugador -->
                 <td class="text-start">

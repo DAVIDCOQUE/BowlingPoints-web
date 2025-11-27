@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { Location } from '@angular/common';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 
 @Component({
   selector: 'app-tournament-details-summary',
@@ -15,6 +16,7 @@ export class TournamentDetailsSummaryComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
+  private readonly excelExportService = inject(ExcelExportService);
 
   // Parámetros de ruta
   public readonly tournamentId: number = Number(this.route.snapshot.paramMap.get('tournamentId'));
@@ -79,6 +81,43 @@ export class TournamentDetailsSummaryComponent implements OnInit {
     const diff = Math.round(score - 200);
     return diff >= 0 ? `+${diff}` : `${diff}`;
   }
+
+
+
+  /** Exporta los resultados a Excel */
+  exportToExcel(): void {
+    const tournamentName = this.resumenTorneo?.tournamentName || 'Torneo';
+    const fileName = `Resultados_${tournamentName.replace(/\s+/g, '_')}_Ronda${this.roundNumber}`;
+
+    const metaInfo = [
+      [`🏆 Torneo: ${tournamentName}`],
+      [`🎯 Ronda: ${this.roundNumber}`]
+    ];
+
+    // Construir los datos visibles tal como se ven en la tabla
+    const data = this.resultsByModality.map((player, index) => {
+      const row: any = {
+        '#': index + 1,
+        'Nombre': player.playerName,
+        'Club': player.clubName
+      };
+
+      // Agregar cada modalidad como columna dinámica
+      this.visibleModalities.forEach(mod => {
+        row[mod.name] = player.modalityScores?.[mod.name] ?? '-';
+      });
+
+      // Agregar total y promedio
+      row['Total'] = player.total;
+      row['Promedio'] = parseFloat(player.promedio.toFixed(2)); // Redondeado
+
+      return row;
+    });
+
+    this.excelExportService.exportToExcel(data, fileName, undefined, metaInfo);
+  }
+
+
 
   /**
    * Se ejecuta al cambiar la ronda
