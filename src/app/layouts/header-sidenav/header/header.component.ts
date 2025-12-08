@@ -22,7 +22,6 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     this.isGuest = this.authService.isGuest();
     const decoded = this.authService.decodeToken();
-    console.log('Decoded Token:', decoded);
     this.userEmail = decoded?.email || null;
     this.userDocument = decoded?.sub || null;
     this.userRole = decoded?.roles?.[0] || 'INVITADO';
@@ -44,7 +43,6 @@ export class HeaderComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        console.log('Sesión cerrada.');
         localStorage.clear();
         this.router.navigate(['/login']);
       }

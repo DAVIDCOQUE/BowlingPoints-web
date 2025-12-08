@@ -45,6 +45,9 @@ import { LoadingComponent } from './components/loading/loading.component';
 import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
 import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
 import { TournamentDetailsSummaryComponent } from './pages/tournament-history/tournament-details-summary/tournament-details-summary.component';
+import { RecoverPasswordComponent } from './pages/recover-password/recover-password.component';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { REACTIVE_NODE } from '@angular/core/primitives/signals';
 
 @NgModule({
   declarations: [
@@ -75,7 +78,9 @@ import { TournamentDetailsSummaryComponent } from './pages/tournament-history/to
     ResultsAndStatsComponent,
     TournamentResultComponent,
     TournamentParticipantsComponent,
-    TournamentDetailsSummaryComponent
+    TournamentDetailsSummaryComponent,
+    RecoverPasswordComponent,
+    ResetPasswordComponent
   ],
   imports: [
     CommonModule,

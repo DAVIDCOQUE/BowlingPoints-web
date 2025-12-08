@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { TournamentResultComponent } from './tournament-result.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
@@ -14,6 +14,8 @@ import { ResultsService } from 'src/app/services/results.service';
 import { UserApiService } from 'src/app/services/user-api.service';
 import { IUser } from 'src/app/model/user.interface';
 import { IResults } from 'src/app/model/result.interface';
+import { ITeam } from 'src/app/model/team.interface';
+import { HttpClient } from '@angular/common/http';
 
 describe('TournamentResultComponent', () => {
   let component: TournamentResultComponent;
@@ -541,6 +543,635 @@ describe('TournamentResultComponent', () => {
       'error'
     );
   });
+
+  it('should handle error in saveResult()', fakeAsync(() => {
+    component.tournamentId = 1;
+    component.initResultForm();
+    component.resultForm.patchValue({
+      personId: 1,
+      teamId: 2,
+      categoryId: 1,
+      modalityId: 1,
+      branchId: 1,
+      roundNumber: 1,
+      laneNumber: 1,
+      lineNumber: 1,
+      score: 100,
+    });
+
+    spyOn(Swal, 'fire');
+    component.saveResult();
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/results`);
+    req.flush({ message: 'Error en backend' }, { status: 500, statusText: 'Server Error' });
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'Error en backend', 'error');
+  }));
+
+  it('should save a new team (POST)', fakeAsync(() => {
+    component.tournamentId = 1;
+    component.idTeam = null;
+    component.initTeamForm();
+
+    component.teamForm.patchValue({
+      nameTeam: 'Equipo A',
+      phone: '123456',
+      playerIds: [1, 2],
+      categoryId: 1,
+      modalityId: 1,
+      status: true
+    });
+
+    spyOn(Swal, 'fire');
+    spyOn(component, 'closeModal');
+    spyOn(component, 'loadRegisteredPlayers');
+
+    component.saveTeam();
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/teams`);
+    expect(req.request.method).toBe('POST');
+    req.flush({}); // Simulamos respuesta exitosa
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Equipo creado correctamente', 'success');
+    expect(component.closeModal).toHaveBeenCalled();
+    expect(component.loadRegisteredPlayers).toHaveBeenCalled();
+  }));
+
+  it('should update an existing team (PUT)', fakeAsync(() => {
+    component.tournamentId = 1;
+    component.idTeam = 123;
+    component.initTeamForm();
+
+    component.teamForm.patchValue({
+      nameTeam: 'Equipo Editado',
+      phone: '987654',
+      playerIds: [3, 4],
+      categoryId: 1,
+      modalityId: 1,
+      status: true
+    });
+
+    spyOn(Swal, 'fire');
+    spyOn(component, 'closeModal');
+    spyOn(component, 'loadRegisteredPlayers');
+
+    component.saveTeam();
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/teams/123`);
+    expect(req.request.method).toBe('PUT');
+    req.flush({});
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Equipo actualizado correctamente', 'success');
+    expect(component.closeModal).toHaveBeenCalled();
+    expect(component.loadRegisteredPlayers).toHaveBeenCalled();
+  }));
+
+
+  it('should show error if selected player file is invalid', () => {
+    const mockEvent = {
+      target: {
+        files: [{ name: 'archivo.txt' }],
+      },
+    };
+
+    spyOn(Swal, 'fire');
+    component.onPlayersFileSelected(mockEvent);
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'Solo se permiten archivos Excel o CSV', 'error');
+  });
+
+  it('should return unique players', () => {
+    component['filteredRegistrations'] = [
+      { personId: 1, personFullName: 'Jugador Uno' },
+      { personId: 1, personFullName: 'Jugador Uno' }, // duplicado
+      { personId: 2, personFullName: null },          // sin nombre
+      { personId: null, personFullName: 'Jugador Null' }, // sin ID
+    ] as any;
+
+    const result = component.uniquePlayers;
+
+    expect(result.length).toBe(2);
+    expect(result[0]).toEqual({ personId: 1, personFullName: 'Jugador Uno' });
+    expect(result[1]).toEqual({ personId: 2, personFullName: 'N/A' });
+  });
+
+
+  it('should return unique teams', () => {
+    component['filteredRegistrations'] = [
+      { teamId: 10, teamName: 'Team A' },
+      { teamId: 10, teamName: 'Team A' }, // duplicado
+      { teamId: 20, teamName: 'Team B' },
+      { teamId: null, teamName: 'Team C' }, // sin ID
+    ] as any;
+
+    const result = component.uniqueTeams;
+
+    expect(result.length).toBe(2);
+    expect(result).toContain(jasmine.objectContaining({ teamId: 10, nameTeam: 'Team A' }));
+    expect(result).toContain(jasmine.objectContaining({ teamId: 20, nameTeam: 'Team B' }));
+  });
+
+
+  it('should not delete result if ID is invalid', () => {
+    spyOn(Swal, 'fire');
+    component.deleteResult(undefined);
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'ID de resultado no válido', 'error');
+  });
+
+
+  it('should call executeDeleteResult when user confirms', fakeAsync(() => {
+    component.tournamentId = 1;
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
+    spyOn<any>(component, 'executeDeleteResult');
+
+    component.deleteResult(123);
+    tick();
+
+    expect(component['executeDeleteResult']).toHaveBeenCalledWith(123);
+  }));
+
+  it('should return unique players by personId', () => {
+    component.filteredRegistrations = [
+      { personId: 1, personFullName: 'Player One' },
+      { personId: 2, personFullName: 'Player Two' },
+      { personId: 1, personFullName: 'Player One' }, // duplicado
+    ] as any;
+
+    const result = component.uniquePlayers;
+    expect(result.length).toBe(2);
+    expect(result).toEqual([
+      { personId: 1, personFullName: 'Player One' },
+      { personId: 2, personFullName: 'Player Two' },
+    ]);
+  });
+
+  it('should return unique teams by teamId', () => {
+    component.filteredRegistrations = [
+      { teamId: 1, teamName: 'Team A' },
+      { teamId: 2, teamName: 'Team B' },
+      { teamId: 1, teamName: 'Team A' }, // duplicado
+    ] as any;
+
+    const result = component.uniqueTeams;
+    expect(result.length).toBe(2);
+    expect(result).toEqual([
+      { teamId: 1, nameTeam: 'Team A' },
+      { teamId: 2, nameTeam: 'Team B' },
+    ]);
+  });
+
+  it('should group registrations by modalityName', () => {
+    component.filteredRegistrations = [
+      { modalityName: 'Doble', personId: 1 } as any,
+      { modalityName: 'Doble', personId: 2 } as any,
+      { modalityName: 'Individual', personId: 3 } as any,
+      { personId: 4 } as any, // Sin modalidad
+    ];
+
+    const grouped = component.groupedRegistrations;
+
+    expect(grouped.length).toBe(3);
+
+    const modalityNames = grouped.map(g => g.modality);
+    expect(modalityNames).toContain('Doble');
+    expect(modalityNames).toContain('Individual');
+    expect(modalityNames).toContain('Sin modalidad');
+
+    const sinModalidad = grouped.find(g => g.modality === 'Sin modalidad');
+    expect(sinModalidad?.players.length).toBe(1);
+  });
+
+
+  it('should group registrations by modalityName', () => {
+    component.filteredRegistrations = [
+      { modalityName: 'Doble', personId: 1 } as any,
+      { modalityName: 'Doble', personId: 2 } as any,
+      { modalityName: 'Individual', personId: 3 } as any,
+      { personId: 4 } as any, // Sin modalidad
+    ];
+
+    const grouped = component.groupedRegistrations;
+
+    expect(grouped.length).toBe(3);
+
+    const modalityNames = grouped.map(g => g.modality);
+    expect(modalityNames).toContain('Doble');
+    expect(modalityNames).toContain('Individual');
+    expect(modalityNames).toContain('Sin modalidad');
+
+    const sinModalidad = grouped.find(g => g.modality === 'Sin modalidad');
+    expect(sinModalidad?.players.length).toBe(1);
+  });
+
+  it('should show error if resultId is invalid', () => {
+    spyOn(Swal, 'fire');
+    component.deleteResult(undefined);
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'ID de resultado no válido', 'error');
+  });
+
+
+  it('should not call executeDeleteResult if user cancels', fakeAsync(() => {
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: false }) as any);
+    const spy = spyOn<any>(component, 'executeDeleteResult');
+
+    component.deleteResult(123);
+    tick();
+    expect(spy).not.toHaveBeenCalled();
+  }));
+
+
+  it('should not upload if no file is selected', () => {
+    const fakeEvent = { target: { files: [] } };
+    component.onResultFileSelected(fakeEvent);
+    // No error esperado pero tampoco debe lanzar nada
+  });
+
+  it('should show error for invalid extension', () => {
+    const fakeFile = new File([''], 'test.txt');
+    const fakeEvent = { target: { files: [fakeFile] } };
+    spyOn(Swal, 'fire');
+
+    component.tournamentId = 1;
+    component.onResultFileSelected(fakeEvent);
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'Solo se permiten archivos Excel o CSV', 'error');
+  });
+
+  it('should show error if tournamentId is missing', () => {
+    const fakeFile = new File([''], 'test.xlsx');
+    const fakeEvent = { target: { files: [fakeFile] } };
+    spyOn(Swal, 'fire');
+
+    component.tournamentId = null;
+    component.onResultFileSelected(fakeEvent);
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No hay torneo seleccionado para cargar resultados', 'error');
+  });
+
+  it('should return unique players based on personId', () => {
+    component.filteredRegistrations = [
+      { personId: 1, personFullName: 'John Doe' } as any,
+      { personId: 2, personFullName: 'Jane Doe' } as any,
+      { personId: 1, personFullName: 'John Doe' } as any,
+    ];
+
+    const unique = component.uniquePlayers;
+    expect(unique.length).toBe(2);
+    expect(unique).toEqual([
+      { personId: 1, personFullName: 'John Doe' },
+      { personId: 2, personFullName: 'Jane Doe' },
+    ]);
+  });
+
+
+  it('should return unique teams based on teamId', () => {
+    component.filteredRegistrations = [
+      { teamId: 1, teamName: 'Team A' } as any,
+      { teamId: 2, teamName: 'Team B' } as any,
+      { teamId: 1, teamName: 'Team A' } as any,
+    ];
+
+    const teams = component.uniqueTeams;
+    expect(teams.length).toBe(2);
+    expect(teams).toEqual([
+      { teamId: 1, nameTeam: 'Team A' },
+      { teamId: 2, nameTeam: 'Team B' },
+    ]);
+  });
+
+  it('should group registrations by modalityName', () => {
+    component.filteredRegistrations = [
+      { modalityName: 'Doble' } as any,
+      { modalityName: 'Individual' } as any,
+      { modalityName: 'Doble' } as any,
+    ];
+
+    const grouped = component.groupedRegistrations;
+    expect(grouped.length).toBe(2);
+    expect(grouped.find(g => g.modality === 'Doble')?.players.length).toBe(2);
+    expect(grouped.find(g => g.modality === 'Individual')?.players.length).toBe(1);
+  });
+
+  it('should show error when deleteResult is called without valid id', () => {
+    spyOn(Swal, 'fire');
+    component.deleteResult(undefined);
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'ID de resultado no válido', 'error');
+  });
+
+  it('should call executeDeleteResult when user confirms deletion', fakeAsync(() => {
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
+    spyOn<any>(component, 'executeDeleteResult');
+
+    component.deleteResult(123);
+    tick();
+
+    expect(component['executeDeleteResult']).toHaveBeenCalledWith(123);
+  }));
+
+  it('should show error for invalid result file extension', () => {
+    spyOn(Swal, 'fire');
+    const mockEvent = {
+      target: {
+        files: [new File(['dummy content'], 'test.txt')],
+      },
+    };
+
+    component.tournamentId = 1;
+    component.onResultFileSelected(mockEvent as any);
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'Solo se permiten archivos Excel o CSV', 'error');
+  });
+
+  it('should show error if no tournamentId when uploading players', () => {
+    spyOn(Swal, 'fire');
+    const mockEvent = {
+      target: {
+        files: [new File(['dummy'], 'players.xlsx')],
+      },
+    };
+
+    component.tournamentId = null;
+    component.onPlayersFileSelected(mockEvent as any);
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No hay torneo seleccionado para cargar jugadores', 'error');
+  });
+
+
+  it('should call Swal in handlePlayerError', () => {
+    spyOn(Swal, 'fire');
+    component['handlePlayerError']({ error: { message: 'Fallo' } });
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'Fallo', 'error');
+  });
+
+  it('should patch form and open modal for editPlayer', () => {
+    const spy = spyOn(component, 'openModal');
+
+    component.initPlayerForm(); // 💥 Necesario
+
+    const reg = {
+      registrationId: 10,
+      personId: 1,
+      categoryId: 1,
+      modalityId: 1,
+      branchId: 1,
+      teamId: 2,
+      status: true
+    } as any;
+
+    component.modalPlayerRef = {} as any;
+    component.editPlayer(reg);
+
+    expect(component.idPlayer).toBe(10);
+    expect(component.playerForm.value.personId).toBe(1); // Ya no fallará
+    expect(spy).toHaveBeenCalledWith(component.modalPlayerRef);
+  });
+
+
+  it('should upload players file successfully', fakeAsync(() => {
+    component.tournamentId = 1;
+    const mockFile = new File(['dummy content'], 'test.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const mockEvent = { target: { files: [mockFile] } };
+
+    spyOn(Swal, 'fire');
+    spyOn(component, 'loadPlayers');
+
+    component.onPlayersFileSelected(mockEvent);
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/players/upload`);
+    expect(req.request.method).toBe('POST');
+    req.flush({});
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Jugadores cargados correctamente', 'success');
+    expect(component.loadPlayers).toHaveBeenCalled();
+    expect(component.isUploadingPlayers).toBeFalse();
+  }));
+
+
+  it('should show error if file upload fails', fakeAsync(() => {
+    component.tournamentId = 1;
+    const mockFile = new File(['dummy content'], 'test.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const mockEvent = { target: { files: [mockFile] } };
+
+    spyOn(Swal, 'fire');
+    spyOn(console, 'error');
+
+    component.onPlayersFileSelected(mockEvent);
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/players/upload`);
+    req.error(new ErrorEvent('Network error'));
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo cargar el archivo', 'error');
+    expect(console.error).toHaveBeenCalled();
+    expect(component.isUploadingPlayers).toBeFalse();
+  }));
+
+  it('should upload results file successfully', fakeAsync(() => {
+    component.tournamentId = 1;
+    const mockFile = new File(['dummy'], 'results.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    const mockEvent = { target: { files: [mockFile] } };
+
+    spyOn(Swal, 'fire');
+    spyOn(component, 'loadResults');
+
+    component.onResultFileSelected(mockEvent);
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/results/upload`);
+    expect(req.request.method).toBe('POST');
+    req.flush({}); // respuesta simulada
+
+    tick();
+
+    expect(component.isUploadingResults).toBeFalse();
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Resultados cargados correctamente', 'success');
+    expect(component.loadResults).toHaveBeenCalled();
+  }));
+
+
+  it('should show error if result file upload fails', fakeAsync(() => {
+    component.tournamentId = 1;
+    const mockFile = new File(['dummy'], 'results.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    const mockEvent = { target: { files: [mockFile] } };
+
+    spyOn(Swal, 'fire');
+    spyOn(console, 'error');
+
+    component.onResultFileSelected(mockEvent);
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/results/upload`);
+    req.error(new ErrorEvent('Network error'));
+
+    tick();
+
+    expect(component.isUploadingResults).toBeFalse();
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo cargar el archivo', 'error');
+    expect(console.error).toHaveBeenCalled();
+  }));
+
+  it('should return false when branch does not match p.branchName', () => {
+    const result = component['matchesBranch']('juvenil')({ branchName: 'mayores' });
+    expect(result).toBeFalse(); // correcto
+  });
+
+  it('should return true when branch matches p.branchName', () => {
+    const result = component['matchesBranch']('juvenil')({ branchName: 'rama juvenil femenino' });
+    expect(result).toBeTrue(); // correcto
+  });
+
+  it('should return true when branch filter is empty', () => {
+    const result = component['matchesBranch']('')({ branchName: 'cualquiera' });
+    expect(result).toBeTrue();
+  });
+
+  it('should patch the form and open modal for editTeam', () => {
+    const mockTeam: ITeam = {
+      teamId: 1,
+      nameTeam: 'Team A',
+      phone: '123456789',
+      members: [
+        { personId: 1001 } as IUser,
+        { personId: 1002 } as IUser
+      ],
+      categoryId: 5,
+      modalityId: 2,
+      status: true,
+    };
+
+    const patchSpy = spyOn(component.teamForm, 'patchValue');
+    const modalSpy = spyOn(component as any, 'openModal');
+
+    component.editTeam(mockTeam);
+
+    expect(component.idTeam).toBe(mockTeam.teamId);
+
+    expect(patchSpy).toHaveBeenCalledWith({
+      nameTeam: mockTeam.nameTeam,
+      phone: mockTeam.phone,
+      playerIds: [1001, 1002],
+      categoryId: mockTeam.categoryId,
+      modalityId: mockTeam.modalityId,
+      status: mockTeam.status,
+    });
+
+    expect(modalSpy).toHaveBeenCalledWith(component['modalTeamRef']);
+  });
+
+
+  it('should call handleDeleteSuccess on successful delete', () => {
+    const id = 123;
+
+    const spySuccess = spyOn(component as any, 'handleDeleteSuccess');
+    const spyError = spyOn(component as any, 'handleDeleteError');
+
+    // Usa la instancia de HttpClient inyectada
+    const httpDeleteSpy = spyOn(component['http'], 'delete').and.returnValue(of({}));
+
+    // Ejecuta la función
+    (component as any).executeDeleteResult(id);
+
+    // Aserciones
+    expect(httpDeleteSpy).toHaveBeenCalledWith(`${component['apiUrl']}/results/${id}`);
+    expect(spySuccess).toHaveBeenCalled();
+    expect(spyError).not.toHaveBeenCalled();
+  });
+
+  it('should call handleDeleteError on failed delete', () => {
+    const id = 123;
+    const spySuccess = spyOn(component as any, 'handleDeleteSuccess');
+    const spyError = spyOn(component as any, 'handleDeleteError');
+
+    // ❗ Espía sobre la instancia del servicio, no la clase
+    const httpDeleteSpy = spyOn(component['http'], 'delete').and.returnValue(
+      throwError(() => new Error('Error'))
+    );
+
+    (component as any).executeDeleteResult(id);
+
+    expect(httpDeleteSpy).toHaveBeenCalledWith(`${component['apiUrl']}/results/${id}`);
+    expect(spyError).toHaveBeenCalled();
+    expect(spySuccess).not.toHaveBeenCalled();
+  });
+
+  it('should show error if form is invalid or tournamentId is missing', () => {
+    component.tournamentId = null;
+    const markSpy = spyOn(component.resultForm, 'markAllAsTouched');
+    const swalSpy = spyOn(Swal, 'fire');
+
+    component.saveResult();
+
+    expect(markSpy).toHaveBeenCalled();
+    expect(swalSpy).toHaveBeenCalledWith(
+      'Error',
+      'Formulario inválido o torneo no definido',
+      'error'
+    );
+  });
+
+  it('should show error if form is invalid', () => {
+    component.tournamentId = 1;
+
+    component.resultForm = new FormGroup({
+      categoryId: new FormControl(null, Validators.required)
+    });
+
+    const markSpy = spyOn(component.resultForm, 'markAllAsTouched');
+    const swalSpy = spyOn(Swal, 'fire');
+
+    component.saveResult();
+
+    expect(markSpy).toHaveBeenCalled();
+    expect(swalSpy).toHaveBeenCalledWith(
+      'Error',
+      'Formulario inválido o torneo no definido',
+      'error'
+    );
+  });
+
+  it('should call handleDeleteSuccess on successful delete', () => {
+    const id = 123;
+
+    const spySuccess = spyOn(component as any, 'handleDeleteSuccess');
+    const spyError = spyOn(component as any, 'handleDeleteError');
+
+    const httpDeleteSpy = spyOn(component['http'], 'delete')
+      .and.returnValue(of({}));
+
+    (component as any).executeDeleteResult(id);
+
+    expect(httpDeleteSpy).toHaveBeenCalledWith(`${component['apiUrl']}/results/${id}`);
+    expect(spySuccess).toHaveBeenCalled();
+    expect(spyError).not.toHaveBeenCalled();
+  });
+
+
+  it('should call handleDeleteError on failed delete', () => {
+    const id = 123;
+
+    const spySuccess = spyOn(component as any, 'handleDeleteSuccess');
+    const spyError = spyOn(component as any, 'handleDeleteError');
+
+    const httpDeleteSpy = spyOn(component['http'], 'delete')
+      .and.returnValue(throwError(() => new Error('Error')));
+
+    (component as any).executeDeleteResult(id);
+
+    expect(httpDeleteSpy).toHaveBeenCalledWith(`${component['apiUrl']}/results/${id}`);
+    expect(spyError).toHaveBeenCalled();
+    expect(spySuccess).not.toHaveBeenCalled();
+  });
+
 
 });
 

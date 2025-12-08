@@ -9,7 +9,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { IClubs } from 'src/app/model/clubs.interface';
 import { IUser } from 'src/app/model/user.interface';
 import Swal from 'sweetalert2';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, TemplateRef } from '@angular/core';
 
 describe('ClubsComponent', () => {
   let component: ClubsComponent;
@@ -246,4 +246,116 @@ describe('ClubsComponent', () => {
 
     expect(result.length).toBe(1);
   });
+
+  it('should show specific error if member is already assigned to a club', () => {
+    spyOn(Swal, 'fire');
+
+    const errorResponse = {
+      error: {
+        message: 'Este usuario ya está asignado a este club'
+      }
+    };
+
+    clubApi.createClub.and.returnValue(throwError(() => errorResponse));
+    component.ngOnInit();
+    component.clubForm.setValue({
+      name: 'Club A',
+      foundationDate: '2020-01-01',
+      city: 'Bogotá',
+      description: 'desc',
+      members: [1],
+      imageUrl: '',
+      status: true
+    });
+
+    component.save();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'Este miembro ya pertenece a otro club.', 'error');
+  });
+
+  it('should show generic error if save fails without known message', () => {
+    spyOn(Swal, 'fire');
+
+    const errorResponse = {
+      error: {
+        message: 'Otro error'
+      }
+    };
+
+    clubApi.createClub.and.returnValue(throwError(() => errorResponse));
+    component.ngOnInit();
+    component.clubForm.setValue({
+      name: 'Club A',
+      foundationDate: '2020-01-01',
+      city: 'Bogotá',
+      description: 'desc',
+      members: [1],
+      imageUrl: '',
+      status: true
+    });
+
+    component.save();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo guardar el club', 'error');
+  });
+
+
+  it('should not delete club if deletion is cancelled', async () => {
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({
+      isConfirmed: false
+    }) as any);
+
+    await component.deleteClub(1);
+
+    expect(clubApi.deleteClub).not.toHaveBeenCalled();
+  });
+
+  it('should open modal for creating a new club', () => {
+    const content = {} as TemplateRef<unknown>;
+    component.clubForm = component['fb'].group({}); // evita errores
+    component.openModal(content);
+    expect(modalService.open).toHaveBeenCalledWith(content);
+  });
+
+  it('should open modal and populate form for editing club', () => {
+    const content = {} as TemplateRef<unknown>;
+
+    const club: IClubs = {
+      clubId: 1,
+      name: 'Club Editar',
+      city: 'Medellín',
+      description: 'desc',
+      imageUrl: 'img.jpg',
+      status: true,
+      foundationDate: new Date(),
+      members: [mockUser]
+    };
+
+    component.ngOnInit();
+    component.openModal(content, club);
+
+    expect(component.id_Club).toBe(1);
+    expect(component.clubForm.value.name).toBe('Club Editar');
+    expect(modalService.open).toHaveBeenCalledWith(content);
+  });
+
+  it('should display "Crear" button if user is admin', () => {
+    auth.hasRole.and.returnValue(true);
+    fixture.detectChanges();
+
+    const btn = fixture.nativeElement.querySelector('button.btn-success');
+    expect(btn?.textContent).toContain('Crear');
+  });
+
+  it('should not display "Crear" button if user is not admin', () => {
+    auth.hasRole.and.returnValue(false);
+    fixture.detectChanges();
+
+    const btn = fixture.nativeElement.querySelector('button.btn-success');
+    expect(btn).toBeNull();
+  });
+
+
+
+
 });

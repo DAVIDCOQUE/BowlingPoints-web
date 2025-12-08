@@ -1,5 +1,4 @@
 <div class="container py-4">
-
   <!-- Botón Volver -->
   <div class="mb-4">
     <button (click)="goBack()" class="btn btn-outline-primary rounded-3 px-4">
@@ -8,7 +7,6 @@
   </div>
 
   <div class="row g-4 mb-4">
-
     <!-- Resumen del Torneo -->
     <div class="col-md-6">
       <div class="card shadow-sm border-0 rounded-4 h-100">
@@ -18,20 +16,28 @@
         <div class="card-body p-4">
           <div class="row gy-3 gx-0">
             <div class="col-12 d-flex align-items-center mb-2">
-              <span class="fw-bold fs-6 flex-shrink-0" style="min-width:180px;">Nombre:</span>
-              <span class="fs-7 ms-3 text-dark">{{ selectedTournament?.name || '-' }}</span>
+              <span class="fw-bold fs-6 flex-shrink-0" style="min-width: 180px">Nombre:</span>
+              <span class="fs-7 ms-3 text-dark">{{
+                selectedTournament?.name || "-"
+                }}</span>
             </div>
             <div class="col-12 d-flex align-items-center mb-2">
-              <span class="fw-bold fs-6 flex-shrink-0" style="min-width:180px;">Organizador:</span>
-              <span class="fs-7 ms-3 text-dark">{{ selectedTournament?.organizer || '-' }}</span>
+              <span class="fw-bold fs-6 flex-shrink-0" style="min-width: 180px">Organizador:</span>
+              <span class="fs-7 ms-3 text-dark">{{
+                selectedTournament?.organizer || "-"
+                }}</span>
             </div>
             <div class="col-12 d-flex align-items-center mb-2">
-              <span class="fw-bold fs-6 flex-shrink-0" style="min-width:180px;">Fecha de inicio:</span>
-              <span class="fs-7 ms-3 text-dark">{{ selectedTournament?.startDate || '-' }}</span>
+              <span class="fw-bold fs-6 flex-shrink-0" style="min-width: 180px">Fecha de inicio:</span>
+              <span class="fs-7 ms-3 text-dark">{{
+                selectedTournament?.startDate || "-"
+                }}</span>
             </div>
             <div class="col-12 d-flex align-items-center">
-              <span class="fw-bold fs-6 flex-shrink-0" style="min-width:180px;">Fecha de finalización:</span>
-              <span class="fs-7 ms-3 text-dark">{{ selectedTournament?.endDate || '-' }}</span>
+              <span class="fw-bold fs-6 flex-shrink-0" style="min-width: 180px">Fecha de finalización:</span>
+              <span class="fs-7 ms-3 text-dark">{{
+                selectedTournament?.endDate || "-"
+                }}</span>
             </div>
           </div>
         </div>
@@ -43,14 +49,29 @@
       <h3 class="text-center">🎳 Ramas</h3>
 
       <!-- Si hay ramas -->
-      <div class="row g-3" *ngIf="branches.length > 0; else noBranches">
+      <div class="row g-3" *ngIf="branches && branches.length > 0; else noBranches">
         <div class="col-12" *ngFor="let branch of branches">
-          <div class="card shadow-sm h-100 border-0 rounded-4 text-center card_h"
-            [routerLink]="['/tournament-details-summary', tournamentId, branch.branchId]">
+          <div class="card shadow-sm h-100 border-0 rounded-4 text-center card_h" [routerLink]="[
+              '/tournament-details-summary',
+              tournamentId,
+              branch.branchId
+            ]">
             <div class="card-body d-flex flex-column justify-content-center align-items-center p-3">
-              <h4 class="fw-semibold mb-2">{{ branch.name }}</h4>
-              <h5 class="badge bg-success bg-opacity-10 text-success fw-semibold px-3">
-                Total Jugadores: {{ branch.playerCount || 'N/A' }}
+              <h4 class="fw-semibold mb-2 d-flex align-items-center gap-2 justify-content-center">
+                <i class="fa-solid fa-mars text-primary" *ngIf="
+                    branch?.name?.toLowerCase()?.includes('masculino')
+                  "></i>
+
+                <i class="fa-solid fa-venus text-pink" *ngIf="
+                    branch?.name?.toLowerCase()?.includes('femenino')
+                  "></i>
+
+                {{ branch.name }}
+              </h4>
+
+              <h5
+                class="badge bg-success bg-opacity-10 text-success fw-semibold px-3 d-flex align-items-center gap-2 justify-content-center">
+                Total Jugadores: {{ branch.playerCount || "N/A" }}
               </h5>
             </div>
           </div>
@@ -64,20 +85,32 @@
         </div>
       </ng-template>
     </div>
-
   </div>
 
   <!-- Modalidades -->
   <h3 class="text-center mb-4">🎳 Modalidades</h3>
   <div class="row g-3 justify-content-center">
     <div class="col-10 col-sm-6 col-md-4 col-lg-3 d-flex" *ngFor="let modality of modalities">
-      <div class="card text-center shadow-sm border-0 rounded-4 bg-light card_h w-100"
-        [routerLink]="['/tournament-details', tournamentId, modality.modalityId]">
+      <div class="card text-center shadow-sm border-0 rounded-4 bg-light card_h w-100" [routerLink]="[
+          '/tournament-details',
+          tournamentId,
+          modality.modalityId
+        ]">
         <div class="card-body p-3">
-          <h4 class="mb-0 fw-semibold">{{ modality.name }}</h4>
+          <h4 class="mb-0 fw-semibold d-flex align-items-center gap-2 justify-content-center">
+            <i class="fa-solid" [ngClass]="{
+                'fa-mars icon-gender-m': modality?.name
+                  ?.toLowerCase()
+                  ?.includes('masculino'),
+                'fa-venus icon-gender-f': modality?.name
+                  ?.toLowerCase()
+                  ?.includes('femenino')
+              }"></i>
+
+            {{ modality.name }}
+          </h4>
         </div>
       </div>
     </div>
   </div>
-
 </div>

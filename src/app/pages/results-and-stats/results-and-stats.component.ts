@@ -149,7 +149,8 @@ export class ResultsAndStatsComponent implements OnInit {
 
   onFilterChange(): void {
     const filtered = this.results.filter((r) =>
-      (!this.selectedBranch || r.branchName?.toLowerCase() === this.selectedBranch.toLowerCase())
+      (!this.selectedBranch || r.branchName?.toLowerCase() === this.selectedBranch.toLowerCase()) &&
+      (!this.selectedCategory || r.categoryId?.toString() === this.selectedCategory)
     );
 
     this.filteredResults = filtered;
@@ -185,7 +186,6 @@ export class ResultsAndStatsComponent implements OnInit {
   // Acciones sobre resultados
   editResult(result: IResults): void {
     this.modalService.open(this.modalResultRef);
-    // console.log('Editar resultado', result);
   }
 
   deleteResult(id: number): void {
@@ -212,6 +212,8 @@ export class ResultsAndStatsComponent implements OnInit {
       }
     });
   }
+
+
 
   openModal(content: TemplateRef<unknown>): void {
     this.modalService.open(content, { size: 'lg' });

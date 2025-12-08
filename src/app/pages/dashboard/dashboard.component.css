@@ -1,0 +1,9 @@
+.player-zoom:hover {
+  transform: scale(1.03);
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.list-group-item {
+  border: none !important;
+}

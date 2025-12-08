@@ -1,5 +1,17 @@
-import { Component, OnInit, ViewChild, TemplateRef, inject, } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators, } from '@angular/forms';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  TemplateRef,
+  inject,
+} from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 
@@ -47,6 +59,13 @@ export class UsersComponent implements OnInit {
 
   /** Indicador de carga */
   loading = false;
+
+  /** Fecha máxima permitida*/
+  maxBirthDate: Date = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  })();
 
   /** Inyecciones mediante inject() */
   private readonly formBuilder = inject(FormBuilder);
@@ -105,7 +124,6 @@ export class UsersComponent implements OnInit {
     this.userApi.getUsers().subscribe({
       next: (res) => {
         this.usuarios = res;
-        console.log('Usuarios cargados:', this.usuarios);
       },
       error: (err) => console.error('Error al cargar usuarios:', err),
     });
@@ -117,7 +135,6 @@ export class UsersComponent implements OnInit {
     this.roleApiService.getAll().subscribe({
       next: (res) => {
         this.roles = res;
-        console.log('roles cargados:', this.roles);
       },
       error: (err) => console.error('Error al cargar roles:', err),
     });
@@ -378,6 +395,25 @@ export class UsersComponent implements OnInit {
 
     const mismatch = pass !== confirm;
     return mismatch ? { passwordsMismatch: true } : null;
+  };
+
+  /**
+   * Validador que impide fechas futuras en birthDate
+   */
+  private readonly futureDateValidator: ValidatorFn = (
+    control: AbstractControl
+  ) => {
+    const value = control.value;
+    if (!value) return null;
+
+    const selectedDate = new Date(value);
+    const today = new Date();
+
+    // Eliminar horas para comparar solo fechas
+    selectedDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    return selectedDate > today ? { futureDate: true } : null;
   };
 
   /**

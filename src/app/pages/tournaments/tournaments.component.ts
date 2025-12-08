@@ -50,6 +50,13 @@ export class TournamentsComponent implements OnInit {
 
   tournamentForm: FormGroup = new FormGroup({});
 
+  /** Fecha mínima permitida (hoy) */
+  minDate: Date = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  })();
+
   estados = [
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' },
@@ -84,7 +91,7 @@ export class TournamentsComponent implements OnInit {
         organizer: ['', Validators.required],
         modalityIds: ['', Validators.required],
         categoryIds: ['', Validators.required],
-        startDate: ['', Validators.required],
+        startDate: ['', [Validators.required, this.pastDateValidator]],
         endDate: ['', Validators.required],
         ambitId: ['', Validators.required],
         branchIds: ['', Validators.required],
@@ -103,9 +110,7 @@ export class TournamentsComponent implements OnInit {
   getTournaments(): void {
     this.tournamentsService.getTournaments().subscribe({
       next: (res) => {
-        console.log('Respuesta de getTournaments:', res);
         this.tournaments = res.data;
-        console.log('this.tournaments después de asignar:', this.tournaments);
       },
       error: (err) => console.error('Error al cargar torneos:', err),
     });
@@ -135,7 +140,6 @@ export class TournamentsComponent implements OnInit {
   getBranches(): void {
     this.branchesService.getAll().subscribe({
       next: (res) => {
-        console.log('Respuesta de getBranches - data:', res);
         this.branches = res;
       },
       error: (err) => console.error('Error al cargar ramas:', err),
@@ -407,4 +411,19 @@ export class TournamentsComponent implements OnInit {
 
     return `${y}-${m}-${d}`;
   }
+
+  /**
+   * Validador que impide seleccionar fechas pasadas
+   */
+  private readonly pastDateValidator = (control: any) => {
+    const value = control.value;
+    if (!value) return null;
+
+    const selectedDate = new Date(value);
+    const today = new Date();
+    selectedDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    return selectedDate < today ? { pastDate: true } : null;
+  };
 }

@@ -27,11 +27,15 @@ import { TournamentParticipantsComponent } from './pages/tournament-history/tour
 import { ResultsAndStatsComponent } from './pages/results-and-stats/results-and-stats.component';
 import { TournamentResultComponent } from './pages/tournament-result/tournament-result.component';
 import { TournamentDetailsSummaryComponent } from './pages/tournament-history/tournament-details-summary/tournament-details-summary.component';
+import { RecoverPasswordComponent } from './pages/recover-password/recover-password.component';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
+  { path: 'recover-password', component: RecoverPasswordComponent },
+  { path: 'restablecer-contraseña', component: ResetPasswordComponent },
   {
     path: '',
     component: BodyComponent,

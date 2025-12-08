@@ -10,6 +10,7 @@ import { AuthService } from '../../auth/auth.service';
 import { RoleApiService } from '../../services/role-api.service';
 import { ElementRef } from '@angular/core';
 import { fakeAsync, tick } from '@angular/core/testing';
+import Swal from 'sweetalert2';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -21,6 +22,22 @@ describe('ProfileComponent', () => {
     { roleId: 1, name: 'Administrador' },
     { roleId: 2, name: 'Usuario' },
   ];
+
+  const mockFile = new File(['dummy content'], 'avatar.png', { type: 'image/png' });
+
+  const event = {
+    target: {
+      files: [mockFile]
+    }
+  } as unknown as Event;
+
+
+
+  const mockReader = {
+    readAsDataURL: jasmine.createSpy('readAsDataURL'),
+    onload: null as ((this: FileReader, ev: Event) => any) | null,
+    result: 'data:image/png;base64,dummydata'
+  };
 
   const mockUser: IUser = {
     userId: 10,
@@ -262,13 +279,80 @@ describe('ProfileComponent', () => {
   });
 
 
+  it('onImgError: debe reemplazar por base64 si ya está en fallback', () => {
+    const event = {
+      target: {
+        src: 'assets/img/fallback.png'
+      }
+    } as unknown as Event;
 
-  it('onSubmit: debe manejar error del servidor', () => {
+    component.onImgError(event, 'assets/img/fallback.png');
+
+    expect((event.target as HTMLImageElement).src).toContain('data:image/png;base64');
+  });
+
+
+  it('getRolesDescription: debe retornar vacío si roleIds no es array', () => {
+    const result = component.getRolesDescription(null as any);
+    expect(result).toBe('');
+  });
+
+
+
+  it('previewAvatar: debe salir si no hay archivo', () => {
+    const event = {
+      target: {
+        files: []
+      }
+    } as unknown as Event;
+
+    // Evita errores por acceso a campos no inicializados
+    component.userForm = component['fb'].group({ photoUrl: [''] });
+    component.avatarPreviewRef = { nativeElement: {} } as any;
+
+    component.previewAvatar(event);
+
+    // No cambia nada si no hay archivo
+    expect(component.userForm.get('photoUrl')?.value).toBe('');
+  });
+
+  it('previewAvatar: debe cargar imagen y actualizar formulario', () => {
+    const mockFile = new File(['dummy content'], 'avatar.png', { type: 'image/png' });
+
+    const event = {
+      target: {
+        files: [mockFile]
+      }
+    } as unknown as Event;
+
+    const mockReader = {
+      readAsDataURL: jasmine.createSpy('readAsDataURL'),
+      onload: null as ((this: FileReader, ev: Event) => any) | null,
+      result: 'data:image/png;base64,dummydata'
+    };
+
+    // Spy correctamente colocado dentro del `it`
+    spyOn(window as any, 'FileReader').and.returnValue(mockReader);
+
+    const mockNativeElement = { src: '' };
+    component.avatarPreviewRef = { nativeElement: mockNativeElement } as ElementRef;
+
+    component.userForm = component['fb'].group({ photoUrl: [''] });
+
+    component.previewAvatar(event);
+
+    //  Simular onload correctamente
+    if (mockReader.onload) {
+      mockReader.onload.call(mockReader as any, new Event('load'));
+    }
+
+    expect(component.userForm.get('photoUrl')?.value).toContain('data:image/');
+    expect(component.avatarPreviewRef.nativeElement.src).toContain('data:image/');
+  });
+
+
+  it('onSubmit: debe manejar error al actualizar usuario', () => {
     fixture.detectChanges();
-
-    authService.updateUserProfile.and.returnValue(
-      throwError(() => new Error('Falló el servidor'))
-    );
 
     component.userForm.patchValue({
       nickname: 'testuser',
@@ -287,9 +371,27 @@ describe('ProfileComponent', () => {
     component.idUser = 10;
     component.roles = mockRoles;
 
+    const error = new Error('Error al actualizar');
+    authService.updateUserProfile.and.returnValue(throwError(() => error));
+    const consoleSpy = spyOn(console, 'error');
+    const swalSpy = spyOn(Swal, 'fire');
+
     component.onSubmit();
 
-    expect(authService.updateUserProfile).toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith('Error al actualizar usuario:', error);
+    expect(swalSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        title: 'Error',
+        icon: 'error',
+      })
+    );
+  });
+
+  it('getRoles: debe manejar error correctamente', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    roleService.getAll.and.returnValue(throwError(() => new Error('Error en getAll')));
+    component.getRoles();
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error al cargar roles:', jasmine.any(Error));
   });
 
 

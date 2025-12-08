@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { IUser } from '../model/user.interface';
 
 @Injectable({
@@ -12,14 +12,14 @@ import { IUser } from '../model/user.interface';
 export class UserApiService {
   private readonly usersUrl = `${environment.apiUrl}/users`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   /**
    * Obtiene todos los usuarios
    */
   getUsers(): Observable<IUser[]> {
     return this.http.get<{ success: boolean; message: string; data: IUser[] }>(this.usersUrl)
-      .pipe(tap(res => console.log('Respuesta completa del backend:', res)), map(res => res.data));
+      .pipe(map(res => res.data));
   }
 
   /**
@@ -30,7 +30,6 @@ export class UserApiService {
     return this.http
       .get<{ success: boolean; message: string; data: IUser[] }>(url)
       .pipe(
-        tap(res => console.log('Usuarios activos obtenidos:', res)),
         map(res => res.data)
       );
   }

@@ -124,4 +124,84 @@ describe('TournamentDetailsComponent', () => {
     component.goBack();
     expect(locationSpy.back).toHaveBeenCalled();
   });
+
+  it('should display fallback image if original image fails to load', () => {
+    flushInitialRequest();
+
+    const fallbackUrl = '/mnt/data/1c358f9c-8934-47cc-9af6-709f4d7eec44.png';
+    const mockEvent = {
+      target: {
+        src: '',
+      }
+    };
+
+    component.onImgError(mockEvent, fallbackUrl);
+
+    expect(mockEvent.target.src).toBe(fallbackUrl);
+  });
+
+  it('should group players by team correctly', () => {
+    flushInitialRequest();
+
+    component.players = [
+      { playerId: 1, teamId: 10, teamName: 'Team A', total: 100, scores: [] } as any,
+      { playerId: 2, teamId: 10, teamName: 'Team A', total: 150, scores: [] } as any,
+      { playerId: 3, teamId: null, total: 90, scores: [] } as any,
+    ];
+
+    component.organizeResultsByTeam();
+
+    expect(component.groupedResults).toContain(jasmine.objectContaining({ playerId: 1 }));
+    expect(component.groupedResults).toContain(jasmine.objectContaining({ playerId: 2 }));
+    expect(component.groupedResults).toContain(jasmine.objectContaining({ playerId: 3 }));
+
+    const teamEntry = component.groupedResults.find(e =>
+      component.isTeamEntry(e) && e.teamName === 'Team A'
+    );
+    expect(teamEntry).toBeTruthy();
+    expect(teamEntry?.total).toBe(250);
+  });
+
+  it('should log an error if loadResultsTable fails', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+
+    // Forzamos un error 500 del backend
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/results/tournament-table?tournamentId=1&modalityId=2&roundNumber=1`
+    );
+    req.flush(null, { status: 500, statusText: 'Internal Server Error' });
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      jasmine.stringMatching(/Error cargando datos:/),
+      jasmine.anything()
+    );
+  });
+
+  it('should fallback to default values when API returns null fields', () => {
+    const partialResponse = {
+      tournament: null,
+      results: null,
+      modalities: null,
+      rounds: null,
+      avgByRound: null,
+      avgByLine: null,
+      highestLine: null
+    } as any;
+
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/results/tournament-table?tournamentId=1&modalityId=2&roundNumber=1`
+    );
+    req.flush(partialResponse);
+
+    expect(component.resumenTorneo).toBeNull();
+    expect(component.players).toEqual([]);
+    expect(component.modalities).toEqual([]);
+    expect(component.rounds).toEqual([]);
+    expect(component.promedioRonda).toBe(0);
+    expect(component.promediosPorLinea).toEqual({});
+    expect(component.mayorLinea).toBeNull();
+    expect(component.nombreModalidad).toBe('Sin modalidad');
+  });
+
+
 });

@@ -11,7 +11,7 @@ import { IAmbit } from 'src/app/model/ambit.interface';
 export class AmbitApiService {
   private readonly apiUrl = `${environment.apiUrl}/ambits`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private  readonly http: HttpClient) { }
 
   getAmbits(): Observable<IAmbit[]> {
     return this.http.get<{ success: boolean; message: string; data: IAmbit[] }>(this.apiUrl)

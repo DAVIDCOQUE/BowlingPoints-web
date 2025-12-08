@@ -3,10 +3,11 @@ import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { JwtUtilsService } from '../auth/jwt-utils.service';
+import { NavigationUtil } from '../utils/navigation.util';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
-  constructor(private jwtUtils: JwtUtilsService) { }
+  constructor(private readonly jwtUtils: JwtUtilsService) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = localStorage.getItem('jwt_token');
@@ -19,7 +20,7 @@ export class JwtInterceptor implements HttpInterceptor {
         if (decoded.exp && decoded.exp < now) {
           console.warn('Token expirado');
           localStorage.removeItem('jwt_token');
-          window.location.assign('/login');
+          NavigationUtil.redirectToLogin();
           return throwError(() => new Error('Token expirado'));
         }
 
@@ -31,11 +32,12 @@ export class JwtInterceptor implements HttpInterceptor {
       } catch (e) {
         console.error('Token inválido', e);
         localStorage.removeItem('jwt_token');
-        window.location.assign('/login');
+        NavigationUtil.redirectToLogin();
         return throwError(() => new Error('Token inválido'));
       }
     }
 
     return next.handle(req);
   }
+
 }

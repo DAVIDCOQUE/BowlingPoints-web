@@ -1,11 +1,18 @@
 <div class="container py-4" *ngIf="clubId">
+  <!-- Botón Volver -->
+  <div class="mb-4">
+    <button (click)="goBack()" class="btn btn-outline-primary rounded-3 px-4">
+      Atras
+    </button>
+  </div>
+
   <!-- INFORMACIÓN GENERAL -->
   <div class="card shadow-sm border-0 rounded-4 mb-4">
     <div class="row g-0 align-items-center">
       <!-- Logo -->
       <div class="col-md-4 text-center p-4">
         <img [src]="apiUrl + miClub?.imageUrl" (error)="onImgError($event, 'assets/img/clubDefault.png')"
-          alt="{{ miClub?.imageUrl }}" class="img-fluid rounded-circle border shadow" width="150" height="150">
+          [alt]="'Logo de ' + miClub?.name" class="img-fluid rounded-circle border shadow" width="150" height="150">
       </div>
 
       <!-- Datos -->

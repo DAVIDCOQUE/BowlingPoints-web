@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 import { IUserResult } from 'src/app/model/userResult.inteface';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-players',
@@ -16,6 +17,7 @@ export class PlayersComponent {
   filter: string = '';
   players: IUserResult[] = [];
 
+  private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   public readonly auth = inject(AuthService);
 
@@ -62,5 +64,9 @@ export class PlayersComponent {
   onImgError(event: Event, defaultPath: string): void {
     const target = event.target as HTMLImageElement;
     target.src = defaultPath;
+  }
+
+  goBack(): void {
+    this.router.navigate(['dashboard']);
   }
 }

@@ -11,7 +11,7 @@ import { IModality } from '../model/modality.interface';
 export class ModalityApiService {
   private readonly apiUrl = `${environment.apiUrl}/modalities`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   /**
    * Consulta todas las modalidades

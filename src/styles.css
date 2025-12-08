@@ -1,5 +1,4 @@
 /* You can add global styles to this file, and also import other style files */
-
 html,
 body {
   height: 100%;
@@ -24,22 +23,6 @@ body {
   cursor: pointer;
 }
 
-.btn-primary {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-}
-
-.btn-primay:hover {
-  background-color: var(--primary-dark);
-}
-
 .btn-s {
   background-color: transparent;
   color: var(--primary);
@@ -56,12 +39,21 @@ body {
   background-color: var(--primary)
 }
 
-html,
-body {
-  height: 100%;
-}
-
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.fa-mars {
+  color: #007bff !important;
+}
+
+.fa-venus {
+  color: #e83e8c !important;
+}
+
+/* Asegura tamaño y alineación */
+.fa-solid {
+  font-size: 1.1rem;
+  vertical-align: middle;
 }

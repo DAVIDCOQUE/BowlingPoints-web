@@ -5,7 +5,7 @@ import { IUser } from 'src/app/model/user.interface';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ClubApiService } from 'src/app/services/club-api.service';
 import { Subscription } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-club',
@@ -14,6 +14,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ClubComponent implements OnInit, OnDestroy {
 
+  private readonly router = inject(Router);
   private readonly clubApi = inject(ClubApiService);
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
@@ -38,10 +39,8 @@ export class ClubComponent implements OnInit, OnDestroy {
     } else {
       // Caso A: Ver mi club (desde el usuario autenticado)
       this.userSub = this.auth.user$.subscribe(user => {
-        console.log('Usuario autenticado recibido:', user);
         if (user?.clubId) {
           this.clubId = user.clubId;
-          console.log('ID del club del usuario:', this.clubId);
           this.getMiClub();
         } else {
           this.miClub = null;
@@ -89,5 +88,9 @@ export class ClubComponent implements OnInit, OnDestroy {
   hasMembers(): boolean {
     if (!this.miClub) return false;
     return Array.isArray(this.miClub.members) && this.miClub.members.length > 0;
+  }
+
+  goBack(): void {
+    this.router.navigate(['dashboard']);
   }
 }
