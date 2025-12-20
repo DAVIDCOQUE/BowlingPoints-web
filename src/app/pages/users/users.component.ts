@@ -1,17 +1,5 @@
-import {
-  Component,
-  OnInit,
-  ViewChild,
-  TemplateRef,
-  inject,
-} from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  ValidatorFn,
-  Validators,
-} from '@angular/forms';
+import { Component, OnInit, ViewChild, TemplateRef, inject, } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators, } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 
@@ -23,6 +11,14 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { ICategory } from 'src/app/model/category.interface';
 import { finalize } from 'rxjs';
 import { RoleApiService } from 'src/app/services/role-api.service';
+import { HttpClient } from '@angular/common/http';
+
+interface PersonImportResponse {
+  successCount: number;
+  errorCount: number;
+  totalProcessed: number;
+  errors: string[];
+}
 
 @Component({
   selector: 'app-users',
@@ -31,6 +27,9 @@ import { RoleApiService } from 'src/app/services/role-api.service';
 })
 export class UsersComponent implements OnInit {
   @ViewChild('modalUser') modalUserRef!: TemplateRef<unknown>;
+  @ViewChild('usersFileInput') usersFileInput!: any;
+
+  isUploadingUsers = false;
 
   /** Filtro de búsqueda */
   filter = '';
@@ -74,6 +73,8 @@ export class UsersComponent implements OnInit {
   private readonly categoryApiService = inject(CategoryApiService);
   private readonly authService = inject(AuthService);
   private readonly roleApiService = inject(RoleApiService);
+  private readonly http = inject(HttpClient);
+
 
   status = [
     { valor: true, etiqueta: 'Activo' },
@@ -177,6 +178,147 @@ export class UsersComponent implements OnInit {
         (user.roles?.some((r) => r.name.toLowerCase().includes(term)) ?? false)
     );
   }
+
+  onUsersFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    // 1️⃣ Validar archivo
+    if (!file) return;
+
+    // 2️⃣ Validar tamaño
+    const maxSizeMB = 5;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      Swal.fire(
+        'Archivo demasiado grande',
+        `El archivo no debe superar ${maxSizeMB} MB.`,
+        'error'
+      );
+      input.value = '';
+      return;
+    }
+
+    // 3️⃣ Validar extensión
+    const validExtensions = ['xlsx', 'xls', 'csv'];
+    const extension = file.name.split('.').pop()?.toLowerCase();
+
+    if (!extension || !validExtensions.includes(extension)) {
+      Swal.fire(
+        'Formato no permitido',
+        'Solo se permiten archivos Excel o CSV.',
+        'error'
+      );
+      input.value = '';
+      return;
+    }
+
+    // 4️⃣ Preparar request
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.isUploadingUsers = true;
+
+    this.http
+      .post<PersonImportResponse>(`${this.apiUrl}/files/persons`, formData)
+      .pipe(
+        finalize(() => {
+          this.isUploadingUsers = false;
+          input.value = '';
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          // 🧠 Resumen base (siempre mostrar)
+          const summaryHtml = `
+          <p><b>Total procesados:</b> ${res.totalProcessed}</p>
+          <p><b>Ingresados:</b> ${res.successCount}</p>
+          <p><b>Fallidos:</b> ${res.errorCount}</p>
+        `;
+
+          // 🟢 Caso 1: Todo OK
+          if (res.successCount > 0 && res.errorCount === 0) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Carga exitosa',
+              html: summaryHtml,
+              confirmButtonText: 'OK',
+            });
+          }
+
+          // 🟡 Caso 2: Parcial
+          else if (res.successCount > 0 && res.errorCount > 0) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Carga parcial',
+              html: summaryHtml,
+              showCancelButton: true,
+              confirmButtonText: 'Ver errores',
+              cancelButtonText: 'Cerrar',
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.showImportErrors(res.errors);
+              }
+            });
+          }
+
+          // 🔴 Caso 3: Nada ingresó, pero backend dio detalle
+          else if (res.successCount === 0 && res.errorCount > 0) {
+            Swal.fire({
+              icon: 'error',
+              title: 'No se cargaron jugadores',
+              html: summaryHtml,
+              showCancelButton: true,
+              confirmButtonText: 'Ver detalles',
+              cancelButtonText: 'Cerrar',
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.showImportErrors(res.errors);
+              }
+            });
+          }
+
+          // 🔄 Refrescar listado
+          this.getUsers();
+        },
+
+        // 🔥 Error técnico (no de negocio)
+        error: (err) => {
+          console.error('Error al cargar usuarios:', err);
+
+          const msg =
+            err?.error?.message ||
+            'No se pudo procesar el archivo. Verifique el formato e intente nuevamente.';
+
+          Swal.fire('Error', msg, 'error');
+        },
+      });
+  }
+
+  /** Muestra un modal con los errores de importación */
+
+  private showImportErrors(errors: string[]): void {
+    const formattedErrors = errors
+      .slice(0, 50)
+      .map((e) => `<li>${e}</li>`)
+      .join('');
+
+    Swal.fire({
+      icon: 'info',
+      title: 'Errores de importación',
+      html: `
+      <div style="max-height:300px; overflow:auto; text-align:left;">
+        <ul>${formattedErrors}</ul>
+      </div>
+      ${errors.length > 50
+          ? '<p>Se muestran solo los primeros 50 errores.</p>'
+          : ''
+        }
+    `,
+      width: 750,
+      confirmButtonText: 'Cerrar',
+    });
+  }
+
 
   /**
    * Abre el modal con datos precargados para editar un usuario

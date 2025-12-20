@@ -18,9 +18,14 @@
 
     <!-- Botón Crear -->
     <div>
-      <button class="btn btn-success btn-sm align-items-center me-2" style="height: 36px; width: 150px">
-        <i class="fas fa-file-excel"></i> Cargar Usuarios
+
+      <input #usersFileInput type="file" accept=".xlsx,.xls,.csv" hidden (change)="onUsersFileSelected($event)" />
+      <button class="btn btn-success btn-sm align-items-center me-2" style="height: 36px; width: 150px"
+        (click)="usersFileInput.click()" [disabled]="isUploadingUsers">
+        <i class="fas fa-file-excel me-1"></i>
+        {{ isUploadingUsers ? 'Subiendo...' : 'Cargar Usuarios' }}
       </button>
+
       <button class="btn btn-success btn-sm align-items-center" style="height: 36px; width: 100px"
         (click)="openModal(modalUser)">
         <i class="fas fa-plus-circle me-1"></i> Crear

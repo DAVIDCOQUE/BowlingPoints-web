@@ -659,7 +659,7 @@ export class TournamentResultComponent implements OnInit {
 
     this.isUploadingPlayers = true;
 
-    this.http.post(`${this.apiUrl}/players/upload`, formData).subscribe({
+    this.http.post(`${this.apiUrl}/files/persons`, formData).subscribe({
       next: (res) => {
         this.isUploadingPlayers = false;
         Swal.fire('Éxito', 'Jugadores cargados correctamente', 'success');
