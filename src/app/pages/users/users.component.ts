@@ -183,10 +183,10 @@ export class UsersComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
-    // 1️⃣ Validar archivo
+    //  Validar archivo
     if (!file) return;
 
-    // 2️⃣ Validar tamaño
+    //  Validar tamaño
     const maxSizeMB = 5;
     if (file.size > maxSizeMB * 1024 * 1024) {
       Swal.fire(
@@ -198,7 +198,7 @@ export class UsersComponent implements OnInit {
       return;
     }
 
-    // 3️⃣ Validar extensión
+    //  Validar extensión
     const validExtensions = ['xlsx', 'xls', 'csv'];
     const extension = file.name.split('.').pop()?.toLowerCase();
 
@@ -212,7 +212,7 @@ export class UsersComponent implements OnInit {
       return;
     }
 
-    // 4️⃣ Preparar request
+    //  Preparar request
     const formData = new FormData();
     formData.append('file', file);
 
@@ -228,14 +228,14 @@ export class UsersComponent implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          // 🧠 Resumen base (siempre mostrar)
+          //  Resumen base (siempre mostrar)
           const summaryHtml = `
           <p><b>Total procesados:</b> ${res.totalProcessed}</p>
           <p><b>Ingresados:</b> ${res.successCount}</p>
           <p><b>Fallidos:</b> ${res.errorCount}</p>
         `;
 
-          // 🟢 Caso 1: Todo OK
+          //  Caso 1: Todo OK
           if (res.successCount > 0 && res.errorCount === 0) {
             Swal.fire({
               icon: 'success',
@@ -245,7 +245,7 @@ export class UsersComponent implements OnInit {
             });
           }
 
-          // 🟡 Caso 2: Parcial
+          //  Caso 2: Parcial
           else if (res.successCount > 0 && res.errorCount > 0) {
             Swal.fire({
               icon: 'warning',
@@ -261,7 +261,7 @@ export class UsersComponent implements OnInit {
             });
           }
 
-          // 🔴 Caso 3: Nada ingresó, pero backend dio detalle
+          //  Caso 3: Nada ingresó, pero backend dio detalle
           else if (res.successCount === 0 && res.errorCount > 0) {
             Swal.fire({
               icon: 'error',
@@ -277,11 +277,11 @@ export class UsersComponent implements OnInit {
             });
           }
 
-          // 🔄 Refrescar listado
+          //  Refrescar listado
           this.getUsers();
         },
 
-        // 🔥 Error técnico (no de negocio)
+        //  Error técnico (no de negocio)
         error: (err) => {
           console.error('Error al cargar usuarios:', err);
 
