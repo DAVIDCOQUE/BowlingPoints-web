@@ -11,6 +11,7 @@ import { ICategory } from '../../model/category.interface';
 import { CategoryApiService } from 'src/app/services/category-api.service';
 import { TournamentsService } from 'src/app/services/tournaments.service';
 import { ResultsService } from 'src/app/services/results.service';
+import { LoadingService } from 'src/app/services/loading.service';
 interface PlayerTournamentStats {
   tournamentName: string;
   average: number;
@@ -46,6 +47,9 @@ export class ResultsAndStatsComponent implements OnInit {
 
   private readonly apiUrl = environment.apiUrl;
 
+  iaLoading = false;
+  iaAnalysis: string | null = null;
+
   // Estadísticas agrupadas por jugador
   playerStats: PlayerStats[] = [];
 
@@ -54,7 +58,8 @@ export class ResultsAndStatsComponent implements OnInit {
     private readonly modalService: NgbModal,
     private readonly categoryApiService: CategoryApiService,
     private readonly tournamentApiService: TournamentsService,
-    private readonly resultsService: ResultsService
+    private readonly resultsService: ResultsService,
+    private loadingService: LoadingService,
   ) { }
 
   ngOnInit(): void {
@@ -145,6 +150,40 @@ export class ResultsAndStatsComponent implements OnInit {
     });
   }
 
+  consultarIA(): void {
+    if (this.iaLoading || !this.playerStats.length) return;
+
+    this.iaLoading = true;
+    this.iaAnalysis = null;
+    this.loadingService.show(); // 🔥 SOLO loader global
+
+    const params: any = {};
+
+    if (this.selectedBranch) {
+      params.branchId = this.selectedBranch === 'Masculino' ? 1 : 2;
+    }
+
+    if (this.selectedCategory) {
+      params.categoryId = this.selectedCategory;
+    }
+
+    this.http.get<{ analysis: string }>(
+      `${this.apiUrl}/api/ai/analizar-resultados-globales`,
+      { params }
+    ).subscribe({
+      next: (res) => {
+        this.iaAnalysis = res.analysis;
+        this.iaLoading = false;
+        this.loadingService.hide();
+      },
+      error: () => {
+        this.iaLoading = false;
+        this.loadingService.hide();
+        Swal.fire('Error', 'No se pudo consultar la IA', 'error');
+      }
+    });
+  }
+
   // Filtros
 
   onFilterChange(): void {
@@ -227,5 +266,18 @@ export class ResultsAndStatsComponent implements OnInit {
     const match = player.tournaments.find(t => t.tournamentName === torneo);
     return match ? match.average : null;
   }
+
+  private getBranchIdFromSelectedBranch(branchName: string): number | null {
+    const v = (branchName || '').toLowerCase().trim();
+    if (!v) return null;
+
+    // Ajusta IDs según tu BD:
+    // ejemplo típico: Masculino=1, Femenino=2
+    if (v === 'masculino') return 1;
+    if (v === 'femenino') return 2;
+
+    return null;
+  }
+
 }
 
