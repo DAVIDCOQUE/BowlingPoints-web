@@ -22,6 +22,14 @@ import { ResultsService } from 'src/app/services/results.service';
 import { IBranch } from 'src/app/model/branch.interface';
 import { Location } from '@angular/common';
 
+// Interfaz para el response de importación
+interface IImportResponse {
+  created: number;
+  skipped: number;
+  errors: string[];
+}
+
+
 @Component({
   selector: 'app-tournament-result',
   templateUrl: './tournament-result.component.html',
@@ -37,6 +45,14 @@ export class TournamentResultComponent implements OnInit {
   @ViewChild('modalTeam', { static: false })
   modalTeamRef!: TemplateRef<unknown>;
 
+
+  private readonly IMPORT_ENDPOINTS = {
+    players: '/files/tournament-registrations',
+    teamPerson: '/files/team-person',
+    results: '/files/results',
+  };
+
+
   // Estado general
   isLoading$ = new BehaviorSubject<boolean>(false);
   loading = false;
@@ -51,7 +67,6 @@ export class TournamentResultComponent implements OnInit {
   categories: ICategory[] = [];
   modalities: IModality[] = [];
   branches: IBranch[] = [];
-  teams: ITeam[] = [];
 
   // Jugadores registrados
   registrations: ITournamentRegistration[] = [];
@@ -79,10 +94,6 @@ export class TournamentResultComponent implements OnInit {
   }));
   roundNumbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-  // Filtros resultados
-  selectedCategory = '';
-  selectedModality = '';
-
   // ================== FILTROS ==================
   selectedBranch = '';
   selectedRound: number | null = null;
@@ -95,7 +106,6 @@ export class TournamentResultComponent implements OnInit {
     { valor: true, etiqueta: 'Activo' },
     { valor: false, etiqueta: 'Inactivo' },
   ];
-  selectedFile: File | null = null;
 
   // Inyecciones
   private readonly apiUrl = environment.apiUrl;
@@ -593,6 +603,40 @@ export class TournamentResultComponent implements OnInit {
 
   // ================== FILTROS ==================
 
+  onTeamPersonFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.uploadFile(
+      this.IMPORT_ENDPOINTS.teamPerson,
+      file,
+      () => (this.loading = true),
+      () => (this.loading = false),
+      () => {
+        this.loadRegisteredPlayers();
+      }
+    );
+  }
+
+  onResultFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.uploadFile(
+      this.IMPORT_ENDPOINTS.results,
+      file,
+      () => (this.isUploadingResults = true),
+      () => (this.isUploadingResults = false),
+      () => {
+        this.loadResults();
+      }
+    );
+  }
+
+
+
   onFilterChange(): void {
     this.loadResults();
   }
@@ -617,98 +661,150 @@ export class TournamentResultComponent implements OnInit {
     this.onFilterPlayerChange();
   }
 
-  /** Función pura para mejorar legibilidad */
-  private matchesBranch(branch: string) {
-    return (p: any) => {
-      const branchName = (p.branchName ?? '').toLowerCase();
-      return !branch || branchName.includes(branch);
+  private uploadFile(
+    endpoint: string,
+    file: File,
+    onStart: () => void,
+    onFinish: () => void,
+    onSuccess: () => void
+  ): void {
+
+    const validExtensions = ['xlsx', 'xls', 'csv'];
+    const extension = file.name.split('.').pop()?.toLowerCase();
+
+    if (!extension || !validExtensions.includes(extension)) {
+      Swal.fire('Error', 'Solo se permiten archivos Excel o CSV', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const params = {
+      skipHeader: 'true',
+      userId: '1', // luego lo puedes sacar del token
     };
+
+    onStart();
+
+    this.http
+      .post<IImportResponse>(`${this.apiUrl}${endpoint}`, formData, { params })
+      .pipe(finalize(() => onFinish()))
+      .subscribe({
+        next: (response) => {
+          this.handleImportResponse(response, onSuccess);
+        },
+        error: (err) => {
+          console.error('Error importando archivo:', err);
+          Swal.fire(
+            'Error',
+            err?.error?.message || 'No se pudo importar el archivo',
+            'error'
+          );
+        },
+      });
   }
 
-  // ================== UTILIDADES ==================
+  private handleImportResponse(response: IImportResponse, onSuccess: () => void): void {
+    const { created, skipped, errors } = response;
+    const total = created + skipped + errors.length;
+    const hasErrors = errors && errors.length > 0;
 
-  openFileInputResults(): void {
-    const input: HTMLInputElement = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.xlsx, .xls';
-    input.onchange = (event: Event) => this.onPlayersFileSelected(event);
-    input.click();
-  }
+    // Construir HTML para el modal
+    let htmlContent = `
+      <div class="import-summary text-start">
+        <div class="summary-stats mb-4">
+          <div class="row g-3">
+            <div class="col-md-4 text-center">
+              <div class="stat-box bg-success bg-opacity-10 p-3 rounded">
+                <h5 class="text-success fw-bold mb-1">${created}</h5>
+                <p class="text-muted small mb-0">Registros creados</p>
+              </div>
+            </div>
+            <div class="col-md-4 text-center">
+              <div class="stat-box bg-warning bg-opacity-10 p-3 rounded">
+                <h5 class="text-warning fw-bold mb-1">${skipped}</h5>
+                <p class="text-muted small mb-0">Registros saltados</p>
+              </div>
+            </div>
+            <div class="col-md-4 text-center">
+              <div class="stat-box bg-danger bg-opacity-10 p-3 rounded">
+                <h5 class="text-danger fw-bold mb-1">${errors.length}</h5>
+                <p class="text-muted small mb-0">Errores encontrados</p>
+              </div>
+            </div>
+          </div>
+        </div>
+    `;
 
-
-  onPlayersFileSelected(event: any): void {
-    const file: File = event.target.files[0];
-    if (!file) return;
-
-    const validExtensions = ['xlsx', 'xls', 'csv'];
-    const extension = file.name.split('.').pop()?.toLowerCase();
-
-    if (!extension || !validExtensions.includes(extension)) {
-      Swal.fire('Error', 'Solo se permiten archivos Excel o CSV', 'error');
-      return;
+    // Agregar sección de errores si existen
+    if (hasErrors) {
+      htmlContent += `
+        <hr>
+        <h6 class="text-danger fw-bold mb-3">📋 Detalle de Errores:</h6>
+        <div class="error-list" style="max-height: 300px; overflow-y: auto;">
+          <ul class="list-group list-group-flush">
+      `;
+      errors.forEach((error, index) => {
+        htmlContent += `
+          <li class="list-group-item px-0 py-2 border-0 text-danger small">
+            <i class="bi bi-exclamation-circle me-2"></i>${this.escapeHtml(error)}
+          </li>
+        `;
+      });
+      htmlContent += `
+          </ul>
+        </div>
+      `;
     }
 
-    if (!this.tournamentId) {
-      Swal.fire('Error', 'No hay torneo seleccionado para cargar jugadores', 'error');
-      return;
-    }
+    htmlContent += `</div>`;
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('tournamentId', this.tournamentId.toString());
-
-    this.isUploadingPlayers = true;
-
-    this.http.post(`${this.apiUrl}/files/persons`, formData).subscribe({
-      next: (res) => {
-        this.isUploadingPlayers = false;
-        Swal.fire('Éxito', 'Jugadores cargados correctamente', 'success');
-        this.loadPlayers?.(); // refresca la tabla si tienes ese método
-      },
-      error: (err) => {
-        this.isUploadingPlayers = false;
-        Swal.fire('Error', 'No se pudo cargar el archivo', 'error');
-        console.error(err);
-      },
+    // Mostrar modal con SweetAlert2
+    Swal.fire({
+      title: `📊 Resultado de Importación`,
+      html: htmlContent,
+      icon: hasErrors && created === 0 ? 'error' : (hasErrors ? 'warning' : 'success'),
+      confirmButtonColor: '#0d6efd',
+      confirmButtonText: 'Aceptar',
+      width: '600px',
+      didClose: () => {
+        // Ejecutar callback de éxito solo si se crearon registros
+        if (created > 0) {
+          onSuccess();
+        }
+      }
     });
   }
 
+  private escapeHtml(text: string): string {
+    const map: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+  }
 
-  onResultFileSelected(event: any): void {
-    const file: File = event.target.files[0];
+
+
+  onPlayersFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
     if (!file) return;
 
-    const validExtensions = ['xlsx', 'xls', 'csv'];
-    const extension = file.name.split('.').pop()?.toLowerCase();
-
-    if (!extension || !validExtensions.includes(extension)) {
-      Swal.fire('Error', 'Solo se permiten archivos Excel o CSV', 'error');
-      return;
-    }
-
-    if (!this.tournamentId) {
-      Swal.fire('Error', 'No hay torneo seleccionado para cargar resultados', 'error');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('tournamentId', this.tournamentId.toString());
-
-    this.isUploadingResults = true;
-
-    this.http.post(`${this.apiUrl}/results/upload`, formData).subscribe({
-      next: (res) => {
-        this.isUploadingResults = false;
-        Swal.fire('Éxito', 'Resultados cargados correctamente', 'success');
-        this.loadResults?.(); // método que refresca la tabla si lo tienes
-      },
-      error: (err) => {
-        this.isUploadingResults = false;
-        Swal.fire('Error', 'No se pudo cargar el archivo', 'error');
-        console.error(err);
-      },
-    });
+    this.uploadFile(
+      this.IMPORT_ENDPOINTS.players,
+      file,
+      () => (this.isUploadingPlayers = true),
+      () => (this.isUploadingPlayers = false),
+      () => {
+        this.loadPlayers();
+        this.loadRegisteredPlayers();
+      }
+    );
   }
 
   onImgError(event: Event, fallback: string): void {

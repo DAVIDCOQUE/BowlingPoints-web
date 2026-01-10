@@ -1,1 +1,249 @@
-/* Styles will be added here soon */
+/* Tournament Result - Responsive Styles */
+
+.tournament-info-card .tournament-title {
+  font-size: 1.5rem;
+  word-wrap: break-word;
+}
+
+.tournament-info-card .text-muted {
+  font-size: 0.95rem;
+}
+
+.tournament-info-card {
+  margin-bottom: 1.5rem;
+}
+
+.players-section,
+.results-section {
+  overflow-x: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.players-table-wrapper,
+.results-table-wrapper {
+
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0.5rem;
+}
+
+.players-table,
+.results-table {
+  min-width: 600px;
+  margin-bottom: 0;
+}
+
+.players-table th,
+.players-table td,
+.results-table th,
+.results-table td {
+  padding: 0.5rem 0.25rem;
+  vertical-align: middle;
+}
+
+/* Breakpoints - Extra Small */
+@media (max-width: 575.98px) {
+  .tournament-result-view {
+    padding: 0;
+  }
+
+  .tournament-info-card {
+    border-radius: 0.5rem !important;
+    margin-bottom: 1rem;
+  }
+
+  .tournament-info-card .tournament-title {
+    font-size: 1.1rem;
+  }
+
+  .tournament-info-card .row.gy-2 {
+    gap: 0.5rem !important;
+  }
+
+  .tournament-info-card .col-6,
+  .tournament-info-card .col-12 {
+    font-size: 0.8rem;
+  }
+
+  .card.players-section,
+  .card.results-section {
+    border-radius: 0.5rem !important;
+    margin-bottom: 1rem;
+  }
+
+  .players-section .card-body,
+  .results-section .card-body {
+    padding: 0.75rem !important;
+  }
+
+  .players-section h4,
+  .results-section h5 {
+    font-size: 1rem;
+  }
+
+  .form-p {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .players-table th,
+  .players-table td,
+  .results-table th,
+  .results-table td {
+    padding: 0.35rem 0.2rem;
+    font-size: 0.7rem;
+  }
+
+  .players-table,
+  .results-table {
+    min-width: 450px;
+  }
+
+  .btn-sm {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.7rem;
+  }
+
+  .gap-2 {
+    gap: 0.3rem !important;
+  }
+}
+
+/* Breakpoints - Small */
+@media (max-width: 767.98px) {
+  .tournament-info-card .p-3,
+  .tournament-info-card .p-md-4 {
+    padding: 1rem !important;
+  }
+
+  .players-section .d-flex.flex-column.flex-md-row,
+  .results-section .d-flex.flex-column.flex-md-row {
+    flex-direction: column;
+  }
+
+  .players-section .btn,
+  .results-section .btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .form-select-sm,
+  .form-control-sm {
+    font-size: 0.8rem;
+  }
+
+  .players-table th,
+  .players-table td,
+  .results-table th,
+  .results-table td {
+    padding: 0.4rem 0.2rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Breakpoints - Medium */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .tournament-result-view {
+    padding: 0;
+  }
+
+  .tournament-info-card .tournament-title {
+    font-size: 1.4rem;
+  }
+
+  .players-table th,
+  .players-table td,
+  .results-table th,
+  .results-table td {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.85rem;
+  }
+
+  .players-table,
+  .results-table {
+    min-width: 650px;
+  }
+}
+
+/* Breakpoints - Large */
+@media (min-width: 992px) {
+  .tournament-result-view {
+    padding: 0;
+  }
+
+  .tournament-info-card .tournament-title {
+    font-size: 1.75rem;
+  }
+
+  .players-table th,
+  .players-table td,
+  .results-table th,
+  .results-table td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  .players-table,
+  .results-table {
+    min-width: 100%;
+  }
+}
+
+/* Utility Classes */
+.form-p {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+/* Button Groups Responsive */
+.d-flex.flex-column.flex-lg-row.gap-2 {
+  width: 100%;
+}
+
+@media (max-width: 991.98px) {
+  .d-flex.flex-column.flex-lg-row.gap-2 > .btn {
+    width: 100%;
+  }
+}
+
+/* Table Scrollbar Styling */
+.players-table-wrapper::-webkit-scrollbar,
+.results-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.players-table-wrapper::-webkit-scrollbar-track,
+.results-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.players-table-wrapper::-webkit-scrollbar-thumb,
+.results-table-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.players-table-wrapper::-webkit-scrollbar-thumb:hover,
+.results-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Text Wrapping */
+.text-start {
+  text-align: left;
+}
+
+/* Gap utilities override for mobile */
+@media (max-width: 767.98px) {
+  .gap-3 {
+    gap: 0.75rem !important;
+  }
+
+  .g-3 > * {
+    --bs-gutter-x: 0.75rem;
+    --bs-gutter-y: 0.75rem;
+  }
+}

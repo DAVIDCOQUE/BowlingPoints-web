@@ -1,54 +1,58 @@
 <div class="container mt-4">
-
   <!-- Botón Atrás -->
   <button class="btn btn-outline-secondary mb-3" (click)="goBack()">
     <i class="fas fa-arrow-left me-2"></i> Volver
   </button>
 
   <!--INFORMACIÓN GENERAL DEL TORNEO COMPLETA -->
-  <div class="card shadow-sm border-0 rounded-4 mb-4">
-    <div class="row g-0 align-items-center">
+  <div class="card shadow-sm border-0 rounded-4 mb-4 tournament-info-card">
+    <div class="row g-0 align-items-center flex-column flex-md-row">
 
       <!-- Logo -->
-      <div class="col-md-3 text-center p-4">
+      <div class="col-md-3 text-center p-3 p-md-4">
         <img [src]="selectedTournament?.imageUrl || 'assets/img/clubDefault.png'"
           (error)="onImgError($event, 'assets/img/clubDefault.png')" alt="Logo torneo"
           class="img-fluid rounded-circle border shadow-sm" width="120" height="120" />
       </div>
 
       <!-- Información del torneo -->
-      <div class="col-md-9 p-4">
-        <h2 class="fw-bold mb-3 text-primary">
+      <div class="col-md-9 p-3 p-md-4">
+        <h2 class="fw-bold mb-3 text-primary tournament-title">
           {{ selectedTournament?.name || 'Nombre del Torneo' }}
         </h2>
 
-        <div class="row gy-2 text-muted">
-          <div class="col-md-6">
+        <div class="row gy-2 gy-md-2 text-muted">
+          <div class="col-6 col-md-6">
             <i class="fas fa-calendar-alt text-warning me-2"></i>
-            <strong>Inicio:</strong> {{ selectedTournament?.startDate | date:'dd/MM/yyyy' }}
+            <strong>Inicio:</strong> <span class="d-block d-md-inline">{{ selectedTournament?.startDate |
+              date:'dd/MM/yyyy' }}</span>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-6">
             <i class="fas fa-calendar-check text-success me-2"></i>
-            <strong>Fin:</strong> {{ selectedTournament?.endDate | date:'dd/MM/yyyy' }}
+            <strong>Fin:</strong> <span class="d-block d-md-inline">{{ selectedTournament?.endDate | date:'dd/MM/yyyy'
+              }}</span>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-6 col-md-6">
             <i class="fas fa-map-marker-alt text-danger me-2"></i>
-            <strong>Ubicación:</strong> {{ selectedTournament?.location || 'No especificada' }}
+            <strong>Ubicación:</strong> <span class="d-block d-md-inline">{{ selectedTournament?.location || 'No
+              especificada' }}</span>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-6">
             <i class="fas fa-user text-primary me-2"></i>
-            <strong>Organizador:</strong> {{ selectedTournament?.organizer || 'N/D' }}
+            <strong>Organizador:</strong> <span class="d-block d-md-inline">{{ selectedTournament?.organizer || 'N/D'
+              }}</span>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-6 col-md-6">
             <i class="fas fa-globe text-info me-2"></i>
-            <strong>Ámbito:</strong> {{ selectedTournament?.ambitName || '-' }}
+            <strong>Ámbito:</strong> <span class="d-block d-md-inline">{{ selectedTournament?.ambitName || '-' }}</span>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-6">
             <i class="fas fa-info-circle text-secondary me-2"></i>
             <strong>Estado:</strong>
-            <span class="badge" [ngClass]="selectedTournament?.status ? 'text-bg-success' : 'text-bg-secondary'">
+            <span class="badge d-block d-md-inline mt-1 mt-md-0"
+              [ngClass]="selectedTournament?.status ? 'text-bg-success' : 'text-bg-secondary'">
               {{ selectedTournament?.status ? 'Activo' : 'Inactivo' }}
             </span>
           </div>
@@ -56,37 +60,43 @@
 
         <!-- Categorías, Modalidades y Ramas -->
         <div class="mt-4 row gy-2">
-          <div class="col-md-4">
+          <div class="col-12 col-md-4">
             <i class="fas fa-layer-group text-primary me-2"></i>
             <strong>Categorías:</strong>
-            <span *ngIf="categories.length; else noCat">
-              <span *ngFor="let cat of categories; let i = index">
-                {{ cat.name }}<span *ngIf="i < categories.length - 1">, </span>
+            <span class="d-block d-md-inline">
+              <span *ngIf="categories.length; else noCat">
+                <span *ngFor="let cat of categories; let i = index">
+                  {{ cat.name }}<span *ngIf="i < categories.length - 1">, </span>
+                </span>
               </span>
+              <ng-template #noCat><em class="text-muted">Ninguna</em></ng-template>
             </span>
-            <ng-template #noCat><em class="text-muted">Ninguna</em></ng-template>
           </div>
 
-          <div class="col-md-4">
+          <div class="col-12 col-md-4">
             <i class="fas fa-puzzle-piece text-success me-2"></i>
             <strong>Modalidades:</strong>
-            <span *ngIf="modalities.length; else noMod">
-              <span *ngFor="let mod of modalities; let i = index">
-                {{ mod.name }}<span *ngIf="i < modalities.length - 1">, </span>
+            <span class="d-block d-md-inline">
+              <span *ngIf="modalities.length; else noMod">
+                <span *ngFor="let mod of modalities; let i = index">
+                  {{ mod.name }}<span *ngIf="i < modalities.length - 1">, </span>
+                </span>
               </span>
+              <ng-template #noMod><em class="text-muted">Ninguna</em></ng-template>
             </span>
-            <ng-template #noMod><em class="text-muted">Ninguna</em></ng-template>
           </div>
 
-          <div class="col-md-4">
+          <div class="col-12 col-md-4">
             <i class="fas fa-venus-mars text-danger me-2"></i>
             <strong>Ramas:</strong>
-            <span *ngIf="branches.length; else noBranch">
-              <span *ngFor="let branch of branches; let i = index">
-                {{ branch.name }}<span *ngIf="i < branches.length - 1">, </span>
+            <span class="d-block d-md-inline">
+              <span *ngIf="branches.length; else noBranch">
+                <span *ngFor="let branch of branches; let i = index">
+                  {{ branch.name }}<span *ngIf="i < branches.length - 1">, </span>
+                </span>
               </span>
+              <ng-template #noBranch><em class="text-muted">Ninguna</em></ng-template>
             </span>
-            <ng-template #noBranch><em class="text-muted">Ninguna</em></ng-template>
           </div>
         </div>
       </div>
@@ -94,37 +104,49 @@
   </div>
 
   <!-- JUGADORES INSCRITOS -->
-  <div class="card shadow-sm mb-4 border-0">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold text-secondary mb-0">Jugadores del Torneo Inscritos Por Modalidad</h4>
-        <div class="d-flex justify-content-end mb-2">
-          <!-- Input de archivo oculto -->
+  <div class="card shadow-sm mb-4 border-0 players-section">
+    <div class="card-body p-3 p-md-4">
+      <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <h4 class="fw-bold text-secondary mb-0">Jugadores Inscritos Por Modalidad</h4>
+        <div class="d-flex flex-column flex-lg-row gap-2 w-100 w-md-auto">
+          <!-- Inputs ocultos -->
           <input type="file" #fileInput accept=".xlsx,.xls,.csv" (change)="onPlayersFileSelected($event)" hidden />
 
-          <!-- Botón de carga -->
-          <button class="btn btn-outline-primary btn-sm me-2" (click)="fileInput.click()"
+          <input type="file" #fileTeamInput accept=".xlsx,.xls,.csv" (change)="onTeamPersonFileSelected($event)"
+            hidden />
+
+          <!-- Botones -->
+          <button class="btn btn-outline-primary btn-sm flex-grow-1" (click)="fileInput.click()"
             [disabled]="isUploadingPlayers">
             <i class="fas fa-file-excel me-1"></i>
-            {{ isUploadingPlayers ? 'Subiendo...' : 'Cargar jugadores' }}
+            <span class="d-none d-sm-inline">{{ isUploadingPlayers ? 'Subiendo...' : 'Cargar jugadores' }}</span>
+            <span class="d-sm-none">{{ isUploadingPlayers ? 'Subiendo...' : 'Jugadores' }}</span>
           </button>
 
-          <!-- Nuevo jugador -->
-          <button class="btn btn-success btn-sm me-2" (click)="openModal(modalPlayerRef)">
-            <i class="fas fa-plus-circle me-1"></i> Nuevo Jugador
+          <button class="btn btn-outline-warning btn-sm flex-grow-1" (click)="fileTeamInput.click()"
+            [disabled]="loading">
+            <i class="fas fa-users me-1"></i>
+            <span class="d-none d-sm-inline">Cargar Equipos</span>
+            <span class="d-sm-none">Equipos</span>
           </button>
 
-          <!-- Nuevo equipo -->
-          <button class="btn btn-success btn-sm me-2" (click)="openModal(modalTeamRef)">
-            <i class="fas fa-plus-circle me-1"></i> Nuevo Equipo
+          <button class="btn btn-success btn-sm flex-grow-1" (click)="openModal(modalPlayerRef)">
+            <i class="fas fa-plus-circle me-1"></i> <span class="d-none d-sm-inline">Nuevo Jugador</span><span
+              class="d-sm-none">Jugador</span>
           </button>
+
+          <button class="btn btn-success btn-sm flex-grow-1" (click)="openModal(modalTeamRef)">
+            <i class="fas fa-plus-circle me-1"></i> <span class="d-none d-sm-inline">Nuevo Equipo</span><span
+              class="d-sm-none">Equipo</span>
+          </button>
+
         </div>
-
       </div>
 
       <!-- Filtros jugadores -->
-      <div class="row g-3 mb-3">
-        <div class="col-md-10">
+      <div class="row g-2 g-md-3 mb-3">
+        <div class="col-12 col-md-10">
           <p class="form-p">Rama</p>
           <select class="form-select form-select-sm" [(ngModel)]="selectedBranchPlayer"
             (change)="onFilterPlayerChange()">
@@ -132,7 +154,8 @@
             <option *ngFor="let b of branches" [value]="b.name">{{ b.name }}</option>
           </select>
         </div>
-        <div class="col-md-2 d-flex align-items-end">
+        <div class="col-12 col-md-2">
+          <p class="form-p">.</p>
           <button class="btn btn-outline-secondary btn-sm w-100" (click)="clearPlayerFilters()">
             <i class="fas fa-eraser me-1"></i> Limpiar
           </button>
@@ -140,16 +163,16 @@
       </div>
 
       <!-- Tabla jugadores -->
-      <div class="table-responsive">
-        <table class="table table-hover table-sm align-middle text-center border">
+      <div class="table-responsive players-table-wrapper">
+        <table class="table table-hover table-sm align-middle text-center border players-table">
           <thead class="table-light">
             <tr class="fw-bold">
               <th>#</th>
               <th>Nombre</th>
-              <th>Categoría</th>
-              <th>Modalidad</th>
-              <th>Rama</th>
-              <th>Equipo</th>
+              <th class="d-none d-md-table-cell">Categoría</th>
+              <th class="d-none d-lg-table-cell">Modalidad</th>
+              <th class="d-none d-md-table-cell">Rama</th>
+              <th class="d-none d-lg-table-cell">Equipo</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -157,7 +180,7 @@
             <ng-container *ngFor="let group of groupedRegistrations">
               <!-- Encabezado de modalidad -->
               <tr class="table-secondary fw-bold text-start">
-                <td colspan="7">
+                <td [attr.colspan]="7">
                   <i class="fas fa-bowling-ball me-2"></i> {{ group.modality }}
                 </td>
               </tr>
@@ -165,17 +188,18 @@
               <!-- Jugadores de esa modalidad -->
               <tr *ngFor="let p of group.players; let i = index">
                 <td>{{ i + 1 }}</td>
-                <td>{{ p.personFullName || '-' }}</td>
-                <td>{{ p.categoryName || '-' }}</td>
-                <td>{{ p.modalityName || '-' }}</td>
-                <td>{{ p.branchName || '-' }}</td>
-                <td>{{ p.teamName || 'N/A' }}</td>
+                <td class="text-start">{{ p.personFullName || '-' }}</td>
+                <td class="d-none d-md-table-cell small">{{ p.categoryName || '-' }}</td>
+                <td class="d-none d-lg-table-cell small">{{ p.modalityName || '-' }}</td>
+                <td class="d-none d-md-table-cell small">{{ p.branchName || '-' }}</td>
+                <td class="d-none d-lg-table-cell small">{{ p.teamName || 'N/A' }}</td>
                 <td>
-                  <div class="d-flex justify-content-center gap-2">
-                    <button class="btn btn-outline-primary btn-sm" (click)="editPlayer(p)">
+                  <div class="d-flex justify-content-center gap-1">
+                    <button class="btn btn-outline-primary btn-sm" (click)="editPlayer(p)" title="Editar">
                       <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" (click)="deletePlayer(p.registrationId)">
+                    <button class="btn btn-outline-danger btn-sm" (click)="deletePlayer(p.registrationId)"
+                      title="Eliminar">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -196,44 +220,48 @@
   </div>
 
   <!--  RESULTADOS -->
-  <div class="card shadow-sm border-0">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="card shadow-sm border-0 results-section">
+    <div class="card-body p-3 p-md-4">
+      <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h5 class="fw-bold text-secondary mb-0">Resultados del Torneo</h5>
-        <div>
+        <div class="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
           <!-- Input de archivo oculto -->
           <input type="file" #fileResultInput accept=".xlsx,.xls,.csv" (change)="onResultFileSelected($event)" hidden />
 
           <!-- Botón de carga -->
-          <button class="btn btn-outline-primary btn-sm me-2" (click)="fileResultInput.click()"
+          <button class="btn btn-outline-primary btn-sm flex-grow-1" (click)="fileResultInput.click()"
             [disabled]="isUploadingResults">
             <i class="fas fa-file-excel me-1"></i>
-            {{ isUploadingResults ? 'Subiendo...' : 'Cargar Resultados' }}
+            <span class="d-none d-sm-inline">{{ isUploadingResults ? 'Subiendo...' : 'Cargar Resultados' }}</span>
+            <span class="d-sm-none">{{ isUploadingResults ? 'Subiendo...' : 'Resultados' }}</span>
           </button>
 
-          <button class="btn btn-success btn-sm" (click)="openModal(modalResultRef)">
-            <i class="fas fa-plus-circle me-1"></i> Nuevo Resultado
+          <button class="btn btn-success btn-sm flex-grow-1" (click)="openModal(modalResultRef)">
+            <i class="fas fa-plus-circle me-1"></i> <span class="d-none d-sm-inline">Nuevo Resultado</span><span
+              class="d-sm-none">Resultado</span>
           </button>
         </div>
       </div>
 
       <!-- Filtros -->
-      <div class="row g-3 mb-3">
-        <div class="col-md-5">
+      <div class="row g-2 g-md-3 mb-3">
+        <div class="col-12 col-md-5">
           <p class="form-p">Rama</p>
           <select class="form-select form-select-sm" [(ngModel)]="selectedBranch" (change)="onFilterChange()">
             <option value="">Todas</option>
             <option *ngFor="let b of branches" [value]="b.name">{{ b.name }}</option>
           </select>
         </div>
-        <div class="col-md-5">
+        <div class="col-12 col-md-5">
           <p class="form-p">Ronda</p>
           <select class="form-select form-select-sm" [(ngModel)]="selectedRound" (change)="onFilterChange()">
             <option [ngValue]="null">Todas</option>
             <option *ngFor="let r of roundNumbers" [ngValue]="r">{{ r }}</option>
           </select>
         </div>
-        <div class="col-md-2 d-flex align-items-end">
+        <div class="col-12 col-md-2">
+          <p class="form-p">.</p>
           <button class="btn btn-outline-secondary btn-sm w-100" (click)="clearFilters()">
             <i class="fas fa-eraser me-1"></i> Limpiar
           </button>
@@ -241,50 +269,52 @@
       </div>
 
       <!-- Tabla resultados -->
-      <div class="table-responsive">
-        <table class="table table-hover table-sm align-middle text-center border">
+      <div class="table-responsive results-table-wrapper">
+        <table class="table table-hover table-sm align-middle text-center border results-table">
           <thead class="table-light">
             <tr class="fw-bold">
               <th>ID</th>
-              <th>Torneo</th>
-              <th>Categoría</th>
-              <th>Modalidad</th>
-              <th>Rama</th>
+              <th class="d-none d-sm-table-cell">Torneo</th>
+              <th class="d-none d-lg-table-cell">Categoría</th>
+              <th class="d-none d-lg-table-cell">Modalidad</th>
+              <th class="d-none d-md-table-cell">Rama</th>
               <th>Ronda</th>
               <th>Jugador</th>
-              <th>Equipo</th>
+              <th class="d-none d-lg-table-cell">Equipo</th>
               <th>Pista</th>
-              <th>Línea Jugada</th>
+              <th class="d-none d-md-table-cell">Línea</th>
               <th>Puntaje</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let result of filteredResults">
-              <td>{{ result.resultId }}</td>
-              <td>{{ result.tournamentName || selectedTournament?.name || '-' }}</td>
-              <td>{{ result.categoryName || '-' }}</td>
-              <td>{{ result.modalityName || '-' }}</td>
-              <td>{{ result.branchName || '-' }}</td>
+              <td class="small">{{ result.resultId }}</td>
+              <td class="d-none d-sm-table-cell small">{{ result.tournamentName || selectedTournament?.name || '-' }}
+              </td>
+              <td class="d-none d-lg-table-cell small">{{ result.categoryName || '-' }}</td>
+              <td class="d-none d-lg-table-cell small">{{ result.modalityName || '-' }}</td>
+              <td class="d-none d-md-table-cell small">{{ result.branchName || '-' }}</td>
               <td>{{ result.roundNumber || '-' }}</td>
-              <td>{{ result.personName || '-' }}</td>
-              <td>{{ result.teamName || '-' }}</td>
+              <td class="text-start small">{{ result.personName || '-' }}</td>
+              <td class="d-none d-lg-table-cell small">{{ result.teamName || '-' }}</td>
               <td>{{ result.laneNumber || '-' }}</td>
-              <td>{{ result.lineNumber || '-' }}</td>
-              <td>{{ result.score || '-' }}</td>
+              <td class="d-none d-md-table-cell small">{{ result.lineNumber || '-' }}</td>
+              <td class="fw-bold">{{ result.score || '-' }}</td>
               <td>
-                <div class="d-flex justify-content-center gap-2">
-                  <button class="btn btn-outline-primary btn-sm" (click)="editResult(result)">
+                <div class="d-flex justify-content-center gap-1">
+                  <button class="btn btn-outline-primary btn-sm" (click)="editResult(result)" title="Editar">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="btn btn-outline-danger btn-sm" (click)="deleteResult(result.resultId)">
+                  <button class="btn btn-outline-danger btn-sm" (click)="deleteResult(result.resultId)"
+                    title="Eliminar">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
               </td>
             </tr>
             <tr *ngIf="!filteredResults.length">
-              <td colspan="12" class="text-muted py-3">No hay resultados disponibles.</td>
+              <td [attr.colspan]="12" class="text-muted py-3">No hay resultados disponibles.</td>
             </tr>
           </tbody>
         </table>
@@ -299,7 +329,7 @@
   <div class="modal-content">
     <div class="modal-header bg-primary text-white">
       <h5 class="modal-title">{{ idPlayer ? 'Editar' : 'Nuevo' }} Jugador</h5> <button type="button"
-        class="btn-close btn-close-white" aria-p="Close" (click)="closeModal()"></button>
+        class="btn-close btn-close-white" aria-label="Close" (click)="closeModal()"></button>
     </div>
     <form [formGroup]="playerForm" (ngSubmit)="savePlayer()">
       <div class="modal-body">
@@ -382,7 +412,7 @@
   <div class="modal-content">
     <div class="modal-header bg-primary text-white">
       <h5 class="modal-title">Nuevo Equipo</h5>
-      <button type="button" class="btn-close btn-close-white" aria-p="Close" (click)="closeModal()"></button>
+      <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeModal()"></button>
     </div>
 
     <form [formGroup]="teamForm" (ngSubmit)="saveTeam()">
@@ -478,7 +508,7 @@
       <h5 class="modal-title flex-grow-1 m-0">
         {{ idResult ? 'Editar' : 'Registrar' }} Resultado
       </h5>
-      <button type="button" class="btn-close btn-close-white ms-2" aria-p="Close" (click)="closeModal()"
+      <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
         style="filter: brightness(0) invert(1);">
       </button>
     </div>

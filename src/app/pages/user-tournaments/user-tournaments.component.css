@@ -1,1 +1,111 @@
-/* Styles will be added here soon */
+/* User Tournaments Responsive Styles */
+
+.user-tournaments-view .tournament-header {
+  gap: 0.5rem;
+}
+
+.user-tournaments-view .tournament-header .badge {
+  white-space: nowrap;
+}
+
+.user-tournaments-view .tournament-thumb img {
+  max-width: 60px;
+}
+
+.user-tournaments-view .tournament-meta span {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: flex-start;
+  word-break: break-word;
+}
+
+.user-tournaments-view .active-tournaments-section {
+  margin-bottom: 2rem;
+}
+
+.user-tournaments-view .finished-tournaments-section {
+  margin-top: 2rem;
+}
+
+.user-tournaments-view .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.user-tournaments-view .tournaments-table {
+  min-width: 800px;
+  margin-bottom: 0;
+}
+
+.user-tournaments-view .tournaments-table th,
+.user-tournaments-view .tournaments-table td {
+  white-space: nowrap;
+  padding: 0.75rem;
+}
+
+@media (max-width: 767.98px) {
+  .user-tournaments-view h3 {
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+  }
+
+  .user-tournaments-view .tournament-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-tournaments-view .tournament-card .card-body {
+    padding: 1rem;
+  }
+
+  .user-tournaments-view .tournament-thumb {
+    margin-bottom: 0.5rem;
+  }
+
+  .user-tournaments-view .tournament-meta .col-md-6 {
+    margin-bottom: 0.5rem;
+  }
+
+  .user-tournaments-view .active-tournaments-section {
+    margin-bottom: 3rem;
+  }
+
+  .user-tournaments-view .finished-tournaments-section {
+    margin-top: 3rem;
+  }
+
+  .user-tournaments-view .table-responsive {
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .user-tournaments-view .tournaments-table {
+    font-size: 0.85rem;
+  }
+
+  .user-tournaments-view .tournaments-table th,
+  .user-tournaments-view .tournaments-table td {
+    padding: 0.5rem 0.4rem;
+  }
+
+  .user-tournaments-view .tournaments-table img {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .user-tournaments-view .tournament-header strong {
+    font-size: 0.95rem;
+  }
+
+  .user-tournaments-view .tournament-meta {
+    font-size: 0.85rem;
+  }
+
+  .user-tournaments-view .tournaments-table {
+    min-width: 700px;
+    font-size: 0.8rem;
+  }
+}
