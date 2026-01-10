@@ -4,6 +4,11 @@
   cursor: pointer;
 }
 
+/* Espacio inferior para que las cards no queden pegadas */
+.dashboard-view {
+  padding-bottom: 3rem;
+}
+
 .list-group-item {
   border: none !important;
 }
@@ -36,6 +41,12 @@
 
 .dashboard-view .historical-actions button {
   min-height: 56px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
 }
 
 .dashboard-view .map-frame iframe {
@@ -52,6 +63,9 @@
 }
 
 @media (max-width: 767.98px) {
+  .dashboard-view {
+    padding-bottom: 3.5rem;
+  }
   .dashboard-view .tournament-header {
     flex-direction: column;
     align-items: flex-start;
@@ -98,7 +112,7 @@
   }
 
   .dashboard-view .historical-actions button img {
-    margin: 0.5rem 0 0 0;
+    margin: 0;
   }
 
   .dashboard-view .info-card ul {
