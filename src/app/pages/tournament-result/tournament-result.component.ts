@@ -1,7 +1,8 @@
 import { Component, ViewChild, TemplateRef, OnInit, inject, } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, finalize } from 'rxjs';
+import { BehaviorSubject, finalize, forkJoin, of, lastValueFrom } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { ActivatedRoute } from '@angular/router';
@@ -21,12 +22,17 @@ import { ITeam } from 'src/app/model/team.interface';
 import { ResultsService } from 'src/app/services/results.service';
 import { IBranch } from 'src/app/model/branch.interface';
 import { Location } from '@angular/common';
+import { TeamApiService } from 'src/app/services/team-api.service';
 
 // Interfaz para el response de importación
 interface IImportResponse {
   created: number;
   skipped: number;
   errors: string[];
+  // Opcionales para detallar registros saltados
+  skippedDetails?: string[];
+  skippedReasons?: string[];
+  skippedMessage?: string;
 }
 
 
@@ -116,6 +122,7 @@ export class TournamentResultComponent implements OnInit {
   private readonly userApiService = inject(UserApiService);
   private readonly tournamentsService = inject(TournamentsService);
   private readonly resultsService = inject(ResultsService);
+  private readonly teamApi = inject(TeamApiService);
   private readonly location = inject(Location);
 
   // ================== CICLO DE VIDA ==================
@@ -692,7 +699,7 @@ export class TournamentResultComponent implements OnInit {
       .pipe(finalize(() => onFinish()))
       .subscribe({
         next: (response) => {
-          this.handleImportResponse(response, onSuccess);
+          this.handleImportResponse(response, onSuccess, endpoint);
         },
         error: (err) => {
           console.error('Error importando archivo:', err);
@@ -705,47 +712,91 @@ export class TournamentResultComponent implements OnInit {
       });
   }
 
-  private handleImportResponse(response: IImportResponse, onSuccess: () => void): void {
+  private handleImportResponse(response: IImportResponse, onSuccess: () => void, sourceEndpoint?: string): void {
     const { created, skipped, errors } = response;
+    const skippedDetails = response.skippedDetails ?? response.skippedReasons ?? [];
+    const skippedMessage = response.skippedMessage;
     const total = created + skipped + errors.length;
     const hasErrors = errors && errors.length > 0;
 
-    // Construir HTML para el modal
+    // Detectar equipos faltantes sólo para importación de team-person
+    const isTeamPerson = sourceEndpoint === this.IMPORT_ENDPOINTS.teamPerson;
+    const missingTeams = isTeamPerson ? this.extractMissingTeams(errors) : [];
+
+    // Construir HTML para el modal (estilos embebidos para consistencia)
     let htmlContent = `
+      <style>
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .stat-card { padding: 14px; border-radius: 12px; min-height: 110px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: default; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04); }
+        .stat-card.clickable { cursor: pointer; transition: transform 120ms ease, box-shadow 120ms ease; }
+        .stat-card.clickable:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+        .stat-number { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+        .stat-label { font-size: 13px; margin: 0; color: #6c757d; }
+        .created { background: #e8f7ee; color: #198754; }
+        .skipped { background: #fff5e5; color: #f59f00; }
+        .errors { background: #ffe5e9; color: #d6336c; }
+      </style>
       <div class="import-summary text-start">
         <div class="summary-stats mb-4">
-          <div class="row g-3">
-            <div class="col-md-4 text-center">
-              <div class="stat-box bg-success bg-opacity-10 p-3 rounded">
-                <h5 class="text-success fw-bold mb-1">${created}</h5>
-                <p class="text-muted small mb-0">Registros creados</p>
-              </div>
+          <div class="stat-grid">
+            <div class="stat-card created">
+              <div class="stat-number">${created}</div>
+              <p class="stat-label">Registros creados</p>
             </div>
-            <div class="col-md-4 text-center">
-              <div class="stat-box bg-warning bg-opacity-10 p-3 rounded">
-                <h5 class="text-warning fw-bold mb-1">${skipped}</h5>
-                <p class="text-muted small mb-0">Registros saltados</p>
-              </div>
+            <div class="stat-card skipped ${skipped > 0 ? 'clickable' : ''}" ${skipped > 0 ? 'data-target="skipped-section"' : ''}>
+              <div class="stat-number">${skipped}</div>
+              <p class="stat-label">Registros saltados</p>
             </div>
-            <div class="col-md-4 text-center">
-              <div class="stat-box bg-danger bg-opacity-10 p-3 rounded">
-                <h5 class="text-danger fw-bold mb-1">${errors.length}</h5>
-                <p class="text-muted small mb-0">Errores encontrados</p>
-              </div>
+            <div class="stat-card errors ${hasErrors ? 'clickable' : ''}" ${hasErrors ? 'data-target="errors-section"' : ''}>
+              <div class="stat-number">${errors.length}</div>
+              <p class="stat-label">Errores encontrados</p>
             </div>
           </div>
         </div>
     `;
 
+    // Sección de detalle para registros saltados
+    if (skipped > 0) {
+      const hasSkippedDetails = skippedDetails.length > 0;
+      htmlContent += `
+        <hr>
+        <div id="skipped-section">
+          <h4 class="text-warning fw-bold mb-3">⚠️ Registros saltados</h4>
+          <div class="text-muted small mb-2">
+            ${skippedMessage || 'Generalmente se omiten porque ya existen en el sistema.'}
+          </div>
+        </div>
+      `;
+
+      if (hasSkippedDetails) {
+        htmlContent += `
+          <div class="skipped-list" style="max-height: 240px; overflow-y: auto;">
+            <ul class="list-group list-group-flush">
+        `;
+        skippedDetails.forEach((detail) => {
+          htmlContent += `
+              <li class="list-group-item px-0 py-2 border-0 text-warning small">
+                <i class="bi bi-info-circle me-2"></i>${this.escapeHtml(detail)}
+              </li>
+          `;
+        });
+        htmlContent += `
+            </ul>
+          </div>
+        `;
+      }
+    }
+
     // Agregar sección de errores si existen
     if (hasErrors) {
       htmlContent += `
         <hr>
-        <h6 class="text-danger fw-bold mb-3">📋 Detalle de Errores:</h6>
-        <div class="error-list" style="max-height: 300px; overflow-y: auto;">
-          <ul class="list-group list-group-flush">
+        <div id="errors-section">
+          <h6 class="text-danger fw-bold mb-3">📋 Detalle de Errores:</h6>
+          <div class="error-list" style="max-height: 300px; overflow-y: auto;">
+            <ul class="list-group list-group-flush">
       `;
-      errors.forEach((error, index) => {
+      errors.forEach((error) => {
         htmlContent += `
           <li class="list-group-item px-0 py-2 border-0 text-danger small">
             <i class="bi bi-exclamation-circle me-2"></i>${this.escapeHtml(error)}
@@ -753,7 +804,8 @@ export class TournamentResultComponent implements OnInit {
         `;
       });
       htmlContent += `
-          </ul>
+            </ul>
+          </div>
         </div>
       `;
     }
@@ -768,11 +820,25 @@ export class TournamentResultComponent implements OnInit {
       confirmButtonColor: '#0d6efd',
       confirmButtonText: 'Aceptar',
       width: '600px',
-      didClose: () => {
-        // Ejecutar callback de éxito solo si se crearon registros
-        if (created > 0) {
-          onSuccess();
-        }
+      showDenyButton: missingTeams.length > 0,
+      denyButtonText: 'Crear equipos faltantes',
+      didOpen: (el) => {
+        const cards = el.querySelectorAll<HTMLElement>('.stat-card.clickable');
+        cards.forEach((card) => {
+          card.addEventListener('click', () => {
+            const targetId = card.getAttribute('data-target');
+            if (!targetId) return;
+            const target = el.querySelector<HTMLElement>(`#${targetId}`);
+            target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        });
+      },
+    }).then(async (result) => {
+      if (result.isDenied && missingTeams.length > 0) {
+        await this.createMissingTeams(missingTeams);
+      }
+      if (result.isConfirmed && created > 0) {
+        onSuccess();
       }
     });
   }
@@ -786,6 +852,54 @@ export class TournamentResultComponent implements OnInit {
       "'": '&#039;'
     };
     return text.replace(/[&<>"']/g, m => map[m]);
+  }
+
+  // Extrae nombres de equipos faltantes desde mensajes de error
+  private extractMissingTeams(errors: string[]): string[] {
+    const teamNames = new Set<string>();
+    const patterns = [
+      /no\s+existe\s+team\s+con\s+nombre\s*=\s*(.+)$/i,
+      /no\s+existe\s+equipo\s+con\s+nombre\s*=\s*(.+)$/i
+    ];
+    errors.forEach((msg) => {
+      const cleaned = msg.replace(/^\s*L[ií]nea\s*\d+\s*:\s*/i, '').trim();
+      for (const re of patterns) {
+        const m = cleaned.match(re);
+        if (m && m[1]) {
+          teamNames.add(m[1].trim());
+          break;
+        }
+      }
+    });
+    return Array.from(teamNames);
+  }
+
+  // Crea equipos faltantes contra el endpoint de equipos
+  private async createMissingTeams(names: string[]): Promise<void> {
+    if (!names.length) return;
+    Swal.fire({
+      title: 'Creando equipos…',
+      html: '<div class="text-muted">Esto puede tardar unos segundos.</div>',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    const requests = names.map((name) =>
+      this.teamApi.createTeam({ nameTeam: name, status: true }).pipe(catchError(() => of(null)))
+    );
+
+    try {
+      const results = await lastValueFrom(forkJoin(requests));
+      const createdCount = (results || []).filter(Boolean).length;
+      await Swal.fire({
+        icon: 'success',
+        title: 'Equipos creados',
+        html: `<div class="text-start"><b>${createdCount}</b> de <b>${names.length}</b> equipos fueron creados.<br><small>Si deseas, vuelve a importar para vincular jugadores.</small></div>`,
+        confirmButtonText: 'Aceptar'
+      });
+    } catch (e) {
+      await Swal.fire({ icon: 'error', title: 'Error creando equipos', text: 'No se pudieron crear los equipos.' });
+    }
   }
 
 
