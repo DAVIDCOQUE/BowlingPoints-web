@@ -1,0 +1,128 @@
+<div class="container mt-4">
+  <h1 class="text-center">Equipos</h1>
+
+  <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
+    <!-- Filtro -->
+    <div class="d-flex flex-column flex-md-row align-items-start gap-2">
+      <div>
+        <input type="text" class="form-control form-control-sm" style="height: 36px; width: 250px;" placeholder="Buscar"
+          [(ngModel)]="filter" name="filter" />
+      </div>
+      <div class="d-flex gap-2 ">
+        <button class="btn btn-outline-secondary btn-sm  align-items-center" style="height: 36px; width: 100px;"
+          (click)="clear()">
+          <i class="fas fa-times me-1"></i> Limpiar
+        </button>
+      </div>
+    </div>
+
+    <!-- Botón Crear -->
+    <div>
+      <button class="btn btn-success btn-sm  align-items-center" style="height: 36px; width: 100px;"
+        (click)="openModal(modalTeam)">
+        <i class="fas fa-plus-circle me-1"></i> Crear
+      </button>
+    </div>
+  </div>
+
+  <hr>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table
+        class="table table-rounded table-hover table-sm border table-bordered border-gray-300 table-vmiddle text-center align-middle">
+        <thead class="bg-light-secondary align-middle">
+          <tr class="fw-bold">
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container>
+            <tr *ngFor="let team of filteredTeams">
+              <td>{{ team.teamId }}</td>
+              <td>{{ team.nameTeam }}</td>
+              <td>{{ team.phone || '-' }}</td>
+              <td>{{ team.status ? 'Activo' : 'Inactivo' }}</td>
+              <td>
+                <div class="d-flex justify-content-center gap-2">
+                  <!-- Botón Editar - Azul suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: 0.5rem; min-width: 40px; height: 36px;"
+                    (click)="editTeam(team)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+
+                  <!-- Botón Eliminar - Rojo suave -->
+                  <button class="btn btn-sm d-flex align-items-center justify-content-center px-2"
+                    (click)="deleteTeam(team.teamId)"
+                    style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 0.5rem; min-width: 40px; height: 36px;">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #modalTeam>
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center">
+          <h2 class="modal-title flex-grow-1 m-0">
+            {{ idTeam ? 'Editar' : 'Crear' }} Equipo
+          </h2>
+          <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" (click)="closeModal()"
+            style="filter: brightness(0) invert(1);"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="teamForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre del Equipo</label>
+                <input formControlName="nameTeam" type="text" class="form-control" placeholder="Nombre del equipo" [ngClass]="{
+                'is-invalid': teamForm.controls['nameTeam'].invalid && teamForm.controls['nameTeam'].touched,
+                'is-valid': teamForm.controls['nameTeam'].valid
+              }" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Teléfono</label>
+                <input formControlName="phone" type="text" class="form-control" placeholder="Teléfono"
+                  [ngClass]="{
+                'is-invalid': teamForm.controls['phone'].invalid && teamForm.controls['phone'].touched,
+                'is-valid': teamForm.controls['phone'].valid
+              }" />
+              </div>
+
+              <div class="col-md-10">
+                <label class="form-label">Estado</label>
+                <select class="form-select" formControlName="status" [ngClass]="{
+            'is-invalid': teamForm.controls['status'].invalid && teamForm.controls['status'].touched,
+            'is-valid': teamForm.controls['status'].valid
+          }">
+                  <option [ngValue]="null" disabled>Seleccione un estado</option>
+                  <option *ngFor="let estado of estados" [ngValue]="estado.valor">
+                    {{ estado.etiqueta }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="button" class="btn btn-success" [disabled]="teamForm.invalid"
+              (click)="saveForm()">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</div>

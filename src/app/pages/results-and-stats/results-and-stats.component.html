@@ -1,11 +1,13 @@
 <div class="container mt-4">
-
   <!-- Título y descripción -->
   <div class="mb-4 text-center">
-    <h2 class="text-primary fw-bold">📊 Resultados y Estadísticas de Jugadores</h2>
+    <h2 class="text-primary fw-bold">
+      📊 Resultados y Estadísticas de Jugadores
+    </h2>
     <p class="text-muted fs-6 mb-0">
-      Visualiza el desempeño de cada jugador por torneo. Filtra por categoría, modalidad y rama para ver promedios
-      específicos y comparativos entre torneos.
+      Visualiza el desempeño de cada jugador por torneo. Filtra por categoría,
+      modalidad y rama para ver promedios específicos y comparativos entre
+      torneos.
     </p>
   </div>
 
@@ -15,21 +17,59 @@
       <div class="row g-3 align-items-end">
         <div class="col-md-3">
           <p class="form-label">Categoría</p>
-          <select class="form-select form-select-sm" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
+          <select
+            class="form-select form-select-sm"
+            [(ngModel)]="selectedCategory"
+            (change)="onFilterChange()"
+          >
             <option value="">Todas</option>
-            <option *ngFor="let c of categories" [value]="c.categoryId">{{ c.name }}</option>
+            <option *ngFor="let c of categories" [value]="c.categoryId">
+              {{ c.name }}
+            </option>
           </select>
         </div>
 
         <div class="col-md-3">
           <p class="form-label">Rama</p>
-          <select class="form-select form-select-sm" [(ngModel)]="selectedBranch" (change)="onFilterChange()">
+          <select
+            class="form-select form-select-sm"
+            [(ngModel)]="selectedBranch"
+            (change)="onFilterChange()"
+          >
             <option value="">Todas</option>
             <option value="Masculino">Masculino</option>
             <option value="Femenino">Femenino</option>
           </select>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end mb-3">
+    <button
+      class="btn btn-primary btn-sm"
+      (click)="consultarIA()"
+      [disabled]="iaLoading || !playerStats.length"
+    >
+      🤖 Consultar con IA
+    </button>
+
+    <button
+      *ngIf="iaAnalysis"
+      class="btn btn-outline-secondary btn-sm ms-2"
+      (click)="iaAnalysis = null"
+    >
+      Limpiar
+    </button>
+  </div>
+
+  <!-- Resultado IA -->
+  <div *ngIf="iaAnalysis" class="card shadow-sm mb-3">
+    <div class="card-body">
+      <h4 class="fw-bold mb-2">📌 Análisis IA</h4>
+      <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit">{{
+        iaAnalysis
+      }}</pre>
     </div>
   </div>
 
@@ -41,7 +81,9 @@
           <thead class="table-light">
             <tr>
               <th class="text-primary">Jugador</th>
-              <th *ngFor="let torneo of allTournaments" class="text-secondary">{{ torneo }}</th>
+              <th *ngFor="let torneo of allTournaments" class="text-secondary">
+                {{ torneo }}
+              </th>
               <th class="table-secondary">Total Promedio</th>
             </tr>
           </thead>
@@ -49,20 +91,27 @@
             <tr *ngFor="let player of playerStats">
               <td class="fw-bold text-primary">{{ player.name }}</td>
               <td *ngFor="let torneo of allTournaments">
-                {{ getPlayerAverage(player, torneo) !== null ? (getPlayerAverage(player, torneo) | number:'1.0-0') : '-'
+                {{
+                  getPlayerAverage(player, torneo) !== null
+                    ? (getPlayerAverage(player, torneo) | number : "1.0-0")
+                    : "-"
                 }}
               </td>
               <td class="fw-bold table-secondary">
-                {{ player.totalAverage | number:'1.0-0' }}
+                {{ player.totalAverage | number : "1.0-0" }}
               </td>
             </tr>
             <tr *ngIf="!playerStats.length">
-              <td [attr.colspan]="allTournaments.length + 2" class="text-muted py-3">No hay datos para mostrar.</td>
+              <td
+                [attr.colspan]="allTournaments.length + 2"
+                class="text-muted py-3"
+              >
+                No hay datos para mostrar.
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
-
 </div>

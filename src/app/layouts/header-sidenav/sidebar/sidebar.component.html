@@ -21,7 +21,7 @@
     </mat-list-item>
 
     <!-- Club -->
-    <mat-list-item *ngIf="isJugador || isEntrenador || isAdmin" routerLink="/club" routerLinkActive="active"
+    <mat-list-item *ngIf="isJugador || isAdmin" routerLink="/club" routerLinkActive="active"
       class="d-flex align-items-center gap-3">
       <img src="assets/img/clubes.png" height="22" class="me-2" alt="Icono de club" />
       <span *ngIf="isExpanded || isShowing">Mi Club</span>
@@ -42,6 +42,13 @@
       class="d-flex align-items-center gap-3">
       <img src="assets/img/torneo.png" height="22" class="me-2" alt="Icono de torneos" />
       <span *ngIf="isExpanded || isShowing">Torneos</span>
+    </mat-list-item>
+
+    <!-- Equipos -->
+    <mat-list-item *ngIf="isAdmin" routerLink="/teams" routerLinkActive="active"
+      class="d-flex align-items-center gap-3">
+      <img src="assets/img/team.png" height="22" class="me-2" alt="Icono de equipos" />
+      <span *ngIf="isExpanded || isShowing">Equipos</span>
     </mat-list-item>
 
     <!-- Usuarios -->
