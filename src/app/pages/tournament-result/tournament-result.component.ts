@@ -858,8 +858,8 @@ export class TournamentResultComponent implements OnInit {
   private extractMissingTeams(errors: string[]): string[] {
     const teamNames = new Set<string>();
     const patterns = [
-      /no\s+existe\s+team\s+con\s+nombre\s*=\s*(.+)$/i,
-      /no\s+existe\s+equipo\s+con\s+nombre\s*=\s*(.+)$/i
+      /no\s+existe\s+team\s+con\s+nombre\s*=\s*([^\r\n]+)$/i,
+      /no\s+existe\s+equipo\s+con\s+nombre\s*=\s*([^\r\n]+)$/i
     ];
     errors.forEach((msg) => {
       const cleaned = msg.replace(/^\s*L[ií]nea\s*\d+\s*:\s*/i, '').trim();
