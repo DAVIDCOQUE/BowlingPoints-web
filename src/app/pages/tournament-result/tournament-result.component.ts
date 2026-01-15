@@ -113,6 +113,8 @@ export class TournamentResultComponent implements OnInit {
     { valor: false, etiqueta: 'Inactivo' },
   ];
 
+  private static readonly MAX_TEAM_NAME_LENGTH = 100;
+
   // Inyecciones
   private readonly apiUrl = environment.apiUrl;
   private readonly fb = inject(FormBuilder);
@@ -855,24 +857,31 @@ export class TournamentResultComponent implements OnInit {
   }
 
   // Extrae nombres de equipos faltantes desde mensajes de error
-  private extractMissingTeams(errors: string[]): string[] {
-    const teamNames = new Set<string>();
-    const patterns = [
-      /no\s+existe\s+team\s+con\s+nombre\s*=\s*([^\r\n]+)$/i,
-      /no\s+existe\s+equipo\s+con\s+nombre\s*=\s*([^\r\n]+)$/i
-    ];
-    errors.forEach((msg) => {
-      const cleaned = msg.replace(/^\s*L[ií]nea\s*\d+\s*:\s*/i, '').trim();
-      for (const re of patterns) {
-        const m = cleaned.match(re);
-        if (m && m[1]) {
-          teamNames.add(m[1].trim());
-          break;
-        }
+private extractMissingTeams(errors: string[]): string[] {
+  const teamNames = new Set<string>();
+  const MAX = TournamentResultComponent.MAX_TEAM_NAME_LENGTH;
+
+  const patterns: RegExp[] = [
+    new RegExp(`no\\s+existe\\s+team\\s+con\\s+nombre\\s*=\\s*([^\\r\\n]{1,${MAX}})$`, 'i'),
+    new RegExp(`no\\s+existe\\s+equipo\\s+con\\s+nombre\\s*=\\s*([^\\r\\n]{1,${MAX}})$`, 'i'),
+  ];
+
+  for (const msg of errors) {
+    const cleaned = msg
+      .replace(/^\s*L[ií]nea\s*\d+\s*:\s*/i, '')
+      .trim();
+
+    for (const re of patterns) {
+      const match = re.exec(cleaned);
+      if (match?.[1]) {
+        teamNames.add(match[1].trim());
+        break;
       }
-    });
-    return Array.from(teamNames);
+    }
   }
+
+  return Array.from(teamNames);
+}
 
   // Crea equipos faltantes contra el endpoint de equipos
   private async createMissingTeams(names: string[]): Promise<void> {
@@ -901,8 +910,6 @@ export class TournamentResultComponent implements OnInit {
       await Swal.fire({ icon: 'error', title: 'Error creando equipos', text: 'No se pudieron crear los equipos.' });
     }
   }
-
-
 
   onPlayersFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
