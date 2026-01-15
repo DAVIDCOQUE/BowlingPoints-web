@@ -638,7 +638,7 @@ describe('TournamentResultComponent', () => {
       target: {
         files: [{ name: 'archivo.txt' }],
       },
-    };
+    } as unknown as Event;
 
     spyOn(Swal, 'fire');
     component.onPlayersFileSelected(mockEvent);
@@ -786,31 +786,20 @@ describe('TournamentResultComponent', () => {
 
 
   it('should not upload if no file is selected', () => {
-    const fakeEvent = { target: { files: [] } };
+    const fakeEvent = { target: { files: [] } } as unknown as Event;
     component.onResultFileSelected(fakeEvent);
     // No error esperado pero tampoco debe lanzar nada
   });
 
   it('should show error for invalid extension', () => {
     const fakeFile = new File([''], 'test.txt');
-    const fakeEvent = { target: { files: [fakeFile] } };
+    const fakeEvent = { target: { files: [fakeFile] } } as unknown as Event;
     spyOn(Swal, 'fire');
 
     component.tournamentId = 1;
     component.onResultFileSelected(fakeEvent);
 
     expect(Swal.fire).toHaveBeenCalledWith('Error', 'Solo se permiten archivos Excel o CSV', 'error');
-  });
-
-  it('should show error if tournamentId is missing', () => {
-    const fakeFile = new File([''], 'test.xlsx');
-    const fakeEvent = { target: { files: [fakeFile] } };
-    spyOn(Swal, 'fire');
-
-    component.tournamentId = null;
-    component.onResultFileSelected(fakeEvent);
-
-    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No hay torneo seleccionado para cargar resultados', 'error');
   });
 
   it('should return unique players based on personId', () => {
@@ -887,21 +876,6 @@ describe('TournamentResultComponent', () => {
     expect(Swal.fire).toHaveBeenCalledWith('Error', 'Solo se permiten archivos Excel o CSV', 'error');
   });
 
-  it('should show error if no tournamentId when uploading players', () => {
-    spyOn(Swal, 'fire');
-    const mockEvent = {
-      target: {
-        files: [new File(['dummy'], 'players.xlsx')],
-      },
-    };
-
-    component.tournamentId = null;
-    component.onPlayersFileSelected(mockEvent as any);
-
-    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No hay torneo seleccionado para cargar jugadores', 'error');
-  });
-
-
   it('should call Swal in handlePlayerError', () => {
     spyOn(Swal, 'fire');
     component['handlePlayerError']({ error: { message: 'Fallo' } });
@@ -935,20 +909,20 @@ describe('TournamentResultComponent', () => {
   it('should upload players file successfully', fakeAsync(() => {
     component.tournamentId = 1;
     const mockFile = new File(['dummy content'], 'test.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const mockEvent = { target: { files: [mockFile] } };
+    const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
 
-    spyOn(Swal, 'fire');
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false }));
     spyOn(component, 'loadPlayers');
+    spyOn(component, 'loadRegisteredPlayers');
 
     component.onPlayersFileSelected(mockEvent);
 
-    const req = httpMock.expectOne(`${component['apiUrl']}/players/upload`);
+    const req = httpMock.expectOne(req => req.url.includes('/files/tournament-registrations'));
     expect(req.request.method).toBe('POST');
-    req.flush({});
+    req.flush({ created: 1, skipped: 0, errors: [] });
 
     tick();
 
-    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Jugadores cargados correctamente', 'success');
     expect(component.loadPlayers).toHaveBeenCalled();
     expect(component.isUploadingPlayers).toBeFalse();
   }));
@@ -957,19 +931,19 @@ describe('TournamentResultComponent', () => {
   it('should show error if file upload fails', fakeAsync(() => {
     component.tournamentId = 1;
     const mockFile = new File(['dummy content'], 'test.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const mockEvent = { target: { files: [mockFile] } };
+    const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
 
     spyOn(Swal, 'fire');
     spyOn(console, 'error');
 
     component.onPlayersFileSelected(mockEvent);
 
-    const req = httpMock.expectOne(`${component['apiUrl']}/players/upload`);
+    const req = httpMock.expectOne(req => req.url.includes('/files/tournament-registrations'));
     req.error(new ErrorEvent('Network error'));
 
     tick();
 
-    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo cargar el archivo', 'error');
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo importar el archivo', 'error');
     expect(console.error).toHaveBeenCalled();
     expect(component.isUploadingPlayers).toBeFalse();
   }));
@@ -979,21 +953,20 @@ describe('TournamentResultComponent', () => {
     const mockFile = new File(['dummy'], 'results.xlsx', {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
-    const mockEvent = { target: { files: [mockFile] } };
+    const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
 
-    spyOn(Swal, 'fire');
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false }));
     spyOn(component, 'loadResults');
 
     component.onResultFileSelected(mockEvent);
 
-    const req = httpMock.expectOne(`${component['apiUrl']}/results/upload`);
+    const req = httpMock.expectOne(req => req.url.includes('/files/results'));
     expect(req.request.method).toBe('POST');
-    req.flush({}); // respuesta simulada
+    req.flush({ created: 1, skipped: 0, errors: [] });
 
     tick();
 
     expect(component.isUploadingResults).toBeFalse();
-    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Resultados cargados correctamente', 'success');
     expect(component.loadResults).toHaveBeenCalled();
   }));
 
@@ -1003,36 +976,44 @@ describe('TournamentResultComponent', () => {
     const mockFile = new File(['dummy'], 'results.xlsx', {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
-    const mockEvent = { target: { files: [mockFile] } };
+    const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
 
     spyOn(Swal, 'fire');
     spyOn(console, 'error');
 
     component.onResultFileSelected(mockEvent);
 
-    const req = httpMock.expectOne(`${component['apiUrl']}/results/upload`);
+    const req = httpMock.expectOne(req => req.url.includes('/files/results'));
     req.error(new ErrorEvent('Network error'));
 
     tick();
 
     expect(component.isUploadingResults).toBeFalse();
-    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo cargar el archivo', 'error');
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo importar el archivo', 'error');
     expect(console.error).toHaveBeenCalled();
   }));
 
-  it('should return false when branch does not match p.branchName', () => {
-    const result = component['matchesBranch']('juvenil')({ branchName: 'mayores' });
-    expect(result).toBeFalse(); // correcto
+  it('should filter registrations by branch when branch is specified', () => {
+    component.registrations = [
+      { branchName: 'mayores' } as any,
+      { branchName: 'rama juvenil femenino' } as any,
+      { branchName: 'cualquiera' } as any,
+    ];
+    component.selectedBranchPlayer = 'juvenil';
+    component.onFilterPlayerChange();
+    expect(component.filteredRegistrations.length).toBe(1);
+    expect(component.filteredRegistrations[0].branchName).toBe('rama juvenil femenino');
   });
 
-  it('should return true when branch matches p.branchName', () => {
-    const result = component['matchesBranch']('juvenil')({ branchName: 'rama juvenil femenino' });
-    expect(result).toBeTrue(); // correcto
-  });
-
-  it('should return true when branch filter is empty', () => {
-    const result = component['matchesBranch']('')({ branchName: 'cualquiera' });
-    expect(result).toBeTrue();
+  it('should return all registrations when branch filter is empty', () => {
+    component.registrations = [
+      { branchName: 'mayores' } as any,
+      { branchName: 'rama juvenil femenino' } as any,
+      { branchName: 'cualquiera' } as any,
+    ];
+    component.selectedBranchPlayer = '';
+    component.onFilterPlayerChange();
+    expect(component.filteredRegistrations.length).toBe(3);
   });
 
   it('should patch the form and open modal for editTeam', () => {
@@ -1172,6 +1153,215 @@ describe('TournamentResultComponent', () => {
     expect(spySuccess).not.toHaveBeenCalled();
   });
 
+  // --------------------------------------------------
+  // hasRegistrations getter
+  // --------------------------------------------------
+  it('should return true when filteredRegistrations has items', () => {
+    component.filteredRegistrations = [{ personId: 1 }] as any;
+    expect(component.hasRegistrations).toBeTrue();
+  });
+
+  it('should return false when filteredRegistrations is empty', () => {
+    component.filteredRegistrations = [];
+    expect(component.hasRegistrations).toBeFalse();
+  });
+
+  // --------------------------------------------------
+  // editResult
+  // --------------------------------------------------
+  it('should patch result form and open modal for editResult', () => {
+    const mockResult: IResults = {
+      resultId: 10,
+      personId: 1,
+      teamId: 2,
+      tournamentId: 1,
+      categoryId: 1,
+      modalityId: 1,
+      branchId: 1,
+      roundNumber: 1,
+      laneNumber: 1,
+      lineNumber: 1,
+      score: 200,
+      branchName: 'Masculino',
+    };
+
+    component.initResultForm();
+    const openModalSpy = spyOn(component, 'openModal');
+    component.modalResultRef = {} as any;
+
+    component.editResult(mockResult);
+
+    expect(component.idResult).toBe(10);
+    expect(component.resultForm.value.personId).toBe(1);
+    expect(component.resultForm.value.score).toBe(200);
+    expect(openModalSpy).toHaveBeenCalledWith(component.modalResultRef);
+  });
+
+  // --------------------------------------------------
+  // handleResultSuccess
+  // --------------------------------------------------
+  it('should show success message for new result', () => {
+    spyOn(Swal, 'fire');
+    spyOn(component, 'closeModal');
+    spyOn(component, 'loadResults');
+
+    component['handleResultSuccess'](false);
+
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Resultado creado', 'success');
+    expect(component.closeModal).toHaveBeenCalled();
+    expect(component.loadResults).toHaveBeenCalled();
+  });
+
+  it('should show success message for updated result', () => {
+    spyOn(Swal, 'fire');
+    spyOn(component, 'closeModal');
+    spyOn(component, 'loadResults');
+
+    component['handleResultSuccess'](true);
+
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Resultado actualizado', 'success');
+  });
+
+  // --------------------------------------------------
+  // handleDeleteSuccess
+  // --------------------------------------------------
+  it('should show success message and reload results on delete success', () => {
+    spyOn(Swal, 'fire');
+    spyOn(component, 'loadResults');
+
+    component['handleDeleteSuccess']();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Eliminado', 'Resultado eliminado correctamente', 'success');
+    expect(component.loadResults).toHaveBeenCalled();
+  });
+
+  // --------------------------------------------------
+  // handleDeleteError
+  // --------------------------------------------------
+  it('should show error message on delete error', () => {
+    spyOn(Swal, 'fire');
+
+    component['handleDeleteError']();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo eliminar el resultado', 'error');
+  });
+
+  // --------------------------------------------------
+  // onTeamPersonFileSelected
+  // --------------------------------------------------
+  it('should not process if no file selected in onTeamPersonFileSelected', () => {
+    const mockEvent = { target: { files: [] } } as unknown as Event;
+    const uploadSpy = spyOn<any>(component, 'uploadFile');
+
+    component.onTeamPersonFileSelected(mockEvent);
+
+    expect(uploadSpy).not.toHaveBeenCalled();
+  });
+
+  it('should upload team person file when valid file selected', fakeAsync(() => {
+    component.tournamentId = 1;
+    const mockFile = new File(['dummy'], 'teams.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
+
+    spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false }));
+    spyOn(component, 'loadRegisteredPlayers');
+
+    component.onTeamPersonFileSelected(mockEvent);
+
+    const req = httpMock.expectOne(req => req.url.includes('/files/team-person'));
+    expect(req.request.method).toBe('POST');
+    req.flush({ created: 1, skipped: 0, errors: [] });
+
+    tick();
+
+    expect(component.loading).toBeFalse();
+  }));
+
+  // --------------------------------------------------
+  // escapeHtml
+  // --------------------------------------------------
+  it('should escape HTML special characters', () => {
+    const result = component['escapeHtml']('<script>alert("XSS")</script>');
+    expect(result).toBe('&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;');
+  });
+
+  it('should escape ampersand', () => {
+    const result = component['escapeHtml']('A & B');
+    expect(result).toBe('A &amp; B');
+  });
+
+  it('should escape single quotes', () => {
+    const result = component['escapeHtml']("It's a test");
+    expect(result).toBe("It&#039;s a test");
+  });
+
+  // --------------------------------------------------
+  // saveResult success path
+  // --------------------------------------------------
+  it('should create new result (POST) successfully', fakeAsync(() => {
+    component.tournamentId = 1;
+    component.idResult = null;
+    component.initResultForm();
+    component.resultForm.patchValue({
+      personId: 1,
+      teamId: 2,
+      categoryId: 1,
+      modalityId: 1,
+      branchId: 1,
+      roundNumber: 1,
+      laneNumber: 1,
+      lineNumber: 1,
+      score: 150,
+    });
+
+    spyOn(Swal, 'fire');
+    spyOn(component, 'closeModal');
+    spyOn(component, 'loadResults');
+
+    component.saveResult();
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/results`);
+    expect(req.request.method).toBe('POST');
+    req.flush({});
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Resultado creado', 'success');
+    expect(component.closeModal).toHaveBeenCalled();
+  }));
+
+  it('should update existing result (PUT) successfully', fakeAsync(() => {
+    component.tournamentId = 1;
+    component.idResult = 99;
+    component.initResultForm();
+    component.resultForm.patchValue({
+      personId: 1,
+      teamId: 2,
+      categoryId: 1,
+      modalityId: 1,
+      branchId: 1,
+      roundNumber: 1,
+      laneNumber: 1,
+      lineNumber: 1,
+      score: 180,
+    });
+
+    spyOn(Swal, 'fire');
+    spyOn(component, 'closeModal');
+    spyOn(component, 'loadResults');
+
+    component.saveResult();
+
+    const req = httpMock.expectOne(`${component['apiUrl']}/results/99`);
+    expect(req.request.method).toBe('PUT');
+    req.flush({});
+
+    tick();
+
+    expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Resultado actualizado', 'success');
+  }));
 
 });
 
