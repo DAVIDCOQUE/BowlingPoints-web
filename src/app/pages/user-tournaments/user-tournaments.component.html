@@ -1,8 +1,8 @@
-<div class="container mt-4">
+<div class="container mt-4 user-tournaments-view">
   <hr>
 
   <!-- =================== TORNEOS ACTIVOS =================== -->
-  <div class="row g-4 mt-4">
+  <div class="row g-4 mt-4 active-tournaments-section">
     <h3 class="mb-3">🏆 Torneos Inscriptos</h3>
 
     <!--  Mostrar mensaje si no hay torneos -->
@@ -13,11 +13,11 @@
 
     <!--  Mostrar torneos si existen -->
     <div class="col-md-6" *ngFor="let torneo of torneosActivos">
-      <div class="card mb-3 border-0 shadow-sm rounded-4">
+      <div class="card mb-3 border-0 shadow-sm rounded-4 tournament-card">
 
         <!-- HEADER -->
-        <div class="d-flex justify-content-between align-items-center bg-primary text-white px-3 py-2 rounded-top">
-          <strong>{{ torneo.name }}</strong>
+        <div class="tournament-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center bg-primary text-white px-3 py-2 rounded-top gap-2">
+          <strong class="text-wrap">{{ torneo.name }}</strong>
           <span class="badge bg-warning text-dark fw-semibold">
             Edición {{ torneo.startDate | date:'yyyy' }}
           </span>
@@ -28,14 +28,14 @@
           <div class="row">
 
             <!-- LOGO -->
-            <div class="col-2 d-flex align-items-center justify-content-center">
+            <div class="col-3 col-sm-2 d-flex align-items-center justify-content-center tournament-thumb">
               <img [src]="apiUrl + torneo.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
                 width="50" alt="Torneo">
             </div>
 
             <!-- INFO -->
-            <div class="col-10">
-              <div class="row small gy-2">
+            <div class="col-9 col-sm-10">
+              <div class="row small gy-2 tournament-meta">
                 <div class="col-md-6">
                   <span>📅 <strong>Inicio:</strong> {{ torneo.startDate | date }}</span>
                 </div>
@@ -68,14 +68,15 @@
   <hr>
 
   <!-- =================== TORNEOS FINALIZADOS =================== -->
-  <h1 class="text-center">Torneos Jugados</h1>
+  <div class="finished-tournaments-section mt-4">
+    <h3 class="text-center mb-4">🏁 Torneos Jugados</h3>
 
-  <div class="card-body">
     <div class="table-responsive">
+      <div class="table-wrapper">
 
-      <table
-        class="table table-rounded table-hover table-sm border table-bordered table-vmiddle text-center align-middle">
-        <thead class="bg-light-secondary align-middle">
+        <table
+          class="table table-rounded table-hover table-sm border table-bordered table-vmiddle text-center align-middle tournaments-table">
+          <thead class="bg-light align-middle">
           <tr class="fw-bold">
             <th>ID</th>
             <th>Foto</th>
@@ -130,8 +131,8 @@
           </tr>
 
         </tbody>
-      </table>
-
+        </table>
+      </div>
     </div>
   </div>
 
