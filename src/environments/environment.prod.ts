@@ -3,5 +3,5 @@ export const environment = {
   appName: 'BowlingPoints',
   USERDATA_KEY: 'authBowling123',
   apiUrl: 'https://api.bowlingpoints.com',
-  webUrl: 'http://localhost:4200'
+  webUrl: 'https://bowlingpoints.com'
 };
