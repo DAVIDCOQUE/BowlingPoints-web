@@ -1,6 +1,7 @@
 .player-zoom {
   transition: transform 0.15s, color 0.15s;
 }
+
 .player-zoom:hover {
   transform: scale(1.07);
   color: #0d6efd;

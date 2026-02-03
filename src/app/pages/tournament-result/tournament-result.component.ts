@@ -100,7 +100,7 @@ export class TournamentResultComponent implements OnInit {
   }));
   roundNumbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-  // ================== FILTROS ==================
+  //  FILTROS
   selectedBranch = '';
   selectedRound: number | null = null;
 
@@ -127,7 +127,7 @@ export class TournamentResultComponent implements OnInit {
   private readonly teamApi = inject(TeamApiService);
   private readonly location = inject(Location);
 
-  // ================== CICLO DE VIDA ==================
+  //  CICLO DE VIDA
   ngOnInit(): void {
     const idFromRoute = this.route.snapshot.paramMap.get('tournamentId');
     this.tournamentId = idFromRoute ? Number(idFromRoute) : null;
@@ -144,7 +144,7 @@ export class TournamentResultComponent implements OnInit {
     this.loadResults();
   }
 
-  // ================== TORNEO ==================
+  //  TORNEO
 
   loadTournamentById(id: number): void {
     this.isLoading$.next(true);
@@ -173,7 +173,7 @@ export class TournamentResultComponent implements OnInit {
       });
   }
 
-  // ================== JUGADORES REGISTRADOS ==================
+  //  JUGADORES REGISTRADOS
 
   loadPlayers(): void {
     this.userApiService.getActiveUsers().subscribe({
@@ -469,7 +469,7 @@ export class TournamentResultComponent implements OnInit {
     });
   }
 
-  // ================== RESULTADOS ==================
+  //  RESULTADOS
 
   loadResults(): void {
     if (!this.tournamentId) return;
@@ -610,7 +610,7 @@ export class TournamentResultComponent implements OnInit {
     Swal.fire('Error', 'No se pudo eliminar el resultado', 'error');
   }
 
-  // ================== FILTROS ==================
+  //  FILTROS
 
   onTeamPersonFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

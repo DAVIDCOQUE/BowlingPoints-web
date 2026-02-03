@@ -2,10 +2,7 @@
 
 <mat-sidenav-container class="layout-container" autosize>
 
-  <mat-sidenav
-    [mode]="isMobile ? 'over' : 'side'"
-    [opened]="isSidebarExpanded"
-    class="sidebar bg-light border-end"
+  <mat-sidenav [mode]="isMobile ? 'over' : 'side'" [opened]="isSidebarExpanded" class="sidebar bg-light border-end"
     (backdropClick)="isMobile ? toggleSidebar() : null">
     <app-sidebar></app-sidebar>
   </mat-sidenav>

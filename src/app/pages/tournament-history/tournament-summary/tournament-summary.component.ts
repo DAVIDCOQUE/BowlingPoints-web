@@ -18,7 +18,7 @@ import { ITournament } from 'src/app/model/tournament.interface';
   styleUrls: ['./tournament-summary.component.css'],
 })
 export class TournamentSummaryComponent implements OnInit {
-  // Estado de carga
+
   isLoading$ = new BehaviorSubject<boolean>(false);
 
   // ID del torneo obtenido por ruta
@@ -62,15 +62,15 @@ export class TournamentSummaryComponent implements OnInit {
           this.modalities = response.data?.modalities ?? [];
           const rawBranches =
             response.data?.branchPlayerCounts &&
-            response.data.branchPlayerCounts.length > 0
+              response.data.branchPlayerCounts.length > 0
               ? response.data.branchPlayerCounts
               : response.data?.branches && response.data.branches.length > 0
-              ? response.data.branches
-              : [];
+                ? response.data.branches
+                : [];
 
           this.branches = rawBranches.map((b: any) => ({
             ...b,
-            name: b.name ?? b.branchName ?? '', 
+            name: b.name ?? b.branchName ?? '',
           }));
 
           this.players = response.data?.tournamentRegistrations ?? [];
@@ -89,9 +89,8 @@ export class TournamentSummaryComponent implements OnInit {
         },
       });
   }
-  /**
-   * Volver a la página anterior
-   */
+
+  // Volver a la página anterior
   goBack(): void {
     this.location.back();
   }

@@ -21,7 +21,6 @@ export class SidebarComponent implements OnInit {
 
   constructor(private router: Router, public auth: AuthService) { }
 
-
   ngOnInit(): void {
     this.isAdmin = this.auth.hasRole('ADMIN');
     this.isJugador = this.auth.hasRole('JUGADOR');

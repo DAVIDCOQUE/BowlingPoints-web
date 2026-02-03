@@ -1,7 +1,4 @@
-<mat-toolbar
-  class="bg-primary text-white px-3"
-  style="height: 64px; display: flex; align-items: center"
->
+<mat-toolbar class="bg-primary text-white px-3" style="height: 64px; display: flex; align-items: center">
   <!-- Botón menú -->
   <button *ngIf="!isGuest" mat-icon-button (click)="toggleSidebar()">
     <mat-icon>menu</mat-icon>
@@ -22,11 +19,7 @@
       <mat-icon>notifications</mat-icon>
     </button>
 
-    <button
-      mat-icon-button
-      [matMenuTriggerFor]="accountMenu"
-      aria-label="Perfil"
-    >
+    <button mat-icon-button [matMenuTriggerFor]="accountMenu" aria-label="Perfil">
       <mat-icon>account_circle</mat-icon>
     </button>
 
@@ -36,7 +29,7 @@
       <div class="mb-2 text-start">
         <span class="badge bg-primary text-white text-uppercase small mb-2">{{
           userRole
-        }}</span>
+          }}</span>
         <div class="text-muted small"><span *ngIf="!isGuest">CC: </span>{{ userDocument }}</div>
         <div class="text-muted small">{{ userEmail }}</div>
       </div>

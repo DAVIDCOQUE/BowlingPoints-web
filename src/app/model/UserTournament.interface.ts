@@ -17,12 +17,11 @@ export interface IUserTournament {
   stage: string;
   status: boolean;
 
-  // IDs como arrays simples
+  // IDs
   categoryIds: number[] | null;
   modalityIds: number[] | null;
   branchIds: number[] | null;
 
-  // Nombres como arrays de strings
   categoryNames: string[] | null;
   modalityNames: string[] | null;
   branchNames: string[] | null;
@@ -34,11 +33,10 @@ export interface IUserTournament {
 
   tournamentRegistrations: ITournamentRegistration[] | null;
 
-  // Campo especial que no viene aún, pero lo tenías antes
+  // Información del usuario en el torneo
   posicionFinal: number | null;
   resultados: number;
 
-  // Compatibilidad anterior
   categoria: string;
   modalidad: string;
   date: string;

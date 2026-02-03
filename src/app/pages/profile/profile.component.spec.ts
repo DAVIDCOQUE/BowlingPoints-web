@@ -32,7 +32,6 @@ describe('ProfileComponent', () => {
   } as unknown as Event;
 
 
-
   const mockReader = {
     readAsDataURL: jasmine.createSpy('readAsDataURL'),
     onload: null as ((this: FileReader, ev: Event) => any) | null,
@@ -393,6 +392,5 @@ describe('ProfileComponent', () => {
     component.getRoles();
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error al cargar roles:', jasmine.any(Error));
   });
-
 
 });

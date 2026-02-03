@@ -24,7 +24,7 @@ describe('PlayersComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [PlayersComponent],
-      imports: [HttpClientTestingModule, FormsModule ],
+      imports: [HttpClientTestingModule, FormsModule],
       providers: [
         {
           provide: AuthService,

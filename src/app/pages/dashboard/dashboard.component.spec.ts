@@ -45,9 +45,9 @@ describe('DashboardComponent', () => {
     httpMock.verify();
   });
 
-  // ------------------------------
+  // ------------
   // BASICS
-  // ------------------------------
+  // ------------
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -59,9 +59,9 @@ describe('DashboardComponent', () => {
     expect(component.getDashboard).toHaveBeenCalled();
   }));
 
-  // ------------------------------
+  // ------------
   // API SUCCESS
-  // ------------------------------
+  // ------------
 
   it('should load dashboard data on success', fakeAsync(() => {
     component.getDashboard();
@@ -78,9 +78,9 @@ describe('DashboardComponent', () => {
     expect(component.ambits.length).toBe(1);
   }));
 
-  // ------------------------------
+  // ------------
   // API ERROR
-  // ------------------------------
+  // ------------
 
   it('should handle dashboard API error', fakeAsync(() => {
     component.getDashboard();
@@ -97,9 +97,9 @@ describe('DashboardComponent', () => {
     );
   }));
 
-  // ------------------------------
+  // ------------
   // UTILS
-  // ------------------------------
+  // ------------
 
   it('getModalitiesString returns modalities list as string', () => {
     const mockTournament = {
@@ -131,9 +131,9 @@ describe('DashboardComponent', () => {
     expect(result).toBe('-');
   });
 
-  // ------------------------------
+  // ------------
   // onImgError
-  // ------------------------------
+  // ------------
 
   it('onImgError replaces broken image with default path', () => {
     const event = {

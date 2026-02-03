@@ -258,27 +258,27 @@ describe('AmbitComponent', () => {
     expect(closeSpy).not.toHaveBeenCalled();
   });
 
-it('deleteAmbit(): confirmado pero API falla → muestra error y NO refresca', fakeAsync(() => {
-  (Swal.fire as jasmine.Spy).and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
-  ambitService.deleteAmbit.and.returnValue(throwError(() => ({ status: 500 })));
+  it('deleteAmbit(): confirmado pero API falla → muestra error y NO refresca', fakeAsync(() => {
+    (Swal.fire as jasmine.Spy).and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
+    ambitService.deleteAmbit.and.returnValue(throwError(() => ({ status: 500 })));
 
-  const getSpy = spyOn(component, 'getAmbits');
+    const getSpy = spyOn(component, 'getAmbits');
 
-  component.deleteAmbit(7);
-  tick();
+    component.deleteAmbit(7);
+    tick();
 
-  expect(ambitService.deleteAmbit).toHaveBeenCalledWith(7);
+    expect(ambitService.deleteAmbit).toHaveBeenCalledWith(7);
 
-  const [title, message, icon] = (Swal.fire as jasmine.Spy).calls.mostRecent().args;
+    const [title, message, icon] = (Swal.fire as jasmine.Spy).calls.mostRecent().args;
 
-  expect(title).toBe('Error');
-  expect(icon).toBe('error');
+    expect(title).toBe('Error');
+    expect(icon).toBe('error');
 
-  const normalizedMsg = message.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  expect(normalizedMsg).toContain('No se pudo eliminar la Ambito');
+    const normalizedMsg = message.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    expect(normalizedMsg).toContain('No se pudo eliminar la Ambito');
 
-  expect(getSpy).not.toHaveBeenCalled();
-}));
+    expect(getSpy).not.toHaveBeenCalled();
+  }));
 
 
 

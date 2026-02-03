@@ -154,7 +154,7 @@ export class ProfileComponent implements OnInit {
       img.src = fallbackUrl;
     } else {
       console.warn('Fallback también falló:', fallbackUrl);
-      // Opcional: puedes ocultar la imagen o poner una base64 vacía
+      // Opcional:  ocultar la imagen o poner una base64 vacía
       img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAFklEQVR4nO3BMQEAAADCoPdPbQ43oAAAAAAAAAAAgOUDNwAAZnyqogAAAABJRU5ErkJggg==';
     }
   }

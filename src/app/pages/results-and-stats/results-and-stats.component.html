@@ -17,11 +17,7 @@
       <div class="row g-3 align-items-end">
         <div class="col-md-3">
           <p class="form-label">Categoría</p>
-          <select
-            class="form-select form-select-sm"
-            [(ngModel)]="selectedCategory"
-            (change)="onFilterChange()"
-          >
+          <select class="form-select form-select-sm" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
             <option value="">Todas</option>
             <option *ngFor="let c of categories" [value]="c.categoryId">
               {{ c.name }}
@@ -31,11 +27,7 @@
 
         <div class="col-md-3">
           <p class="form-label">Rama</p>
-          <select
-            class="form-select form-select-sm"
-            [(ngModel)]="selectedBranch"
-            (change)="onFilterChange()"
-          >
+          <select class="form-select form-select-sm" [(ngModel)]="selectedBranch" (change)="onFilterChange()">
             <option value="">Todas</option>
             <option value="Masculino">Masculino</option>
             <option value="Femenino">Femenino</option>
@@ -46,19 +38,11 @@
   </div>
 
   <div class="d-flex justify-content-end mb-3">
-    <button
-      class="btn btn-primary btn-sm"
-      (click)="consultarIA()"
-      [disabled]="iaLoading || !playerStats.length"
-    >
+    <button class="btn btn-primary btn-sm" (click)="consultarIA()" [disabled]="iaLoading || !playerStats.length">
       🤖 Consultar con IA
     </button>
 
-    <button
-      *ngIf="iaAnalysis"
-      class="btn btn-outline-secondary btn-sm ms-2"
-      (click)="iaAnalysis = null"
-    >
+    <button *ngIf="iaAnalysis" class="btn btn-outline-secondary btn-sm ms-2" (click)="iaAnalysis = null">
       Limpiar
     </button>
   </div>
@@ -92,9 +76,9 @@
               <td class="fw-bold text-primary">{{ player.name }}</td>
               <td *ngFor="let torneo of allTournaments">
                 {{
-                  getPlayerAverage(player, torneo) !== null
-                    ? (getPlayerAverage(player, torneo) | number : "1.0-0")
-                    : "-"
+                getPlayerAverage(player, torneo) !== null
+                ? (getPlayerAverage(player, torneo) | number : "1.0-0")
+                : "-"
                 }}
               </td>
               <td class="fw-bold table-secondary">
@@ -102,10 +86,7 @@
               </td>
             </tr>
             <tr *ngIf="!playerStats.length">
-              <td
-                [attr.colspan]="allTournaments.length + 2"
-                class="text-muted py-3"
-              >
+              <td [attr.colspan]="allTournaments.length + 2" class="text-muted py-3">
                 No hay datos para mostrar.
               </td>
             </tr>

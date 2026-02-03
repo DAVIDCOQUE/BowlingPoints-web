@@ -47,18 +47,18 @@ describe('ResultsAndStatsComponent', () => {
     httpMock.expectOne('http://localhost:9999/results').flush({ success: true, data: results });
   };
 
-  // --------------------------------------------------
+
   // CREACIÓN
-  // --------------------------------------------------
+
   it('should create', () => {
     fixture.detectChanges();
     flushNgOnInitRequests();
     expect(component).toBeTruthy();
   });
 
-  // --------------------------------------------------
+
   // CARGA DE DATOS
-  // --------------------------------------------------
+
   it('should load tournaments', () => {
     fixture.detectChanges();
     const mockTournaments: ITournament[] = [
@@ -113,9 +113,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(component.playerStats[0].totalAverage).toBeGreaterThan(0);
   });
 
-  // --------------------------------------------------
+
   // FILTROS Y AGRUPAMIENTO
-  // --------------------------------------------------
+
   it('should filter results by branch', () => {
     component.results = [
       {
@@ -154,9 +154,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(component.allTournaments).toContain('Open');
   });
 
-  // --------------------------------------------------
+
   // PROMEDIOS
-  // --------------------------------------------------
+
   it('should return player average correctly', () => {
     const stats = {
       name: 'Pedro',
@@ -178,9 +178,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(component.getPlayerAverage(stats, 'Otro')).toBeNull();
   });
 
-  // --------------------------------------------------
+
   // ARCHIVOS
-  // --------------------------------------------------
+
   it('should handle file selection', () => {
     const fakeFile = new File(['fake'], 'test.xlsx', { type: 'application/vnd.ms-excel' });
     const event = { target: { files: [fakeFile] } } as unknown as Event;
@@ -196,9 +196,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(component.selectedFile).toBe(fakeFile);
   });
 
-  // --------------------------------------------------
+
   // MODALES
-  // --------------------------------------------------
+
   it('should open and close modal', () => {
     const fakeTemplate = {} as TemplateRef<unknown>;
     component.openModal(fakeTemplate);
@@ -218,9 +218,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(modalService.open).toHaveBeenCalled();
   });
 
-  // --------------------------------------------------
+
   // DELETE RESULT
-  // --------------------------------------------------
+
   it('should delete result and reload', async () => {
     spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
 
@@ -261,9 +261,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(swalSpy).toHaveBeenCalledWith('Error', 'No se pudo eliminar el resultado', 'error');
   });
 
-  // --------------------------------------------------
+
   // CONSULTAR IA
-  // --------------------------------------------------
+
   it('should not call AI if already loading', () => {
     component.iaLoading = true;
     component.playerStats = [{ name: 'Test', tournaments: [], totalAverage: 100 }];
@@ -342,9 +342,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo consultar la IA', 'error');
   });
 
-  // --------------------------------------------------
+
   // OPEN FILE INPUT
-  // --------------------------------------------------
+
   it('should create and click file input', () => {
     let inputClicked = false;
     const originalCreateElement = document.createElement.bind(document);
@@ -363,9 +363,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(inputClicked).toBeTrue();
   });
 
-  // --------------------------------------------------
+
   // CALCULATE AVERAGE
-  // --------------------------------------------------
+
   it('should return 0 when calculating average of empty array', () => {
     const result = (component as any).calculateAverage([]);
     expect(result).toBe(0);
@@ -376,9 +376,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(result).toBe(200);
   });
 
-  // --------------------------------------------------
+
   // GET BRANCH ID FROM SELECTED BRANCH
-  // --------------------------------------------------
+
   it('should return 1 for masculino', () => {
     const result = (component as any).getBranchIdFromSelectedBranch('masculino');
     expect(result).toBe(1);
@@ -399,9 +399,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(result).toBeNull();
   });
 
-  // --------------------------------------------------
+
   // FILTER BY CATEGORY
-  // --------------------------------------------------
+
   it('should filter results by category', () => {
     component.results = [
       { resultId: 1, score: 200, laneNumber: 1, lineNumber: 1, branchName: 'Masculino', branchId: 1, categoryId: 1 } as IResults,
@@ -414,9 +414,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(component.filteredResults[0].categoryId).toBe(1);
   });
 
-  // --------------------------------------------------
+
   // ERROR HANDLING
-  // --------------------------------------------------
+
   it('should handle error when loading tournaments', () => {
     spyOn(console, 'error');
     component.loadTournaments();
@@ -441,9 +441,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(console.error).toHaveBeenCalled();
   });
 
-  // --------------------------------------------------
+
   // GROUP RESULTS EDGE CASES
-  // --------------------------------------------------
+
   it('should handle results with missing names', () => {
     const results: IResults[] = [
       { resultId: 1, score: 100, laneNumber: 1, lineNumber: 1, branchName: 'Masculino', branchId: 1, personName: undefined, tournamentName: undefined }
@@ -462,9 +462,9 @@ describe('ResultsAndStatsComponent', () => {
     expect(component.selectedTournament).toBeNull();
   });
 
-  // --------------------------------------------------
+
   // FILE SELECTION EDGE CASES
-  // --------------------------------------------------
+
   it('should not set file when no file selected', () => {
     const event = { target: { files: [] } } as unknown as Event;
     component.selectedFile = null;

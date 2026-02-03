@@ -21,9 +21,7 @@ export class PlayersComponent {
   private readonly http = inject(HttpClient);
   public readonly auth = inject(AuthService);
 
-  /**
-   * Inicializa el componente cargando el ranking de players.
-   */
+
   ngOnInit(): void {
     this.getPlayersRanking();
   }

@@ -1,8 +1,0 @@
-
-
-3. valida en registro de resultados un maximo de puntos (tournament-results)
-4. validar que solo salgan modalidades de equipos en el selec del ingreso de equipos (tournament-results)
-
-
-
-hacer recuperar contraseña

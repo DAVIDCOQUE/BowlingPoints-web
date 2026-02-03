@@ -25,7 +25,7 @@ describe('LoadingService', () => {
     const subscription = service.loading$.subscribe(value => {
       emissions.push(value);
       if (emissions.length === 2) {
-        expect(emissions).toEqual([false, true]); // estado inicial + show()
+        expect(emissions).toEqual([false, true]);
         subscription.unsubscribe();
         done();
       }
@@ -40,7 +40,7 @@ describe('LoadingService', () => {
     const subscription = service.loading$.subscribe(value => {
       emissions.push(value);
       if (emissions.length === 3) {
-        expect(emissions).toEqual([false, true, false]); // init → show() → hide()
+        expect(emissions).toEqual([false, true, false]);
         subscription.unsubscribe();
         done();
       }
