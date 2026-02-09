@@ -1,4 +1,6 @@
-/* Roboto Font - Local */
+/* =========================
+   Roboto Font - Local
+   ========================= */
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
@@ -23,7 +25,9 @@
   src: url('./roboto-500.woff2') format('woff2');
 }
 
-/* Material Icons - Local */
+/* =========================
+   Material Icons - Local
+   ========================= */
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
@@ -33,7 +37,7 @@
 }
 
 .material-icons {
-  font-family: 'Material Icons';
+  font-family: 'Material Icons', sans-serif;
   font-weight: normal;
   font-style: normal;
   font-size: 24px;
@@ -44,6 +48,8 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
+
+  /* Material Icons rendering */
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
