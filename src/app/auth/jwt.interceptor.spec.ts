@@ -59,7 +59,7 @@ describe('JwtInterceptor (simplificado)', () => {
     const token = 'no-exp-token';
 
     spyOn(localStorage, 'getItem').and.returnValue(token);
-    jwtUtils.decode.and.returnValue({}); // sin campo exp
+    jwtUtils.decode.and.returnValue({});
 
     httpClient.get('/api/test').subscribe();
 

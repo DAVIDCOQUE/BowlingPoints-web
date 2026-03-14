@@ -103,6 +103,4 @@ describe('dateRangeValidator', () => {
     expect(form.get('end')?.errors).toBeNull();
   });
 
-
-
 });

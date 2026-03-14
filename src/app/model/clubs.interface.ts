@@ -1,4 +1,5 @@
 import { IUser } from './user.interface';
+
 export interface IClubs {
   clubId: number;
   name: string;

@@ -1,7 +1,7 @@
 <div class="container mt-4 user-tournaments-view">
   <hr>
 
-  <!-- =================== TORNEOS ACTIVOS =================== -->
+  <!-- = TORNEOS ACTIVOS = -->
   <div class="row g-4 mt-4 active-tournaments-section">
     <h3 class="mb-3">🏆 Torneos Inscriptos</h3>
 
@@ -16,7 +16,8 @@
       <div class="card mb-3 border-0 shadow-sm rounded-4 tournament-card">
 
         <!-- HEADER -->
-        <div class="tournament-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center bg-primary text-white px-3 py-2 rounded-top gap-2">
+        <div
+          class="tournament-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center bg-primary text-white px-3 py-2 rounded-top gap-2">
           <strong class="text-wrap">{{ torneo.name }}</strong>
           <span class="badge bg-warning text-dark fw-semibold">
             Edición {{ torneo.startDate | date:'yyyy' }}
@@ -64,10 +65,9 @@
     </div>
   </div>
 
-
   <hr>
 
-  <!-- =================== TORNEOS FINALIZADOS =================== -->
+  <!-- = TORNEOS FINALIZADOS = -->
   <div class="finished-tournaments-section mt-4">
     <h3 class="text-center mb-4">🏁 Torneos Jugados</h3>
 
@@ -77,60 +77,60 @@
         <table
           class="table table-rounded table-hover table-sm border table-bordered table-vmiddle text-center align-middle tournaments-table">
           <thead class="bg-light align-middle">
-          <tr class="fw-bold">
-            <th>ID</th>
-            <th>Foto</th>
-            <th>Nombre</th>
-            <th>Fecha</th>
-            <th>Lugar</th>
-            <th>Modalidad</th>
-            <th>Categoría</th>
-            <th>Resultados</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
+            <tr class="fw-bold">
+              <th>ID</th>
+              <th>Foto</th>
+              <th>Nombre</th>
+              <th>Fecha</th>
+              <th>Lugar</th>
+              <th>Modalidad</th>
+              <th>Categoría</th>
+              <th>Resultados</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
 
-        <tbody>
+          <tbody>
 
-          <tr *ngFor="let torneo of torneosFinalizados">
+            <tr *ngFor="let torneo of torneosFinalizados">
 
-            <td>{{ torneo.tournamentId }}</td>
+              <td>{{ torneo.tournamentId }}</td>
 
-            <td>
-              <img [src]="apiUrl + torneo.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
-                alt="Foto" style="width: 40px; height: 40px" class="rounded-circle" />
-            </td>
+              <td>
+                <img [src]="apiUrl + torneo.imageUrl" (error)="onImgError($event, 'assets/img/torneoDefault.png')"
+                  alt="Foto" style="width: 40px; height: 40px" class="rounded-circle" />
+              </td>
 
-            <td>{{ torneo.name }}</td>
+              <td>{{ torneo.name }}</td>
 
-            <td>{{ torneo.startDate | date }}</td>
+              <td>{{ torneo.startDate | date }}</td>
 
-            <td>{{ torneo.location }}</td>
+              <td>{{ torneo.location }}</td>
 
-            <td>{{ getNombres(torneo.modalities) }}</td>
-            <td>{{ getNombres(torneo.categories) }}</td>
+              <td>{{ getNombres(torneo.modalities) }}</td>
+              <td>{{ getNombres(torneo.categories) }}</td>
 
-            <td>{{ torneo.resultados || 0 }}</td>
+              <td>{{ torneo.resultados || 0 }}</td>
 
-            <td>
-              <button class="btn btn-sm px-2" [routerLink]="['/tournament-summary', torneo.tournamentId]"
-                style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: .5rem;">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-            </td>
+              <td>
+                <button class="btn btn-sm px-2" [routerLink]="['/tournament-summary', torneo.tournamentId]"
+                  style="background-color: rgba(0, 123, 255, 0.1); color: #007bff; border-radius: .5rem;">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </td>
 
-          </tr>
+            </tr>
 
-          <!-- SIN TORNEOS -->
-          <tr *ngIf="(!torneosFinalizados || torneosFinalizados.length === 0)">
-            <td colspan="9">
-              <div class="alert alert-warning text-center my-3 py-2 rounded-3 fw-semibold m-0">
-                <i class="bi bi-emoji-frown"></i> No hay torneos para mostrar.
-              </div>
-            </td>
-          </tr>
+            <!-- SIN TORNEOS -->
+            <tr *ngIf="(!torneosFinalizados || torneosFinalizados.length === 0)">
+              <td colspan="9">
+                <div class="alert alert-warning text-center my-3 py-2 rounded-3 fw-semibold m-0">
+                  <i class="bi bi-emoji-frown"></i> No hay torneos para mostrar.
+                </div>
+              </td>
+            </tr>
 
-        </tbody>
+          </tbody>
         </table>
       </div>
     </div>

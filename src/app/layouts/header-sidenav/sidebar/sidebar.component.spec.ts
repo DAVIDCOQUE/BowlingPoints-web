@@ -12,7 +12,7 @@ describe('SidebarComponent', () => {
 
   beforeEach(async () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-    mockAuthService = jasmine.createSpyObj('AuthService', ['hasRole', 'logout', 'isGuest']); // ⬅️ AÑADIDO
+    mockAuthService = jasmine.createSpyObj('AuthService', ['hasRole', 'logout', 'isGuest']);
 
     await TestBed.configureTestingModule({
       declarations: [SidebarComponent],
@@ -35,14 +35,14 @@ describe('SidebarComponent', () => {
     mockAuthService.hasRole.withArgs('ADMIN').and.returnValue(true);
     mockAuthService.hasRole.withArgs('JUGADOR').and.returnValue(false);
     mockAuthService.hasRole.withArgs('ENTRENADOR').and.returnValue(true);
-    mockAuthService.isGuest.and.returnValue(false); // ⬅️ AÑADIDO
+    mockAuthService.isGuest.and.returnValue(false);
 
     component.ngOnInit();
 
     expect(component.isAdmin).toBeTrue();
     expect(component.isJugador).toBeFalse();
     expect(component.isEntrenador).toBeTrue();
-    expect(component.isGuest).toBeFalse(); // ⬅️ Verificamos también esto
+    expect(component.isGuest).toBeFalse();
   });
 
   it('should set isShowing to true on mouseenter if not expanded', () => {

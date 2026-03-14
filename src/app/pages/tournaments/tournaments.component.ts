@@ -91,7 +91,7 @@ export class TournamentsComponent implements OnInit {
         organizer: ['', Validators.required],
         modalityIds: ['', Validators.required],
         categoryIds: ['', Validators.required],
-        startDate: ['', [Validators.required, this.pastDateValidator]],
+        startDate: ['', Validators.required],
         endDate: ['', Validators.required],
         ambitId: ['', Validators.required],
         branchIds: ['', Validators.required],

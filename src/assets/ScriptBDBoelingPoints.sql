@@ -1,6 +1,5 @@
--- ===========================================
+
 -- MODELO DE DATOS ACTUALIZADO PARA BOWLING POINTS
--- ===========================================
 -- Tabla: roles
 CREATE TABLE roles (
   role_id SERIAL PRIMARY KEY,

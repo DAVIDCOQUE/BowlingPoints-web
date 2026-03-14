@@ -607,7 +607,7 @@ describe('UsersComponent', () => {
     component.editUser(user);
 
     const form = component.userForm;
-    const expectedDate = component['toDateInput'](user.birthDate); // 🛠 ajuste de timezone
+    const expectedDate = component['toDateInput'](user.birthDate);
 
     expect(form.get('document')?.value).toBe(user.document);
     expect(form.get('photoUrl')?.value).toBe(user.photoUrl);
@@ -616,7 +616,7 @@ describe('UsersComponent', () => {
     expect(form.get('fullSurname')?.value).toBe(user.fullSurname);
     expect(form.get('phone')?.value).toBe(user.phone);
     expect(form.get('gender')?.value).toBe(user.gender);
-    expect(form.get('birthDate')?.value).toBe(expectedDate); // 👈 aquí corregido
+    expect(form.get('birthDate')?.value).toBe(expectedDate);
     expect(form.get('categories')?.value).toEqual([5]);
     expect(form.get('roles')?.value).toEqual([3]);
     expect(form.get('status')?.value).toBe(user.status);

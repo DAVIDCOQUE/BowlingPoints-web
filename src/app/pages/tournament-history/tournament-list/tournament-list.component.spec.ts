@@ -132,10 +132,10 @@ describe('TournamentlistComponent', () => {
     fixture.detectChanges();
 
     const reqAmbit = httpMock.expectOne(`${environment.apiUrl}/ambits/1`);
-    reqAmbit.flush({ success: true, data: {} }); // <-- sin 'name'
+    reqAmbit.flush({ success: true, data: {} });
 
     const reqTorneos = httpMock.expectOne(`${environment.apiUrl}/results/by-ambit?ambitId=1`);
-    reqTorneos.flush({ success: true, data: [] }); // <-- importante para cerrar la petición
+    reqTorneos.flush({ success: true, data: [] });
 
     expect(component.ambitName).toBe('');
   });

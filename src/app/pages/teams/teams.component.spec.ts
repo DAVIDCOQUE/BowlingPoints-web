@@ -37,7 +37,7 @@ describe('TeamsComponent', () => {
       ],
       schemas: [NO_ERRORS_SCHEMA]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(TeamsComponent);
     component = fixture.componentInstance;

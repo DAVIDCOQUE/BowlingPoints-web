@@ -101,5 +101,4 @@ export class UserTournamentsComponent implements OnInit {
     return items?.length ? items.map(i => i.name).join(' / ') : 'No especificada';
   }
 
-
 }

@@ -92,7 +92,7 @@ describe('TournamentsComponent', () => {
     modalSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
   });
 
-  // ------------------ BASICS ------------------
+  //  BASICS
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
@@ -103,7 +103,7 @@ describe('TournamentsComponent', () => {
     expect(component.loadData).toHaveBeenCalled();
   });
 
-  // ------------------ LOAD DATA ------------------
+  //  LOAD DATA
   it('should load tournaments correctly', () => {
     tournamentsServiceSpy.getTournaments.and.returnValue(
       of({ success: true, message: '', data: [mockTournament] })
@@ -132,7 +132,7 @@ describe('TournamentsComponent', () => {
     expect(component.branches[0].name).toBe('Branch A');
   });
 
-  // ------------------ FILTERS / UTILS ------------------
+  //  FILTERS / UTILS
   it('should clear filter', () => {
     component.filter = 'abc';
     component.clear();
@@ -155,7 +155,7 @@ describe('TournamentsComponent', () => {
     expect(result).toBe('2025-05-10');
   });
 
-  // ------------------ MODALS ------------------
+  //  MODALS
   it('should open and close modal correctly', () => {
     component.initForm();
     component.openModal({});
@@ -172,7 +172,7 @@ describe('TournamentsComponent', () => {
     expect(modalSpy.open).toHaveBeenCalled();
   });
 
-  // ------------------ SAVE FORM ------------------
+  //  SAVE FORM
   it('should save new tournament successfully', fakeAsync(() => {
     const fireSpy = spyOn(Swal, 'fire');
 
@@ -180,7 +180,7 @@ describe('TournamentsComponent', () => {
     tournamentsServiceSpy.createTournament.and.returnValue(of({ success: true }));
 
     component.ngOnInit();
-    fixture.detectChanges(); // 👈 IMPORTANTE para activar validaciones
+    fixture.detectChanges();
 
     component.modalities = [{ modalityId: 1, name: 'Mod A', status: true }];
     component.categories = [{ categoryId: 1, name: 'Cat A', status: true }];
@@ -210,7 +210,7 @@ describe('TournamentsComponent', () => {
   it('should handle error when saving tournament', fakeAsync(() => {
     const fireSpy = spyOn(Swal, 'fire');
 
-    // 🔥 Necesario para evitar undefined.subscribe()
+    // Necesario para evitar undefined.subscribe()
     mockLoadData();
 
     tournamentsServiceSpy.createTournament.and.returnValue(
@@ -252,7 +252,7 @@ describe('TournamentsComponent', () => {
     }));
   }));
 
-  // ------------------ DELETE ------------------
+  //  DELETE
   it('should delete tournament successfully', fakeAsync(() => {
     spyOn(Swal, 'fire').and.returnValue(Promise.resolve({ isConfirmed: true }) as any);
     tournamentsServiceSpy.deleteTournament.and.returnValue(of({ success: true }));

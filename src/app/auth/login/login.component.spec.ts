@@ -23,13 +23,13 @@ describe('LoginComponent (refactor)', () => {
     await TestBed.configureTestingModule({
       declarations: [
         LoginComponent,
-        DummyComponent // 👈 requerido para que el Router tenga rutas válidas
+        DummyComponent
       ],
       imports: [
         ReactiveFormsModule,
         HttpClientTestingModule,
         RouterTestingModule.withRoutes([
-          { path: 'dashboard', component: DummyComponent } // ✅ Dummy ruta necesaria
+          { path: 'dashboard', component: DummyComponent }
         ])
       ],
       providers: [

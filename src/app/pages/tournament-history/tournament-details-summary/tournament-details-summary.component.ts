@@ -117,8 +117,6 @@ export class TournamentDetailsSummaryComponent implements OnInit {
     this.excelExportService.exportToExcel(data, fileName, undefined, metaInfo);
   }
 
-
-
   /**
    * Se ejecuta al cambiar la ronda
    */

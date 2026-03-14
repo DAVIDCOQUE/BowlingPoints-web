@@ -26,8 +26,6 @@ describe('TournamentDetailsSummaryComponent', () => {
     });
   };
 
-
-
   beforeEach(async () => {
     locationSpy = jasmine.createSpyObj('Location', ['back']);
 
@@ -140,7 +138,7 @@ describe('TournamentDetailsSummaryComponent', () => {
 
 
   it('should filter visible modalities correctly when valid data is present', () => {
-    flushInitRequest(); // Esto ya es seguro aquí porque httpMock está definido
+    flushInitRequest();
 
     component.modalities = [
       { name: 'Individual' },
@@ -183,8 +181,5 @@ describe('TournamentDetailsSummaryComponent', () => {
 
     expect(component.visibleModalities.length).toBe(0);
   });
-
-
-
 
 });

@@ -1153,9 +1153,9 @@ describe('TournamentResultComponent', () => {
     expect(spySuccess).not.toHaveBeenCalled();
   });
 
-  // --------------------------------------------------
+
   // hasRegistrations getter
-  // --------------------------------------------------
+
   it('should return true when filteredRegistrations has items', () => {
     component.filteredRegistrations = [{ personId: 1 }] as any;
     expect(component.hasRegistrations).toBeTrue();
@@ -1166,9 +1166,9 @@ describe('TournamentResultComponent', () => {
     expect(component.hasRegistrations).toBeFalse();
   });
 
-  // --------------------------------------------------
+
   // editResult
-  // --------------------------------------------------
+
   it('should patch result form and open modal for editResult', () => {
     const mockResult: IResults = {
       resultId: 10,
@@ -1197,9 +1197,9 @@ describe('TournamentResultComponent', () => {
     expect(openModalSpy).toHaveBeenCalledWith(component.modalResultRef);
   });
 
-  // --------------------------------------------------
+
   // handleResultSuccess
-  // --------------------------------------------------
+
   it('should show success message for new result', () => {
     spyOn(Swal, 'fire');
     spyOn(component, 'closeModal');
@@ -1222,9 +1222,9 @@ describe('TournamentResultComponent', () => {
     expect(Swal.fire).toHaveBeenCalledWith('Éxito', 'Resultado actualizado', 'success');
   });
 
-  // --------------------------------------------------
+
   // handleDeleteSuccess
-  // --------------------------------------------------
+
   it('should show success message and reload results on delete success', () => {
     spyOn(Swal, 'fire');
     spyOn(component, 'loadResults');
@@ -1235,9 +1235,9 @@ describe('TournamentResultComponent', () => {
     expect(component.loadResults).toHaveBeenCalled();
   });
 
-  // --------------------------------------------------
+
   // handleDeleteError
-  // --------------------------------------------------
+
   it('should show error message on delete error', () => {
     spyOn(Swal, 'fire');
 
@@ -1246,9 +1246,9 @@ describe('TournamentResultComponent', () => {
     expect(Swal.fire).toHaveBeenCalledWith('Error', 'No se pudo eliminar el resultado', 'error');
   });
 
-  // --------------------------------------------------
+
   // onTeamPersonFileSelected
-  // --------------------------------------------------
+
   it('should not process if no file selected in onTeamPersonFileSelected', () => {
     const mockEvent = { target: { files: [] } } as unknown as Event;
     const uploadSpy = spyOn<any>(component, 'uploadFile');
@@ -1279,9 +1279,9 @@ describe('TournamentResultComponent', () => {
     expect(component.loading).toBeFalse();
   }));
 
-  // --------------------------------------------------
+
   // escapeHtml
-  // --------------------------------------------------
+
   it('should escape HTML special characters', () => {
     const result = component['escapeHtml']('<script>alert("XSS")</script>');
     expect(result).toBe('&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;');
@@ -1297,9 +1297,9 @@ describe('TournamentResultComponent', () => {
     expect(result).toBe("It&#039;s a test");
   });
 
-  // --------------------------------------------------
+
   // saveResult success path
-  // --------------------------------------------------
+
   it('should create new result (POST) successfully', fakeAsync(() => {
     component.tournamentId = 1;
     component.idResult = null;

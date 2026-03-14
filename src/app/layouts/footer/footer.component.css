@@ -1,14 +1,10 @@
-.flex{
+.flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-    background-color: var(--primary--pink-light);
-    gap: 1%;
-    height: 50px;
-    
-    
-    
-   
+  background-color: var(--primary--pink-light);
+  gap: 1%;
+  height: 50px;
+
 }

@@ -177,16 +177,12 @@ export class TournamentDetailsComponent implements OnInit {
   }
 
 
-  /**
-   * Imagen fallback
-   */
+  //Imagen fallback
   onImgError(event: any, fallbackUrl: string): void {
     event.target.src = fallbackUrl;
   }
 
-  /**
-   * Volver atrás
-   */
+  // Volver atrás
   goBack(): void {
     this.location.back();
   }

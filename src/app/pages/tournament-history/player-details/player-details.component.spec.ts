@@ -44,26 +44,26 @@ describe('PlayerDetailsComponent', () => {
     httpMock.verify();
   });
 
-it('should create the component and load statistics', () => {
-  const mockResponse = {
-    fullName: 'John Doe',
-    photoUrl: 'http://example.com/photo.jpg',
-    age: 30,
-    club: 'Club Central',
-    avgScore: 195,
-    bestGame: 280,
-    tournamentsWon: 3
-  };
+  it('should create the component and load statistics', () => {
+    const mockResponse = {
+      fullName: 'John Doe',
+      photoUrl: 'http://example.com/photo.jpg',
+      age: 30,
+      club: 'Club Central',
+      avgScore: 195,
+      bestGame: 280,
+      tournamentsWon: 3
+    };
 
-  fixture.detectChanges();
+    fixture.detectChanges();
 
-  const req = httpMock.expectOne(`${environment.apiUrl}/api/user-stats/public-summary?userId=42`);
-  req.flush({ success: true, data: mockResponse }); // 👈 importante
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/user-stats/public-summary?userId=42`);
+    req.flush({ success: true, data: mockResponse });
 
-  fixture.detectChanges();
+    fixture.detectChanges();
 
-  expect(component.statisticsUser).toEqual(mockResponse);
-});
+    expect(component.statisticsUser).toEqual(mockResponse);
+  });
 
 
 

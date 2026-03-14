@@ -203,5 +203,4 @@ describe('TournamentDetailsComponent', () => {
     expect(component.nombreModalidad).toBe('Sin modalidad');
   });
 
-
 });

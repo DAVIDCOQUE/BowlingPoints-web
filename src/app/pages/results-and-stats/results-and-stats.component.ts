@@ -155,7 +155,7 @@ export class ResultsAndStatsComponent implements OnInit {
 
     this.iaLoading = true;
     this.iaAnalysis = null;
-    this.loadingService.show(); // 🔥 SOLO loader global
+    this.loadingService.show();
 
     const params: any = {};
 

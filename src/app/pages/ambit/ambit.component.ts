@@ -4,6 +4,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { IAmbit } from 'src/app/model/ambit.interface';
 import { AmbitApiService } from 'src/app/services/ambit-api.service';
 import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-ambit',
   templateUrl: './ambit.component.html',

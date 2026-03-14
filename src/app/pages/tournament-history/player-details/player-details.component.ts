@@ -4,9 +4,6 @@ import { Location } from '@angular/common';
 import { environment } from 'src/environments/environment';
 import { UserStatsApiService } from 'src/app/services/user-stats-api.service';
 import Swal from 'sweetalert2';
-
-
-
 @Component({
   selector: 'app-player-details',
   templateUrl: './player-details.component.html',

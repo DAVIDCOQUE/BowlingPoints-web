@@ -11,7 +11,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 // Dummy Component para la ruta de navegación post-reset
 @Component({ template: '' })
-class DummyComponent {}
+class DummyComponent { }
 
 describe('ResetPasswordComponent', () => {
   let component: ResetPasswordComponent;
@@ -37,7 +37,7 @@ describe('ResetPasswordComponent', () => {
           useValue: {
             snapshot: {
               queryParamMap: {
-                get: () => 'mock-token' // 👈 Simula token en URL
+                get: () => 'mock-token'
               }
             }
           }

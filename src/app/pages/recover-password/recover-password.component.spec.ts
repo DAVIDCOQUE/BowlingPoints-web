@@ -5,7 +5,6 @@ import { RecoverPasswordService } from 'src/app/services/recover-password.servic
 import { of, throwError } from 'rxjs';
 import Swal from 'sweetalert2';
 
-// Creamos un mock del servicio
 class MockRecoverPasswordService {
   recoverPassword(identifier: string) {
     return of({ message: 'Correo enviado correctamente' });
@@ -34,11 +33,11 @@ describe('RecoverPasswordComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create the component ✔️', () => {
+  it('should create the component ', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have invalid form initially 🤔', () => {
+  it('should have invalid form initially ', () => {
     expect(component.form.valid).toBeFalse();
   });
 
@@ -57,20 +56,20 @@ describe('RecoverPasswordComponent', () => {
     expect(identifier?.valid).toBeTrue();
   });
 
-  it('should not call recoverPassword service if form is invalid ❌', () => {
+  it('should not call recoverPassword service if form is invalid ', () => {
     spyOn(mockService, 'recoverPassword');
     component.onSubmit();
     expect(mockService.recoverPassword).not.toHaveBeenCalled();
   });
 
-  it('should call recoverPassword service if form is valid ✅', () => {
+  it('should call recoverPassword service if form is valid ', () => {
     spyOn(mockService, 'recoverPassword').and.returnValue(of({ message: 'ok' }));
     component.form.get('identifier')?.setValue('test@example.com');
     component.onSubmit();
     expect(mockService.recoverPassword).toHaveBeenCalledWith('test@example.com');
   });
 
-  it('should show success Swal when recoverPassword succeeds 🎉', fakeAsync(() => {
+  it('should show success Swal when recoverPassword succeeds ', fakeAsync(() => {
     const swalSpy = spyOn(Swal, 'fire');
     component.form.get('identifier')?.setValue('test@example.com');
     component.onSubmit();
@@ -83,7 +82,7 @@ describe('RecoverPasswordComponent', () => {
     }));
   }));
 
-  it('should show error Swal when recoverPassword fails 💥', fakeAsync(() => {
+  it('should show error Swal when recoverPassword fails ', fakeAsync(() => {
     spyOn(mockService, 'recoverPassword').and.returnValue(throwError(() => new Error('Error')));
     const swalSpy = spyOn(Swal, 'fire');
     component.form.get('identifier')?.setValue('test@example.com');
