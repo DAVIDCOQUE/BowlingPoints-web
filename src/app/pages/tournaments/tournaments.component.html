@@ -199,12 +199,7 @@
                   La fecha de inicio no puede ser posterior a la fecha fin.
                 </div>
 
-                <div class="invalid-feedback d-block" *ngIf="
-                    tournamentForm.controls['startDate'].touched &&
-                    tournamentForm.controls['startDate'].hasError('pastDate')
-                  ">
-                  No es posible seleccionar una fecha anterior al día de hoy.
-                </div>
+                <!-- Mensaje eliminado: ahora se permiten fechas anteriores a hoy -->
               </div>
 
               <div class="col-md-6">
