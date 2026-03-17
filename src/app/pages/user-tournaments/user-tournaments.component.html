@@ -85,7 +85,7 @@
               <th>Lugar</th>
               <th>Modalidad</th>
               <th>Categoría</th>
-              <th>Resultados</th>
+              <!-- <th>Resultados</th> -->
               <th>Acciones</th>
             </tr>
           </thead>
@@ -110,7 +110,7 @@
               <td>{{ getNombres(torneo.modalities) }}</td>
               <td>{{ getNombres(torneo.categories) }}</td>
 
-              <td>{{ torneo.resultados || 0 }}</td>
+              <!-- <td>{{ torneo.resultados || 0 }}</td> -->
 
               <td>
                 <button class="btn btn-sm px-2" [routerLink]="['/tournament-summary', torneo.tournamentId]"
